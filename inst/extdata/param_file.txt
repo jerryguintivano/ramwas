@@ -1,0 +1,84 @@
+### RaMWAS 
+### Parameters file
+
+### 'bmdir' - Directory with BAM files
+### Optional (current directory or path to the BAM file if not defined)
+
+if(.Platform$OS.type == "windows") {
+	bmdir='D:/RW/NESDA/'
+} else {
+	bmdir='/gpfs_fs/pharm/NESDA/alignment/bam_files/softlinks'
+}	
+
+### 'qcdir' - Directory for QC and reads files.
+### Relative to 'bmdir' or absolute.
+### Optional, set to 'ramwas' by default.
+
+qcdir='ramwas/AS120_sba'
+
+### 'filter.id' - Rule for selecting the best alignment.
+### Must be integer from 1 to 6.
+###
+### Primary alignment selection (Bowtie friendly):
+###  1 - MAPQ filter and primary alignment, [x$mapq>=minscore]
+###  2 - AS   filter and primary alignment, [x$AS  >=minscore]
+###
+### Best alignment by MAPQ value or AS tag (Cushaw friendly):
+###  3 - MAPQ best alignment [x$mapq>=minscore], at least 'mingap' better than the second best
+###  4 - AS   best alignment [x$AS  >=minscore], at least 'mingap' better than the second best
+###
+### Two best alignments with equal score (only for special experiments):
+###  5 - MAPQ two best alignments [x$mapq>=minscore], at least distance 'mingap' from the third best
+###  6 - AS   two best alignments [x$AS  >=minscore], at least distance 'mingap' from the third best
+
+filter.id=2
+minscore=120
+mingap=0
+
+### 'cpgfile' - character
+### File with CpG location information.
+### Must contain 'cpgsloc' variable inside.
+
+if(.Platform$OS.type == "windows") {
+	cpgfile='C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/CpG_set/cpgsloc_all_25chr.Rdata'
+} else {
+	cpgfile='/gpfs_fs/pharm/tools/ramwas/cpgsloc_all_25chr.Rdata'
+}	
+
+### 'maxfragmentsize' and 'minfragmentsize' - Range of possible fragment sizes.
+### Used in estimation of fragment size distribution 
+### Used in selection of isolated CpGs.
+
+maxfragmentsize=250;
+minfragmentsize=50
+
+### 'maxstartfreq' - Maximum allowed number of reads starting at the same position on the same chromosome strand.
+### Excess reads are removed before calculation of coverage and some QC measures.
+### Set maxstartfreq=0 to keep all reads.
+
+maxstartfreq=3;
+
+bam2samplefile='../bam2samples.csv'
+
+###
+### File with list of samples with respective BAMs.
+
+matdir='matrix8'; doublesize=8;
+#matdir='matrix4'; doublesize=4;
+
+minavgcpgcoverage=0.3
+minnonzerosamples=0.3
+
+covariatefile='../cov.txt'
+
+#var2test= 'Peak2'
+#pcs2use = 1
+#cov2use = NULL; # c('rufc','PeakSQRT','Peak3')
+
+
+# memorybuffersize=4e9
+
+#
+#print(lapply(ls(), function(x){paste(x,eval(parse(text=x)))}))
+#print(getwd())
+

@@ -1,0 +1,20 @@
+Package: ramwas
+Type: Package
+Title: Fast methylome-wide association study pipeline for enrichment platforms
+Version: 0.1
+Date: 2016-30-30
+Author: Andrey Shabalin
+Maintainer: Andrey Shabalin <ashabalin@vcu.edu>
+Description: Ramwas provides a full set of tools for 
+ methylome-wide association studies for enrichment technologies.
+ The steps of the pipeline include scanning aligned reads from BAM files,
+ calculation of multiple quality control measures,
+ creation of coverage for each sample,
+ principal component analysis for capturing batch effects and accounting for 
+ cell composition differences, and, finally, association analysis
+ with respect to phenotypes of interest correcting for PCs and known covariates.
+License: LGPL-3
+LazyLoad: yes
+Depends: R (>= 2.12.0), methods, Rsamtools, GenomicAlignments
+VignetteBuilder: knitr
+Suggests: knitr, rmarkdown
