@@ -1,15 +1,13 @@
 ---
 title: "RaMWAS data structures"
-author: "Andrey Shabalin"
+author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  BiocStyle::html_document:
     toc: true # table of content true
-    theme: united
 vignette: >
   %\VignetteIndexEntry{Filematrix overview}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 # Loading and Saving RaMWAS objects
@@ -17,7 +15,7 @@ vignette: >
 All RaMWAS objects except for filematrices are saved to files and loaded back with `saveRDS` and `readRDS` functions.
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.align='center', fig.retina=1)
+#knitr::opts_chunk$set(fig.align='center', fig.retina=1)
 ```
 
 ```{r loadCgGset}

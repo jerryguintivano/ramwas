@@ -15,6 +15,7 @@ Description: Ramwas provides a full set of tools for
  with respect to phenotypes of interest correcting for PCs and known covariates.
 License: LGPL-3
 LazyLoad: yes
-Depends: R (>= 2.12.0), methods, Rsamtools, GenomicAlignments
+Depends: R (>= 2.12.0), methods
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown
+Suggests: knitr, rmarkdown, BiocStyle
+Imports: graphics, stats,  GenomicAlignments, Rsamtools
