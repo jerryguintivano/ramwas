@@ -20,17 +20,16 @@ library(GenomicAlignments)
 
 parametersFromFile = function(.parameterfile){
 	source(.parameterfile, local = TRUE);
-	.d = 11;
-	.aas12 = '234234'
 	.nms = ls();
-	.result = vector('list',length(.nms));
-	names(.result) = .nms;
-	for( .i in seq_along(.nms)) {
-		.result[[.i]] = get(.nms[.i]);
-	}
-	return(.result);
+	# .result = vector('list',length(.nms));
+	# names(.result) = .nms;
+	# for( .i in seq_along(.nms)) {
+	# 	.result[[.i]] = get(.nms[.i]);
+	# }
+	# return(.result);
+	return(mget(.nms));
 }
-if(FALSE) {
+if(FALSE) { # test code
 	param = parametersFromFile(.parameterfile = 'D:/RW/NESDA/ramwas/param_file.txt');
 	param
 }
@@ -192,7 +191,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4 ) {
 			}
 			rm(offset, split.levels, splt);
 		} # startlistfwd, startlistrev	
-		cat('Recorded',qc$reads.recorded,'of',qc$reads.total,'reads\n')
+		cat(sprintf('Recorded %.f of %.f reads',qc$reads.recorded,qc$reads.total),'\n')
 	}
 	close(bf);
 	rm(bf); # , oldtail
@@ -209,9 +208,12 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4 ) {
 	bam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc);
 	return( bam );
 }
-
+if(FALSE) { # test code
+	rbam = bam.scanBamFile('D:/02H08SM142EZ.bam', scoretag = "AS", minscore = 10);
+	sprintf('Recorded %.f of %.f reads',1e4,1e10)
+}
 ###
-### BAM QC
+### BAM QC / preprocessing
 ###
 
 .remove.repeats.over.maxrep = function(vec, maxrep) {
@@ -226,7 +228,9 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4 ) {
 	}
 	return(vec);
 }
-
+if(FALSE) { # test code
+	.remove.repeats.over.maxrep(rep(1:10,1:10), 5L)
+}
 bam.removeRepeats = function(rbam, maxrep) {
 	if(maxrep<=0)
 		return(rbam);
@@ -237,10 +241,6 @@ bam.removeRepeats = function(rbam, maxrep) {
 		startsrev = lapply( rbam$startsrev, .remove.repeats.over.maxrep, maxrep),
 		qc = rbam$qc);
 	
-	newbam$qc$reads.recorded.no.repeats =
-		sum(sapply(newbam$startsfwd,length)) +
-		sum(sapply(newbam$startsrev,length));
-		
 	newbam$qc$frwrev.no.repeats = c(
 		sum(sapply(newbam$startsfwd,length)),
 		sum(sapply(newbam$startsrev,length)));
@@ -251,7 +251,6 @@ bam.removeRepeats = function(rbam, maxrep) {
 }
 
 ### Non-CpG set of locations
-
 noncpgSitesFromCpGset = function(cpgset, distance) {
 	noncpg = vector('list', length(cpgset));
 	names(noncpg) = names(cpgset);
@@ -264,7 +263,17 @@ noncpgSitesFromCpGset = function(cpgset, distance) {
 	}
 	return(noncpg);
 }
-if(FALSE) {
+### Find isolated CpGs among the given set of CpGs
+isocpgSitesFromCpGset = function(cpgset, distance){
+	isocpg = vector('list',length(cpgset));
+	names(isocpg) = names(cpgset);
+	for( i in seq_along(cpgset) ) {	
+		distbig = diff(cpgset[[i]]) >= distance;
+		isocpg[[i]] = cpgset[[i]][ which( c(distbig[1],distbig[-1] & distbig[-length(distbig)], distbig[length(distbig)]) ) ];
+	}
+	return(isocpg);
+}
+if(FALSE) { # test code
 	cpgset = readRDS('C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds')
 	noncpg = noncpgSitesFromCpGset(cpgset, 200);
 	sapply(cpgset, typeof)
@@ -282,16 +291,6 @@ if(FALSE) {
 	show(isocpg);
 }
 
-### Find isolated CpGs among the given set of CpGs
-isocpgSitesFromCpGset = function(cpgset, distance){
-	isocpg = vector('list',length(cpgset));
-	names(isocpg) = names(cpgset);
-	for( i in seq_along(cpgset) ) {	
-		distbig = diff(cpgset[[i]]) >= distance;
-		isocpg[[i]] = cpgset[[i]][ which( c(distbig[1],distbig[-1] & distbig[-length(distbig)], distbig[length(distbig)]) ) ];
-	}
-	return(isocpg);
-}
 
 ### Count reads away from CpGs
 .count.nonCpG.reads.forward = function( starts, cpglocations, distance ) {
@@ -323,8 +322,7 @@ bam.count.nonCpG.reads = function(rbam, cpgset, distance) {
 	rbam$qc$cnt.nonCpG.reads = result;
 	return(rbam);
 }
-
-if(FALSE) {
+if(FALSE) { # test code
 	rbam = list( startsfwd = list( chr1 = 1:100, chr2 = 1:100 ), startsrev = list(chr1 = 100:200) )
 	data(toycpgset);
 	cpgset = toycpgset
@@ -383,8 +381,7 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance) {
 	rbam$qc$hist.isolated.dist1 = result;
 	return(rbam);
 }
-
-if(FALSE) {
+if(FALSE) { # test code
 	rbam = list( startsfwd = list(chr1=100), startsrev = list(chr1 = 103) );
 	isocpgset = list(chr1 = 101);
 	distance = 100;
@@ -393,11 +390,95 @@ if(FALSE) {
 	which(rbam2$qc$hist.isolated.dist1>0)
 }
 
+### Estimate fragment size distribution
+estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength) {
+	
+	### Point of crossing the middle
+	ytop = median(hist.isolated.distances[1:seqLength]);
+	ybottom = median(tail(hist.isolated.distances,seqLength));
+	ymidpoint = ( ytop + ybottom )/2;
+	yrange = ( ytop - ybottom );
+	overymid = (hist.isolated.distances > ymidpoint)
+	xmidpoint = which.max( cumsum( overymid - mean(overymid) ) );
+	
+	### interquartile range estimate
+	xqrange = 
+		which.max(cumsum( ((hist.isolated.distances > quantile(hist.isolated.distances,0.25))-0.75) )) -
+		which.max(cumsum( ((hist.isolated.distances > quantile(hist.isolated.distances,0.75))-0.25) ));
+	
+	logitrange = diff(qlogis(c(0.25,0.75)));
+	
+	initparam = c(xmidpoint = xmidpoint, 
+					  xdivider = (xqrange/logitrange)/2, 
+					  ymultiplier = yrange, 
+					  ymean = ybottom);
+	
+	fsPredict = function( x, param) {
+		(plogis((param[1]-x)/param[2]))*param[3]+param[4]
+	}
+	
+	x = seq_along(hist.isolated.distances);
 
+	# plot( x, hist.isolated.distances)
+	# lines( x, fsPredict(x, initparam), col='blue', lwd = 3)
 
+	fmin = function(param) {
+		fit2 = fsPredict(x, param); 
+		# (plogis((param[1]-x)/param[2]))*param[3]+param[4];
+		error = hist.isolated.distances - fit2;
+		e2 = error^2;
+		e2s = sort.int(e2,decreasing = TRUE);
+		return(sum(e2s[-(1:10)]));
+	}
+	
+	estimate = optim(par = initparam, fn = fmin, method = "BFGS");
+	param = estimate$par;
+	fit = fsPredict(x, param);
+	
+	rezfit = plogis((param[1]-x)/param[2]);
+	keep = rezfit>0.05;
+	rezfit = rezfit - max(rezfit[!keep],0)
+	rezfit[1:seqLength] = rezfit[seqLength];
+	rezfit = rezfit[keep];
+	rezfit = rezfit / rezfit[1];
+	
+	# lz = lm(hist.isolated.distances[seq_along(rezfit)] ~ rezfit)
+	# lines(rezfit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col='red');
+	
+	return(rezfit);
+}
+if(FALSE) { # test code
+	x = seq(0.01,0.99,0.01);
+	y = sqrt(abs(x-0.5))*sign(x-0.5)
+	plot(x,y)
+	log.ss <- nls(y ~ SSlogis(x, phi1, phi2, phi3))
+	z = SSlogis(x, 0.59699, 0.61320, 0.04599)
+	lines(x, z, col='blue')
+	
+	
+	# setwd('D:/RW/NESDA/ramwas/AS120_sba/');
+	setwd('D:/RW/RC2/ramwas/AS38_gap0/');
+	# setwd('D:/RW/Celltype//ramwas/AS120_sba/');
+	lst = list.files(pattern = '\\.qc\\.');
+	qcs = lapply(lst, function(x){load(x);return(bam);})
+	histinfo = Reduce( `+`, lapply( lapply(qcs, `[[`, 'qcflt'), `[[`, 'hist.iso.dist.250'), init = 0);
+	rng = range(histinfo[-(1:10)]);
+	plot(histinfo/1e3, ylim = rng/1e3, pch=19, col='blue')
+	
+	hist.isolated.distances = histinfo;
+	seqLength = 50;
+	
+	fit = estimateFragmentSizeDistribution(hist.isolated.distances, seqLength)
+	
+	x = seq_along(hist.isolated.distances)
+	plot( x, hist.isolated.distances)
+	lz = lm(hist.isolated.distances[seq_along(fit)] ~ fit)
+	lines(fit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col='red');
+	
+}
 
-
-
+### Test C code wrapper
+.conv <- function(a, b) .Call("convolve2", a, b)
 
 
 
