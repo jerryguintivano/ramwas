@@ -393,6 +393,9 @@ if(FALSE) { # test code
 ### Estimate fragment size distribution
 estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength) {
 	
+	if( length(hist.isolated.distances) == seqLength )
+		return( rep(1, seqLength) );
+	
 	### Point of crossing the middle
 	ytop = median(hist.isolated.distances[1:seqLength]);
 	ybottom = median(tail(hist.isolated.distances,seqLength));
