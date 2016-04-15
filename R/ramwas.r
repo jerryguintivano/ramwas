@@ -15,6 +15,25 @@ library(GenomicAlignments)
 	return(x + y)
 }
 
+.isAbsolutePath = function(pathname) {
+	if( grepl("^~/", pathname) ) 
+		return(TRUE)
+	if( grepl("^.:(/|\\\\)", pathname) ) 
+		return(TRUE)
+	if( grepl("^(/|\\\\)", pathname) ) 
+		return(TRUE)
+	return(FALSE);
+}
+if(FALSE) {
+	.isAbsolutePath( 'C:/123' );  # TRUE
+	.isAbsolutePath( '~123' );    # FALSE
+	.isAbsolutePath( '~/123' );   # TRUE
+	.isAbsolutePath( '/123' );    # TRUE
+	.isAbsolutePath( '\\123' );    # TRUE
+	.isAbsolutePath( 'asd\\123' ); # FALSE
+	.isAbsolutePath( 'a\\123' );   # FALSE
+	
+}
 
 ### Scan a file for parameters
 
@@ -38,7 +57,7 @@ if(FALSE) { # test code
 ### BAM processing
 ###
 
-bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4 ) {
+bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 	
 	# header = scanBamHeader(bamfilename)
 	# chrnames = names(header[[1]]$targets)
@@ -216,7 +235,7 @@ if(FALSE) { # test code
 ### BAM QC / preprocessing
 ###
 
-.remove.repeats.over.maxrep = function(vec, maxrep) {
+.remove.repeats.over.maxrep = function(vec, maxrep){
 	if( is.unsorted(vec) )
 		vec = sort.int(vec);
 	if( maxrep > 0 ) {
@@ -231,7 +250,7 @@ if(FALSE) { # test code
 if(FALSE) { # test code
 	.remove.repeats.over.maxrep(rep(1:10,1:10), 5L)
 }
-bam.removeRepeats = function(rbam, maxrep) {
+bam.removeRepeats = function(rbam, maxrep){
 	if(maxrep<=0)
 		return(rbam);
 	# vec = c(floor(sqrt(0:99))); maxrep=5
@@ -251,7 +270,7 @@ bam.removeRepeats = function(rbam, maxrep) {
 }
 
 ### Non-CpG set of locations
-noncpgSitesFromCpGset = function(cpgset, distance) {
+noncpgSitesFromCpGset = function(cpgset, distance){
 	noncpg = vector('list', length(cpgset));
 	names(noncpg) = names(cpgset);
 	for( i in seq_along(cpgset) ) { # i=1;
@@ -293,7 +312,7 @@ if(FALSE) { # test code
 
 
 ### Count reads away from CpGs
-.count.nonCpG.reads.forward = function( starts, cpglocations, distance ) {
+.count.nonCpG.reads.forward = function( starts, cpglocations, distance ){
 	### count CpGs before the read
 	### count CpGs before and covered by the read
 	ind = findInterval(c(starts-1L,starts+(distance-1L)), cpglocations);
@@ -301,7 +320,7 @@ if(FALSE) { # test code
 	# cbind(ind, starts)
 	return(c(sum(ind[,1] == ind[,2]),length(starts)));
 }
-.count.nonCpG.reads.reverse = function( starts, cpglocations, distance ) {
+.count.nonCpG.reads.reverse = function( starts, cpglocations, distance ){
 	### count CpGs left of read (+distance)
 	### count CpGs left of read start or at start
 	ind = findInterval(c(starts-distance,starts), cpglocations);
@@ -309,7 +328,7 @@ if(FALSE) { # test code
 	# cbind(ind, starts)
 	return(c(sum(ind[,1] == ind[,2]),length(starts)));
 }
-bam.count.nonCpG.reads = function(rbam, cpgset, distance) {
+bam.count.nonCpG.reads = function(rbam, cpgset, distance){
 	result = c(nonCpGreads = 0,totalreads = 0);
 	for( chr in names(cpgset) ) { # chr = names(cpgset)[1]
 		frwstarts = rbam$startsfwd[[chr]];
@@ -346,7 +365,7 @@ if(FALSE) { # test code
 }
 
 ### Get distribution of distances to isolated CpGs
-.hist.isodist.forward = function( starts, cpglocations, distance ) {
+.hist.isodist.forward = function( starts, cpglocations, distance){
 	### count CpGs before the read
 	### count CpGs before and covered by the read
 	ind = findInterval(c(starts-1L,starts+(distance-1L)), cpglocations);
@@ -357,7 +376,7 @@ if(FALSE) { # test code
 	counts = tabulate(dists+1L, distance);
 	return(counts);
 }
-.hist.isodist.reverse = function( starts, cpglocations, distance ) {
+.hist.isodist.reverse = function( starts, cpglocations, distance){
 	### count CpGs left of read (+distance)
 	### count CpGs left of read start or at start
 	ind = findInterval(c(starts-distance,starts), cpglocations);
@@ -368,7 +387,7 @@ if(FALSE) { # test code
 	counts = tabulate(dists+1L, distance);
 	return(counts);
 }
-bam.hist.isolated.distances = function(rbam, isocpgset, distance) {
+bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 	result = 0;
 	for( chr in names(isocpgset) ) { # chr = names(cpgset)[1]
 		frwstarts = rbam$startsfwd[[chr]];
@@ -391,7 +410,7 @@ if(FALSE) { # test code
 }
 
 ### Estimate fragment size distribution
-estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength) {
+estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
 	if( length(hist.isolated.distances) == seqLength )
 		return( rep(1, seqLength) );
@@ -480,12 +499,10 @@ if(FALSE) { # test code
 	
 }
 
+
+
+
+
+
 ### Test C code wrapper
 .conv <- function(a, b) .Call("convolve2", a, b)
-
-
-
-
-
-
-
