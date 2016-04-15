@@ -189,7 +189,8 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		{
 			bb$startpos = bb$pos;
 			bb$startpos[bb$isReverse] = bb$startpos[bb$isReverse] + 
-				(cigarWidthAlongReferenceSpace(bb$cigar[bb$isReverse])-1L);		
+				(cigarWidthAlongReferenceSpace(bb$cigar[bb$isReverse])-1L) - 1L;
+			# Last -1L is for shift from C on reverse strand to C on the forward
 		} # startpos
 		
 		### Split and store the start locations
@@ -499,10 +500,137 @@ if(FALSE) { # test code
 	
 }
 
+### Cache CpG location files to avoid reloading.
+cachedRDSload = function(rdsfilename){
+	globalname = paste0('.ramwas.',rdsfilename);
+	if( exists(x = globalname, envir = .GlobalEnv) ) {
+		return(get(x = paste0('.ramwas.',rdsfilename), envir = .GlobalEnv));
+	} else {
+		data = readRDS(rdsfilename);
+		assign(x = globalname, value = data, envir = .GlobalEnv);
+		return(data);
+	}
+}
+if(FALSE) { # test code
+	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19//spgset_hg19_SNPS_at_MAF_0.05.rds";
+	system.time({z = cachedRDSload(rdsfilename)});
+	system.time({z = cachedRDSload(rdsfilename)});
+	system.time({z = cachedRDSload(rdsfilename)});
+}
 
+### Pipeline parts
+pipelineProcessBam = function(bamname, param) {
+	if( is.null(param$scoretag) )
+		param$scoretag = "mapq";
+	if( is.null(param$minscore) )
+		param$minscore = 4;
+	if( is.null(param$maxrepeats) )
+		param$maxrepeats = 0;
+	if( !is.null(param$cpgfile) && is.null(param$maxfragmentsize) )
+		return('Parameter not set: maxfragmentsize');
+	
+	bamname = gsub('\\.bam$','',bamname);
+	if( !.isAbsolutePath(bamname) && (length(param$bamdir)>0) ) {
+		bamfullname = paste0(param$bamdir, '/', bamname, '.bam');
+	} else {
+		bamfullname = paste0(bamname, '.bam');
+	}
+	
+	rdsbmdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, '/rbam_rds');
+	rdsqcdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, '/rbam_qc_rds');
+	dir.create(rdsbmdir, showWarnings = FALSE, recursive = TRUE)
+	dir.create(rdsqcdir, showWarnings = FALSE, recursive = TRUE)
+	
+	rdsbmfile = paste0( rdsbmdir, '/', basename(bamname), '.rbam.rds' );
+	rdsqcfile = paste0( rdsqcdir, '/', basename(bamname), '.qc.rds' );
+	if( file.exists( rdsqcfile ) )
+		return(paste0('Rbam qc rds file already exists: ',rdsqcfile));
+	
+	if( !file.exists( bamfullname ) )
+		return(paste0('Bam file does not exist: ',bamfullname));
+	
+	rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
+	
+	rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
+	
+	if( !is.null(param$cpgfile) ) {
+		cpgset = cachedRDSload(param$cpgfile);
+		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
+		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
+		
+		# if( !is.null(param$noncpgfile)) {
+		# 	noncpgset = cachedRDSload(param$noncpgfile);
+		# } else {
+		# 	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
+		# }
+		rbam4 = bam.count.nonCpG.reads(rbam = rbam3, cpgset = cpgset, distance = param$maxfragmentsize);
+	} else {
+		rbam4 = rbam2;
+	}
+	
+	saveRDS( object = rbam4, file = rdsbmfile, compress = 'xz');
+	rbam5 = rbam4;
+	rbam5$startsfwd=NULL;
+	rbam5$startsrev=NULL;
+	saveRDS( object = rbam5, file = rdsqcfile, compress = 'xz');
+	return(paste0('OK. ', bamname));
+}
 
+### RaMWAS pipeline
+ramwas1scanBams = function( param ){
+	if(is.character(param)) {
+		param = parametersFromFile(param);
+	}
+	
+	bamnames = readLines(param$bamlistfile);
+	
+	if(is.null(param$cputhreads))
+		param$cputhreads = 1;
+	
+	if( param$cputhreads > 1) {
+		
+		library(snow)
+		cl <- makeCluster(param$cputhreads)
+		# clusterExport(cl, list = c("nms", "rvcfdir"))
+		# nmslist = clusterSplit(cl, nms)
+		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,'/Rvcf_',nms[i],'.rds')); return(vcf$pos)})
+		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
+		stopCluster(cl)
+	}
+}
+if(FALSE) { # test code
+	param = list(
+		bamdir = 'F:/Cell_type/bams/',
+		projectdir = 'F:/Cell_type/',
+		bamlistfile = 'F:/Cell_type/000_list_of_files.txt',
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 4,
+		cpgfile = 'C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds',
+		noncpgfile = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50
+	);
+	
+	bamname='150114_WBCS014_CD20_150.bam';
+	pipelineProcessBam(bamname, param);
+	
+	bamnames = readLines(param$bamlistfile);
+	library(snow)
+	library(ramwas)
+	cl <- makeCluster(param$cputhreads)
+	# clusterCall(cl, function(){library('ramwas')});
+	clusterEvalQ(cl, library(ramwas))
+	
+	# nmslist = clusterSplit(cl, nms)
+	# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,'/Rvcf_',nms[i],'.rds')); return(vcf$pos)})
+	report = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
+	stopCluster(cl)
+	
+}
 
-
+# snow makeCluster clusterEvalQ clusterApplyLB stopCluster
 
 ### Test C code wrapper
 .conv <- function(a, b) .Call("convolve2", a, b)
