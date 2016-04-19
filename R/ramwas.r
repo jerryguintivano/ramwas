@@ -518,7 +518,7 @@ cachedRDSload = function(rdsfilename){
 	}
 }
 if(FALSE) { # test code
-	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19//spgset_hg19_SNPS_at_MAF_0.05.rds";
+	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds";
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
@@ -608,6 +608,7 @@ if(FALSE) { # test code
 		show(toc-tic);
 	}
 }
+
 ### RaMWAS pipeline
 ramwas1scanBams = function( param ){
 	if(is.character(param)) {
