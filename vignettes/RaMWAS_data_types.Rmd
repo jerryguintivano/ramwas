@@ -15,7 +15,9 @@ vignette: >
 All RaMWAS objects except for filematrices are saved to files and loaded back with `saveRDS` and `readRDS` functions.
 
 ```{r global_options, include=FALSE}
+#getwd()
 #knitr::opts_chunk$set(fig.align='center', fig.retina=1)
+knitr::opts_chunk$set(fig.retina=1)
 ```
 
 ```{r loadCgGset}
