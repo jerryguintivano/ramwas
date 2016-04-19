@@ -508,10 +508,10 @@ if(FALSE) { # test code
 cachedRDSload = function(rdsfilename){
 	globalname = rdsfilename; #paste0(".ramwas.",rdsfilename);
 	if( exists(x = globalname, envir = .ramwasEnv) ) {
-		cat("Using cache","\n");
+		# cat("Using cache","\n");
 		return(base::mget(x = globalname, envir = .ramwasEnv));
 	} else {
-		cat("Loading","\n");
+		# cat("Loading","\n");
 		data = readRDS(rdsfilename);
 		base::assign(x = globalname, value = data, envir = .ramwasEnv);
 		return(data);
