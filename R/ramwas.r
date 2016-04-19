@@ -3,6 +3,9 @@
 library(Rsamtools)
 ### GenomicAlignments to process CIGAR strings
 library(GenomicAlignments)
+library(snow)
+
+.ramwasEnv = new.env()
 
 `%add%` <- function(x, y) {
 	if(is.null(x)) return(y);
@@ -80,7 +83,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 						  
 		flag = scanBamFlag(isUnmappedQuery=NA, isSecondMateRead=FALSE);
 		param = ScanBamParam(flag=flag, what=fields, tag=tags);
-		bf <- BamFile(bamfilename, yieldSize=1e5) ## typically, yieldSize=1e6
+		bf <- BamFile(bamfilename, yieldSize=1e6) ## typically, yieldSize=1e6
 		open(bf);	
 		rm(fields, tags, flag);
 	} # bf, param
@@ -229,7 +232,8 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 	return( bam );
 }
 if(FALSE) { # test code
-	rbam = bam.scanBamFile('D:/02H08SM142EZ.bam', scoretag = "AS", minscore = 10);
+	bamfilename = 'D:/02H08SM142EZ.bam'; scoretag = "AS"; minscore = 10;
+	rbam = bam.scanBamFile(bamfilename = 'D:/02H08SM142EZ.bam', scoretag = "AS", minscore = 10);
 	sprintf('Recorded %.f of %.f reads',1e4,1e10)
 }
 ###
@@ -502,12 +506,14 @@ if(FALSE) { # test code
 
 ### Cache CpG location files to avoid reloading.
 cachedRDSload = function(rdsfilename){
-	globalname = paste0('.ramwas.',rdsfilename);
-	if( exists(x = globalname, envir = .GlobalEnv) ) {
-		return(get(x = paste0('.ramwas.',rdsfilename), envir = .GlobalEnv));
+	globalname = rdsfilename; #paste0('.ramwas.',rdsfilename);
+	if( exists(x = globalname, envir = ramwas:::.ramwasEnv) ) {
+		cat('Using cache','\n');
+		return(base::mget(x = globalname, envir = ramwas:::.ramwasEnv));
 	} else {
+		cat('Loading','\n');
 		data = readRDS(rdsfilename);
-		assign(x = globalname, value = data, envir = .GlobalEnv);
+		base::assign(x = globalname, value = data, envir = ramwas:::.ramwasEnv);
 		return(data);
 	}
 }
@@ -515,11 +521,21 @@ if(FALSE) { # test code
 	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19//spgset_hg19_SNPS_at_MAF_0.05.rds";
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
-	system.time({z = cachedRDSload(rdsfilename)});
+	system.time({z = cachedRDSload(rdsfilename)});.
+	
+	globalname = paste0('.ramwas.',rdsfilename);
+	if( exists(x = globalname, envir = ramwas:::.ramwasEnv) ) {
+		return(base::mget(x = globalname, envir = ramwas:::.ramwasEnv));
+	} else {
+		data = readRDS(rdsfilename);
+		base::assign(x = globalname, value = data, envir = ramwas:::.ramwasEnv);
+		return(data);
+	}
 }
 
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
+	# Used parameters: scoretag, minscore, cpgfile, maxrepeats
 	if( is.null(param$scoretag) )
 		param$scoretag = "mapq";
 	if( is.null(param$minscore) )
@@ -588,8 +604,6 @@ ramwas1scanBams = function( param ){
 		param$cputhreads = 1;
 	
 	if( param$cputhreads > 1) {
-		
-		library(snow)
 		cl <- makeCluster(param$cputhreads)
 		# clusterExport(cl, list = c("nms", "rvcfdir"))
 		# nmslist = clusterSplit(cl, nms)
@@ -597,15 +611,16 @@ ramwas1scanBams = function( param ){
 		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
 		stopCluster(cl)
 	}
+	return(z);
 }
 if(FALSE) { # test code
 	param = list(
-		bamdir = 'F:/Cell_type/bams/',
-		projectdir = 'F:/Cell_type/',
-		bamlistfile = 'F:/Cell_type/000_list_of_files.txt',
+		bamdir = 'C:/Cell_type/bams/',
+		projectdir = 'D:/Cell_type/',
+		bamlistfile = 'c:/Cell_type/000_list_of_files.txt',
 		scoretag = "AS",
 		minscore = 100,
-		cputhreads = 4,
+		cputhreads = 6,
 		cpgfile = 'C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds',
 		noncpgfile = NULL,
 		maxrepeats = 3,
@@ -613,13 +628,39 @@ if(FALSE) { # test code
 		minfragmentsize=50
 	);
 	
+	param = list(
+		bamdir = '.',
+		projectdir = 'D:/Cell_type/',
+		bamlistfile = 'c:/Cell_type/000_list_of_files.txt',
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		cpgfile = 'C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds',
+		noncpgfile = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50
+	);
+		
+	library(ramwas)
+	# ramwas1scanBams(param)
+	
 	bamname='150114_WBCS014_CD20_150.bam';
-	pipelineProcessBam(bamname, param);
+	{
+		tic = proc.time();
+		pipelineProcessBam(bamname, param);
+		toc = proc.time();
+		show(toc-tic);
+	}
 	
 	bamnames = readLines(param$bamlistfile);
+	bamnames[seq(1, length(bamnames), 2)] = paste0('C:/Cell_type/bams/', bamnames[seq(1, length(bamnames), 2)]);
+	bamnames[seq(2, length(bamnames), 2)] = paste0('D:/Cell_type/bams/', bamnames[seq(2, length(bamnames), 2)]);
+	
 	library(snow)
 	library(ramwas)
-	cl <- makeCluster(param$cputhreads)
+	# cl = makeCluster(param$cputhreads)
+	cl = makeSOCKcluster(rep("localhost",param$cputhreads))
 	# clusterCall(cl, function(){library('ramwas')});
 	clusterEvalQ(cl, library(ramwas))
 	
@@ -628,6 +669,16 @@ if(FALSE) { # test code
 	report = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
 	stopCluster(cl)
 	
+	file.exists('D:/Cell_type/bams/141106_WBCS011_BuCo_350.bam')
+	file.exists('D:/Cell_type/bams//141201_WBCS011_BuCo_150.bam')
+	
+	### Cell type performance:
+	# 15:35 - 17:40
+	# 638 GB of BAM files
+	# 2.7 GB of ramwas read start info
+	# 60 KB of QC info
+	
+	cl = makeSOCKcluster(c("localhost","localhost"))
 }
 
 # snow makeCluster clusterEvalQ clusterApplyLB stopCluster
