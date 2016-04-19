@@ -583,14 +583,41 @@ pipelineProcessBam = function(bamname, param) {
 	saveRDS( object = rbam5, file = rdsqcfile, compress = "xz");
 	return(paste0("OK. ", bamname));
 }
-
+if(FALSE) { # test code
+	### Test process single bam
+	library(ramwas)
+	param = list(
+		bamdir = "E:/Cell_type/bams/",
+		projectdir = "C:/Cell_type/",
+		bamlistfile = "D:/Cell_type/000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		cpgfile = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds",
+		noncpgfile = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		bamnames = NULL
+	);
+	bamname="150114_WBCS014_CD20_150.bam";
+	{
+		tic = proc.time();
+		pipelineProcessBam(bamname, param);
+		toc = proc.time();
+		show(toc-tic);
+	}
+}
 ### RaMWAS pipeline
 ramwas1scanBams = function( param ){
 	if(is.character(param)) {
 		param = parametersFromFile(param);
 	}
-	
-	bamnames = readLines(param$bamlistfile);
+	if(!is.null(param$bamnames)) {
+		bamnames = param$bamnames;
+	} else {
+		bamnames = readLines(param$bamlistfile);
+	}
 	
 	if(is.null(param$cputhreads))
 		param$cputhreads = 1;
@@ -606,24 +633,12 @@ ramwas1scanBams = function( param ){
 	return(z);
 }
 if(FALSE) { # test code
-	param = list(
-		bamdir = "C:/Cell_type/bams/",
-		projectdir = "D:/Cell_type/",
-		bamlistfile = "C:/Cell_type/000_list_of_files.txt",
-		scoretag = "AS",
-		minscore = 100,
-		cputhreads = 6,
-		cpgfile = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds",
-		noncpgfile = NULL,
-		maxrepeats = 3,
-		maxfragmentsize=200,
-		minfragmentsize=50
-	);
-	
+	### Testing the cluster ability
+	library(ramwas)
 	param = list(
 		bamdir = ".",
-		projectdir = "D:/Cell_type/",
-		bamlistfile = "c:/Cell_type/000_list_of_files.txt",
+		projectdir = "C:/Cell_type/",
+		bamlistfile = "D:/Cell_type/000_list_of_files.txt",
 		scoretag = "AS",
 		minscore = 100,
 		cputhreads = 8,
@@ -631,46 +646,16 @@ if(FALSE) { # test code
 		noncpgfile = NULL,
 		maxrepeats = 3,
 		maxfragmentsize=200,
-		minfragmentsize=50
+		minfragmentsize=50,
+		bamnames = NULL
 	);
-		
-	library(ramwas)
-	# ramwas1scanBams(param)
-	
-	bamname="150114_WBCS014_CD20_150.bam";
-	{
-		tic = proc.time();
-		pipelineProcessBam(bamname, param);
-		toc = proc.time();
-		show(toc-tic);
-	}
 	
 	bamnames = readLines(param$bamlistfile);
-	bamnames[seq(1, length(bamnames), 2)] = paste0("C:/Cell_type/bams/", bamnames[seq(1, length(bamnames), 2)]);
+	bamnames[seq(1, length(bamnames), 2)] = paste0("E:/Cell_type/bams/", bamnames[seq(1, length(bamnames), 2)]);
 	bamnames[seq(2, length(bamnames), 2)] = paste0("D:/Cell_type/bams/", bamnames[seq(2, length(bamnames), 2)]);
+	param$bamnames = bamnames;
 	
-	# library(snow)
-	# library(ramwas)
-	# cl = makeCluster(param$cputhreads)
-	cl = makeSOCKcluster(rep("localhost",param$cputhreads))
-	# clusterCall(cl, function(){library("ramwas")});
-	clusterEvalQ(cl, library(ramwas))
-	
-	# nmslist = clusterSplit(cl, nms)
-	# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
-	report = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
-	stopCluster(cl)
-	
-	file.exists("D:/Cell_type/bams/141106_WBCS011_BuCo_350.bam")
-	file.exists("D:/Cell_type/bams//141201_WBCS011_BuCo_150.bam")
-	
-	### Cell type performance:
-	# 15:35 - 17:40
-	# 638 GB of BAM files
-	# 2.7 GB of ramwas read start info
-	# 60 KB of QC info
-	
-	cl = makeSOCKcluster(c("localhost","localhost"))
+	ramwas1scanBams(param)
 }
 
 # snow makeCluster clusterEvalQ clusterApplyLB stopCluster
