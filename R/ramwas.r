@@ -509,7 +509,7 @@ cachedRDSload = function(rdsfilename){
 	globalname = rdsfilename; #paste0(".ramwas.",rdsfilename);
 	if( exists(x = globalname, envir = .ramwasEnv) ) {
 		# cat("Using cache","\n");
-		return(base::mget(x = globalname, envir = .ramwasEnv));
+		return(base::get(x = globalname, envir = .ramwasEnv));
 	} else {
 		# cat("Loading","\n");
 		data = readRDS(rdsfilename);
@@ -518,11 +518,85 @@ cachedRDSload = function(rdsfilename){
 	}
 }
 if(FALSE) { # test code
-	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/spgset_hg19_SNPS_at_MAF_0.05.rds";
+	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds";
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
+}
+
+### Coverage calculation
+.calc.coverage.chr = function(startfrw, startrev, cpgs, fragdistr) {
+	maxfragmentsize = length(fragdistr);	
+	cover = double(length(cpgs));
 	
+	if(length(startfrw) > 0) {
+		ind1 = findInterval(cpgs - maxfragmentsize, startfrw);  # CpGs left of start
+		ind2 = findInterval(cpgs,                   startfrw);  # CpGs left of start+250L
+		# coverage of CpGs 
+		# which(ind2>ind1) 
+		# are covered by fragments ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+		.Call("cover_frw_c",startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+	}
+	
+	if(length(startrev) > 0) {
+		ind1 = findInterval(cpgs - 1L,              startrev);  # CpGs left of start
+		ind2 = findInterval(cpgs + maxfragmentsize-1L, startrev);  # CpGs left of start+250L
+		# coverage of CpGs 
+		# which(ind2>ind1) 
+		# are covered by fragments ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+		.Call("cover_rev_c",startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+	}
+	return( cover );
+}
+calc.coverage = function(rbam, cpgset, fragdistr) {
+	coveragelist = vector('list', length(cpgset));
+	names(coveragelist) = names(cpgset);
+	
+	for( chr in names(coveragelist) ) { # chr = names(coveragelist)[1]
+		coveragelist[[chr]] = 
+			.calc.coverage.chr(rbam$startsfwd[[chr]], rbam$startsrev[[chr]], cpgset[[chr]], fragdistr); 
+	}
+	return(coveragelist);
+}
+if(FALSE) {
+	# testing calc.coverage
+	cpgset = list(chr1 = 1:100);
+	rbam = list(startsfwd = list(chr1  = c(10L, 20L)), startsrev = list(chr1  = c(80L, 90L)));
+	fragdistr = c(4,3,2,1);
+
+	cvl = calc.coverage(rbam, cpgset, fragdistr)
+	cv = cvl$chr1;
+	
+	# testing .calc.coverage.chr
+	chr = "chr1"
+	# startfrw = rbam$startsfwd[[chr]]; startrev = rbam$startsrev[[chr]]; cpgs = cpgset[[chr]];
+	cv = .calc.coverage.chr(rbam$startsfwd[[chr]], rbam$startsrev[[chr]], cpgset[[chr]], fragdistr)
+	
+	cv[rbam$startsfwd[[chr]]]
+	cv[rbam$startsrev[[chr]]]
+	cv[rbam$startsfwd[[chr]]+1]
+	cv[rbam$startsrev[[chr]]+1]
+	cv[rbam$startsfwd[[chr]]-1]
+	cv[rbam$startsrev[[chr]]-1]
+	
+	
+	# Timing CpG density calculation
+	
+	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds";
+	
+	cpgset = cachedRDSload(rdsfilename);
+	
+	fragdistr = c(rep(1,75), seq(1,0,length.out = 76))
+	fragdistr = fragdistr[fragdistr>0];
+	
+	system.time({ covlist1 = calc.coverage( rbam = list( startsfwd = cpgset, startsrev = cpgset), cpgset = cpgset, fragdistr = fragdistr) });
+	# 4.72
+	
+	system.time({ covlist2 = calc.coverage.simple( bam = list( startlistfwd = cpgset, startlistrev = cpgset), cpgsloc = cpgset, fragdistr = fragdistr) });
+	# 31.40
+	
+	range(covlist1$chr1 - covlist2$chr1)
+	range(covlist1$chr2 - covlist2$chr2)
 }
 
 ### Pipeline parts
@@ -658,3 +732,4 @@ if(FALSE) { # test code
 	
 	ramwas1scanBams(param)
 }
+
