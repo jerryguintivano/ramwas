@@ -317,7 +317,7 @@ if(FALSE) { # test code
 
 
 ### Count reads away from CpGs
-.count.nonCpG.reads.forward = function( starts, cpglocations, distance ){
+.count.nonCpG.reads.forward = function( starts, cpglocations, distance){
 	### count CpGs before the read
 	### count CpGs before and covered by the read
 	ind = findInterval(c(starts-1L,starts+(distance-1L)), cpglocations);
@@ -325,7 +325,7 @@ if(FALSE) { # test code
 	# cbind(ind, starts)
 	return(c(sum(ind[,1] == ind[,2]),length(starts)));
 }
-.count.nonCpG.reads.reverse = function( starts, cpglocations, distance ){
+.count.nonCpG.reads.reverse = function( starts, cpglocations, distance){
 	### count CpGs left of read (+distance)
 	### count CpGs left of read start or at start
 	ind = findInterval(c(starts-distance,starts), cpglocations);
@@ -651,15 +651,10 @@ if(FALSE) { # test code
 		bamnames = NULL
 	);
 	
-	bamnames = readLines(param$bamlistfile);
-	bamnames[seq(1, length(bamnames), 2)] = paste0("E:/Cell_type/bams/", bamnames[seq(1, length(bamnames), 2)]);
-	bamnames[seq(2, length(bamnames), 2)] = paste0("D:/Cell_type/bams/", bamnames[seq(2, length(bamnames), 2)]);
-	param$bamnames = bamnames;
+	# bamnames = readLines(param$bamlistfile);
+	# bamnames[seq(1, length(bamnames), 2)] = paste0("E:/Cell_type/bams/", bamnames[seq(1, length(bamnames), 2)]);
+	# bamnames[seq(2, length(bamnames), 2)] = paste0("D:/Cell_type/bams/", bamnames[seq(2, length(bamnames), 2)]);
+	# param$bamnames = bamnames;
 	
 	ramwas1scanBams(param)
 }
-
-# snow makeCluster clusterEvalQ clusterApplyLB stopCluster
-
-### Test C code wrapper
-.conv <- function(a, b) .Call("convolve2", a, b)
