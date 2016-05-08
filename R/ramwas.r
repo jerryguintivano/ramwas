@@ -733,3 +733,8 @@ if(FALSE) { # test code
 	ramwas1scanBams(param)
 }
 
+### Plot distributions of QC measures
+plot.qcscorehist = function(x, cex = 0.5, pch = 19, xlim = NULL, ylim = NULL, main = NULL, ...) {
+	
+}
+
