@@ -55,6 +55,53 @@ if(FALSE) { # test code
 	param
 }
 
+parseBam2sample = function(lines) {
+	# remove trailing commas
+	lines = gsub(pattern = ',$', replacement = '', lines);
+	
+	lines = gsub(pattern = '\\.bam,', replacement = ',', lines);
+	lines = gsub(pattern = '\\.bam$', replacement = '',  lines);
+	
+	split.eq = strsplit(lines, split = '=', fixed = TRUE);
+	samplenames = sapply(split.eq, `[`, 1);
+	bamlist = strsplit(sapply(split.eq,tail,1), split = ',', fixed = TRUE);
+	names(bamlist) = samplenames;
+	
+	# bamvec = unlist(bamlist, use.names = FALSE)
+	# bamlist = lapply(bamlist, basename);
+	return(bamlist);
+}
+
+parameterProcess = function(param) {
+	if( is.null(param$scoretag) )
+		param$scoretag = "mapq";
+	if( is.null(param$minscore) )
+		param$minscore = 4;
+	if( is.null(param$maxrepeats) )
+		param$maxrepeats = 0;
+	if( !is.null(param$projectdir) ) {
+		if( is.null(param$rdsbmdir) )
+			param$rdsbmdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, "/rbam_rds");
+		if( is.null(param$rdsqcdir) )
+			param$rdsqcdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, "/rbam_qc_rds");
+	}
+	if(is.null(param$cputhreads))
+		param$cputhreads = 1;
+	
+	if(!is.null(param$bamnames) & is.null(param$bamlistfile)) {
+		bamnames = readLines(param$bamlistfile);
+	}
+	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
+		if( .isAbsolutePath(param$filebam2sample) ) {
+			filename = param$filebam2sample;
+		} else {
+			filename = paste0(param$projectdir, "/", param$filebam2sample);
+		}
+		param$bam2sample = parseBam2sample( readLines(filename) );
+	}
+	return(param);
+}
+
 ###
 ### BAM processing
 ###
@@ -600,12 +647,9 @@ if(FALSE) {
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
 	# Used parameters: scoretag, minscore, cpgfile, maxrepeats
-	if( is.null(param$scoretag) )
-		param$scoretag = "mapq";
-	if( is.null(param$minscore) )
-		param$minscore = 4;
-	if( is.null(param$maxrepeats) )
-		param$maxrepeats = 0;
+
+	param = parameterProcess(param);
+	
 	if( !is.null(param$cpgfile) && is.null(param$maxfragmentsize) )
 		return("Parameter not set: maxfragmentsize");
 	
@@ -616,13 +660,11 @@ pipelineProcessBam = function(bamname, param) {
 		bamfullname = paste0(bamname, ".bam");
 	}
 	
-	rdsbmdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, "/rbam_rds");
-	rdsqcdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, "/rbam_qc_rds");
 	dir.create(rdsbmdir, showWarnings = FALSE, recursive = TRUE)
 	dir.create(rdsqcdir, showWarnings = FALSE, recursive = TRUE)
 	
-	rdsbmfile = paste0( rdsbmdir, "/", basename(bamname), ".rbam.rds" );
-	rdsqcfile = paste0( rdsqcdir, "/", basename(bamname), ".qc.rds" );
+	rdsbmfile = paste0( param$rdsbmdir, "/", basename(bamname), ".rbam.rds" );
+	rdsqcfile = paste0( param$rdsqcdir, "/", basename(bamname), ".qc.rds" );
 	if( file.exists( rdsqcfile ) )
 		return(paste0("Rbam qc rds file already exists: ",rdsqcfile));
 	
@@ -681,26 +723,31 @@ if(FALSE) { # test code
 	}
 }
 
+pipelineEstimateFragmentSizeDistribution = function(param) {
+	rdsbmdir = paste0( param$projectdir, "/", param$scoretag, "_", param$minscore, "/rbam_rds");
+	rdsqcfile = paste0( rdsqcdir, "/", basename(bamname), ".qc.rds" );
+	
+	bamname = gsub("\\.bam$","",bamname);
+	rdsqcfile = paste0( rdsqcdir, "/", basename(bamname), ".qc.rds" );
+	
+	
+}
 ### RaMWAS pipeline
 ramwas1scanBams = function( param ){
 	if(is.character(param)) {
 		param = parametersFromFile(param);
 	}
-	if(!is.null(param$bamnames)) {
-		bamnames = param$bamnames;
-	} else {
-		bamnames = readLines(param$bamlistfile);
-	}
+	param = parameterFillMissing(param);
+	stopifnot( !is.null(param$bamnames));
 	
-	if(is.null(param$cputhreads))
-		param$cputhreads = 1;
+
 	
 	if( param$cputhreads > 1) {
 		cl <- makeCluster(param$cputhreads)
 		# clusterExport(cl, list = c("nms", "rvcfdir"))
 		# nmslist = clusterSplit(cl, nms)
 		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
-		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param = param)
+		z = clusterApplyLB(cl, param$bamnames, pipelineProcessBam, param = param)
 		stopCluster(cl)
 	} else {
 		z = character(length(bamnames));
@@ -726,7 +773,8 @@ if(FALSE) { # test code
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		bamnames = NULL
+		bamnames = NULL,
+		filebam2sample = 'D:/Cell_type/bams2samples_with_duplicates_KA160502.txt'
 	);
 	
 	# bamnames = readLines(param$bamlistfile);
@@ -737,7 +785,24 @@ if(FALSE) { # test code
 	ramwas1scanBams(param)
 }
 
-
+ramwas2collectqc = function( param ){
+	if(is.character(param)) {
+		param = parametersFromFile(param);
+	}
+	param = parameterProcess(param);
+	
+	param$bam2sample
+	
+	if( param$cputhreads > 1) {
+		cl <- makeCluster(param$cputhreads)
+		# clusterExport(cl, list = c("nms", "rvcfdir"))
+		# nmslist = clusterSplit(cl, nms)
+		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
+		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
+		stopCluster(cl)
+	}
+	return(z);
+}
 
 ### Plot distributions of QC measures
 plot.qcscorehist = function(x, cex = 0.5, pch = 19, xlim = NULL, ylim = NULL, main = NULL, ...) {
