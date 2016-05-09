@@ -39,7 +39,6 @@ if(FALSE) {
 }
 
 ### Scan a file for parameters
-
 parametersFromFile = function(.parameterfile){
 	source(.parameterfile, local = TRUE);
 	.nms = ls();
@@ -314,7 +313,6 @@ if(FALSE) { # test code
 	isocpg = isocpgSitesFromCpGset(cpgset, 3);
 	show(isocpg);
 }
-
 
 ### Count reads away from CpGs
 .count.nonCpG.reads.forward = function( starts, cpglocations, distance){
@@ -702,8 +700,14 @@ ramwas1scanBams = function( param ){
 		# clusterExport(cl, list = c("nms", "rvcfdir"))
 		# nmslist = clusterSplit(cl, nms)
 		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
-		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
+		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param = param)
 		stopCluster(cl)
+	} else {
+		z = character(length(bamnames));
+		names(z) = bamnames;
+		for(i in seq_along(bamnames)) {
+			z[i] = pipelineProcessBam(bamname = bamnames[i], param = param);
+		}
 	}
 	return(z);
 }
@@ -732,6 +736,8 @@ if(FALSE) { # test code
 	
 	ramwas1scanBams(param)
 }
+
+
 
 ### Plot distributions of QC measures
 plot.qcscorehist = function(x, cex = 0.5, pch = 19, xlim = NULL, ylim = NULL, main = NULL, ...) {
