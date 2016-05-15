@@ -17,7 +17,6 @@
 	y[is.na(y)] <- 0
 	return(x + y)
 }
-
 .isAbsolutePath = function(pathname) {
 	if( grepl("^~/", pathname) ) 
 		return(TRUE)
@@ -66,21 +65,16 @@ parseBam2sample = function(lines) {
 }
 
 parameterPreprocess = function(param) {
-
+	### Get from a file if param is not a list
 	if(is.character(param)) {
 		param = parametersFromFile(param);
 	}
 	
-	if( is.null(param$scoretag) )
-		param$scoretag = "mapq";
-	if( is.null(param$minscore) )
-		param$minscore = 4;
-	
+	# Set up directories 
 	if( is.null(param$dirproject)) {
 		param$dirproject = ".";
 	}
-
-		if( is.null(param$dirfilter) ) {
+	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
 	}
 	if( is.logical(param$dirfilter) ) {
@@ -89,26 +83,44 @@ parameterPreprocess = function(param) {
 		} else {
 			param$dirfilter = param$dirproject;
 		}
+	} else {
+		if( !.isAbsolutePath(param$dirfilter)) {
+			param$dirfilter = paste0( param$dirproject, "/", param$dirfilter);
+		}
 	}
+	if( is.null(param$dirrbam) )
+		param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
+	if( is.null(param$dirrqc) )
+		param$dirrqc = paste0( param$dirfilter, "/rds_qc");
+	if( is.null(param$dirqc) )
+		param$dirqc = paste0( param$dirfilter, "/qc");
+	if( is.null(param$dircoverageraw) )
+		param$dircoverageraw  = 'coverage_raw'
+	if( !.isAbsolutePath(param$dircoverageraw) )
+		param$dircoverageraw  = paste0(param$dirproject, "/", param$dircoverageraw);
+	if( is.null(param$dircoveragenorm) )
+		param$dircoveragenorm = 'coverage_norm'
+	if( !.isAbsolutePath(param$dircoveragenorm) )
+		param$dircoveragenorm = paste0(param$dirproject, "/", param$dircoveragenorm);
+
+	### Filter parameters
+	if( is.null(param$scoretag) )
+		param$scoretag = "mapq";
+	if( is.null(param$minscore) )
+		param$minscore = 4;
 	
+	### More analysis parameters
 	if( is.null(param$maxrepeats) )
 		param$maxrepeats = 0;
-	if( !is.null(param$dirproject) ) {
-		if( is.null(param$dirrbam) )
-			param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
-		if( is.null(param$dirrqc) )
-			param$dirrqc = paste0( param$dirfilter, "/rds_qc");
-		if( is.null(param$dirqc) )
-			param$dirqc = paste0( param$dirfilter, "/qc");
-	}
 	if(is.null(param$cputhreads))
 		param$cputhreads = detectCores();
 	
+	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
 		param$bamnames = readLines(param$filebamlist);
 		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
-		
 	}
+	### BAM2sample processing
 	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
 		if( .isAbsolutePath(param$filebam2sample) ) {
 			filename = param$filebam2sample;
@@ -118,35 +130,28 @@ parameterPreprocess = function(param) {
 		param$bam2sample = parseBam2sample( readLines(filename) );
 		rm(filename);
 	}
-	
-	if( !is.null(param$filecpgset) ) {
-		stopifnot( file.exists(param$filecpgset) );
-	}
-	
-	if( is.null(param$dircoverageraw) ) {
-		param$dircoverageraw = 'coverage_raw'
-	}
-	if( is.null(param$dircoveragenorm) ) {
-		param$dircoveragenorm = 'coverage_norm'
-	}
-	
-	if( is.null(param$doublesize) ) {
-		param$doublesize = 4;
-	}
-	
-	if( !is.null(param$covfile) ) {
+	### Analysis variables file
+	if( !is.null(param$fileanalysis) ) {
 		sep = '\t';
-		if(grepl('\\.csv$',param$covfile))
+		if(grepl('\\.csv$',param$fileanalysis))
 			sep = ',';
-		if( .isAbsolutePath(param$covfile) ) {
-			filename = param$covfile;
+		if( .isAbsolutePath(param$fileanalysis) ) {
+			filename = param$fileanalysis;
 		} else {
-			filename = paste0(param$dirproject, "/", param$covfile);
+			filename = paste0(param$dirproject, "/", param$fileanalysis);
 		}
 		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE);
 		rm(filename);
 	}
-	
+
+	### CpG set should exist
+	if( !is.null(param$filecpgset) ) {
+		stopifnot( file.exists(param$filecpgset) );
+	}
+	if( is.null(param$doublesize) ) {
+		param$doublesize = 4;
+	}
+
 	return(param);
 }
 
@@ -286,7 +291,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		{
 			bb$startpos = bb$pos;
 			bb$startpos[bb$isReverse] = bb$startpos[bb$isReverse] + 
-			(cigarWidthAlongReferenceSpace(bb$cigar[bb$isReverse])-1L) - 1L;
+				(cigarWidthAlongReferenceSpace(bb$cigar[bb$isReverse])-1L) - 1L;
 			# Last -1L is for shift from C on reverse strand to C on the forward
 		} # startpos
 		
