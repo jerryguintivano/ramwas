@@ -14,3 +14,6 @@ S3method(plot, qcHistScore)
 S3method(plot, qcEditDist)
 S3method(plot, qcLengthMatched)
 
+S3method(qcmean, qcHistScore)
+S3method(qcmean, qcEditDist)
+S3method(qcmean, qcLengthMatched)

@@ -340,15 +340,18 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 if(FALSE) { # test code
 	bamfilename = "D:/NESDA_07D00232.bam"; scoretag = "AS"; minscore = 60;
 	rbam = bam.scanBamFile(bamfilename = bamfilename, scoretag = scoretag, minscore = minscore);
-	sprintf("Recorded %.f of %.f reads",1e4,1e10)
-	
+
 	plot(rbam$qc$hist.score1)
 	plot(rbam$qc$hist.score1, col='red')
-	plot(rbam$qc$hist.score1, xstep=5)
+	plot(rbam$qc$hist.score1, xstep=15)
 	plot(rbam$qc$hist.edit.dist1)
 	plot(rbam$qc$hist.edit.dist1, xstep=2)
 	plot(rbam$qc$hist.length.matched)
 	plot(rbam$qc$hist.length.matched, xstep=5)
+	
+	qcmean(rbam$qc$hist.score1)
+	qcmean(rbam$qc$hist.edit.dist1)
+	qcmean(rbam$qc$hist.length.matched)
 }
 
 .my.hist.plot = function(values, main2, firstvalue=0, xstep = 10, ...) {
@@ -386,7 +389,19 @@ plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
 plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
-
+.histmean = function(x) {
+	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
+}
+qcmean <- function(x) UseMethod("qcmean", x)
+qcmean.qcHistScore = function(x) {
+	return( .histmean(x)-1 );
+}
+qcmean.qcEditDist = function(x) {
+	return( .histmean(x)-1 );
+}
+qcmean.qcLengthMatched = function(x) {
+	return( .histmean(x) );
+}
 ###
 ### BAM QC / preprocessing
 ###
