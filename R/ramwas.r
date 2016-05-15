@@ -327,14 +327,52 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		startsrev[[i]] = sort.int(unlist(startlistrev[[i]]));
 	}		
 	
+	if( !is.null(qc$hist.score1))
+		class(qc$hist.score1) = "qcHistScore";
+	if( !is.null(qc$hist.edit.dist1))
+		class(qc$hist.edit.dist1) = "qcEditDist"
+	if( !is.null(qc$hist.length.matched))
+		class(qc$hist.length.matched) = "qcLengthMatched"
+	
 	bam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc);
 	return( bam );
 }
 if(FALSE) { # test code
-	bamfilename = "D:/02H08SM142EZ.bam"; scoretag = "AS"; minscore = 10;
-	rbam = bam.scanBamFile(bamfilename = "D:/02H08SM142EZ.bam", scoretag = "AS", minscore = 10);
+	bamfilename = "D:/NESDA_07D00232.bam"; scoretag = "AS"; minscore = 60;
+	rbam = bam.scanBamFile(bamfilename = bamfilename, scoretag = scoretag, minscore = minscore);
 	sprintf("Recorded %.f of %.f reads",1e4,1e10)
+	
+	plot(rbam$qc$hist.score1)
+	plot(rbam$qc$hist.edit.dist1)
+	plot(rbam$qc$hist.length.matched)
 }
+
+.my.hist.plot = function(values, main2, firstvalue=0, xstep = 10, ...) {
+	maxval = max(values);
+	
+	thresholds = c(-Inf, 1e3, 1e6, 1e9)*1.5;
+	bin = findInterval(maxval, thresholds)
+	switch(bin,
+			 {ylab = "count"},
+			 {ylab = "count, thousands"; values=values/1e3;},
+			 {ylab = "count, millions"; values=values/1e6;},
+			 {ylab = "count, billions"; values=values/1e9;}
+	)
+	barplot(values, width = 1, space = 0, col = "royalblue", border = "blue", main = main2, xaxs="i", yaxs="i", ylab = ylab);
+	at = seq(0, length(values)+xstep, xstep);
+	at[1] = firstvalue;
+	axis(1,at = at+0.5-firstvalue, labels = at)
+}
+plot.qcHistScore = function(x, samplename="", ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = 25);
+}
+plot.qcEditDist = function(x, samplename="", ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = 5);
+}
+plot.qcLengthMatched = function(x, samplename="", ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = 25);
+}
+
 ###
 ### BAM QC / preprocessing
 ###
