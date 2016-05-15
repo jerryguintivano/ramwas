@@ -1,0 +1,103 @@
+---
+title: "RaMWAS data structures"
+author: "Andrey A Shabalin"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true # table of content true
+vignette: >
+  %\VignetteIndexEntry{Filematrix overview}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+# Project directory structure
+
+Typically RaMWAS pipeline creates the following directory structure.
+
+* Project directory (`dirproject` parameter, '.' by default)
+    * Rbam files (`dirrbam` parameter or 'rds_rbam' by default)
+    * R QC files (`dirrqc` paramter or 'rds_qc' by default)
+    * QC plots and figures ('dirqc' parameter or 'qc' by default)
+    * Raw coverage matrix, 1 sample -- 1 column (`dircoverageraw` parameter or 'coverage_raw' by default)
+    * Normalized coverage, 1 CpG -- 1 column (`dircoveragenorm` paramteter or 'coverage_norm' by default)
+        * MWAS subdirectory, named based on the phenotype, number of PCs and covariates used in analysis
+
+# Pipeline steps
+
+## Parameters
+
+There are two ways to specify the parameters when calling any RaMWAS pipeline function.
+The parameters can be stored in an R list like this:
+
+```{r eval=FALSE}
+param = list(
+	dirbam = "/ramwas_project/bams/",
+	dirproject = "/ramwas_project/",
+	filebamlist = "/ramwas_project/000_list_of_files.txt",
+	scoretag = "AS",
+	minscore = 100,
+	cputhreads = 8,
+	filecpgset = "/ramwas/cpgsets/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+	maxrepeats = 3,
+	maxfragmentsize=200,
+	minfragmentsize=50,
+	bamnames = NULL,
+	filebam2sample = "/ramwas_project/bam2sample.txt",
+	minavgcpgcoverage = 0.3,
+	minnonzerosamples = 0.3,
+	tbuffersize = 10e9,
+	covfile = "cov.txt",
+	chrkeep = 1:22
+);
+```
+
+Alternatively, the parameters can be set in a separate R code file, which is sourced and the variables set in it serve as the parameters.
+The R code file can contain lines like this:
+
+```{r eval=FALSE}
+### R parameter file
+dirbam = "/ramwas_project/bams/"
+dirproject = "/ramwas_project/"
+filebamlist = "/ramwas_project/000_list_of_files.txt"
+scoretag = "AS"
+minscore = 100
+
+### platform dependent part
+if(.Platform$OS.type == "windows") {
+	filecpgset='C:/RaMWAS/CpG_set/cpgset_hg19_SNPS_at_MAF_0.05.rds'
+} else {
+	filecpgset='/computing_cluster/ramwas/cpgset_hg19_SNPS_at_MAF_0.05.rds'
+}
+
+
+```
+
+## Step 1, scan BAM files, record read start sites and QC information.
+
+**Overview.** The first step of the RaMWAS pipeline includes scanning BAM files, filtering reads and recording their start locations, and calculating the QC measures.
+See the separate vignette on the QC measures.
+
+**R function.** Step 1 can be run with a single call of the `ramwas1scanBams` or separate runs of `pipelineProcessBam` for each BAM file.
+The `ramwas1scanBams` function starts a local cluster with the number of jobs equal to the number of CPU cores, unless it is set by the `cputhreads` parameter.
+The `pipelineProcessBam` can be used if the user wants to manually spread the task across the nodes of a computing cluster.
+
+**Read filtering.** The alignments in the BAM files are usually filtered by the MAPQ or AS tag (set by `scoretag`), the reads with the score tag below `minscore` are discarded.
+
+**BAM files.** The list of BAMs can specified either in the character vector `bamnames` or listed in the `filebamlist` file, one bam name per file.
+The BAM file names can include full path, or path relative to `dirbam` or no path (BAMs should be in `dirbam` then).
+
+**Files produced.** The information extracted from the BAMs is stored in R format in 'rds_rbam' subdirectory of the Project directory. The QC information in R format is stored in 'rds_qc' subdirectory of the Project directory. The QC plots and figures are stored in 'qc' subdirectory of the Project directory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
