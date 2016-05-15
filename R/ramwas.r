@@ -343,13 +343,16 @@ if(FALSE) { # test code
 	sprintf("Recorded %.f of %.f reads",1e4,1e10)
 	
 	plot(rbam$qc$hist.score1)
+	plot(rbam$qc$hist.score1, col='red')
+	plot(rbam$qc$hist.score1, xstep=5)
 	plot(rbam$qc$hist.edit.dist1)
+	plot(rbam$qc$hist.edit.dist1, xstep=2)
 	plot(rbam$qc$hist.length.matched)
+	plot(rbam$qc$hist.length.matched, xstep=5)
 }
 
 .my.hist.plot = function(values, main2, firstvalue=0, xstep = 10, ...) {
 	maxval = max(values);
-	
 	thresholds = c(-Inf, 1e3, 1e6, 1e9)*1.5;
 	bin = findInterval(maxval, thresholds)
 	switch(bin,
@@ -358,19 +361,30 @@ if(FALSE) { # test code
 			 {ylab = "count, millions"; values=values/1e6;},
 			 {ylab = "count, billions"; values=values/1e9;}
 	)
-	barplot(values, width = 1, space = 0, col = "royalblue", border = "blue", main = main2, xaxs="i", yaxs="i", ylab = ylab);
+	param = list(...);
+	if(is.null(param$col)) param$col = "royalblue";
+	if(is.null(param$border)) param$border = "blue";
+	if(is.null(param$main)) param$main = main2;
+	if(is.null(param$xaxs)) param$xaxs = "i";
+	if(is.null(param$yaxs)) param$yaxs = "i";
+	if(is.null(param$ylab)) param$ylab = ylab;
+	if(is.null(param$width)) param$width = 1;
+	if(is.null(param$space)) param$space = 0;
+	param$height = values;
+	do.call(barplot, param);
+	# barplot(values, width = 1, space = 0, col = "royalblue", border = "blue", main = main2, xaxs="i", yaxs="i", ylab = ylab, ...);
 	at = seq(0, length(values)+xstep, xstep);
 	at[1] = firstvalue;
 	axis(1,at = at+0.5-firstvalue, labels = at)
 }
-plot.qcHistScore = function(x, samplename="", ...) {
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = 25);
+plot.qcHistScore = function(x, samplename="", xstep = 25, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcEditDist = function(x, samplename="", ...) {
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = 5);
+plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcLengthMatched = function(x, samplename="", ...) {
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = 25);
+plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
 
 ###
