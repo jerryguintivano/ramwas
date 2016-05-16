@@ -265,7 +265,12 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 			rm(keep);
 		}
 		
+		bb$matchedAlongQuerySpace = cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
+		
 		qc$reads.aligned = qc$reads.aligned %add% length(bb[[1]]);
+		qc$hist.score1.bf = qc$hist.score1.bf %add% tabulate(bb[[scoretag]]+1L);
+		qc$hist.edit.dist1.bf = qc$hist.edit.dist1.bf %add% tabulate(bb$NM+1L);
+		qc$hist.length.matched.bf = qc$hist.length.matched.bf %add% tabulate(bb$matchedAlongQuerySpace);
 		
 		### Keep score >= minscore
 		if( ! is.null(minscore) ) {
@@ -279,8 +284,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		qc$reads.recorded = qc$reads.recorded %add% length(bb[[1]]);
 		qc$hist.score1 = qc$hist.score1 %add% tabulate(bb[[scoretag]]+1L);
 		qc$hist.edit.dist1 = qc$hist.edit.dist1 %add% tabulate(bb$NM+1L);
-		qc$hist.length.matched = qc$hist.length.matched %add% 
-			tabulate(cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE));
+		qc$hist.length.matched = qc$hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
 		
 		### Forward vs. Reverse strand
 		bb$isReverse = bitwAnd(bb$flag, 0x10) > 0;
@@ -328,13 +332,23 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 	}		
 	
 	if( !is.null(qc$hist.score1))
-		class(qc$hist.score1) = "qcHistScore";
+			 class(qc$hist.score1) = "qcHistScore";
+	if( !is.null(qc$hist.score1.bf))
+			 class(qc$hist.score1.bf) = "qcHistScoreBF";
 	if( !is.null(qc$hist.edit.dist1))
-		class(qc$hist.edit.dist1) = "qcEditDist"
+			 class(qc$hist.edit.dist1) = "qcEditDist";
+	if( !is.null(qc$hist.edit.dist1.bf))
+			 class(qc$hist.edit.dist1.bf) = "qcEditDistBF";
 	if( !is.null(qc$hist.length.matched))
-		class(qc$hist.length.matched) = "qcLengthMatched"
+			 class(qc$hist.length.matched) = "qcLengthMatched";
+	if( !is.null(qc$hist.length.matched.bf))
+			 class(qc$hist.length.matched.bf) = "qcLengthMatchedBF";
+	if( !is.null(qc$hist.isolated.dist1))
+			 class(qc$hist.isolated.dist1) = "qcIsoDist";
 	
-	bam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc);
+	info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore);
+	
+	bam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
 	return( bam );
 }
 if(FALSE) { # test code
@@ -383,11 +397,23 @@ if(FALSE) { # test code
 plot.qcHistScore = function(x, samplename="", xstep = 25, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
+plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
+}
 plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
+plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
+}
 plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = xstep, ...);
+}
+plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n(including excluded reads)\n",samplename), firstvalue=1, xstep = xstep, ...);
+}
+plot.qcIsoDist = function(x, samplename="", xstep = 25, ...) {
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
 .histmean = function(x) {
 	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
@@ -396,10 +422,22 @@ qcmean <- function(x) UseMethod("qcmean", x)
 qcmean.qcHistScore = function(x) {
 	return( .histmean(x)-1 );
 }
+qcmean.qcHistScoreBF = function(x) {
+	return( .histmean(x)-1 );
+}
 qcmean.qcEditDist = function(x) {
 	return( .histmean(x)-1 );
 }
+qcmean.qcEditDistBF = function(x) {
+	return( .histmean(x)-1 );
+}
 qcmean.qcLengthMatched = function(x) {
+	return( .histmean(x) );
+}
+qcmean.qcLengthMatchedBF = function(x) {
+	return( .histmean(x) );
+}
+qcmean.qcIsoDist = function(x) {
 	return( .histmean(x) );
 }
 ###
@@ -568,6 +606,7 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 			result = result + .hist.isodist.reverse( starts = revstarts, cpglocations = isocpgset[[chr]], distance);
 	}
 	rbam$qc$hist.isolated.dist1 = result;
+	class(rbam$qc$hist.isolated.dist1) = 'qcIsoDist';
 	return(rbam);
 }
 if(FALSE) { # test code
@@ -768,6 +807,41 @@ if(FALSE) {
 	range(covlist1$chr2 - covlist2$chr2)
 }
 
+pipelineSaveQCplots = function(param, rbam, bamname) {
+	filename = paste0(param$dirqc,'/score/hs_',bamname,'.pdf');
+	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+	pdf(filename);
+	plot(rbam$qc$hist.score1, samplename = bamname);
+	plot(rbam$qc$hist.score1.bf, samplename = bamname);
+	dev.off();
+	rm(filename);
+	
+	filename = paste0(param$dirqc,'/edit_distance/ed_',bamname,'.pdf');
+	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+	pdf(filename);
+	plot(rbam$qc$hist.edit.dist1, samplename = bamname);
+	plot(rbam$qc$hist.edit.dist1.bf, samplename = bamname);
+	dev.off();
+	rm(filename);
+	
+	filename = paste0(param$dirqc,'/matched_length/ml_',bamname,'.pdf');
+	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+	pdf(filename);
+	plot(rbam$qc$hist.length.matched, samplename = bamname);
+	plot(rbam$qc$hist.length.matched.bf, samplename = bamname);
+	dev.off();
+	rm(filename);
+	
+	if( !is.null(hist.isolated.dist1) ) {
+		filename = paste0(param$dirqc,'/isolated_distance/id_',bamname,'.pdf');
+		dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+		pdf(filename);
+		plot(rbam$qc$hist.isolated.dist1, samplename = bamname);
+		dev.off();
+		rm(filename);
+	}
+}
+
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
@@ -810,6 +884,10 @@ pipelineProcessBam = function(bamname, param) {
 		# 	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		# }
 		rbam4 = bam.count.nonCpG.reads(rbam = rbam3, cpgset = cpgset, distance = param$maxfragmentsize);
+		
+		### QC plots
+		pipelineSaveQCplots(param, rbam4, bamname);
+		
 	} else {
 		rbam4 = rbam2;
 	}
@@ -819,32 +897,9 @@ pipelineProcessBam = function(bamname, param) {
 	rbam5$startsfwd=NULL;
 	rbam5$startsrev=NULL;
 	saveRDS( object = rbam5, file = rdsqcfile, compress = "xz");
+	
+	
 	return(paste0("OK. ", bamname));
-}
-if(FALSE) { # test code
-	### Test process single bam
-	library(ramwas)
-	param = list(
-		dirbam = "D:/Cell_type/bams/",
-		dirproject = "D:/Cell_type/",
-		filebamlist = "D:/Cell_type/000_list_of_files.txt",
-		scoretag = "AS",
-		minscore = 100,
-		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
-		maxrepeats = 3,
-		maxfragmentsize=200,
-		minfragmentsize=50,
-		bamnames = NULL
-	);
-	bamname="150114_WBCS014_CD20_150.bam";
-	{
-		tic = proc.time();
-		pipelineProcessBam(bamname, param);
-		toc = proc.time();
-		show(toc-tic);
-	}
 }
 
 pipelineEstimateFragmentSizeDistribution = function(param) {
@@ -1144,3 +1199,36 @@ plot.qcscorehist = function(x, cex = 0.5, pch = 19, xlim = NULL, ylim = NULL, ma
 	
 }
 
+if(FALSE) { # test code
+	### Test process single bam
+	library(ramwas)
+	param = list(
+		dirbam = "D:/Cell_type/bams/",
+		dirproject = "D:/Cell_type/",
+		filebamlist = "D:/Cell_type/000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+		filenoncpgset = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		bamnames = NULL
+	);
+	
+	{
+		tic = proc.time();
+		pipelineProcessBam(bamname="150114_WBCS014_CD20_150.bam", param);
+		toc = proc.time();
+		show(toc-tic);
+	}
+	{
+		tic = proc.time();
+		ramwas1scanBams(param);
+		toc = proc.time();
+		show(toc-tic);
+	}
+	
+	
+}
