@@ -8,7 +8,7 @@ importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim")
 importFrom("utils", "flush.console", "tail", "tail.matrix")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
 importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam")
-importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster")
+importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores")
 importFrom("KernSmooth","locpoly");
 
 S3method(plot, qcHistScore)
