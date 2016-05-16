@@ -87,7 +87,7 @@ parameterPreprocess = function(param) {
 			param$dirfilter = param$dirproject;
 		}
 	} else {
-		param$dirfilter = makefullpath(aram$dirproject, param$dirfilter);
+		param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
 	}
 	if( is.null(param$dirrbam) ) param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
 	if( is.null(param$dirrqc) ) param$dirrqc = paste0( param$dirfilter, "/rds_qc");
@@ -130,9 +130,8 @@ parameterPreprocess = function(param) {
 	if( !is.null(param$filecpgset) ) {
 		stopifnot( file.exists(param$filecpgset) );
 	}
-	if( is.null(param$doublesize) ) {
-		param$doublesize = 4;
-	}
+	if( is.null(param$doublesize) ) param$doublesize = 4;
+	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
 
 	return(param);
 }
@@ -448,7 +447,7 @@ qcTextHeader = paste(sep = '\t',
 	'Forward strand (%)',
 	'Avg aligned length',
 	'Avg edit distance',
-	paste0('Non-CpG coverage at ',maxfragmentsize,'bp'), 'Peak Location SQRT');
+	'Non-CpG coverage', 'Peak Location SQRT');
 
 qcTextLine = function(qc, name) {
 	if( is.null(qc) )
@@ -982,13 +981,18 @@ pipelineProcessBam = function(bamname, param) {
 	
 	rdsbmfile = paste0( param$dirrbam, "/", basename(bamname), ".rbam.rds" );
 	rdsqcfile = paste0( param$dirrqc, "/", basename(bamname), ".qc.rds" );
-	if( file.exists( rdsqcfile ) )
-		return(paste0("Rbam qc rds file already exists: ",rdsqcfile));
-	
 	if( !file.exists( bamfullname ) )
 		return(paste0("Bam file does not exist: ",bamfullname));
 	
-	rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
+	if( file.exists( rdsbmfile ) ) {
+		if( param$recalculate.QCs ) {
+			rbam = readRDS(rdsbmfile); 
+		} else {
+			return(paste0("Rbam qc rds file already exists: ",rdsqcfile));
+		}
+	} else {
+		rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
+	}
 	
 	rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
 	
@@ -1019,7 +1023,6 @@ pipelineProcessBam = function(bamname, param) {
 	rbam5$startsrev=NULL;
 	saveRDS( object = rbam5, file = rdsqcfile, compress = "xz");
 	
-	
 	return(paste0("OK. ", bamname));
 }
 
@@ -1035,8 +1038,7 @@ pipelineEstimateFragmentSizeDistribution = function(param) {
 	} else {
 		stop("Bams are not defined. Set filebam2sample, filebamlist, bam2sample or bamnames.","\n");
 	}
-	bams = basename(bams);
-	bams = unique(bams);
+	bams = unique(basename(bams));
 
 	qclist = vector("list", length(bams));
 	names(qclist) = bams;
@@ -1325,7 +1327,7 @@ ramwas2collectqc = function( param ){
 	for( ibam in seq_along(bamset) ) { # ibam=1
 		if(length(bamset[[ibam]]) == 1)
 			qc = rbamlist[[bamset[[ibam]][1]]]$qc;
-	
+	}
 	
 	bams = uunlist( param$bam2sample, use.names = FALSE);
 	
@@ -1359,7 +1361,8 @@ if(FALSE) { # test code
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		filebam2sample = 'bam2sample.txt'
+		filebam2sample = 'bam2sample.txt',
+		recalculate.QCs = TRUE
 	);
 	
 	{
@@ -1377,3 +1380,4 @@ if(FALSE) { # test code
 	
 	
 }
+
