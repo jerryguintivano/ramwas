@@ -1,10 +1,4 @@
-### load required libraries
-### Rsamtools to read BAMs
-# library(Rsamtools)
-### GenomicAlignments to process CIGAR strings
-# library(GenomicAlignments)
-#library(snow)
-
+### Caching environment
 .ramwasEnv = new.env()
 
 `%add%` <- function(x, y) {
@@ -25,6 +19,15 @@
 	if( grepl("^(/|\\\\)", pathname) ) 
 		return(TRUE)
 	return(FALSE);
+}
+makefullpath = function(path, filename) {
+	if( is.null(path) )
+		return(filename);
+	if(.isAbsolutePath(filename)) {
+		return(filename) 
+	} else {
+		return( paste0(path, "/", filename) );
+	}
 }
 if(FALSE) {
 	.isAbsolutePath( "C:/123" );  # TRUE
@@ -84,36 +87,23 @@ parameterPreprocess = function(param) {
 			param$dirfilter = param$dirproject;
 		}
 	} else {
-		if( !.isAbsolutePath(param$dirfilter)) {
-			param$dirfilter = paste0( param$dirproject, "/", param$dirfilter);
-		}
+		param$dirfilter = makefullpath(aram$dirproject, param$dirfilter);
 	}
-	if( is.null(param$dirrbam) )
-		param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
-	if( is.null(param$dirrqc) )
-		param$dirrqc = paste0( param$dirfilter, "/rds_qc");
-	if( is.null(param$dirqc) )
-		param$dirqc = paste0( param$dirfilter, "/qc");
-	if( is.null(param$dircoverageraw) )
-		param$dircoverageraw  = "coverage_raw"
-	if( !.isAbsolutePath(param$dircoverageraw) )
-		param$dircoverageraw  = paste0(param$dirproject, "/", param$dircoverageraw);
-	if( is.null(param$dircoveragenorm) )
-		param$dircoveragenorm = "coverage_norm"
-	if( !.isAbsolutePath(param$dircoveragenorm) )
-		param$dircoveragenorm = paste0(param$dirproject, "/", param$dircoveragenorm);
-
+	if( is.null(param$dirrbam) ) param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
+	if( is.null(param$dirrqc) ) param$dirrqc = paste0( param$dirfilter, "/rds_qc");
+	if( is.null(param$dirqc) ) param$dirqc = paste0( param$dirfilter, "/qc");
+	if( is.null(param$dircoverageraw) ) param$dircoverageraw  = "coverage_raw"
+	param$dircoverageraw  = makefullpath(param$dirproject, param$dircoverageraw );
+	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm"
+	param$dircoveragenorm = makefullpath(param$dirproject, param$dircoveragenorm);
+	
 	### Filter parameters
-	if( is.null(param$scoretag) )
-		param$scoretag = "mapq";
-	if( is.null(param$minscore) )
-		param$minscore = 4;
+	if( is.null(param$scoretag) ) param$scoretag = "mapq";
+	if( is.null(param$minscore) ) param$minscore = 4;
 	
 	### More analysis parameters
-	if( is.null(param$maxrepeats) )
-		param$maxrepeats = 0;
-	if(is.null(param$cputhreads))
-		param$cputhreads = detectCores();
+	if( is.null(param$maxrepeats) ) param$maxrepeats = 0;
+	if(is.null(param$cputhreads)) param$cputhreads = detectCores();
 	
 	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
@@ -122,24 +112,16 @@ parameterPreprocess = function(param) {
 	}
 	### BAM2sample processing
 	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
-		if( .isAbsolutePath(param$filebam2sample) ) {
-			filename = param$filebam2sample;
-		} else {
-			filename = paste0(param$dirproject, "/", param$filebam2sample);
-		}
+		filename = makefullpath(param$dirproject, param$filebam2sample);
 		param$bam2sample = parseBam2sample( readLines(filename) );
 		rm(filename);
 	}
 	### Analysis variables file
 	if( !is.null(param$fileanalysis) ) {
 		sep = "\t";
-		if(grepl("\\.csv$",param$fileanalysis))
+		if(grepl("\\.csv$",param$fileanalysis)) 
 			sep = ",";
-		if( .isAbsolutePath(param$fileanalysis) ) {
-			filename = param$fileanalysis;
-		} else {
-			filename = paste0(param$dirproject, "/", param$fileanalysis);
-		}
+		filename = makefullpath(param$dirproject, param$fileanalysis);
 		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE);
 		rm(filename);
 	}
@@ -346,15 +328,22 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 	# if( !is.null(qc$hist.isolated.dist1))
 	# 		 class(qc$hist.isolated.dist1) = "qcIsoDist";
 	
-	info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore);
+	info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore, filesize = file.size(bamfilename));
 	
-	bam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
-	return( bam );
+	rbam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
+	return( rbam );
 }
 if(FALSE) { # test code
+	### Rsamtools to read BAMs
+	library(Rsamtools)
+	### GenomicAlignments to process CIGAR strings
+	library(GenomicAlignments)
+	
 	bamfilename = "D:/NESDA_07D00232.bam"; scoretag = "AS"; minscore = 60;
 	rbam = bam.scanBamFile(bamfilename = bamfilename, scoretag = scoretag, minscore = minscore);
 
+	rbam$info
+	
 	plot(rbam$qc$hist.score1)
 	plot(rbam$qc$hist.score1, col="red")
 	plot(rbam$qc$hist.score1, xstep=15)
@@ -448,6 +437,27 @@ qcmean.qcLengthMatchedBF = function(x) {
 }
 qcmean.qcIsoDist = function(x) {
 	return( .histmean(x) );
+}
+
+
+qcTextHeader = paste(sep = '\t',
+	'Sample','Total reads','Reads aligned\tRA % of total',
+	'Reads after filter\tRAF % of aligned',
+	'Reads removed as repeats\tRRAR % of aligned',
+	'Reads used for coverage\tRUFC % of aligned',
+	'Forward strand (%)',
+	'Avg aligned length',
+	'Avg edit distance',
+	paste0('Non-CpG coverage at ',maxfragmentsize,'bp'), 'Peak Location SQRT');
+
+qcTextLine = function(qc, name) {
+	if( is.null(qc) )
+		return(paste0(name,paste0(rep('\tNA',qccols-1), collapse = '')));
+	
+	
+}
+if(FALSE) {
+	name = 'My_bam'
 }
 ###
 ### BAM QC / preprocessing
@@ -671,6 +681,7 @@ bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsi
 	# plot(bins, style = "colorscale", colramp= function(n){magent(n,beg=200,end=1)}, trans = function(x)x^0.6);
 	rbam$qc$avg.coverage.by.density = z$y;
 	class(rbam$qc$avg.coverage.by.density) = "qcCoverageByDensity";
+	rbam$qc$avg.noncpg.coverage = mean(coverage[sqrtcpgdensity==0]);
 	return(rbam);
 }
 if(FALSE) {
@@ -951,7 +962,9 @@ if(FALSE) {
 	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
 	pipelineSaveQCplots(param, rbam, bamname="150114_WBCS014_CD20_150");
 }
-	
+
+
+
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
@@ -962,12 +975,8 @@ pipelineProcessBam = function(bamname, param) {
 		return("Parameter not set: maxfragmentsize");
 	
 	bamname = gsub("\\.bam$","",bamname);
-	if( !.isAbsolutePath(bamname) && (length(param$dirbam)>0) ) {
-		bamfullname = paste0(param$dirbam, "/", bamname, ".bam");
-	} else {
-		bamfullname = paste0(bamname, ".bam");
-	}
-	
+	bamfullname = makefullpath(param$dirbam, paste0(bamname,".bam"))
+
 	dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
 	dir.create(param$dirrqc, showWarnings = FALSE, recursive = TRUE)
 	
@@ -1014,6 +1023,7 @@ pipelineProcessBam = function(bamname, param) {
 	return(paste0("OK. ", bamname));
 }
 
+### Fragment size distribution estimation
 pipelineEstimateFragmentSizeDistribution = function(param) {
 	
 	param = parameterPreprocess(param);
@@ -1131,7 +1141,6 @@ ramwas1scanBams = function( param ){
 	}
 	return(z);
 }
-ramwas2collectqc = function( param ) {}
 ramwas3coverageMatrix = function( param ){
 	library(parallel);
 	library(ramwas);
@@ -1287,27 +1296,52 @@ if(FALSE) { # test code
 	### See cellType.r
 }
 
- 
-
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	
+	if( !is.null(param$bam2sample) ) {
+		sam2bams = param$bam2sample;
+	} else if (!is.null(param$bamnames)) {
+		sam2bams = basename(param$bamnames);
+		names(sam2bams) = sam2bams;
+	} else {
+		stop("Bams are not defined. Set filebam2sample, filebamlist, bam2sample or bamnames.","\n");
+	}
+	
+	bams = unique(unlist(sam2bams,use.names = FALSE));
+	
+	rbamlist = vector("list", length(bams));
+	names(rbamlist) = bams;
+	for( bamname in bams) {
+		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
+		rbamlist[[bamname]] = readRDS(rdsqcfile);
+	}
+	
+	dirloc = paste0(param$dirqc, '/Summary_by_bam');
+	
+	bamset = bams;
+	dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
+	
+	for( ibam in seq_along(bamset) ) { # ibam=1
+		if(length(bamset[[ibam]]) == 1)
+			qc = rbamlist[[bamset[[ibam]][1]]]$qc;
+	
+	
+	bams = uunlist( param$bam2sample, use.names = FALSE);
+	
+	
+	
 	param$bam2sample
 	
-	if( param$cputhreads > 1) {
-		cl <- makeCluster(param$cputhreads)
-		# clusterExport(cl, list = c("nms", "rvcfdir"))
-		# nmslist = clusterSplit(cl, nms)
-		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
-		z = clusterApplyLB(cl, bamnames, pipelineProcessBam, param=param)
-		stopCluster(cl)
-	}
 	return(z);
 }
-
-### Plot distributions of QC measures
-plot.qcscorehist = function(x, cex = 0.5, pch = 19, xlim = NULL, ylim = NULL, main = NULL, ...) {
-	
+if(FALSE) {
+	param = parameterPreprocess(param);
+	sam2bams = param$bam2sample;
+	bams = unlist(sam2bams,use.names = FALSE);
+	sample = sapply(strsplit(bams, '_', fixed = TRUE), `[`, 2);
+	names(bams) = NULL;
+	bamset = split( bams, factor(sample) );
 }
 
 if(FALSE) { # test code
@@ -1325,7 +1359,7 @@ if(FALSE) { # test code
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		bamnames = NULL
+		filebam2sample = 'bam2sample.txt'
 	);
 	
 	{
