@@ -95,11 +95,11 @@ parameterPreprocess = function(param) {
 	if( is.null(param$dirqc) )
 		param$dirqc = paste0( param$dirfilter, "/qc");
 	if( is.null(param$dircoverageraw) )
-		param$dircoverageraw  = 'coverage_raw'
+		param$dircoverageraw  = "coverage_raw"
 	if( !.isAbsolutePath(param$dircoverageraw) )
 		param$dircoverageraw  = paste0(param$dirproject, "/", param$dircoverageraw);
 	if( is.null(param$dircoveragenorm) )
-		param$dircoveragenorm = 'coverage_norm'
+		param$dircoveragenorm = "coverage_norm"
 	if( !.isAbsolutePath(param$dircoveragenorm) )
 		param$dircoveragenorm = paste0(param$dirproject, "/", param$dircoveragenorm);
 
@@ -132,9 +132,9 @@ parameterPreprocess = function(param) {
 	}
 	### Analysis variables file
 	if( !is.null(param$fileanalysis) ) {
-		sep = '\t';
-		if(grepl('\\.csv$',param$fileanalysis))
-			sep = ',';
+		sep = "\t";
+		if(grepl("\\.csv$",param$fileanalysis))
+			sep = ",";
 		if( .isAbsolutePath(param$fileanalysis) ) {
 			filename = param$fileanalysis;
 		} else {
@@ -343,8 +343,8 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 			 class(qc$hist.length.matched) = "qcLengthMatched";
 	if( !is.null(qc$hist.length.matched.bf))
 			 class(qc$hist.length.matched.bf) = "qcLengthMatchedBF";
-	if( !is.null(qc$hist.isolated.dist1))
-			 class(qc$hist.isolated.dist1) = "qcIsoDist";
+	# if( !is.null(qc$hist.isolated.dist1))
+	# 		 class(qc$hist.isolated.dist1) = "qcIsoDist";
 	
 	info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore);
 	
@@ -356,7 +356,7 @@ if(FALSE) { # test code
 	rbam = bam.scanBamFile(bamfilename = bamfilename, scoretag = scoretag, minscore = minscore);
 
 	plot(rbam$qc$hist.score1)
-	plot(rbam$qc$hist.score1, col='red')
+	plot(rbam$qc$hist.score1, col="red")
 	plot(rbam$qc$hist.score1, xstep=15)
 	plot(rbam$qc$hist.edit.dist1)
 	plot(rbam$qc$hist.edit.dist1, xstep=2)
@@ -606,7 +606,7 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 			result = result + .hist.isodist.reverse( starts = revstarts, cpglocations = isocpgset[[chr]], distance);
 	}
 	rbam$qc$hist.isolated.dist1 = result;
-	class(rbam$qc$hist.isolated.dist1) = 'qcIsoDist';
+	class(rbam$qc$hist.isolated.dist1) = "qcIsoDist";
 	return(rbam);
 }
 if(FALSE) { # test code
@@ -616,6 +616,23 @@ if(FALSE) { # test code
 	
 	rbam2 = bam.hist.isolated.distances(rbam, isocpgset, distance);
 	which(rbam2$qc$hist.isolated.dist1>0)
+}
+
+### Get average coverage vs. CpG density
+bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsize) {
+	
+	fragdistr = c(rep(1, minfragmentsize-1),seq(1,0,length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
+	fragdistr = fragment.distr[fragment.distr>0];
+
+	cpgdensity = calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), cpgset = cpgset, fragdistr = fragdistr);
+	cpgdensity = unlist(cpgdensity, recursive = FALSE, use.names = FALSE) - 1;
+	
+}
+if(FALSE) {
+	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
+	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds");
+	minfragmentsize = 50;
+	maxfragmentsize = 200;
 }
 
 ### Estimate fragment size distribution
@@ -808,7 +825,7 @@ if(FALSE) {
 }
 
 pipelineSaveQCplots = function(param, rbam, bamname) {
-	filename = paste0(param$dirqc,'/score/hs_',bamname,'.pdf');
+	filename = paste0(param$dirqc,"/score/hs_",bamname,".pdf");
 	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 	pdf(filename);
 	plot(rbam$qc$hist.score1, samplename = bamname);
@@ -816,7 +833,7 @@ pipelineSaveQCplots = function(param, rbam, bamname) {
 	dev.off();
 	rm(filename);
 	
-	filename = paste0(param$dirqc,'/edit_distance/ed_',bamname,'.pdf');
+	filename = paste0(param$dirqc,"/edit_distance/ed_",bamname,".pdf");
 	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 	pdf(filename);
 	plot(rbam$qc$hist.edit.dist1, samplename = bamname);
@@ -824,7 +841,7 @@ pipelineSaveQCplots = function(param, rbam, bamname) {
 	dev.off();
 	rm(filename);
 	
-	filename = paste0(param$dirqc,'/matched_length/ml_',bamname,'.pdf');
+	filename = paste0(param$dirqc,"/matched_length/ml_",bamname,".pdf");
 	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 	pdf(filename);
 	plot(rbam$qc$hist.length.matched, samplename = bamname);
@@ -832,16 +849,36 @@ pipelineSaveQCplots = function(param, rbam, bamname) {
 	dev.off();
 	rm(filename);
 	
-	if( !is.null(hist.isolated.dist1) ) {
-		filename = paste0(param$dirqc,'/isolated_distance/id_',bamname,'.pdf');
+	if( !is.null(rbam$qc$hist.isolated.dist1) ) {
+		filename = paste0(param$dirqc,"/isolated_distance/id_",bamname,".pdf");
 		dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 		pdf(filename);
 		plot(rbam$qc$hist.isolated.dist1, samplename = bamname);
 		dev.off();
 		rm(filename);
 	}
+	### text line
 }
-
+if(FALSE) {
+	param = list(
+		dirbam = "D:/Cell_type/bams/",
+		dirproject = "D:/Cell_type/",
+		filebamlist = "D:/Cell_type/000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+		filenoncpgset = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		bamnames = NULL
+	);
+	param = parameterPreprocess(param);
+	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
+	pipelineSaveQCplots = function(param, rbam, bamname="150114_WBCS014_CD20_150");
+}
+	
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
@@ -916,7 +953,7 @@ pipelineEstimateFragmentSizeDistribution = function(param) {
 	bams = basename(bams);
 	bams = unique(bams);
 
-	qclist = vector('list', length(bams));
+	qclist = vector("list", length(bams));
 	names(qclist) = bams;
 	
 	for( bamname in bams) {
@@ -928,7 +965,7 @@ pipelineEstimateFragmentSizeDistribution = function(param) {
 	bighist = Reduce(`%add%`, qcset);
 	estimate = estimateFragmentSizeDistribution(bighist, param$minfragmentsize);
 	
-	writeLines(con = paste0(param$dirfilter,'/Fragment_size_distribution.txt'), text = as.character(estimate));
+	writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"), text = as.character(estimate));
 	
 	return(estimate);
 }
@@ -959,7 +996,7 @@ pipelineCoverage1sample = function(col, param){
 			rm(cov);
 		}
 	} else {
-		rbams = vector('list',length(bams));
+		rbams = vector("list",length(bams));
 		for( j in seq_along(bams)) { # j=1
 			rbams[[j]] = readRDS( paste0( param$dirrbam, "/", bams[j], ".rbam.rds" ) );
 		}
@@ -1024,7 +1061,7 @@ ramwas3coverageMatrix = function( param ){
 	library(parallel);
 	library(ramwas);
 	param = parameterPreprocess(param);
-	param$fragdistr = as.double( readLines( con = paste0(param$dirfilter,'/Fragment_size_distribution.txt')));
+	param$fragdistr = as.double( readLines( con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
 
 	library(filematrix)
 	fmfilename = paste0(param$dirfilter,"/", param$dircoverageraw, "/MAT_coverage");
@@ -1048,11 +1085,10 @@ ramwas3coverageMatrix = function( param ){
 		names(z) = param$bamnames;
 		for(i in seq_along(param$bam2sample)) { # i=1
 			z[i] = pipelineCoverage1sample(col = i, param = param);
-			cat(i,z[i],'\n');
+			cat(i,z[i],"\n");
 		}
 	}
 	file.remove(param$lockfile);
-	
 }
 ramwas4transpose = function( param ){
 	param = parameterPreprocess(param);
@@ -1074,7 +1110,7 @@ ramwas4transpose = function( param ){
 	# Get sample ids 
 	sampleids = match(param$covariates[[1]], colnames(fmmat), nomatch = 0L)
 	if(any(sampleids==0))
-		stop(paste0('Unrecognized sample(s): ',paste0(param$covariates[[1]][sampleids==0], collapse=' ')))
+		stop(paste0("Unrecognized sample(s): ",paste0(param$covariates[[1]][sampleids==0], collapse=" ")))
 	
 	# Output matrices
 	tfilename = paste0(param$dirfilter,"/", param$dircoveragenorm, "/MAT_t_coverage");
@@ -1094,7 +1130,7 @@ ramwas4transpose = function( param ){
 	mm = nrow(fmmat);
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 3
-		cat( part, 'of', nsteps, '\n');
+		cat( part, "of", nsteps, "\n");
 		fr = (part-1)*step1 + 1;
 		to = min(part*step1, mm);
 		
@@ -1143,7 +1179,7 @@ ramwas4transpose = function( param ){
 	mm = ncol(outmat);
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
-		cat( part, 'of', nsteps, '\n');
+		cat( part, "of", nsteps, "\n");
 		fr = (part-1)*step1 + 1;
 		to = min(part*step1, mm);
 		
