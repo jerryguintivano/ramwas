@@ -379,17 +379,12 @@ if(FALSE) { # test code
 			 {ylab = "count, billions"; values=values/1e9;}
 	)
 	param = list(...);
-	if(is.null(param$col)) param$col = "royalblue";
-	if(is.null(param$border)) param$border = "blue";
-	if(is.null(param$main)) param$main = main2;
-	if(is.null(param$xaxs)) param$xaxs = "i";
-	if(is.null(param$yaxs)) param$yaxs = "i";
-	if(is.null(param$ylab)) param$ylab = ylab;
-	if(is.null(param$width)) param$width = 1;
-	if(is.null(param$space)) param$space = 0;
-	param$height = values;
-	do.call(barplot, param);
-	# barplot(values, width = 1, space = 0, col = "royalblue", border = "blue", main = main2, xaxs="i", yaxs="i", ylab = ylab, ...);
+	plotparam = list(height = as.vector(values), width = 1, space = 0, 
+						  col = "royalblue", border = "blue", 
+						  main = main2, xaxs="i", yaxs="i", ylab = ylab);
+	plotparam[names(param)] = param;
+	do.call(barplot, plotparam);
+	# barplot(, ...);
 	at = seq(0, length(values)+xstep, xstep);
 	at[1] = firstvalue;
 	axis(1,at = at+0.5-firstvalue, labels = at)
@@ -414,6 +409,20 @@ plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...) {
 }
 plot.qcIsoDist = function(x, samplename="", xstep = 25, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
+}
+plot.qcCoverageByDensity = function(y, samplename="", ...) {
+	# y = rbam$qc$avg.coverage.by.density
+	x = (seq_along(y)-1)/100;
+	param = list(...);
+	plotparam = list(x = x, y = y, type = 'l', col = 'magenta', 
+						  lwd = 3, xaxs="i", yaxs="i", axes=FALSE,
+						  ylim = c(0, max(y)*1.1), xlim = range(x), 
+						  xlab = "CpG density", ylab = "Coverage", 
+						  main = paste0("Average coverage by CpG density\n",samplename));
+	plotparam[names(param)] = param;
+	do.call(plot, plotparam);
+	axis(1, at = seq(0,tail(x,1)+2,by = 1), labels = seq(0,tail(x,1)+2,by=1)^2)
+	axis(2);
 }
 .histmean = function(x) {
 	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
@@ -622,17 +631,74 @@ if(FALSE) { # test code
 bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsize) {
 	
 	fragdistr = c(rep(1, minfragmentsize-1),seq(1,0,length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
-	fragdistr = fragment.distr[fragment.distr>0];
+	fragdistr = fragdistr[fragdistr>0];
 
-	cpgdensity = calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), cpgset = cpgset, fragdistr = fragdistr);
-	cpgdensity = unlist(cpgdensity, recursive = FALSE, use.names = FALSE) - 1;
+	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = minfragmentsize)
+	sum(sapply(noncpgset,length))
+	newcpgset = noncpgset;
+	for( chr in seq_along(noncpgset) ) {
+		newcpgset[[chr]] = sort.int( c(cpgset[[chr]], noncpgset[[chr]]) );
+	}
+	rm(noncpgset);
 	
+	cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset), cpgset = newcpgset, fragdistr = fragdistr);
+	cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)), cpgset = newcpgset, fragdistr = fragdistr[-1]);
+	cpgdensity1 = unlist(cpgdensity1, recursive = FALSE, use.names = FALSE);
+	cpgdensity2 = unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
+	cpgdensity = cpgdensity1 + cpgdensity2;
+	rm(cpgdensity1,cpgdensity2);
+	
+	coverage = calc.coverage(rbam, newcpgset, fragdistr);
+	coverage = unlist(coverage, recursive = FALSE, use.names = FALSE);
+	
+	# sqrtcover = sqrt(coverage);
+	sqrtcpgdensity = sqrt(cpgdensity);
+	rm(cpgdensity);
+	
+	axmax = ceiling(quantile(sqrtcpgdensity,0.99)*100)/100;
+	axmaxsafe = ceiling(quantile(sqrtcpgdensity,0.9)*100)/100;
+
+	library(KernSmooth);
+	z = locpoly(sqrtcpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
+	# z = locpoly(cpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
+	# plot(z$x, z$y, type='l', ylim = c(0,max(z$y)*1.1), yaxs="i", xaxs="i");
+	
+	# # sum(sapply(rbam$startsfwd[names(cpgset)], length)) + sum(sapply(rbam$startsrev[names(cpgset)], length))
+	# reads.used = sum(sapply(rbam$startsfwd, length)) + sum(sapply(rbam$startsrev, length));
+	# additive.vector = c(reads.used, z$y);
+	
+	# bins = hexbin(sqrtcpgdensity[sqrtcover<5], sqrtcover[sqrtcover<5],xbins = 100, ybnds = c(0,5))
+	# plot(bins, style = "colorscale", colramp= function(n){magent(n,beg=200,end=1)}, trans = function(x)x^0.6);
+	rbam$qc$avg.coverage.by.density = z$y;
+	class(rbam$qc$avg.coverage.by.density) = "qcCoverageByDensity";
+	return(rbam);
 }
 if(FALSE) {
 	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
 	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds");
 	minfragmentsize = 50;
 	maxfragmentsize = 200;
+	rbam = bam.coverage.by.density( rbam, cpgset, minfragmentsize, maxfragmentsize);
+	plot(rbam$qc$avg.coverage.by.density, 'name', col='blue');
+	
+	
+	param = list(
+		dirbam = "D:/Cell_type/bams/",
+		dirproject = "D:/Cell_type/",
+		filebamlist = "D:/Cell_type/000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+		filenoncpgset = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		bamnames = NULL
+	);
+	param = parameterPreprocess(param);
+
+	pipelineSaveQCplots(param, rbam, bamname='bamname')
 }
 
 ### Estimate fragment size distribution
@@ -857,7 +923,14 @@ pipelineSaveQCplots = function(param, rbam, bamname) {
 		dev.off();
 		rm(filename);
 	}
-	### text line
+	if( !is.null(rbam$qc$avg.coverage.by.density) ) {
+		filename = paste0(param$dirqc,"/coverage_by_density/cbd_",bamname,".pdf");
+		dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+		pdf(filename);
+		plot(rbam$qc$avg.coverage.by.density, samplename = bamname);
+		dev.off();
+		rm(filename);
+	}	
 }
 if(FALSE) {
 	param = list(
@@ -876,7 +949,7 @@ if(FALSE) {
 	);
 	param = parameterPreprocess(param);
 	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
-	pipelineSaveQCplots = function(param, rbam, bamname="150114_WBCS014_CD20_150");
+	pipelineSaveQCplots(param, rbam, bamname="150114_WBCS014_CD20_150");
 }
 	
 ### Pipeline parts
@@ -914,13 +987,15 @@ pipelineProcessBam = function(bamname, param) {
 		cpgset = cachedRDSload(param$filecpgset);
 		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
+		rbam33 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, 
+			minfragmentsize = param$minfragmentsize, maxfragmentsize = param$maxfragmentsize);
 		
 		# if( !is.null(param$noncpgfile)) {
 		# 	noncpgset = cachedRDSload(param$noncpgfile);
 		# } else {
 		# 	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		# }
-		rbam4 = bam.count.nonCpG.reads(rbam = rbam3, cpgset = cpgset, distance = param$maxfragmentsize);
+		rbam4 = bam.count.nonCpG.reads(rbam = rbam33, cpgset = cpgset, distance = param$maxfragmentsize);
 		
 		### QC plots
 		pipelineSaveQCplots(param, rbam4, bamname);

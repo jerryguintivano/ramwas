@@ -9,6 +9,7 @@ importFrom("utils", "flush.console", "tail", "tail.matrix")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
 importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam")
 importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster")
+importFrom("KernSmooth","locpoly");
 
 S3method(plot, qcHistScore)
 S3method(plot, qcEditDist)
@@ -17,6 +18,8 @@ S3method(plot, qcHistScoreBF)
 S3method(plot, qcEditDistBF)
 S3method(plot, qcLengthMatchedBF)
 S3method(plot, qcIsoDist)
+S3method(plot, qcCoverageByDensity)
+
 
 S3method(qcmean, qcHistScore)
 S3method(qcmean, qcEditDist)
