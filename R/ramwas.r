@@ -1182,11 +1182,117 @@ ramwas1scanBams = function( param ){
 	}
 	return(z);
 }
-ramwas3coverageMatrix = function( param ){
-	library(parallel);
-	library(ramwas);
+ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
-	param$fragdistr = as.double( readLines( con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
+	
+	bams = NULL;
+	if( !is.null(param$bamnames) )
+		bams = c(bams, param$bamnames);
+	if( !is.null(param$bam2sample) )
+		bams = c(bams, unlist(param$bamnames, use.names = FALSE));
+	
+	bams = unique(basename(bams));
+	
+	rbamlist = vector("list", length(bams));
+	names(rbamlist) = bams;
+	for( bamname in bams) {
+		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
+		if(file.exists(rdsqcfile))
+			rbamlist[[bamname]] = readRDS(rdsqcfile);
+	}
+	
+	collect.qc.summary = function(bamset, dirname) {
+		dirloc = paste0(param$dirqc, "/", dirname);
+		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
+		
+		bigqc = vector("list", length(bamset));
+		names(bigqc) = names(bamset);
+		text = character(length(bamset));
+		for( ibam in seq_along(bamset) ) { # ibam=1
+			curbams = rbamlist[bamset[[ibam]]];
+			bigqc[[ibam]] = .combine.bams.qc(curbams)$qc;
+			text[ibam] = qcTextLine( bigqc[[ibam]], names(bamset)[ibam] );
+		}
+		writeLines( con = paste0(dirloc, "/Summary_QC.txt"), text = c(qcTextHeader, text));
+		
+		figfun = function(qcname, plotname) {
+			pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
+			for( ibam in seq_along(bamset) ) {
+				plot(bigqc[[ibam]][[qcname]], samplename = names(bamset)[ibam]);
+			}
+			dev.off();
+		}
+		
+		figfun(qcname = "hist.score1", plotname = "score");
+		figfun(qcname = "hist.score1.bf", plotname = "score_before_filter");
+		figfun(qcname = "hist.edit.dist1", plotname = "edit_distance");
+		figfun(qcname = "hist.edit.dist1.bf", plotname = "edit_distance_before_filter");
+		figfun(qcname = "hist.length.matched", plotname = "matched_length");
+		figfun(qcname = "hist.length.matched.bf", plotname = "matched_length_before_filter");
+		figfun(qcname = "hist.isolated.dist1", plotname = "isolated_distance");
+		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
+		return(invisible(bigqc));
+	}
+	
+	# By bam
+	bamset = bams; 
+	names(bamset) = bams; 
+	dirname = "summary_by_bam";
+	collect.qc.summary(bamset, dirname);
+	rm(bamset, dirname);
+	
+	if( !is.null(param$bam2sample) ) {
+		# by sample
+		collect.qc.summary(bamset = param$bam2sample, dirname = "summary_by_sample");
+		bigqc = collect.qc.summary(bamset = list(total=unlist(param$bam2sample, use.names = FALSE)), dirname = "summary_total");
+	} else {
+		bigqc = collect.qc.summary(bamset = list(total=bams), dirname = "summary_total");
+	}
+	
+	### Fragment size
+	frdata = bigqc$total$hist.isolated.dist1;
+	estimate = estimateFragmentSizeDistribution(frdata, param$minfragmentsize);
+	writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"), text = as.character(estimate));
+	
+	pdf(paste0(param$dirqc,'/Fragment_size_distribution_estimate.pdf'),8,8);
+	lz = lm(frdata[seq_along(estimate)] ~ estimate)
+	plot(as.vector(frdata)/1000, pch = 19, col='blue', main='Isolated CpG coverage vs.\nfragment size distribution estimate', ylab='count, thousands', xlab='Distance to isolated CpGs', xaxs="i");
+	lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000, lwd = 4, col='red');
+	dev.off();
+}
+if(FALSE) {
+	param = list(
+		dirbam = "D:/Cell_type/bams/",
+		dirproject = "D:/Cell_type/",
+		filebamlist = "D:/Cell_type/000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+		filenoncpgset = NULL,
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		filebam2sample = "bam2sample2.txt",
+		recalculate.QCs = TRUE
+	);
+	
+	ramwas2collectqc(param);
+	
+	# param = parameterPreprocess(param);
+	# sam2bams = param$bam2sample;
+	# bams = unlist(sam2bams,use.names = FALSE);
+	# sample = sapply(strsplit(bams, "_", fixed = TRUE), `[`, 2);
+	# names(bams) = NULL;
+	# sam2bams = split( bams, factor(sample) );
+	# writeLines(con = "D:/Cell_type/bam2sample2.txt", text = paste0(names(sam2bams),"=", sapply(sam2bams, paste, collapse = ",")));
+}
+
+ramwas3coverageMatrix = function( param ){
+	# library(parallel);
+	# library(ramwas);
+	param = parameterPreprocess(param);
+	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
 
 	library(filematrix)
 	fmfilename = paste0(param$dirfilter,"/", param$dircoverageraw, "/MAT_coverage");
@@ -1357,100 +1463,6 @@ if(FALSE) { # test code
 	return(list(qc = bigqc));
 }
 
-ramwas2collectqc = function( param ){
-	param = parameterPreprocess(param);
-	
-	bams = NULL;
-	if( !is.null(param$bamnames) )
-		bams = c(bams, param$bamnames);
-	if( !is.null(param$bam2sample) )
-		bams = c(bams, unlist(param$bamnames, use.names = FALSE));
-	
-	bams = unique(basename(bams));
-
-	rbamlist = vector("list", length(bams));
-	names(rbamlist) = bams;
-	for( bamname in bams) {
-		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
-		if(file.exists(rdsqcfile))
-			rbamlist[[bamname]] = readRDS(rdsqcfile);
-	}
-	
-	collect.qc.summary = function(bamset, dirname) {
-		dirloc = paste0(param$dirqc, "/", dirname);
-		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
-
-		bigqc = vector("list", length(bamset));
-		names(bigqc) = names(bamset);
-		text = character(length(bamset));
-		for( ibam in seq_along(bamset) ) { # ibam=1
-			curbams = rbamlist[bamset[[ibam]]];
-			bigqc[[ibam]] = .combine.bams.qc(curbams)$qc;
-			text[ibam] = qcTextLine( bigqc[[ibam]], names(bamset)[ibam] );
-		}
-		writeLines( con = paste0(dirloc, "/Summary_QC.txt"), text = c(qcTextHeader, text))
-		
-	
-		figfun = function(qcname, plotname) {
-			pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
-			for( ibam in seq_along(bamset) ) {
-				plot(bigqc[[ibam]][[qcname]], samplename = names(bamset)[ibam]);
-			}
-			dev.off();
-		}
-		
-		figfun(qcname = "hist.score1", plotname = "score");
-		figfun(qcname = "hist.score1.bf", plotname = "score_before_filter");
-		figfun(qcname = "hist.edit.dist1", plotname = "edit_distance");
-		figfun(qcname = "hist.edit.dist1.bf", plotname = "edit_distance_before_filter");
-		figfun(qcname = "hist.length.matched", plotname = "matched_length");
-		figfun(qcname = "hist.length.matched.bf", plotname = "matched_length_before_filter");
-		figfun(qcname = "hist.isolated.dist1", plotname = "isolated_distance");
-		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
-	}
-	
-	# By bam
-	bamset = bams; 
-	names(bamset) = bams; 
-	dirname = "summary_by_bam";
-	collect.qc.summary(bamset, dirname);
-	rm(bamset, dirname);
-							 
-	if( !is.null(param$bam2sample) ) {
-		# by sample
-		collect.qc.summary(bamset = param$bam2sample, dirname = "summary_by_sample");
-		collect.qc.summary(bamset = list(total=unlist(param$bam2sample, use.names = FALSE)), dirname = "summary_total");
-	} else {
-		collect.qc.summary(bamset = list(total=bams), dirname = "summary_total");
-	}
-}
-if(FALSE) {
-	param = list(
-		dirbam = "D:/Cell_type/bams/",
-		dirproject = "D:/Cell_type/",
-		filebamlist = "D:/Cell_type/000_list_of_files.txt",
-		scoretag = "AS",
-		minscore = 100,
-		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
-		maxrepeats = 3,
-		maxfragmentsize=200,
-		minfragmentsize=50,
-		filebam2sample = "bam2sample2.txt",
-		recalculate.QCs = TRUE
-	);
-	
-	ramwas2collectqc(param);
-	
-	# param = parameterPreprocess(param);
-	# sam2bams = param$bam2sample;
-	# bams = unlist(sam2bams,use.names = FALSE);
-	# sample = sapply(strsplit(bams, "_", fixed = TRUE), `[`, 2);
-	# names(bams) = NULL;
-	# sam2bams = split( bams, factor(sample) );
-	# writeLines(con = "D:/Cell_type/bam2sample2.txt", text = paste0(names(sam2bams),"=", sapply(sam2bams, paste, collapse = ",")));
-}
 
 if(FALSE) { # test code
 	### Test process single bam
