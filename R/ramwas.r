@@ -447,6 +447,14 @@ qcTextLine = function(qc, name) {
 	twodig = function(x){ sprintf("%.2f",x) };
 	s = function(x)formatC(x=x,digits=ceiling(log10(max(x)+1)),big.mark=",",big.interval=3);
 	
+	if( !is.null(qc$hist.score1))							class(qc$hist.score1) = "qcHistScore";
+	if( !is.null(qc$hist.score1.bf))			 			class(qc$hist.score1.bf) = "qcHistScoreBF";
+	if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
+	if( !is.null(qc$hist.edit.dist1.bf))				class(qc$hist.edit.dist1.bf) = "qcEditDistBF";
+	if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
+	if( !is.null(qc$hist.length.matched.bf))			class(qc$hist.length.matched.bf) = "qcLengthMatchedBF";
+	if( !is.null(qc$frwrev) ) 								class(qc$frwrev) = "qcFrwrev";
+	
 	rez = with(qc, paste( sep = "\t",
 		name, # Sample
 		if(is.null(qc$nbams)){1}else{qc$nbams}, # Number of BAMs
@@ -484,6 +492,8 @@ if(FALSE) {
 	qc$nbams = 1;
 	
 	cat( qcTextLine(qc, "bam name"), "\n")
+	
+	as.matrix(names(qc))
 	
 	with(qc, paste0("avg.noncpg.coverage", avg.noncpg.coverage, "\n"));
 	with(qc, is.null(qc$nbams))
@@ -1014,11 +1024,13 @@ pipelineProcessBam = function(bamname, param) {
 	if( !file.exists( bamfullname ) )
 		return(paste0("Bam file does not exist: ",bamfullname));
 	
+	savebam = TRUE;
 	if( file.exists( rdsbmfile ) ) {
 		if( param$recalculate.QCs ) {
 			rbam = readRDS(rdsbmfile); 
+			savebam = FALSE;
 		} else {
-			return(paste0("Rbam qc rds file already exists: ",rdsqcfile));
+			return(paste0("Rbam rds file already exists: ",rdsqcfile));
 		}
 	} else {
 		rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
@@ -1030,7 +1042,7 @@ pipelineProcessBam = function(bamname, param) {
 		cpgset = cachedRDSload(param$filecpgset);
 		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
-		rbam33 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, 
+		rbam4 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, 
 			minfragmentsize = param$minfragmentsize, maxfragmentsize = param$maxfragmentsize);
 		
 		# if( !is.null(param$noncpgfile)) {
@@ -1038,20 +1050,21 @@ pipelineProcessBam = function(bamname, param) {
 		# } else {
 		# 	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		# }
-		rbam4 = bam.count.nonCpG.reads(rbam = rbam33, cpgset = cpgset, distance = param$maxfragmentsize);
+		rbam5 = bam.count.nonCpG.reads(rbam = rbam4, cpgset = cpgset, distance = param$maxfragmentsize);
 		
 		### QC plots
 		pipelineSaveQCplots(param, rbam4, bamname);
 		
 	} else {
-		rbam4 = rbam2;
+		rbam5 = rbam2;
 	}
-	
-	saveRDS( object = rbam4, file = rdsbmfile, compress = "xz");
-	rbam5 = rbam4;
-	rbam5$startsfwd=NULL;
-	rbam5$startsrev=NULL;
-	saveRDS( object = rbam5, file = rdsqcfile, compress = "xz");
+	if(savebam)
+		saveRDS( object = rbam5, file = rdsbmfile, compress = "xz");
+	rbam6 = rbam5;
+	rbam6$startsfwd=NULL;
+	rbam6$startsrev=NULL;
+	rbam6$qc$nbams = 1L;
+	saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 	
 	return(paste0("OK. ", bamname));
 }
@@ -1149,19 +1162,13 @@ pipelineCoverage1sample = function(col, param){
 	return(paste0("OK:",col));
 }
 
-
 ### RaMWAS pipeline
 ramwas1scanBams = function( param ){
 	param = parameterPreprocess(param);
 	stopifnot( !is.null(param$bamnames));
 	
-	
-	
 	if( param$cputhreads > 1) {
 		cl <- makeCluster(param$cputhreads)
-		# clusterExport(cl, list = c("nms", "rvcfdir"))
-		# nmslist = clusterSplit(cl, nms)
-		# z = clusterApplyLB(cl, 1:8, function(i){ vcf = readRDS(paste0(rvcfdir,"/Rvcf_",nms[i],".rds")); return(vcf$pos)})
 		z = clusterApplyLB(cl, param$bamnames, pipelineProcessBam, param = param)
 		stopCluster(cl)
 	} else {
