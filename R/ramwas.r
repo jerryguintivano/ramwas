@@ -67,6 +67,7 @@ parseBam2sample = function(lines) {
 	return(bamlist);
 }
 
+### Fill in gaps in the parameter list
 parameterPreprocess = function(param) {
 	### Get from a file if param is not a list
 	if(is.character(param)) {
@@ -168,7 +169,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		rm(fields, tags, flag);
 	} # bf, param
 	
-	qc = list();
+	qc = list(nbams = 1L);
 	# qc.frwrev = c(0,0);
 	# qc.reads = 0;
 	# qc.aligned = 0;
@@ -249,7 +250,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		bb$matchedAlongQuerySpace = cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
 		
 		qc$reads.aligned = qc$reads.aligned %add% length(bb[[1]]);
-		qc$hist.score1.bf = qc$hist.score1.bf %add% tabulate(bb[[scoretag]]+1L);
+		qc$hist.score1.bf = qc$hist.score1.bf %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
 		qc$hist.edit.dist1.bf = qc$hist.edit.dist1.bf %add% tabulate(bb$NM+1L);
 		qc$hist.length.matched.bf = qc$hist.length.matched.bf %add% tabulate(bb$matchedAlongQuerySpace);
 		
@@ -263,7 +264,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		}
 		
 		qc$reads.recorded = qc$reads.recorded %add% length(bb[[1]]);
-		qc$hist.score1 = qc$hist.score1 %add% tabulate(bb[[scoretag]]+1L);
+		qc$hist.score1 = qc$hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
 		qc$hist.edit.dist1 = qc$hist.edit.dist1 %add% tabulate(bb$NM+1L);
 		qc$hist.length.matched = qc$hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
 		
@@ -312,23 +313,15 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		startsrev[[i]] = sort.int(unlist(startlistrev[[i]]));
 	}		
 	
-	if( !is.null(qc$hist.score1))
-			 class(qc$hist.score1) = "qcHistScore";
-	if( !is.null(qc$hist.score1.bf))
-			 class(qc$hist.score1.bf) = "qcHistScoreBF";
-	if( !is.null(qc$hist.edit.dist1))
-			 class(qc$hist.edit.dist1) = "qcEditDist";
-	if( !is.null(qc$hist.edit.dist1.bf))
-			 class(qc$hist.edit.dist1.bf) = "qcEditDistBF";
-	if( !is.null(qc$hist.length.matched))
-			 class(qc$hist.length.matched) = "qcLengthMatched";
-	if( !is.null(qc$hist.length.matched.bf))
-			 class(qc$hist.length.matched.bf) = "qcLengthMatchedBF";
-	# if( !is.null(qc$hist.isolated.dist1))
-	# 		 class(qc$hist.isolated.dist1) = "qcIsoDist";
+	if( !is.null(qc$hist.score1))							class(qc$hist.score1) = "qcHistScore";
+	if( !is.null(qc$hist.score1.bf))			 			class(qc$hist.score1.bf) = "qcHistScoreBF";
+	if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
+	if( !is.null(qc$hist.edit.dist1.bf))				class(qc$hist.edit.dist1.bf) = "qcEditDistBF";
+	if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
+	if( !is.null(qc$hist.length.matched.bf))			class(qc$hist.length.matched.bf) = "qcLengthMatchedBF";
+	if( !is.null(qc$frwrev) ) 								class(qc$frwrev) = "qcFrwrev";
 	
 	info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore, filesize = file.size(bamfilename));
-	
 	rbam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
 	return( rbam );
 }
@@ -402,7 +395,7 @@ plot.qcCoverageByDensity = function(y, samplename="", ...) {
 	# y = rbam$qc$avg.coverage.by.density
 	x = (seq_along(y)-1)/100;
 	param = list(...);
-	plotparam = list(x = x, y = y, type = 'l', col = 'magenta', 
+	plotparam = list(x = x, y = y, type = "l", col = "magenta", 
 						  lwd = 3, xaxs="i", yaxs="i", axes=FALSE,
 						  ylim = c(0, max(y)*1.1), xlim = range(x), 
 						  xlab = "CpG density", ylab = "Coverage", 
@@ -416,47 +409,84 @@ plot.qcCoverageByDensity = function(y, samplename="", ...) {
 	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
 }
 qcmean <- function(x) UseMethod("qcmean", x)
-qcmean.qcHistScore = function(x) {
-	return( .histmean(x)-1 );
-}
-qcmean.qcHistScoreBF = function(x) {
-	return( .histmean(x)-1 );
-}
-qcmean.qcEditDist = function(x) {
-	return( .histmean(x)-1 );
-}
-qcmean.qcEditDistBF = function(x) {
-	return( .histmean(x)-1 );
-}
-qcmean.qcLengthMatched = function(x) {
-	return( .histmean(x) );
-}
-qcmean.qcLengthMatchedBF = function(x) {
-	return( .histmean(x) );
-}
-qcmean.qcIsoDist = function(x) {
-	return( .histmean(x) );
-}
+qcmean.qcHistScore = function(x) { .histmean(x)-1 }
+qcmean.qcHistScoreBF = function(x) { .histmean(x)-1 }
+qcmean.qcEditDist = function(x) { .histmean(x)-1 }
+qcmean.qcEditDistBF = function(x) { .histmean(x)-1 }
+qcmean.qcLengthMatched = function(x) { .histmean(x) }
+qcmean.qcLengthMatchedBF = function(x) { .histmean(x) }
+qcmean.qcIsoDist = function(x) { .histmean(x) }
+qcmean.qcFrwrev = function(x){ x[1]/(x[1]+x[2]) }
+qcmean.qcNonCpGreads = function(x){ x[1]/(x[1]+x[2]) }
+qcmean.qcCoverageByDensity = function(x){ (which.max(x)-1)/100 }
 
-
-qcTextHeader = paste(sep = '\t',
-	'Sample','Total reads','Reads aligned\tRA % of total',
-	'Reads after filter\tRAF % of aligned',
-	'Reads removed as repeats\tRRAR % of aligned',
-	'Reads used for coverage\tRUFC % of aligned',
-	'Forward strand (%)',
-	'Avg aligned length',
-	'Avg edit distance',
-	'Non-CpG coverage', 'Peak Location SQRT');
-
+### Make text line for the QC set
+qcTextHeader = {paste(sep = "\t",
+	"Sample",
+	"# BAMs",
+	"Total reads",
+	"Reads aligned\tRA % of total",
+	"Reads after filter\tRAF % of aligned",
+	"Reads removed as repeats\tRRAR % of aligned",
+	"Reads used for coverage\tRUFC % of aligned",
+	"Forward strand (%)",
+	"Avg alignment score",
+	"Avg aligned length",
+	"Avg edit distance",
+	"Non-CpG reads (%)",
+	"Avg non-CpG coverage",
+	"Avg CpG coverage",
+	"Non-Cpg/CpG coverage ratio",
+	"Peak SQRT")};
+.qccols = length(strsplit(qcTextHeader,"\t",fixed = TRUE)[[1]])
 qcTextLine = function(qc, name) {
 	if( is.null(qc) )
-		return(paste0(name,paste0(rep('\tNA',qccols-1), collapse = '')));
+		return(paste0(name,paste0(rep("\tNA",.qccols-1), collapse = "")));
+	afracb = function(a,b) { paste0(s(a), "\t", round(100*a/b,1),"%") };
+	perc = function(x){ sprintf("%.2f%%",100*x) };
+	twodig = function(x){ sprintf("%.2f",x) };
+	s = function(x)formatC(x=x,digits=ceiling(log10(max(x)+1)),big.mark=",",big.interval=3);
 	
-	
+	rez = with(qc, paste( sep = "\t",
+		name, # Sample
+		if(is.null(qc$nbams)){1}else{qc$nbams}, # Number of BAMs
+		s(reads.total), # Total reads
+		afracb(reads.aligned, reads.total), # Reads aligned, % of total
+		afracb(reads.recorded, reads.aligned), # Reads after filter, % of aligned
+		afracb(reads.recorded - reads.recorded.no.repeats, reads.aligned), # Reads removed as repeats\tRRAR % of aligned
+		afracb(reads.recorded.no.repeats, reads.aligned), # Reads used for coverage, % of aligned
+		perc(qcmean( frwrev.no.repeats )), # Forward strand (%)
+		twodig(qcmean( hist.score1 )), # Avg alignment score
+		twodig(qcmean( hist.length.matched )), # Avg aligned length
+		twodig(qcmean( hist.edit.dist1 )), # Avg edit distance
+		perc(qcmean( cnt.nonCpG.reads )), # Non-CpG reads (%)
+		twodig( avg.noncpg.coverage ), # Avg non-CpG coverage
+		twodig( avg.cpg.coverage ), # Avg CpG coverage
+		perc( avg.noncpg.coverage / avg.cpg.coverage), # Non-Cpg/CpG coverage ratio
+		twodig(qcmean( avg.coverage.by.density )) # Peak SQRT
+	));
+	# cat(rez,"\n");
+	return(rez);
 }
 if(FALSE) {
-	name = 'My_bam'
+	name = "My_bam";
+	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
+	rbam$qc$avg.cpg.coverage
+	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds");
+	minfragmentsize = 50;
+	maxfragmentsize = 200;
+	rbam = bam.coverage.by.density(rbam, cpgset, minfragmentsize, maxfragmentsize);
+	rbam$qc$avg.cpg.coverage
+	qc = rbam$qc;
+	class(qc$frwrev) = "qcFrwrev";
+	class(qc$frwrev.no.repeats) = "qcFrwrev";
+	class(qc$cnt.nonCpG.reads) = "qcNonCpGreads"
+	qc$nbams = 1;
+	
+	cat( qcTextLine(qc, "bam name"), "\n")
+	
+	with(qc, paste0("avg.noncpg.coverage", avg.noncpg.coverage, "\n"));
+	with(qc, is.null(qc$nbams))
 }
 ###
 ### BAM QC / preprocessing
@@ -478,19 +508,16 @@ if(FALSE) { # test code
 	remove.repeats.over.maxrep(rep(1:10,1:10), 5L)
 }
 bam.removeRepeats = function(rbam, maxrep){
-	if(maxrep<=0)
-		return(rbam);
-	# vec = c(floor(sqrt(0:99))); maxrep=5
-	
-	newbam = list(
-		startsfwd = lapply( rbam$startsfwd, remove.repeats.over.maxrep, maxrep),
-		startsrev = lapply( rbam$startsrev, remove.repeats.over.maxrep, maxrep),
-		qc = rbam$qc);
-	
+	if(maxrep>0) {
+		newbam = list(
+			startsfwd = lapply( rbam$startsfwd, remove.repeats.over.maxrep, maxrep),
+			startsrev = lapply( rbam$startsrev, remove.repeats.over.maxrep, maxrep),
+			qc = rbam$qc);
+	}	
 	newbam$qc$frwrev.no.repeats = c(
 		sum(sapply(newbam$startsfwd,length)),
 		sum(sapply(newbam$startsrev,length)));
-	
+	class(newbam$qc$frwrev.no.repeats) = "qcFrwrev";
 	newbam$qc$reads.recorded.no.repeats = sum(newbam$qc$frwrev.no.repeats);
 	
 	return(newbam);
@@ -565,6 +592,7 @@ bam.count.nonCpG.reads = function(rbam, cpgset, distance){
 			result = result + .count.nonCpG.reads.reverse( starts = revstarts, cpglocations = cpgset[[chr]], distance);
 	}
 	rbam$qc$cnt.nonCpG.reads = result;
+	class(rbam$qc$cnt.nonCpG.reads) = "qcNonCpGreads"
 	return(rbam);
 }
 if(FALSE) { # test code
@@ -670,7 +698,7 @@ bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsi
 	library(KernSmooth);
 	z = locpoly(sqrtcpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
 	# z = locpoly(cpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
-	# plot(z$x, z$y, type='l', ylim = c(0,max(z$y)*1.1), yaxs="i", xaxs="i");
+	# plot(z$x, z$y, type="l", ylim = c(0,max(z$y)*1.1), yaxs="i", xaxs="i");
 	
 	# # sum(sapply(rbam$startsfwd[names(cpgset)], length)) + sum(sapply(rbam$startsrev[names(cpgset)], length))
 	# reads.used = sum(sapply(rbam$startsfwd, length)) + sum(sapply(rbam$startsrev, length));
@@ -681,6 +709,8 @@ bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsi
 	rbam$qc$avg.coverage.by.density = z$y;
 	class(rbam$qc$avg.coverage.by.density) = "qcCoverageByDensity";
 	rbam$qc$avg.noncpg.coverage = mean(coverage[sqrtcpgdensity==0]);
+	rbam$qc$avg.cpg.coverage = mean(coverage[sqrtcpgdensity>=1]);
+	
 	return(rbam);
 }
 if(FALSE) {
@@ -689,7 +719,7 @@ if(FALSE) {
 	minfragmentsize = 50;
 	maxfragmentsize = 200;
 	rbam = bam.coverage.by.density( rbam, cpgset, minfragmentsize, maxfragmentsize);
-	plot(rbam$qc$avg.coverage.by.density, 'name', col='blue');
+	plot(rbam$qc$avg.coverage.by.density, "name", col="blue");
 	
 	
 	param = list(
@@ -708,7 +738,7 @@ if(FALSE) {
 	);
 	param = parameterPreprocess(param);
 
-	pipelineSaveQCplots(param, rbam, bamname='bamname')
+	pipelineSaveQCplots(param, rbam, bamname="bamname")
 }
 
 ### Estimate fragment size distribution
@@ -1319,7 +1349,7 @@ ramwas2collectqc = function( param ){
 		rbamlist[[bamname]] = readRDS(rdsqcfile);
 	}
 	
-	dirloc = paste0(param$dirqc, '/Summary_by_bam');
+	dirloc = paste0(param$dirqc, "/Summary_by_bam");
 	
 	bamset = bams;
 	dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
@@ -1341,7 +1371,7 @@ if(FALSE) {
 	param = parameterPreprocess(param);
 	sam2bams = param$bam2sample;
 	bams = unlist(sam2bams,use.names = FALSE);
-	sample = sapply(strsplit(bams, '_', fixed = TRUE), `[`, 2);
+	sample = sapply(strsplit(bams, "_", fixed = TRUE), `[`, 2);
 	names(bams) = NULL;
 	bamset = split( bams, factor(sample) );
 }
@@ -1361,7 +1391,7 @@ if(FALSE) { # test code
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		filebam2sample = 'bam2sample.txt',
+		filebam2sample = "bam2sample.txt",
 		recalculate.QCs = TRUE
 	);
 	
