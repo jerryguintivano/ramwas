@@ -1475,7 +1475,7 @@ if(FALSE) {
 		z = ramwas3NormalizedCoverage2( param );
 		toc = proc.time();
 		show(toc-tic);
-		###  64 MB - 
+		###  64 MB - 88.53   29.34  131.19 
 		### 128 MB - 93.61   28.40  142.42
 		### 1   GB - 96.57   32.23  155.36
 	}
