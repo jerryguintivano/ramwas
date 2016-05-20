@@ -1352,7 +1352,7 @@ ramwas3NormalizedCoverage1 = function( param ){
 			cat(i,z[i],"\n");
 		}
 	}
-	# file.remove(param$lockfile);
+	file.remove(param$lockfile);
 }
 ramwas3NormalizedCoverage2 = function( param ){
 	# library(parallel);
@@ -1441,6 +1441,58 @@ ramwas3NormalizedCoverage2 = function( param ){
  	
 
 }
+.NormalizeTCoverage = function(rng, param, samplesums){
+	library(filematrix);
+	tfilename = paste0(param$dircoveragenorm, "/Coverage_norm");
+	mat = fm.open(tfilename, lockfile = param$lockfile);
+	
+	if(is.null(rng)) 
+		rng = c(1,ncol(mat));
+	
+	scale = samplesums / mean(samplesums);
+	
+	step1 = max(floor(64 * 1024 * 1024 / 8 / nrow(mat)),1);
+	mm = diff(rng)+1;
+	nsteps = ceiling(mm/step1);
+	for( part in 1:nsteps ) { # part = 1
+		cat( part, 'of', nsteps, '\n');
+		fr = (part-1)*step1 + rng[1];
+		to = min(part*step1, mm) + rng[1]-1;
+		
+		mat[,fr:to] = mat[,fr:to] / scale;
+	}
+	rm(part, step1, mm, nsteps, fr, to);
+	mat$close();
+	return("OK.");
+}
+ramwas3NormalizedCoverage3 = function(param, samplesums){
+	# samplesums = z
+	library(filematrix)
+	param = parameterPreprocess(param);
+	
+	if( param$cputhreads > 1 ) {
+		tfilename = paste0(param$dircoveragenorm, "/Coverage_norm");
+		outmat = fm.open(tfilename, readonly = TRUE);
+		ncpgs = ncol(outmat);
+		nsamples = nrow(outmat);
+		close(outmat);
+		rm(tfilename, outmat);
+		
+		starts = seq(1, ncpgs+1, length.out = param$cputhreads+1);
+		ranges = rbind(starts[-length(starts)], starts[-1]-1);
+		ranges = lapply(1:ncol(ranges), function(i) ranges[,i]);
+		
+		param$lockfile = tempfile();
+		cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+		z = clusterApplyLB(cl, 1:param$cputhreads, .NormalizeTCoverage, param = param, samplesums = samplesums);
+		stopCluster(cl);
+		file.remove(param$lockfile);
+		
+	} else {
+		.NormalizeTCoverage( rng = NULL, param, samplesums)
+	}
+	return("OK.");
+}
 
 if(FALSE) {
 	library(ramwas);
@@ -1478,6 +1530,15 @@ if(FALSE) {
 		###  64 MB - 88.53   29.34  131.19 
 		### 128 MB - 93.61   28.40  142.42
 		### 1   GB - 96.57   32.23  155.36
+	}
+	{
+		param$cputhreads = 1;
+		tic = proc.time();
+		param = parameterPreprocess(param);
+		.NormalizeTCoverage( rng = NULL, param, samplesums)
+		toc = proc.time();
+		show(toc-tic);
+		# 1 thread: 		
 	}
 }
 if(FALSE) {
