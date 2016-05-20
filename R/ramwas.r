@@ -1484,7 +1484,7 @@ ramwas3NormalizedCoverage3 = function(param, samplesums){
 		
 		param$lockfile = tempfile();
 		cl = makePSOCKcluster(rep("localhost", param$cputhreads))
-		z = clusterApplyLB(cl, 1:param$cputhreads, .NormalizeTCoverage, param = param, samplesums = samplesums);
+		z = clusterApplyLB(cl, ranges, .NormalizeTCoverage, param = param, samplesums = samplesums);
 		stopCluster(cl);
 		file.remove(param$lockfile);
 		
@@ -1524,7 +1524,7 @@ if(FALSE) {
 	}
 	{
 		tic = proc.time();
-		z = ramwas3NormalizedCoverage2( param );
+		samplesums = ramwas3NormalizedCoverage2( param );
 		toc = proc.time();
 		show(toc-tic);
 		###  64 MB - 88.53   29.34  131.19 
@@ -1532,13 +1532,16 @@ if(FALSE) {
 		### 1   GB - 96.57   32.23  155.36
 	}
 	{
-		param$cputhreads = 1;
+		param$cputhreads = 8;
 		tic = proc.time();
-		param = parameterPreprocess(param);
-		.NormalizeTCoverage( rng = NULL, param, samplesums)
+		ramwas3NormalizedCoverage3(param, samplesums);
 		toc = proc.time();
 		show(toc-tic);
-		# 1 thread: 		
+		# 1 thread:  37.61   16.86   71.53
+		# 1 thread:  36.77   16.69   70.39
+		# 2 threads:  0.00    0.00   48.76
+		# 4 threads:  1.15    0.29   39.98 
+		# 8 threads:  0.03    0.00   40.83
 	}
 }
 if(FALSE) {
@@ -1561,9 +1564,22 @@ if(FALSE) {
 	);
 	
 	# ramwas2collectqc(param);
-		{
+	{
 		tic = proc.time();
-		z = ramwas3NormalizedCoverage( param );
+		z = ramwas3NormalizedCoverage1( param );
+		toc = proc.time();
+		show(toc-tic);
+	}
+	{
+		tic = proc.time();
+		samplesums = ramwas3NormalizedCoverage2( param );
+		toc = proc.time();
+		show(toc-tic);
+	}
+	{
+		param$cputhreads = 8;
+		tic = proc.time();
+		ramwas3NormalizedCoverage3(param, samplesums);
 		toc = proc.time();
 		show(toc-tic);
 	}
