@@ -1373,7 +1373,7 @@ ramwas3NormalizedCoverage2 = function( param ){
 	cpgsloc1e9 = unlist(cpgsloc1e9, recursive = FALSE, use.names = FALSE);
 
 	### Output matrices
-	tfilename = paste0(param$dircoveragenorm, "/Coverage_norm");
+	tfilename = paste0(param$dirtemp, "/Coverage_transposed");
 	outmat = fm.create(tfilename, nrow=nsamples, ncol=0, size = param$doublesize)
 	rownames(outmat) = names(param$bam2sample);
 	
@@ -1434,8 +1434,12 @@ ramwas3NormalizedCoverage2 = function( param ){
 			break
 	}
  	
+ 	fm = fm.create.from.matrix(paste0(param$dircoveragenorm, "/Sample_averages"), mat = samplesums / ncol(outmat))
+ 	close(fm);
+ 	
  	outmat$close();
  	outcpg$close();
+ 	
  	
  	return(samplesums);
  	
@@ -1443,53 +1447,64 @@ ramwas3NormalizedCoverage2 = function( param ){
 }
 .NormalizeTCoverage = function(rng, param, samplesums){
 	library(filematrix);
-	tfilename = paste0(param$dircoveragenorm, "/Coverage_norm");
-	mat = fm.open(tfilename, lockfile = param$lockfile);
+	tfilename = paste0(param$dirtemp, "/Coverage_transposed");
+	inmat  = fm.open(tfilename, lockfile = param$lockfile1, readonly = TRUE);
+	tfilename = paste0(param$dircoveragenorm, "/Coverage_normalized");
+	outmat = fm.open(tfilename, lockfile = param$lockfile2);
 	
-	if(is.null(rng)) 
-		rng = c(1,ncol(mat));
+	scale = as.vector(samplesums) / mean(samplesums);
 	
-	scale = samplesums / mean(samplesums);
-	
-	step1 = max(floor(64 * 1024 * 1024 / 8 / nrow(mat)),1);
-	mm = diff(rng)+1;
-	nsteps = ceiling(mm/step1);
-	for( part in 1:nsteps ) { # part = 1
-		cat( part, 'of', nsteps, '\n');
-		fr = (part-1)*step1 + rng[1];
-		to = min(part*step1, mm) + rng[1]-1;
+	for( part in seq_len(nrow(rng)) ) { # part = 1
+		cat( part, 'of', nrow(rng), '\n');
+		fr = rng[part,1];
+		to = rng[part,2];
 		
-		mat[,fr:to] = mat[,fr:to] / scale;
+		outmat[,fr:to] = inmat[,fr:to] / scale;
 	}
 	rm(part, step1, mm, nsteps, fr, to);
-	mat$close();
+	inmat$close();
+	outmat$close();
 	return("OK.");
 }
-ramwas3NormalizedCoverage3 = function(param, samplesums){
+ramwas3NormalizedCoverage3 = function(param){
 	# samplesums = z
 	library(filematrix)
 	param = parameterPreprocess(param);
-	
-	if( param$cputhreads > 1 ) {
-		tfilename = paste0(param$dircoveragenorm, "/Coverage_norm");
-		outmat = fm.open(tfilename, readonly = TRUE);
-		ncpgs = ncol(outmat);
-		nsamples = nrow(outmat);
+
+	samplesums = fm.load( paste0(param$dircoveragenorm, "/Sample_averages") );
+
+	tfilename = paste0(param$dirtemp, "/Coverage_transposed");
+	inmat = fm.open(tfilename, readonly = TRUE);
+	ncpgs = ncol(inmat);
+	nsamples = nrow(inmat);
+		tfilename = paste0(param$dircoveragenorm, "/Coverage_normalized");
+		outmat = fm.create(tfilename, nrow = nsamples, ncol = ncpgs, size = param$doublesize);
+		rownames(outmat) = rownames(inmat);
 		close(outmat);
-		rm(tfilename, outmat);
+	close(inmat);
+	rm(tfilename, inmat);
+
+	step1 = max(floor(64 * 1024 * 1024 / 8 / nsamples),1);
+	starts = c(seq(1, ncpgs, step1),ncpgs+1);
+	ranges = cbind(starts[-length(starts)], starts[-1]-1);
+
+	if( param$cputhreads > 1 ) {
 		
-		starts = seq(1, ncpgs+1, length.out = param$cputhreads+1);
-		ranges = rbind(starts[-length(starts)], starts[-1]-1);
-		ranges = lapply(1:ncol(ranges), function(i) ranges[,i]);
+		rnglist = vector('list', param$cputhreads)
+		for( k in seq_len(param$cputhreads))
+			rnglist[[k]] = ranges[ ((seq_len(nrow(ranges))+k) %% param$cputhreads)==0,]
 		
-		param$lockfile = tempfile();
+		param$lockfile1 = tempfile();
+		param$lockfile2 = tempfile();
+		library(parallel);
 		cl = makePSOCKcluster(rep("localhost", param$cputhreads))
-		z = clusterApplyLB(cl, ranges, .NormalizeTCoverage, param = param, samplesums = samplesums);
+		z = clusterApplyLB(cl, rnglist, .NormalizeTCoverage, param = param, samplesums = samplesums);
 		stopCluster(cl);
-		file.remove(param$lockfile);
+		file.remove(param$lockfile1);
+		file.remove(param$lockfile2);
 		
 	} else {
-		.NormalizeTCoverage( rng = NULL, param, samplesums)
+		.NormalizeTCoverage(rng = ranges, param, samplesums)
 	}
 	return("OK.");
 }
@@ -1534,7 +1549,7 @@ if(FALSE) {
 	{
 		param$cputhreads = 8;
 		tic = proc.time();
-		ramwas3NormalizedCoverage3(param, samplesums);
+		ramwas3NormalizedCoverage3(param);
 		toc = proc.time();
 		show(toc-tic);
 		# 1 thread:  37.61   16.86   71.53
@@ -1566,7 +1581,7 @@ if(FALSE) {
 	# ramwas2collectqc(param);
 	{
 		tic = proc.time();
-		z = ramwas3NormalizedCoverage1( param );
+		z = ramwas3NormalizedCoverage1( param );☻
 		toc = proc.time();
 		show(toc-tic);
 	}
@@ -1575,13 +1590,18 @@ if(FALSE) {
 		samplesums = ramwas3NormalizedCoverage2( param );
 		toc = proc.time();
 		show(toc-tic);
+		# 2961.89  657.59 5140.73
+		# 2966.73  650.12 5372.79
+		# 2965.59  642.71 5434.28
 	}
 	{
-		param$cputhreads = 8;
+		param$cputhreads = 2;
 		tic = proc.time();
-		ramwas3NormalizedCoverage3(param, samplesums);
+		ramwas3NormalizedCoverage3(param);
 		toc = proc.time();
 		show(toc-tic);
+		# 1 thread: 1767.03  477.41 4122.09
+		# 2 threads:   1.00    0.99 4067.15 
 	}
 }
 ramwas3coverageMatrix = function( param ){
