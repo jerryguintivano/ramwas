@@ -1199,6 +1199,7 @@ ramwas2collectqc = function( param ){
 	
 	bams = unique(basename(bams));
 	
+	cat('Load BAM QC info','\n');
 	rbamlist = vector("list", length(bams));
 	names(rbamlist) = bams;
 	for( bamname in bams) {
@@ -1211,6 +1212,7 @@ ramwas2collectqc = function( param ){
 		dirloc = paste0(param$dirqc, "/", dirname);
 		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
 		
+		cat('Saving text summary','\n');
 		bigqc = vector("list", length(bamset));
 		names(bigqc) = names(bamset);
 		text = character(length(bamset));
@@ -1222,6 +1224,7 @@ ramwas2collectqc = function( param ){
 		writeLines( con = paste0(dirloc, "/Summary_QC.txt"), text = c(.qcTextHeader, text));
 		
 		figfun = function(qcname, plotname) {
+			cat('Saving plots',plotname,'\n');
 			pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
 			for( ibam in seq_along(bamset) ) {
 				plot(bigqc[[ibam]][[qcname]], samplename = names(bamset)[ibam]);
@@ -1244,14 +1247,18 @@ ramwas2collectqc = function( param ){
 	bamset = bams; 
 	names(bamset) = bams; 
 	dirname = "summary_by_bam";
+	cat('Saving QC info by BAM','\n');
 	collect.qc.summary(bamset, dirname);
 	rm(bamset, dirname);
 	
 	if( !is.null(param$bam2sample) ) {
 		# by sample
+		cat('Saving QC info by SAMPLE','\n');
 		collect.qc.summary(bamset = param$bam2sample, dirname = "summary_by_sample");
+		cat('Saving QC info TOTAL (all BAMs in bam2sample)','\n');
 		bigqc = collect.qc.summary(bamset = list(total=unique(unlist(param$bam2sample, use.names = FALSE))), dirname = "summary_total");
 	} else {
+		cat('Saving QC info TOTAL (all BAMs in bamnames/filebamlist)','\n');
 		bigqc = collect.qc.summary(bamset = list(total=bams), dirname = "summary_total");
 	}
 	
@@ -1304,7 +1311,6 @@ ramwas2collectqc = function( param ){
 	
 	return("OK");
 }
-
 ramwas3NormalizedCoverage1 = function( param ){
 	# library(parallel);
 	# library(ramwas);
@@ -1319,7 +1325,8 @@ ramwas3NormalizedCoverage1 = function( param ){
 	### Create tamp matrices
 	library(filematrix)
 	# Sliced loop
-	step1 = max(floor(param$buffersize / (8 * nsamples)),1);
+	kbblock = (128*1024)/8;
+	step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
 	mm = ncpgs;
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
@@ -1564,7 +1571,8 @@ if(FALSE) {
 	param = list(
 		dirbam = "D:/RW/NESDA/bams/",
 		dirproject = "D:/RW/NESDA/",
-		dirtemp = "C:/AllWorkFiles/temp/",
+		# dirtemp = "C:/AllWorkFiles/temp/",
+		dirtemp = "E:/RaMWAS_temp/",
 		filebamlist = "000_list_of_files.txt",
 		scoretag = "AS",
 		minscore = 100,
@@ -1575,15 +1583,23 @@ if(FALSE) {
 		maxfragmentsize = 200,
 		minfragmentsize = 50,
 		filebam2sample = "bam2samples2.txt",
-		recalculate.QCs = TRUE
+		recalculate.QCs = TRUE,
+		buffersize = 2e9
 	);
 	
-	# ramwas2collectqc(param);
 	{
 		tic = proc.time();
-		z = ramwas3NormalizedCoverage1( param );☻
+		z = ramwas2collectqc( param );
 		toc = proc.time();
 		show(toc-tic);
+		# HP: 
+	}
+	{
+		tic = proc.time();
+		z = ramwas3NormalizedCoverage1( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP, 2e9: 
 	}
 	{
 		tic = proc.time();
@@ -1602,6 +1618,55 @@ if(FALSE) {
 		show(toc-tic);
 		# 1 thread: 1767.03  477.41 4122.09
 		# 2 threads:   1.00    0.99 4067.15 
+	}
+}
+if(FALSE) {
+	library(ramwas);
+	param = list(
+		dirbam = "D:/RW/RC2/bams/",
+		dirproject = "D:/RW/RC2/",
+		# dirtemp = "C:/AllWorkFiles/temp/",
+		dirtemp = "E:/RaMWAS_temp/",
+		filebamlist = "000_list_of_files.txt",
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
+		filenoncpgset = NULL,
+		maxrepeats = 3,
+		maxfragmentsize = 200,
+		minfragmentsize = 50,
+		filebam2sample = "bam2sample.txt",
+		recalculate.QCs = TRUE,
+		buffersize = 2e9
+	);
+	
+	{
+		tic = proc.time();
+		z = ramwas2collectqc( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas3NormalizedCoverage1( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP, 4e8: 
+	}
+	{
+		tic = proc.time();
+		samplesums = ramwas3NormalizedCoverage2( param );
+		toc = proc.time();
+		show(toc-tic);
+	}
+	{
+		param$cputhreads = 2;
+		tic = proc.time();
+		ramwas3NormalizedCoverage3(param);
+		toc = proc.time();
+		show(toc-tic);
 	}
 }
 ramwas3coverageMatrix = function( param ){
