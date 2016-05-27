@@ -548,7 +548,9 @@ bam.removeRepeats = function(rbam, maxrep){
 			startsfwd = lapply( rbam$startsfwd, remove.repeats.over.maxrep, maxrep),
 			startsrev = lapply( rbam$startsrev, remove.repeats.over.maxrep, maxrep),
 			qc = rbam$qc);
-	}	
+	} else {
+		newbam = rbam;
+	}
 	newbam$qc$frwrev.no.repeats = c(
 		sum(sapply(newbam$startsfwd,length)),
 		sum(sapply(newbam$startsrev,length)));
@@ -1454,9 +1456,6 @@ ramwas3NormalizedCoverage2 = function( param ){
 	mm = ncpgs;
 	nparts = ceiling(mm/step1);
 	rm(kbblock, step1, mm);
-	
-	fm = fm.create(paste0(param$dirtemp,"/0_sample_sums"), nrow = nsamples, ncol = nparts);
-	close(fm);
 	
 	if( param$cputhreads > 1 ) {
 		
