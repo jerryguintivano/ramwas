@@ -205,7 +205,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		bb = c(bb[names(bb) != "tag"], bb$tag);
 		# data.frame(lapply(bb,`[`, 1:60), check.rows = FALSE, stringsAsFactors = FALSE)
 		
-		stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
+		# stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
 		
 		### Create output lists
 		if(is.null(startlistfwd)) {
@@ -254,6 +254,11 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 			if(!all(keep))
 				bb = lapply(bb,`[`,which(keep));
 			rm(keep);
+		}
+		
+		if(length(bb[[1]])==0) {
+			cat(sprintf("Recorded %.f of %.f reads",qc$reads.recorded,qc$reads.total),"\n");
+			next;
 		}
 		
 		bb$matchedAlongQuerySpace = cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
@@ -309,7 +314,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 			}
 			rm(offset, split.levels, splt);
 		} # startlistfwd, startlistrev	
-		cat(sprintf("Recorded %.f of %.f reads",qc$reads.recorded,qc$reads.total),"\n")
+		cat(sprintf("Recorded %.f of %.f reads",qc$reads.recorded,qc$reads.total),"\n");
 	}
 	close(bf);
 	rm(bf); # , oldtail
@@ -322,6 +327,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		startsfwd[[i]] = sort.int(unlist(startlistfwd[[i]]));
 		startsrev[[i]] = sort.int(unlist(startlistrev[[i]]));
 	}		
+	gc();
 	
 	if( !is.null(qc$hist.score1))							class(qc$hist.score1) = "qcHistScore";
 	if( !is.null(qc$bf.hist.score1))			 			class(qc$bf.hist.score1) = "qcHistScoreBF";
