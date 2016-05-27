@@ -1062,8 +1062,6 @@ pipelineProcessBam = function(bamname, param) {
 	
 	rdsbmfile = paste0( param$dirrbam, "/", basename(bamname), ".rbam.rds" );
 	rdsqcfile = paste0( param$dirrqc, "/", basename(bamname), ".qc.rds" );
-	if( !file.exists( bamfullname ) )
-		return(paste0("Bam file does not exist: ",bamfullname));
 	
 	savebam = TRUE;
 	if( file.exists( rdsbmfile ) ) {
@@ -1074,6 +1072,8 @@ pipelineProcessBam = function(bamname, param) {
 			return(paste0("Rbam rds file already exists: ",rdsqcfile));
 		}
 	} else {
+		if( !file.exists( bamfullname ) )
+			return(paste0("Bam file does not exist: ",bamfullname));
 		rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
 	}
 	
