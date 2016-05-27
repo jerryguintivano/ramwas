@@ -421,7 +421,7 @@ plot.qcCoverageByDensity = function(y, samplename="", ...) {
 	param = list(...);
 	plotparam = list(x = x, y = y, type = "l", col = "magenta", 
 						  lwd = 3, xaxs="i", yaxs="i", axes=FALSE,
-						  ylim = c(0, max(y)*1.1), xlim = range(x), 
+						  ylim = c(0, max(y, na.rm = TRUE)*1.1), xlim = range(x), 
 						  xlab = "CpG density", ylab = "Coverage", 
 						  main = paste0("Average coverage by CpG density\n",samplename));
 	plotparam[names(param)] = param;
