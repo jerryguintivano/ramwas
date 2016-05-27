@@ -701,41 +701,54 @@ if(FALSE) { # test code
 }
 
 ### Get average coverage vs. CpG density
-bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsize) {
+bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, maxfragmentsize) {
 	
 	fragdistr = c(rep(1, minfragmentsize-1),seq(1,0,length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
 	fragdistr = fragdistr[fragdistr>0];
 
-	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = minfragmentsize)
-	sum(sapply(noncpgset,length))
-	newcpgset = noncpgset;
-	for( chr in seq_along(noncpgset) ) {
-		newcpgset[[chr]] = sort.int( c(cpgset[[chr]], noncpgset[[chr]]) );
+	if( is.null(noncpgset) ) {
+		noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = maxfragmentsize)
 	}
-	rm(noncpgset);
+	# sum(sapply(noncpgset,length))
+	# newcpgset = noncpgset;
+	# for( chr in seq_along(noncpgset) ) {
+	# 	newcpgset[[chr]] = sort.int( c(cpgset[[chr]], noncpgset[[chr]]) );
+	# }
+	# rm(noncpgset);
 	
-	cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset), cpgset = newcpgset, fragdistr = fragdistr);
-	cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)), cpgset = newcpgset, fragdistr = fragdistr[-1]);
-	cpgdensity1 = unlist(cpgdensity1, recursive = FALSE, use.names = FALSE);
-	cpgdensity2 = unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
-	cpgdensity = cpgdensity1 + cpgdensity2;
+	cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset), cpgset = cpgset, fragdistr = fragdistr);
+	cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)), cpgset = cpgset, fragdistr = fragdistr[-1]);
+	cpgdensity = unlist(cpgdensity1, recursive = FALSE, use.names = FALSE) + 
+					 unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
 	rm(cpgdensity1,cpgdensity2);
 	
-	coverage = calc.coverage(rbam, newcpgset, fragdistr);
-	coverage = unlist(coverage, recursive = FALSE, use.names = FALSE);
+	### It's zero, not needed
+	# noncpgdensity1 = calc.coverage(rbam = list(startsfwd = noncpgset), cpgset = cpgset, fragdistr = fragdistr);
+	# noncpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(noncpgset,`-`,1L)), cpgset = cpgset, fragdistr = fragdistr[-1]);
+	# noncpgdensity = unlist(noncpgdensity1, recursive = FALSE, use.names = FALSE) + 
+	# 					 unlist(noncpgdensity2, recursive = FALSE, use.names = FALSE);
+	# rm(noncpgdensity1,noncpgdensity2);
 	
+	cpgcoverage = calc.coverage(rbam, cpgset,    fragdistr);
+	cpgcoverage = unlist(cpgcoverage, recursive = FALSE, use.names = FALSE);
+	
+	noncoverage = calc.coverage(rbam, noncpgset, fragdistr);
+	noncoverage = unlist(noncoverage, recursive = FALSE, use.names = FALSE);
+
 	# sqrtcover = sqrt(coverage);
 	sqrtcpgdensity = sqrt(cpgdensity);
 	rm(cpgdensity);
 	
 	axmax = ceiling(quantile(sqrtcpgdensity,0.99)*100)/100;
-	axmaxsafe = ceiling(quantile(sqrtcpgdensity,0.9)*100)/100;
+	# axmaxsafe = ceiling(quantile(sqrtcpgdensity,0.9)*100)/100;
 
 	library(KernSmooth);
-	z = locpoly(sqrtcpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
+	z = locpoly(x = c(sqrtcpgdensity, double(length(noncoverage))),
+					y = c(cpgcoverage, noncoverage), 
+					bandwidth = 0.5, gridsize = axmax*100+1, range.x = c(0,axmax));
+	z$y[is.na(z$y)] = 0;
 	# z = locpoly(cpgdensity, coverage, bandwidth = 0.2, gridsize = axmax*100+1, range.x = c(0,axmax))
-	# plot(z$x, z$y, type="l", ylim = c(0,max(z$y)*1.1), yaxs="i", xaxs="i");
-	
+	# plot(z$x, z$y, type="l", ylim = c(0,max(z$y, na.rm = TRUE)*1.1), yaxs="i", xaxs="i");
 	# # sum(sapply(rbam$startsfwd[names(cpgset)], length)) + sum(sapply(rbam$startsrev[names(cpgset)], length))
 	# reads.used = sum(sapply(rbam$startsfwd, length)) + sum(sapply(rbam$startsrev, length));
 	# additive.vector = c(reads.used, z$y);
@@ -744,17 +757,18 @@ bam.coverage.by.density = function( rbam, cpgset, minfragmentsize, maxfragmentsi
 	# plot(bins, style = "colorscale", colramp= function(n){magent(n,beg=200,end=1)}, trans = function(x)x^0.6);
 	rbam$qc$avg.coverage.by.density = z$y;
 	class(rbam$qc$avg.coverage.by.density) = "qcCoverageByDensity";
-	rbam$qc$avg.noncpg.coverage = mean(coverage[sqrtcpgdensity==0]);
-	rbam$qc$avg.cpg.coverage = mean(coverage[sqrtcpgdensity>=1]);
+	rbam$qc$avg.noncpg.coverage = mean(noncoverage);
+	rbam$qc$avg.cpg.coverage = mean(cpgcoverage);
 	
 	return(rbam);
 }
 if(FALSE) {
-	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
-	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds");
+	rbam = readRDS("D:/RW/RC2/rds_rbam/01A01SM1429N.rbam.rds");
+	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp.rds");
+	noncpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp_nonCpG.rds");
 	minfragmentsize = 50;
 	maxfragmentsize = 200;
-	rbam = bam.coverage.by.density( rbam, cpgset, minfragmentsize, maxfragmentsize);
+	rbam = bam.coverage.by.density( rbam, cpgset, noncpgset, minfragmentsize, maxfragmentsize);
 	plot(rbam$qc$avg.coverage.by.density, "name", col="blue");
 	
 	
@@ -1065,9 +1079,10 @@ pipelineProcessBam = function(bamname, param) {
 	
 	if( !is.null(param$filecpgset) ) {
 		cpgset = cachedRDSload(param$filecpgset);
+		noncpgset = cachedRDSload(param$filenoncpgset);
 		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
 		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
-		rbam4 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, 
+		rbam4 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, noncpgset = noncpgset,
 			minfragmentsize = param$minfragmentsize, maxfragmentsize = param$maxfragmentsize);
 		
 		# if( !is.null(param$noncpgfile)) {
