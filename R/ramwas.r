@@ -883,14 +883,16 @@ if(FALSE) { # test code
 
 ### Cache CpG location files to avoid reloading.
 cachedRDSload = function(rdsfilename){
-	globalname = rdsfilename; #paste0(".ramwas.",rdsfilename);
-	if( exists(x = globalname, envir = .ramwasEnv) ) {
+	if(is.null(rdsfilename))
+		return(NULL);
+	cachename = rdsfilename; #paste0(".ramwas.",rdsfilename);
+	if( exists(x = cachename, envir = .ramwasEnv) ) {
 		# cat("Using cache","\n");
-		return(base::get(x = globalname, envir = .ramwasEnv));
+		return(base::get(x = cachename, envir = .ramwasEnv));
 	} else {
 		# cat("Loading","\n");
 		data = readRDS(rdsfilename);
-		base::assign(x = globalname, value = data, envir = .ramwasEnv);
+		base::assign(x = cachename, value = data, envir = .ramwasEnv);
 		return(data);
 	}
 }
