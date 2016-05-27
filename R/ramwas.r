@@ -1625,7 +1625,7 @@ ramwas3NormalizedCoverage3 = function(param){
 	return("OK.");
 }
 
-if(FALSE) {
+if(FALSE) { # Cell Type
 	library(ramwas);
 	param = list(
 		dirbam = "D:/Cell_type/bams/",
@@ -1674,8 +1674,8 @@ if(FALSE) {
 		# 4 threads:  1.15    0.29   39.98 
 		# 8 threads:  0.03    0.00   40.83
 	}
-}
-if(FALSE) {
+} # Cell Type
+if(FALSE) { # NESDA
 	library(ramwas);
 	param = list(
 		dirbam = "D:/RW/NESDA/bams/",
@@ -1683,10 +1683,10 @@ if(FALSE) {
 		dirtemp = NULL,
 		filebamlist = "000_list_of_files.txt",
 		scoretag = "AS",
-		minscore = 100,
+		minscore = 120,
 		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
+		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize = 200,
 		minfragmentsize = 50,
@@ -1724,6 +1724,21 @@ if(FALSE) {
 	
 	{
 		tic = proc.time();
+		rez = pipelineProcessBam(bamname = '150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311', param );
+		qc = readRDS('D:/RW/NESDA/rds_qc/150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311.qc.rds')
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas1scanBams( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
 		z = ramwas2collectqc( param );
 		toc = proc.time();
 		show(toc-tic);
@@ -1756,8 +1771,8 @@ if(FALSE) {
 		# 1 thread: 1767.03  477.41 4122.09
 		# 2 threads:   1.00    0.99 4067.15 
 	}
-}
-if(FALSE) {
+} # NESDA
+if(FALSE) { # RC2
 	library(ramwas);
 	param = list(
 		dirbam = "D:/RW/RC2/bams/",
@@ -1768,8 +1783,8 @@ if(FALSE) {
 		scoretag = "AS",
 		minscore = 100,
 		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp.rds",
+		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize = 200,
 		minfragmentsize = 50,
@@ -1778,6 +1793,21 @@ if(FALSE) {
 		buffersize = 2e9
 	);
 	
+	{
+		tic = proc.time();
+		rbam = pipelineProcessBam(bamname = '01A01SM1429N', param );
+		readRDS('D:/RW/RC2/rds_qc/01A01SM1429N.qc.rds')
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas1scanBams( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
 	{
 		tic = proc.time();
 		z = ramwas2collectqc( param );
@@ -1805,7 +1835,7 @@ if(FALSE) {
 		toc = proc.time();
 		show(toc-tic);
 	}
-}
+} # RC2
 ramwas3coverageMatrix = function( param ){
 	# library(parallel);
 	# library(ramwas);
