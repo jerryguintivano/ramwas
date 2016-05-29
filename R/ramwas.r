@@ -445,6 +445,8 @@ qcmean.qcFrwrev = function(x){ x[1]/(x[1]+x[2]) }
 qcmean.qcNonCpGreads = function(x){ x[1]/(x[1]+x[2]) }
 qcmean.qcCoverageByDensity = function(x){ (which.max(x)-1)/100 }
 qcmean.qcChrX = function(x){ x[1]/x[2] }
+qcmean.qcChrY = function(x){ x[1]/x[2] }
+qcmean.NULL = function(x){ NA }
 
 ### Make text line for the QC set
 .qcTextHeader = {paste(sep = "\t",
@@ -463,7 +465,8 @@ qcmean.qcChrX = function(x){ x[1]/x[2] }
 	"Avg non-CpG coverage",
 	"Avg CpG coverage",
 	"Non-Cpg/CpG coverage ratio",
-	"Reads on chrX (%)",
+	"ChrX reads (%)",
+	"ChrY reads (%)",
 	"Peak SQRT")};
 .qccols = length(strsplit(.qcTextHeader,"\t",fixed = TRUE)[[1]])
 .qcTextLine = function(qc, name) {
@@ -498,7 +501,8 @@ qcmean.qcChrX = function(x){ x[1]/x[2] }
 		twodig( avg.noncpg.coverage ), # Avg non-CpG coverage
 		twodig( avg.cpg.coverage ), # Avg CpG coverage
 		perc( avg.noncpg.coverage / avg.cpg.coverage), # Non-Cpg/CpG coverage ratio
-		perc(qcmean( chrX.count )), # Reads on chrX (%)
+		perc(qcmean( chrX.count )), # ChrX reads (%)
+		perc(qcmean( qc$chrY.count )), # ChrY reads (%)
 		twodig(qcmean( avg.coverage.by.density )) # Peak SQRT
 	));
 	# cat(rez,"\n");
@@ -1049,10 +1053,15 @@ if(FALSE) {
 }
 
 
-bam.chrX.qc = function(rbam) {
-	strandfun = function(st){c(length(st$chrX), sum(sapply(st,length)))};
-	rbam$qc$chrX.count =  strandfun(rbam$startsfwd) + strandfun(rbam$startsfwd);
+bam.chrXY.qc = function(rbam) {
+	strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
+	rbam$qc$chrX.count =  strandfunX(rbam$startsfwd) + strandfunX(rbam$startsfwd);
 	class(rbam$qc$chrX.count) = "qcChrX"
+	
+	strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
+	rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) + strandfunY(rbam$startsfwd);
+	class(rbam$qc$chrY.count) = "qcChrY"
+	
 	return(rbam);
 }
 
@@ -1111,7 +1120,7 @@ pipelineProcessBam = function(bamname, param) {
 	} else {
 		rbam5 = rbam2;
 	}
-	rbam5 = bam.chrX.qc(rbam5); 
+	rbam5 = bam.chrXY.qc(rbam5); 
 	# .qc qcmean(rbam5$qc$chrX.count)  rbam5$qc$chrX.count[1]/rbam5$qc$chrX.count[2]
 	# cat(.qcTextLine(rbam5$qc, 'bam')	)
 	
