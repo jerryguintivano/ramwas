@@ -1106,11 +1106,15 @@ pipelineProcessBam = function(bamname, param) {
 		rbam5 = bam.count.nonCpG.reads(rbam = rbam4, cpgset = cpgset, distance = param$maxfragmentsize);
 		
 		### QC plots
-		pipelineSaveQCplots(param, rbam4, bamname);
+		pipelineSaveQCplots(param, rbam5, bamname);
 		
 	} else {
 		rbam5 = rbam2;
 	}
+	rbam5 = bam.chrX.qc(rbam5); 
+	# .qc qcmean(rbam5$qc$chrX.count)  rbam5$qc$chrX.count[1]/rbam5$qc$chrX.count[2]
+	# cat(.qcTextLine(rbam5$qc, 'bam')	)
+	
 	if(savebam)
 		saveRDS( object = rbam5, file = rdsbmfile, compress = "xz");
 	rbam6 = rbam5;
