@@ -1305,7 +1305,6 @@ ramwas2collectqc = function( param ){
 	# colnum = 3
 	library(ramwas);
 	library(filematrix)
-	# library(RSQLite);
 	coverage = pipelineCoverage1Sample(colnum, param);
 	coverage = unlist(coverage, use.names = FALSE);
 
@@ -1316,7 +1315,7 @@ ramwas2collectqc = function( param ){
 		fm = fm.open(fmname, lockfile = param$lockfile);
 		ntowrite = nrow(fm);
 		fm$writeCols(colnum, coverage[start:(start+ntowrite-1)]);
-		fm$close();
+		close(fm);
 		start = start + ntowrite;
 	}
 	
@@ -1325,7 +1324,7 @@ ramwas2collectqc = function( param ){
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dirlog,'/000_log_raw_coverage_calc.txt'), colnum, '\n', append = TRUE);
 	});
-	fm$close();
+	close(fm);
 	
 	return("OK");
 }
@@ -1339,8 +1338,10 @@ ramwas2collectqc = function( param ){
 	mat = fmraw[];
 	# mat = as.matrix(fmraw);
 
-	fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart), nrow = ncol(mat), ncol = 0, size = param$doublesize, lockfile = param$lockfile2);
-	fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart), nrow = 1, ncol = 0, type = 'integer', lockfile = param$lockfile2);
+	fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart), 
+							 nrow = ncol(mat), ncol = 0, size = param$doublesize, lockfile = param$lockfile2);
+	fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart), 
+							 nrow = 1, ncol = 0, type = 'integer', lockfile = param$lockfile2);
 	
 	samplesums = rep(0, ncol(mat));
 	
@@ -1386,11 +1387,11 @@ ramwas2collectqc = function( param ){
 	
 	fmss = fm.open( paste0(param$dirtemp,"/0_sample_sums"), lockfile = param$lockfile2);
 	fmss[,fmpart] = samplesums;
-	fmss$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,'/000_log_transpose_filter.txt'), fmpart, '\n', append = TRUE);
-	});
 	close(fmss);
 	
+	fmraw$filelock$lockedrun( {
+		cat(file = paste0(param$dirlog,'/000_log_transpose_and_filter.txt'), fmpart, '\n', append = TRUE);
+	});
 	closeAndDeleteFiles(fmraw);
 	return("OK.");
 }
@@ -1492,7 +1493,7 @@ ramwas3NormalizedCoverage = function( param ) {
 		fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"), nrow = nsamples, ncol = nslices);
 		close(fm);
 		
-		cat(file = paste0(param$dirlog,'/000_log_transpose_filter.txt'), 'Log, transpose and filter:', date(), '\n', append = FALSE);
+		cat(file = paste0(param$dirlog,'/000_log_transpose_and_filter.txt'), 'Log, transpose and filter:', date(), '\n', append = FALSE);
 		if( param$cputhreads > 1 ) {
 			param$lockfile2 = tempfile();
 			library(parallel);
@@ -1597,26 +1598,38 @@ ramwas3NormalizedCoverage = function( param ) {
 			fm = fm.open( paste0(param$dirtemp,"/TrCoverage_part",part) );
 			closeAndDeleteFiles(fm);
 		}
+		fm = fm.open( paste0(param$dirtemp,"/0_sample_sums") );
+		closeAndDeleteFiles(fm);
+		
 	}
 	
+}
+
+
+if(FALSE){
+	param = parameterPreprocess(param);
+	cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+	clusterEvalQ(cl, library(filematrix));
+	z = clusterApplyLB(cl, 1, ramwas:::.ramwas3transposeFilterJob, param = param);
+	stopCluster(cl);
 }
 
 if(FALSE) { # Cell Type
 	library(ramwas);
 	param = list(
-		dirbam = "D:/Cell_type/bams/",
-		dirproject = "D:/Cell_type/",
+		dirbam = "D:/RW/CELL/bams/",
+		dirproject = "D:/RW/CELL/",
 		filebamlist = "000_list_of_files.txt",
 		dirtemp = NULL,
 		scoretag = "AS",
 		minscore = 100,
 		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
+		filecpgset =    "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
+		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		filebam2sample = "bam2sample.txt",
+		filebam2sample = "bam2sample2.txt",
 		recalculate.QCs = TRUE,
 		buffersize = 1e9
 	);
@@ -1624,23 +1637,34 @@ if(FALSE) { # Cell Type
 		param$dirtemp = "E:/RaMWAS_temp_CELL/"
 	} else {
 		param$dirtemp = "C:/AllWorkFiles/temp/"
-	}	
-	# ramwas2collectqc(param);
-	{
-		tic = proc.time();
-		z = ramwas3NormalizedCoverage1( param );
-		toc = proc.time();
-		show(toc-tic);
-		### 2 GB - 0.57    0.84  209.05
 	}
 	{
 		tic = proc.time();
-		samplesums = ramwas3NormalizedCoverage2( param );
+		rbam = pipelineProcessBam(bamname = '150114_WBCS014_CD20_150', param );
 		toc = proc.time();
 		show(toc-tic);
-		###  64 MB - 88.53   29.34  131.19 
-		### 128 MB - 93.61   28.40  142.42
-		### 1   GB - 96.57   32.23  155.36
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas1scanBams( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas2collectqc( param );
+		toc = proc.time();
+		show(toc-tic);
+		# HP: 61.37   18.86  184.10 
+	}
+	{
+		tic = proc.time();
+		z = ramwas2collectqc( param );
+		toc = proc.time();
+		show(toc-tic);
+		# DL: 33.42   10.06   80.37
 	}
 	{
 		param$cputhreads = 8;
@@ -1648,11 +1672,6 @@ if(FALSE) { # Cell Type
 		ramwas3NormalizedCoverage(param);
 		toc = proc.time();
 		show(toc-tic);
-		# 1 thread:  37.61   16.86   71.53
-		# 1 thread:  36.77   16.69   70.39
-		# 2 threads:  0.00    0.00   48.76
-		# 4 threads:  1.15    0.29   39.98 
-		# 8 threads:  0.03    0.00   40.83
 	}
 } # Cell Type
 if(FALSE) { # NESDA
@@ -1665,7 +1684,7 @@ if(FALSE) { # NESDA
 		scoretag = "AS",
 		minscore = 120,
 		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
+		filecpgset =    "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
 		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize = 200,
@@ -1805,160 +1824,7 @@ if(FALSE) { # RC2
 		show(toc-tic);
 	}
 } # RC2
-ramwas3coverageMatrix = function( param ){
-	# library(parallel);
-	# library(ramwas);
-	param = parameterPreprocess(param);
-	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
 
-	library(filematrix)
-	fmfilename = paste0(param$dirfilter,"/", param$dircoverageraw, "/MAT_coverage");
-	dir.create( dirname(fmfilename), showWarnings = FALSE, recursive = TRUE );
-		
-	cpgset = cachedRDSload(param$filecpgset);
-	ncpgs = sum(sapply(cpgset, length));
-	
-	fm = fm.create(fmfilename, nrow = ncpgs, ncol = length(param$bam2sample), size = param$doublesize)
-	colnames(fm) = names(param$bam2sample);
-	fm$close();
-	
-	param$lockfile = tempfile();
-	
-	if( param$cputhreads > 1) {
-		cl <- makeCluster(param$cputhreads)
-		z = clusterApplyLB(cl, seq_along(param$bam2sample), pipelineCoverage1sample, param = param)
-		stopCluster(cl)
-	} else {
-		z = character(length(param$bam2sample));
-		names(z) = names(param$bam2sample);
-		for(i in seq_along(param$bam2sample)) { # i=1
-			z[i] = pipelineCoverage1sample(col = i, param = param);
-			cat(i,z[i],"\n");
-		}
-	}
-	file.remove(param$lockfile);
-}
-ramwas4transpose = function( param ){
-	param = parameterPreprocess(param);
-	
-	cpgset = cachedRDSload(param$filecpgset);
-	ncpgs = sum(sapply(cpgset, length));
-	
-	cpgsloc1e9 = cpgset;
-	for( i in seq_along(cpgsloc1e9) ) {
-		cpgsloc1e9[[i]] = cpgset[[i]] + i*1e9;
-	}
-	cpgsloc1e9 = unlist(cpgsloc1e9, recursive = FALSE, use.names = FALSE);
-
-	
-	library(filematrix)
-	fmfilename = paste0(param$dirfilter,"/", param$dircoverageraw, "/MAT_coverage");
-	fmmat = fm.open(fmfilename, readonly = TRUE);
-
-	# Get sample ids 
-	sampleids = match(param$covariates[[1]], colnames(fmmat), nomatch = 0L)
-	if(any(sampleids==0))
-		stop(paste0("Unrecognized sample(s): ",paste0(param$covariates[[1]][sampleids==0], collapse=" ")))
-	
-	# Output matrices
-	tfilename = paste0(param$dirfilter,"/", param$dircoveragenorm, "/MAT_t_coverage");
-	dir.create(dirname(tfilename), showWarnings = FALSE, recursive = TRUE);
-	
-	outmat = fm.create(tfilename, nrow=length(sampleids), ncol=0, size = param$doublesize)
-	rownames(outmat) = param$covariates[[1]];
-	
-	tcpgfilename = paste0(param$dirfilter,"/", param$dircoveragenorm, "/MAT_t_cpg_locations");
-	outcpg = fm.create(tcpgfilename, nrow=1, ncol=0)
-	
-	# Main loop, transpose, not scale yet
-	
-	samplesums = double(length(sampleids));
-	
-	step1 = ceiling(param$tbuffersize / 8 / length(sampleids));
-	mm = nrow(fmmat);
-	nsteps = ceiling(mm/step1);
-	for( part in 1:nsteps ) { # part = 3
-		cat( part, "of", nsteps, "\n");
-		fr = (part-1)*step1 + 1;
-		to = min(part*step1, mm);
-		
-		slice = fmmat[fr:to, sampleids];
-
-		# 		slice[is.na(slice)] = 0;
-		# 		slice = slice / rep(scale, each=nrow(slice))
-		
-		cpgmean = rowMeans(slice);
-		cpgnonz = rowMeans(slice>0);
-		keep = (cpgmean>=param$minavgcpgcoverage) & (cpgnonz >= param$minnonzerosamples);
-		if(length(param$chrkeep)>0)
-			keep = keep & ( (cpgsloc1e9[fr:to] %/% 1e9) %in% param$chrkeep );
-		if( !any(keep) )
-			next;
-		
-		keep = which(keep);
-		
-		if( !all(keep) ) {
-			slice = slice[keep,,drop=false];
-		}
-		slice = t(slice);
-		slloc = cpgsloc1e9[fr:to][keep];
-		
-		outmat$appendColumns(slice);
-		outcpg$appendColumns(t(slloc))
-		
-		samplesums = samplesums + rowSums(slice);
-		rm(slice, slloc, keep, cpgmean, cpgnonz);
-		gc();
-	}
-	rm(part, step1, mm, nsteps, fr, to);
-
-	
-	
-	samplemeans = samplesums / ncol(outmat);
-	scale = samplemeans / mean(samplemeans);
-	
-	
-	
-	# Main loop 2, scale and PCA
-	
-	cormat = 0;
-	
-	step1 = ceiling(1e9 / 8 / length(sampleids));
-	mm = ncol(outmat);
-	nsteps = ceiling(mm/step1);
-	for( part in 1:nsteps ) { # part = 1
-		cat( part, "of", nsteps, "\n");
-		fr = (part-1)*step1 + 1;
-		to = min(part*step1, mm);
-		
-		slice = outmat[,fr:to];
-		slice = slice / scale;
-		outmat[,fr:to] = slice
-		
-		slice = t(slice);
-		
-		slice = slice - rowMeans(slice);
-		slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-3);
-		cormat = cormat + crossprod(slice);
-		
-		stopifnot(!any(is.na(slice)))
-		rm(slice);
-	}
-	rm(part, step1, mm, nsteps, fr, to);
-	
-	# 	cor(rowMeans(slice), scale)
-	
-	fmmat$close()
-	outmat$close()
-	outcpg$close()
-	
-	e = eigen(cormat, symmetric=TRUE);
-	
-	
-}
-if(FALSE) { # test code
-	### See cellType.r
-}
 
 .combine.bams.qc = function( bamlist ) {
 	# bamlist = curbams
