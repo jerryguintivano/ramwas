@@ -1086,6 +1086,8 @@ pipelineProcessBam = function(bamname, param) {
 	savebam = TRUE;
 	if( file.exists( rdsbmfile ) ) {
 		if( param$recalculate.QCs ) {
+			
+			{invisible(readBin( rdsbmfile, 'raw', file.size(rdsbmfile)));}
 			rbam = readRDS(rdsbmfile); 
 			savebam = FALSE;
 		} else {
