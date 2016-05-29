@@ -444,6 +444,7 @@ qcmean.qcIsoDist = function(x) { .histmean(x) }
 qcmean.qcFrwrev = function(x){ x[1]/(x[1]+x[2]) }
 qcmean.qcNonCpGreads = function(x){ x[1]/(x[1]+x[2]) }
 qcmean.qcCoverageByDensity = function(x){ (which.max(x)-1)/100 }
+qcmean.qcChrX = function(x){ x[1]/x[2] }
 
 ### Make text line for the QC set
 .qcTextHeader = {paste(sep = "\t",
@@ -462,6 +463,7 @@ qcmean.qcCoverageByDensity = function(x){ (which.max(x)-1)/100 }
 	"Avg non-CpG coverage",
 	"Avg CpG coverage",
 	"Non-Cpg/CpG coverage ratio",
+	"Reads on chrX (%)",
 	"Peak SQRT")};
 .qccols = length(strsplit(.qcTextHeader,"\t",fixed = TRUE)[[1]])
 .qcTextLine = function(qc, name) {
@@ -496,6 +498,7 @@ qcmean.qcCoverageByDensity = function(x){ (which.max(x)-1)/100 }
 		twodig( avg.noncpg.coverage ), # Avg non-CpG coverage
 		twodig( avg.cpg.coverage ), # Avg CpG coverage
 		perc( avg.noncpg.coverage / avg.cpg.coverage), # Non-Cpg/CpG coverage ratio
+		perc(qcmean( chrX.count )), # Reads on chrX (%)
 		twodig(qcmean( avg.coverage.by.density )) # Peak SQRT
 	));
 	# cat(rez,"\n");
@@ -1045,6 +1048,13 @@ if(FALSE) {
 	pipelineSaveQCplots(param, rbam, bamname="150114_WBCS014_CD20_150");
 }
 
+
+bam.chrX.qc = function(rbam) {
+	strandfun = function(st){c(length(st$chrX), sum(sapply(st,length)))};
+	rbam$qc$chrX.count =  strandfun(rbam$startsfwd) + strandfun(rbam$startsfwd);
+	class(rbam$qc$chrX.count) = "qcChrX"
+	return(rbam);
+}
 
 ### Pipeline parts
 pipelineProcessBam = function(bamname, param) {
