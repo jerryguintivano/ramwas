@@ -1127,7 +1127,7 @@ pipelineProcessBam = function(bamname, param) {
 }
 
 ### Fragment size distribution estimation
-pipelineEstimateFragmentSizeDistribution = function(param) {
+pipelineEstimateFragmentSizeDistribution = function(param){
 	
 	param = parameterPreprocess(param);
 	
@@ -1653,7 +1653,7 @@ if(FALSE) { # Cell Type
 		scoretag = "AS",
 		minscore = 100,
 		cputhreads = 8,
-		filecpgset =    "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
+		filecpgset    = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
 		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize=200,
@@ -1672,14 +1672,18 @@ if(FALSE) { # Cell Type
 		rbam = pipelineProcessBam(bamname = '150114_WBCS014_CD20_150', param );
 		toc = proc.time();
 		show(toc-tic);
-		# HP: 61.37   18.86  184.10 
+		qc = readRDS('D:/RW/CELL/rds_qc/150114_WBCS014_CD20_150.qc.rds')
+		cat(ramwas:::.qcTextLine(qc$qc, '150114_WBCS014_CD20_150'))
+		# HP: 392.95   14.43  415.42
+		# HP: 374.86   14.03  391.68 
 	}
 	{
+		param$cputhreads = 4;
 		tic = proc.time();
 		z = ramwas1scanBams( param );
 		toc = proc.time();
 		show(toc-tic);
-		# HP: 61.37   18.86  184.10 
+		# HP 4thr: 
 	}
 	{
 		tic = proc.time();
