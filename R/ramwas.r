@@ -93,6 +93,7 @@ parameterPreprocess = function(param) {
 	if( is.null(param$dirrbam) ) param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
 	if( is.null(param$dirrqc) ) param$dirrqc = paste0( param$dirfilter, "/rds_qc");
 	if( is.null(param$dirqc) ) param$dirqc = paste0( param$dirfilter, "/qc");
+	if( is.null(param$dirlog) ) param$dirlog = paste0( param$dirfilter, "/log");
 	if( is.null(param$dirtemp) ) param$dirtemp  = "coverage_raw_temp";
 	param$dirtemp  = makefullpath(param$dirproject, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
