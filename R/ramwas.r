@@ -1336,7 +1336,8 @@ ramwas2collectqc = function( param ){
 	if( !file.exists(paste0(filename,'.bmat')) || !file.exists(paste0(filename,'.desc.txt')) )
 		return(paste0('Raw coverage slice filematrix not found: ', filename));
 	fmraw = fm.open(filename, lockfile = param$lockfile2);
-	mat = as.matrix(fmraw);
+	mat = fmraw[];
+	# mat = as.matrix(fmraw);
 
 	fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart), nrow = ncol(mat), ncol = 0, size = param$doublesize, lockfile = param$lockfile2);
 	fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart), nrow = 1, ncol = 0, type = 'integer', lockfile = param$lockfile2);
