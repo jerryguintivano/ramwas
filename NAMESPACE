@@ -37,6 +37,7 @@ S3method(qcmean, qcFrwrev)
 S3method(qcmean, qcNonCpGreads)
 S3method(qcmean, qcCoverageByDensity)
 S3method(qcmean, qcChrX)
-
+S3method(qcmean, qcChrY)
+S3method(qcmean, NULL)
 
 
