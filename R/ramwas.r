@@ -1242,7 +1242,7 @@ ramwas2collectqc = function( param ){
 	
 	bams = unique(basename(bams));
 	
-	cat('Load BAM QC info','\n');
+	message('Load BAM QC info','\n');
 	rbamlist = vector("list", length(bams));
 	names(rbamlist) = bams;
 	for( bamname in bams) {
@@ -1259,10 +1259,15 @@ ramwas2collectqc = function( param ){
 		bigqc = vector("list", length(bamset));
 		names(bigqc) = names(bamset);
 		text = character(length(bamset));
-		for( ibam in seq_along(bamset) ) { # ibam=1
+		for( ibam in seq_along(bamset) ) { # ibam=7
 			curbams = rbamlist[bamset[[ibam]]];
-			bigqc[[ibam]] = .combine.bams.qc(curbams)$qc;
-			text[ibam] = .qcTextLine( bigqc[[ibam]], names(bamset)[ibam] );
+			qc = .combine.bams.qc(curbams)$qc;
+			if( length(qc) > 0 ) {
+				bigqc[[ibam]] = qc;
+			} else {
+				qc = NULL;
+			}
+			text[ibam] = .qcTextLine( qc, names(bamset)[ibam] );
 		}
 		writeLines( con = paste0(dirloc, "/Summary_QC.txt"), text = c(.qcTextHeader, text));
 		
@@ -1270,7 +1275,10 @@ ramwas2collectqc = function( param ){
 			cat('Saving plots',plotname,'\n');
 			pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
 			for( ibam in seq_along(bamset) ) {
-				plot(bigqc[[ibam]][[qcname]], samplename = names(bamset)[ibam]);
+				plotinfo = bigqc[[ibam]][[qcname]];
+				if( !is.null(bigqc[[ibam]][[qcname]]))
+					plot(plotinfo, samplename = names(bamset)[ibam]);
+				rm(plotinfo);
 			}
 			dev.off();
 		}
