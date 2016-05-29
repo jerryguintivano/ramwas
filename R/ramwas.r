@@ -1207,23 +1207,30 @@ pipelineCoverage1Sample = function(colnum, param){
 }
 
 ### RaMWAS pipeline
+.ramwas1scanBam = function(bamname, param){
+	cat(file = paste0(param$dirlog,'/011_log_scanning_bams.txt'), bamname, '\n', append = TRUE);
+	pipelineProcessBam(bamname = bamname, param = param);
+}
 ramwas1scanBams = function( param ){
 	param = parameterPreprocess(param);
 	stopifnot( !is.null(param$bamnames));
 	
 	if( param$cputhreads > 1) {
-		cl <- makeCluster(param$cputhreads)
-		z = clusterApplyLB(cl, param$bamnames, pipelineProcessBam, param = param)
-		stopCluster(cl)
+		dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
+		cat(file = paste0(param$dirlog,'/011_log_scanning_bams.txt'), 'Log, scanning bams:', date(), '\n', append = FALSE);
+		cl <- makeCluster(param$cputhreads);
+		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBam, param = param);
+		stopCluster(cl);
 	} else {
 		z = character(length(param$bamnames));
 		names(z) = param$bamnames;
 		for(i in seq_along(param$bamnames)) { # i=1
-			z[i] = pipelineProcessBam(bamname = param$bamnames[i], param = param);
+			z[i] = .ramwas1scanBam(bamname = param$bamnames[i], param = param);
 		}
 	}
 	return(z);
 }
+
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	
