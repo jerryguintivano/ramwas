@@ -1278,6 +1278,25 @@ ramwas1scanBams = function( param ){
 	return(z);
 }
 
+.combine.bams.qc = function( bamlist ){
+	# bamlist = curbams
+	if(length(bamlist)==1)
+		return(bamlist[[1]]);
+	
+	### Deal with QCs
+	qclist = lapply(bamlist, `[[`, "qc");
+	
+	qcnames = lapply(qclist, names);
+	qcnames = unique(unlist(qcnames, use.names = FALSE))
+	
+	bigqc = vector("list", length(qcnames));
+	names(bigqc) = qcnames;
+	
+	for( nm in qcnames) { # nm = qcnames[1]
+		bigqc[[nm]] = Reduce(`%add%`, lapply(qclist, `[[`, nm));
+	}
+	return(list(qc = bigqc));
+}
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	
@@ -1856,25 +1875,6 @@ if(FALSE) { # RC2
 } # RC2
 
 
-.combine.bams.qc = function( bamlist ) {
-	# bamlist = curbams
-	if(length(bamlist)==1)
-		return(bamlist[[1]]);
-	
-	### Deal with QCs
-	qclist = lapply(bamlist, `[[`, "qc");
-	
-	qcnames = lapply(qclist, names);
-	qcnames = unique(unlist(qcnames, use.names = FALSE))
-	
-	bigqc = vector("list", length(qcnames));
-	names(bigqc) = qcnames;
-	
-	for( nm in qcnames) { # nm = qcnames[1]
-		bigqc[[nm]] = Reduce(`%add%`, lapply(qclist, `[[`, nm));
-	}
-	return(list(qc = bigqc));
-}
 
 
 if(FALSE) { # test code
