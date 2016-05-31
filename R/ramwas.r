@@ -11,7 +11,7 @@
 	y[is.na(y)] <- 0
 	return(x + y)
 }
-.isAbsolutePath = function(pathname) {
+.isAbsolutePath = function( pathname ){
 	if( grepl("^~/", pathname) ) 
 		return(TRUE)
 	if( grepl("^.:(/|\\\\)", pathname) ) 
@@ -29,7 +29,7 @@ makefullpath = function(path, filename) {
 		return( paste0(path, "/", filename) );
 	}
 }
-if(FALSE) {
+if(FALSE){
 	.isAbsolutePath( "C:/123" );  # TRUE
 	.isAbsolutePath( "~123" );    # FALSE
 	.isAbsolutePath( "~/123" );   # TRUE
@@ -40,17 +40,17 @@ if(FALSE) {
 }
 
 ### Scan a file for parameters
-parametersFromFile = function(.parameterfile){
+parametersFromFile = function( .parameterfile ){
 	source(.parameterfile, local = TRUE);
 	.nms = ls();
 	return(mget(.nms));
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	param = parametersFromFile(.parameterfile = "D:/RW/NESDA/ramwas/param_file.txt");
 	param
 }
 
-parseBam2sample = function(lines) {
+parseBam2sample = function( lines ){
 	# remove trailing commas
 	lines = gsub(pattern = ",$", replacement = "", lines);
 	
@@ -68,7 +68,7 @@ parseBam2sample = function(lines) {
 }
 
 ### Fill in gaps in the parameter list
-parameterPreprocess = function(param) {
+parameterPreprocess = function( param ){
 	### Get from a file if param is not a list
 	if(is.character(param)) {
 		param = parametersFromFile(param);
@@ -93,7 +93,7 @@ parameterPreprocess = function(param) {
 	if( is.null(param$dirrbam) ) param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
 	if( is.null(param$dirrqc) ) param$dirrqc = paste0( param$dirfilter, "/rds_qc");
 	if( is.null(param$dirqc) ) param$dirqc = paste0( param$dirfilter, "/qc");
-	if( is.null(param$dirlog) ) param$dirlog = paste0( param$dirfilter, "/log");
+	if( is.null(param$dirlog) ) param$dirlog = paste0( param$dirfilter, "/logs");
 	if( is.null(param$dirtemp) ) param$dirtemp  = "coverage_raw_temp";
 	param$dirtemp  = makefullpath(param$dirproject, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
@@ -342,7 +342,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 	rbam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
 	return( rbam );
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	### Rsamtools to read BAMs
 	library(Rsamtools)
 	### GenomicAlignments to process CIGAR strings
@@ -374,7 +374,7 @@ if(FALSE) { # test code
 	qcmean(rbam$qc$hist.length.matched)
 }
 
-.my.hist.plot = function(values, main2, firstvalue=0, xstep = 10, ...) {
+.my.hist.plot = function(values, main2, firstvalue=0, xstep = 10, ...){
 	maxval = max(values);
 	thresholds = c(-Inf, 1e3, 1e6, 1e9)*1.5;
 	bin = findInterval(maxval, thresholds)
@@ -395,10 +395,10 @@ if(FALSE) { # test code
 	at[1] = firstvalue;
 	axis(1,at = at+0.5-firstvalue, labels = at)
 }
-plot.qcHistScore = function(x, samplename="", xstep = 25, ...) {
+plot.qcHistScore = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...) {
+plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
 plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
@@ -407,16 +407,16 @@ plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
 plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...) {
+plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
-plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...) {
+plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n(including excluded reads)\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
-plot.qcIsoDist = function(x, samplename="", xstep = 25, ...) {
+plot.qcIsoDist = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcCoverageByDensity = function(y, samplename="", ...) {
+plot.qcCoverageByDensity = function(y, samplename="", ...){
 	# y = rbam$qc$avg.coverage.by.density
 	x = (seq_along(y)-1)/100;
 	param = list(...);
@@ -430,9 +430,10 @@ plot.qcCoverageByDensity = function(y, samplename="", ...) {
 	axis(1, at = seq(0,tail(x,1)+2,by = 1), labels = seq(0,tail(x,1)+2,by=1)^2)
 	axis(2);
 }
-.histmean = function(x) {
+.histmean = function(x){
 	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
 }
+
 qcmean <- function(x) UseMethod("qcmean", x)
 qcmean.qcHistScore = function(x) { .histmean(x)-1 }
 qcmean.qcHistScoreBF = function(x) { .histmean(x)-1 }
@@ -469,7 +470,7 @@ qcmean.NULL = function(x){ NA }
 	"ChrY reads (%)",
 	"Peak SQRT")};
 .qccols = length(strsplit(.qcTextHeader,"\t",fixed = TRUE)[[1]])
-.qcTextLine = function(qc, name) {
+.qcTextLine = function(qc, name){
 	if( is.null(qc) )
 		return(paste0(name,paste0(rep("\tNA",.qccols-1), collapse = "")));
 	afracb = function(a,b) { sprintf("%s\t%.1f%%",s(a),100*a/b) };
@@ -508,7 +509,7 @@ qcmean.NULL = function(x){ NA }
 	# message(rez);
 	return(rez);
 }
-.qcTextLineR = function(qc, name) {
+.qcTextLineR = function(qc, name){
 	if( is.null(qc) )
 		return(paste0(name,paste0(rep("\tNA",.qccols-1), collapse = "")));
 	afracb = function(a,b) { paste0(a, "\t", a/b) };
@@ -546,7 +547,7 @@ qcmean.NULL = function(x){ NA }
 	);
 	return(rez);
 }
-if(FALSE) {
+if(FALSE){
 	name = "My_bam";
 	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
 	rbam$qc$avg.cpg.coverage
@@ -585,7 +586,7 @@ remove.repeats.over.maxrep = function(vec, maxrep){
 	}
 	return(vec);
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	remove.repeats.over.maxrep(rep(1:10,1:10), 5L)
 }
 bam.removeRepeats = function(rbam, maxrep){
@@ -737,7 +738,7 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 	class(rbam$qc$hist.isolated.dist1) = "qcIsoDist";
 	return(rbam);
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	rbam = list( startsfwd = list(chr1=100), startsrev = list(chr1 = 103) );
 	isocpgset = list(chr1 = 101);
 	distance = 100;
@@ -747,7 +748,7 @@ if(FALSE) { # test code
 }
 
 ### Get average coverage vs. CpG density
-bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, maxfragmentsize) {
+bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, maxfragmentsize){
 	
 	fragdistr = c(rep(1, minfragmentsize-1),seq(1,0,length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
 	fragdistr = fragdistr[fragdistr>0];
@@ -808,7 +809,7 @@ bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, ma
 	
 	return(rbam);
 }
-if(FALSE) {
+if(FALSE){
 	rbam = readRDS("D:/RW/RC2/rds_rbam/01A01SM1429N.rbam.rds");
 	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp.rds");
 	noncpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp_nonCpG.rds");
@@ -838,7 +839,7 @@ if(FALSE) {
 }
 
 ### Fraction of reads on ChrX/Y
-bam.chrXY.qc = function(rbam) {
+bam.chrXY.qc = function(rbam){
 	strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
 	rbam$qc$chrX.count =  strandfunX(rbam$startsfwd) + strandfunX(rbam$startsfwd);
 	class(rbam$qc$chrX.count) = "qcChrX"
@@ -910,7 +911,7 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
 	return(rezfit);
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	x = seq(0.01,0.99,0.01);
 	y = sqrt(abs(x-0.5))*sign(x-0.5)
 	plot(x,y)
@@ -955,7 +956,7 @@ cachedRDSload = function(rdsfilename){
 		return(data);
 	}
 }
-if(FALSE) { # test code
+if(FALSE){ # test code
 	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22.rds";
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
@@ -963,7 +964,7 @@ if(FALSE) { # test code
 }
 
 ### Coverage calculation
-.calc.coverage.chr = function(startfrw, startrev, cpgs, fragdistr) {
+.calc.coverage.chr = function(startfrw, startrev, cpgs, fragdistr){
 	maxfragmentsize = length(fragdistr);
 	# if(is.null(cover)) {
 		cover = double(length(cpgs));
@@ -1000,7 +1001,7 @@ calc.coverage = function(rbam, cpgset, fragdistr) {
 	}
 	return(coveragelist);
 }
-if(FALSE) {
+if(FALSE){
 	# testing calc.coverage
 	cpgset = list(chr1 = 1:100);
 	rbam = list(startsfwd = list(chr1  = c(10L, 20L)), startsrev = list(chr1  = c(80L, 90L)));
@@ -1041,7 +1042,7 @@ if(FALSE) {
 	range(covlist1$chr2 - covlist2$chr2)
 }
 
-pipelineSaveQCplots = function(param, rbam, bamname) {
+pipelineSaveQCplots = function(param, rbam, bamname){
 	filename = paste0(param$dirqc,"/score/hs_",bamname,".pdf");
 	dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 	pdf(filename);
@@ -1083,7 +1084,7 @@ pipelineSaveQCplots = function(param, rbam, bamname) {
 		rm(filename);
 	}	
 }
-if(FALSE) {
+if(FALSE){
 	param = list(
 		dirbam = "D:/Cell_type/bams/",
 		dirproject = "D:/Cell_type/",
@@ -1104,7 +1105,7 @@ if(FALSE) {
 }
 
 ### Pipeline parts
-pipelineProcessBam = function(bamname, param) {
+pipelineProcessBam = function(bamname, param){
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
 	
 	param = parameterPreprocess(param);
@@ -1516,7 +1517,7 @@ ramwas2collectqc = function( param ){
 	gc();
 	return("OK.");
 }
-ramwas3NormalizedCoverage = function( param ) {
+ramwas3NormalizedCoverage = function( param ){
 	# Prepare
 	param = parameterPreprocess(param);
 	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
@@ -1700,15 +1701,15 @@ ramwas3NormalizedCoverage = function( param ) {
 	}
 	
 }
-if(FALSE){
+if(FALSE){ # cluster
 	param = parameterPreprocess(param);
 	cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 	clusterEvalQ(cl, library(filematrix));
 	z = clusterApplyLB(cl, 1, ramwas:::.ramwas3transposeFilterJob, param = param);
 	stopCluster(cl);
-}
+}  # cluster
 
-if(FALSE) { # Cell Type
+if(FALSE){ # Cell Type
 	library(ramwas);
 	param = list(
 		dirbam = "D:/RW/CELL/bams/",
@@ -1764,7 +1765,7 @@ if(FALSE) { # Cell Type
 		show(toc-tic);
 	}
 } # Cell Type
-if(FALSE) { # NESDA
+if(FALSE){ # NESDA
 	library(ramwas);
 	param = list(
 		dirbam = "D:/RW/NESDA/bams/",
@@ -1821,7 +1822,7 @@ if(FALSE) { # NESDA
 		# HP, 1e9, 8thr:     44.64    25.86 10772.28 
 	}
 } # NESDA
-if(FALSE) { # RC2
+if(FALSE){ # RC2
 	library(ramwas);
 	param = list(
 		dirbam = "D:/RW/RC2/bams/",
@@ -1872,43 +1873,10 @@ if(FALSE) { # RC2
 		ramwas3NormalizedCoverage(param);
 		toc = proc.time();
 		show(toc-tic);
+		# HP: 
 	}
 } # RC2
 
 
 
 
-if(FALSE) { # test code
-	### Test process single bam
-	library(ramwas)
-	param = list(
-		dirbam = "D:/Cell_type/bams/",
-		dirproject = "D:/Cell_type/",
-		filebamlist = "D:/Cell_type/000_list_of_files.txt",
-		scoretag = "AS",
-		minscore = 100,
-		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds",
-		filenoncpgset = NULL,
-		maxrepeats = 3,
-		maxfragmentsize=200,
-		minfragmentsize=50,
-		filebam2sample = "bam2sample.txt",
-		recalculate.QCs = TRUE
-	);
-	
-	{
-		tic = proc.time();
-		pipelineProcessBam(bamname="150114_WBCS014_CD20_150.bam", param);
-		toc = proc.time();
-		show(toc-tic);
-	}
-	{
-		tic = proc.time();
-		ramwas1scanBams(param);
-		toc = proc.time();
-		show(toc-tic);
-	}
-	
-	
-}
