@@ -258,7 +258,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		}
 		
 		if(length(bb[[1]])==0) {
-			cat(sprintf("Recorded %.f of %.f reads",qc$reads.recorded,qc$reads.total),"\n");
+			message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
 			next;
 		}
 		
@@ -315,7 +315,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 			}
 			rm(offset, split.levels, splt);
 		} # startlistfwd, startlistrev	
-		cat(sprintf("Recorded %.f of %.f reads",qc$reads.recorded,qc$reads.total),"\n");
+		message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
 	}
 	close(bf);
 	rm(bf); # , oldtail
@@ -659,7 +659,7 @@ if(FALSE) { # test code
 	system.time( .count.nonCpG.reads.forward2(starts, cpglocations, distance=20) )
 	
 	rbam2 = bam.count.nonCpG.reads(rbam, toycpgset, 50)
-	cat( rbam2$qc$bam.count.nonCpG.reads[1], "of",rbam2$qc$bam.count.nonCpG.reads[2],"reads are not covering CpGs","\n" );
+	message(rbam2$qc$bam.count.nonCpG.reads[1], "of", rbam2$qc$bam.count.nonCpG.reads[2], "reads are not covering CpGs");
 }
 
 ### Get distribution of distances to isolated CpGs
@@ -895,10 +895,10 @@ cachedRDSload = function(rdsfilename){
 		return(NULL);
 	cachename = rdsfilename; #paste0(".ramwas.",rdsfilename);
 	if( exists(x = cachename, envir = .ramwasEnv) ) {
-		# cat("Using cache","\n");
+		# message("cachedRDSload: Using cache for: ", rdsfilename);
 		return(base::get(x = cachename, envir = .ramwasEnv));
 	} else {
-		# cat("Loading","\n");
+		# message("cachedRDSload: Loading to cache: ", rdsfilename);
 		data = readRDS(rdsfilename);
 		base::assign(x = cachename, value = data, envir = .ramwasEnv);
 		return(data);
@@ -1122,9 +1122,8 @@ pipelineProcessBam = function(bamname, param) {
 	} else {
 		rbam5 = rbam2;
 	}
-	rbam5 = bam.chrXY.qc(rbam5); 
 	# .qc qcmean(rbam5$qc$chrX.count)  rbam5$qc$chrX.count[1]/rbam5$qc$chrX.count[2]
-	# cat(.qcTextLine(rbam5$qc, 'bam')	)
+	# message(.qcTextLine(rbam5$qc, bamname))
 	
 	if(savebam)
 		saveRDS( object = rbam5, file = rdsbmfile, compress = "xz");
@@ -1257,7 +1256,7 @@ ramwas2collectqc = function( param ){
 	
 	bams = unique(basename(bams));
 	
-	message('Load BAM QC info','\n');
+	message("Load BAM QC info");
 	rbamlist = vector("list", length(bams));
 	names(rbamlist) = bams;
 	for( bamname in bams) {
@@ -1270,7 +1269,7 @@ ramwas2collectqc = function( param ){
 		dirloc = paste0(param$dirqc, "/", dirname);
 		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
 		
-		cat('Saving text summary','\n');
+		message("Saving text summary");
 		bigqc = vector("list", length(bamset));
 		names(bigqc) = names(bamset);
 		text = character(length(bamset));
@@ -1350,7 +1349,7 @@ ramwas2collectqc = function( param ){
 
 	start = 1;
 	for( part in seq_len(nslices) ) {
-		cat('colnum =',colnum,'part =', part,'\n');
+		message("colnum =",colnum,"part =", part);
 		fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
 		fm = fm.open(fmname, lockfile = param$lockfile);
 		ntowrite = nrow(fm);
@@ -1390,7 +1389,7 @@ ramwas2collectqc = function( param ){
 	mm = nrow(mat);
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
-		cat(fmpart, part, 'of', nsteps, '\n');
+		message(fmpart, part, "of", nsteps);
 		fr = (part-1)*step1 + 1;
 		to = min(part*step1, mm);
 		
