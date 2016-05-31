@@ -837,6 +837,19 @@ if(FALSE) {
 	pipelineSaveQCplots(param, rbam, bamname="bamname")
 }
 
+### Fraction of reads on ChrX/Y
+bam.chrXY.qc = function(rbam) {
+	strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
+	rbam$qc$chrX.count =  strandfunX(rbam$startsfwd) + strandfunX(rbam$startsfwd);
+	class(rbam$qc$chrX.count) = "qcChrX"
+	
+	strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
+	rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) + strandfunY(rbam$startsfwd);
+	class(rbam$qc$chrY.count) = "qcChrY"
+	
+	return(rbam);
+}
+
 ### Estimate fragment size distribution
 estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
@@ -1088,19 +1101,6 @@ if(FALSE) {
 	param = parameterPreprocess(param);
 	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
 	pipelineSaveQCplots(param, rbam, bamname="150114_WBCS014_CD20_150");
-}
-
-
-bam.chrXY.qc = function(rbam) {
-	strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
-	rbam$qc$chrX.count =  strandfunX(rbam$startsfwd) + strandfunX(rbam$startsfwd);
-	class(rbam$qc$chrX.count) = "qcChrX"
-	
-	strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
-	rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) + strandfunY(rbam$startsfwd);
-	class(rbam$qc$chrY.count) = "qcChrY"
-	
-	return(rbam);
 }
 
 ### Pipeline parts
