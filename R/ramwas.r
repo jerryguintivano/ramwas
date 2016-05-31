@@ -1522,6 +1522,7 @@ ramwas3NormalizedCoverage = function( param ) {
 	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
+	dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
 	
 	### data dimensions
 	cpgset = cachedRDSload(param$filecpgset);
