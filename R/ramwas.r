@@ -768,7 +768,7 @@ bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, ma
 					 unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
 	rm(cpgdensity1,cpgdensity2);
 	
-	### It's zero, not needed
+	### CpG density of Non-CpG is always zero, not needed
 	# noncpgdensity1 = calc.coverage(rbam = list(startsfwd = noncpgset), cpgset = cpgset, fragdistr = fragdistr);
 	# noncpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(noncpgset,`-`,1L)), cpgset = cpgset, fragdistr = fragdistr[-1]);
 	# noncpgdensity = unlist(noncpgdensity1, recursive = FALSE, use.names = FALSE) + 
@@ -956,7 +956,7 @@ cachedRDSload = function(rdsfilename){
 	}
 }
 if(FALSE) { # test code
-	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds";
+	rdsfilename = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22.rds";
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
 	system.time({z = cachedRDSload(rdsfilename)});
@@ -1124,8 +1124,8 @@ pipelineProcessBam = function(bamname, param) {
 	savebam = TRUE;
 	if( file.exists( rdsbmfile ) ) {
 		if( param$recalculate.QCs ) {
-			
-			{invisible(readBin( rdsbmfile, 'raw', file.size(rdsbmfile)));}
+			### Precache the input rds file
+			{invisible(readBin( rdsbmfile, "raw", file.size(rdsbmfile)));}
 			rbam = readRDS(rdsbmfile); 
 			savebam = FALSE;
 		} else {
@@ -1138,6 +1138,8 @@ pipelineProcessBam = function(bamname, param) {
 	}
 	
 	rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
+	rbam2 = bam.chrXY.qc(rbam5); 
+	rbam2$qc$nbams = 1L;
 	
 	if( !is.null(param$filecpgset) ) {
 		cpgset = cachedRDSload(param$filecpgset);
@@ -1146,12 +1148,6 @@ pipelineProcessBam = function(bamname, param) {
 		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
 		rbam4 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, noncpgset = noncpgset,
 			minfragmentsize = param$minfragmentsize, maxfragmentsize = param$maxfragmentsize);
-		
-		# if( !is.null(param$noncpgfile)) {
-		# 	noncpgset = cachedRDSload(param$noncpgfile);
-		# } else {
-		# 	noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
-		# }
 		rbam5 = bam.count.nonCpG.reads(rbam = rbam4, cpgset = cpgset, distance = param$maxfragmentsize);
 		
 		### QC plots
@@ -1168,7 +1164,6 @@ pipelineProcessBam = function(bamname, param) {
 	rbam6 = rbam5;
 	rbam6$startsfwd=NULL;
 	rbam6$startsrev=NULL;
-	rbam6$qc$nbams = 1L;
 	saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 	
 	return(paste0("OK. ", bamname));
@@ -1259,8 +1254,8 @@ pipelineCoverage1Sample = function(colnum, param){
 }
 
 ### RaMWAS pipeline
-.ramwas1scanBam = function(bamname, param){
-	cat(file = paste0(param$dirlog,'/011_log_scanning_bams.txt'), bamname, '\n', append = TRUE);
+.ramwas1scanBamJob = function(bamname, param){
+	cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), date(), 'Processing BAM', bamname, "\n", append = TRUE);
 	pipelineProcessBam(bamname = bamname, param = param);
 }
 ramwas1scanBams = function( param ){
@@ -1269,15 +1264,15 @@ ramwas1scanBams = function( param ){
 	
 	if( param$cputhreads > 1) {
 		dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
-		cat(file = paste0(param$dirlog,'/011_log_scanning_bams.txt'), 'Log, scanning bams:', date(), '\n', append = FALSE);
-		cl <- makeCluster(param$cputhreads);
-		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBam, param = param);
+		cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), "Log, scanning bams:", date(), "\n", append = FALSE);
+		cl <- makeCluster(param$cputhreads, outfile="");
+		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, param = param); #[1:64]
 		stopCluster(cl);
 	} else {
 		z = character(length(param$bamnames));
 		names(z) = param$bamnames;
 		for(i in seq_along(param$bamnames)) { # i=1
-			z[i] = .ramwas1scanBam(bamname = param$bamnames[i], param = param);
+			z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i], param = param);
 		}
 	}
 	return(z);
@@ -1311,6 +1306,7 @@ ramwas2collectqc = function( param ){
 		bigqc = vector("list", length(bamset));
 		names(bigqc) = names(bamset);
 		text = character(length(bamset));
+		textR = character(length(bamset));
 		for( ibam in seq_along(bamset) ) { # ibam=7
 			curbams = rbamlist[bamset[[ibam]]];
 			qc = .combine.bams.qc(curbams)$qc;
@@ -1319,12 +1315,14 @@ ramwas2collectqc = function( param ){
 			} else {
 				qc = NULL;
 			}
-			text[ibam] = .qcTextLine( qc, names(bamset)[ibam] );
+			text[ibam]  = .qcTextLine(  qc, names(bamset)[ibam] );
+			textR[ibam] = .qcTextLineR( qc, names(bamset)[ibam] );
 		}
-		writeLines( con = paste0(dirloc, "/Summary_QC.txt"), text = c(.qcTextHeader, text));
+		writeLines(con = paste0(dirloc, "/Summary_QC.txt"),   text = c(.qcTextHeader, text));
+		writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeader, textR));
 		
 		figfun = function(qcname, plotname) {
-			cat('Saving plots',plotname,'\n');
+			message("Saving plots ", plotname);
 			pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
 			for( ibam in seq_along(bamset) ) {
 				plotinfo = bigqc[[ibam]][[qcname]];
@@ -1349,19 +1347,21 @@ ramwas2collectqc = function( param ){
 	# By bam
 	bamset = bams; 
 	names(bamset) = bams; 
-	dirname = "summary_by_bam";
-	cat('Saving QC info by BAM','\n');
+	dirname = "summary_bams";
+	message("Saving QC info by BAM");
 	collect.qc.summary(bamset, dirname);
 	rm(bamset, dirname);
 	
 	if( !is.null(param$bam2sample) ) {
 		# by sample
-		cat('Saving QC info by SAMPLE','\n');
+		message("Saving QC info by BAMs in bam2sample");
+		collect.qc.summary(bamset = unlist(param$bam2sample), dirname = "summary_bams_in_bam2sample");
+		message("Saving QC info by SAMPLE");
 		collect.qc.summary(bamset = param$bam2sample, dirname = "summary_by_sample");
-		cat('Saving QC info TOTAL (all BAMs in bam2sample)','\n');
+		message("Saving QC info TOTAL (all BAMs in bam2sample)");
 		bigqc = collect.qc.summary(bamset = list(total=unique(unlist(param$bam2sample, use.names = FALSE))), dirname = "summary_total");
 	} else {
-		cat('Saving QC info TOTAL (all BAMs in bamnames/filebamlist)','\n');
+		message("Saving QC info TOTAL (all BAMs in bamnames/filebamlist)");
 		bigqc = collect.qc.summary(bamset = list(total=bams), dirname = "summary_total");
 	}
 	
@@ -1370,16 +1370,15 @@ ramwas2collectqc = function( param ){
 	estimate = estimateFragmentSizeDistribution(frdata, param$minfragmentsize);
 	writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"), text = as.character(estimate));
 	
-	pdf(paste0(param$dirqc,'/Fragment_size_distribution_estimate.pdf'),8,8);
+	pdf(paste0(param$dirqc,"/Fragment_size_distribution_estimate.pdf"),8,8);
 	lz = lm(frdata[seq_along(estimate)] ~ estimate)
-	plot(as.vector(frdata)/1000, pch = 19, col='blue', main='Isolated CpG coverage vs.\nfragment size distribution estimate', ylab='count, thousands', xlab='Distance to isolated CpGs', xaxs="i");
-	lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000, lwd = 4, col='red');
+	plot(as.vector(frdata)/1000, pch = 19, col="blue", main="Isolated CpG coverage vs.\nfragment size distribution estimate", ylab="count, thousands", xlab="Distance to isolated CpGs", xaxs="i");
+	lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000, lwd = 4, col="red");
 	dev.off();
 	return(invisible(NULL));
 }
 
 .ramwas3coverageJob = function(colnum, param, nslices){
-	# colnum = 3
 	library(ramwas);
 	library(filematrix)
 	coverage = pipelineCoverage1Sample(colnum, param);
@@ -1399,18 +1398,19 @@ ramwas2collectqc = function( param ){
 	fmname = paste0(param$dirtemp,"/RawCoverage_part",1);
 	fm = fm.open(fmname, lockfile = param$lockfile);
 	fm$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,'/000_log_raw_coverage_calc.txt'), colnum, '\n', append = TRUE);
+		cat(file = paste0(param$dirlog,"/031_log_raw_coverage_calc.txt"),
+			 date(), 'Processing sample', colnum, names(param$bam2sample)[colnum], "\n", append = TRUE);
 	});
 	close(fm);
 	
 	return("OK");
 }
-.ramwas3transposeFilterJob = function(fmpart, param) {
+.ramwas3transposeFilterJob = function(fmpart, param){
 	library(filematrix);
 	# fmpart = 1
 	filename = paste0(param$dirtemp,"/RawCoverage_part",fmpart);
-	if( !file.exists(paste0(filename,'.bmat')) || !file.exists(paste0(filename,'.desc.txt')) )
-		return(paste0('Raw coverage slice filematrix not found: ', filename));
+	if( !file.exists(paste0(filename,".bmat")) || !file.exists(paste0(filename,".desc.txt")) )
+		return(paste0("Raw coverage slice filematrix not found: ", filename));
 	fmraw = fm.open(filename, lockfile = param$lockfile2);
 	mat = fmraw[];
 	# mat = as.matrix(fmraw);
@@ -1418,7 +1418,7 @@ ramwas2collectqc = function( param ){
 	fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart), 
 							 nrow = ncol(mat), ncol = 0, size = param$doublesize, lockfile = param$lockfile2);
 	fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart), 
-							 nrow = 1, ncol = 0, type = 'integer', lockfile = param$lockfile2);
+							 nrow = 1, ncol = 0, type = "integer", lockfile = param$lockfile2);
 	
 	samplesums = rep(0, ncol(mat));
 	
@@ -1467,7 +1467,8 @@ ramwas2collectqc = function( param ){
 	close(fmss);
 	
 	fmraw$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,'/000_log_transpose_and_filter.txt'), fmpart, '\n', append = TRUE);
+		cat(file = paste0(param$dirlog,"/032_log_transpose_and_filter.txt"), 
+			 date(), 'Processing slice', fmpart, "\n", append = TRUE);
 	});
 	closeAndDeleteFiles(fmraw);
 	return("OK.");
@@ -1488,10 +1489,10 @@ ramwas2collectqc = function( param ){
 	close(fm);
 	
 	fm$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,'/000_log_normalize.txt'), fmpart_offset[1], '\n', append = TRUE);
+		cat(file = paste0(param$dirlog,"/033_log_normalize.txt"), 
+			 date(), 'Processing slice', fmpart_offset[1], "\n", append = TRUE);
 	});
 
-	
 	rm(mat);
 	gc();
 	return("OK.");
@@ -1510,12 +1511,12 @@ ramwas3NormalizedCoverage = function( param ) {
 	
 	### Check is all rbams are in place
 	{
-		message('Checking if all required Rbam files present');
+		message("Checking if all required Rbam files present");
 		bams = unlist(param$bam2sample);
 		for( bname in bams) {
-			filename = paste0( param$dirrbam, '/', bname);
+			filename = paste0( param$dirrbam, "/", bname);
 			if( file.exists(filename) ) {
-				stop(paste0('Rbam file from bam2sample does not exist: ', filename));
+				stop(paste0("Rbam file from bam2sample does not exist: ", filename));
 			}
 		}
 		rm(bams, bname, filename);
@@ -1529,9 +1530,9 @@ ramwas3NormalizedCoverage = function( param ) {
 		step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
 		mm = ncpgs;
 		nslices = ceiling(mm/step1);
-		message('Creating ',nslices,' file matrices for raw coverage at: ', param$dirtemp);
+		message("Creating ", nslices, " file matrices for raw coverage at: ", param$dirtemp);
 		for( part in 1:nslices ) { # part = 1
-			# cat('Creating raw coverage matrix slices', part, 'of', nslices, '\n');
+			# cat("Creating raw coverage matrix slices", part, "of", nslices, "\n");
 			fr = (part-1)*step1 + 1;
 			to = min(part*step1, mm);
 			fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
@@ -1543,9 +1544,10 @@ ramwas3NormalizedCoverage = function( param ) {
 
 	### Fill in the raw coverage files
 	{
-		message('Calculating and saving raw coverage');
+		message("Calculating and saving raw coverage");
 		param$lockfile = tempfile();
-		cat(file = paste0(param$dirlog,'/000_log_raw_coverage_calc.txt'), 'Log, raw coverage:', date(), '\n', append = FALSE);
+		cat(file = paste0(param$dirlog,"/031_log_raw_coverage_calc.txt"), 
+			 "Log, raw coverage:", date(), "\n", append = FALSE);
 		library(parallel)
 		if( param$cputhreads > 1) {
 			cl = makeCluster(param$cputhreads);
@@ -1565,12 +1567,13 @@ ramwas3NormalizedCoverage = function( param ) {
 	
 	### Transpose the slices, filter by average and fraction of non-zeroes
 	{
-		message('Transposing coverage matrices and filtering CpGs by coverage');
+		message("Transposing coverage matrices and filtering CpGs by coverage");
 		
 		fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"), nrow = nsamples, ncol = nslices);
 		close(fm);
 		
-		cat(file = paste0(param$dirlog,'/000_log_transpose_and_filter.txt'), 'Log, transpose and filter:', date(), '\n', append = FALSE);
+		cat(file = paste0(param$dirlog,"/032_log_transpose_and_filter.txt"), 
+			 "Log, transpose and filter:", date(), "\n", append = FALSE);
 		if( param$cputhreads > 1 ) {
 			param$lockfile2 = tempfile();
 			library(parallel);
@@ -1587,7 +1590,7 @@ ramwas3NormalizedCoverage = function( param ) {
 	
 	### Prepare CpG set for filtered CpGs	
 	{
-		message('Saving locations for CpGs which passed the filter');
+		message("Saving locations for CpGs which passed the filter");
 		
 		cpgsloc1e9 = cpgset;
 		for( i in seq_along(cpgsloc1e9) ) {
@@ -1599,9 +1602,9 @@ ramwas3NormalizedCoverage = function( param ) {
 		step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
 		mm = ncpgs;
 		nsteps = ceiling(mm/step1);
-		cpgsloclist = vector('list',nsteps);
+		cpgsloclist = vector("list",nsteps);
 		for( part in 1:nsteps ) { # part = 1
-			# cat( part, 'of', nsteps, '\n');
+			# cat( part, "of", nsteps, "\n");
 			fr = (part-1)*step1 + 1;
 			to = min(part*step1, mm);
 			
@@ -1614,32 +1617,32 @@ ramwas3NormalizedCoverage = function( param ) {
 		cpgslocvec = unlist(cpgsloclist, use.names = FALSE);
 		cpgslocmat = cbind( chr = as.integer(cpgslocvec %/% 1e9), position = as.integer(cpgslocvec %% 1e9));
 		
-		fm = fm.create.from.matrix( filenamebase = paste0(param$dircoveragenorm, '/CpG_locations'), mat = cpgslocmat);
+		fm = fm.create.from.matrix( filenamebase = paste0(param$dircoveragenorm, "/CpG_locations"), mat = cpgslocmat);
 		close(fm);
-		writeLines(con = paste0(param$dircoveragenorm, '/CpG_chromosome_names.txt'), text = names(cpgset));
+		writeLines(con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt"), text = names(cpgset));
 		rm(cpgsloc1e9, cpgsloclist, cpgslocvec, cpgslocmat);
 	} # /CpG_locations, sliceoffsets
 	
 	### Sample sums
 	{
-		message('Gathering sample sums from ', nslices,' slices');
+		message("Gathering sample sums from ", nslices, " slices");
 		
 		mat = fm.load( paste0(param$dirtemp,"/0_sample_sums") );
 		samplesums = rowSums(mat);
 		rm(mat);
-		fm = fm.create.from.matrix( paste0(param$dircoveragenorm, '/raw_sample_sums'), samplesums);
+		fm = fm.create.from.matrix( paste0(param$dircoveragenorm,"/raw_sample_sums"), samplesums);
 		close(fm);
 	}
 	
 	### Normalize and combine in one matrix
 	{
-		message('Normalizing coverage and saving in one matrix');
+		message("Normalizing coverage and saving in one matrix");
 		
 		fmpart_offset_list = as.list(data.frame(rbind( seq_len(nslices), sliceoffsets[-length(sliceoffsets)])));
-		cat(file = paste0(param$dirlog,'/000_log_normalize.txt'), 'Log, normalize:', date(), '\n');
+		cat(file = paste0(param$dirlog,"/033_log_normalize.txt"), "Log, normalize:", date(), "\n");
 		
 		### Create big matrix for normalized coverage
-		fm = fm.create(paste0(param$dircoveragenorm, '/Coverage'), 
+		fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"), 
 							nrow = nsamples, ncol = tail(sliceoffsets,1), size = param$doublesize);
 		rownames(fm) = names(param$bam2sample);
 		close(fm);
@@ -1661,14 +1664,11 @@ ramwas3NormalizedCoverage = function( param ) {
 				.ramwas3normalizeJob( fmpart_offset_list[[fmpart]], param, samplesums);
 			}
 		}
-		
-		
-		
 	}
 	
 	### Cleanup
 	{
-		message('Removing temporary files');
+		message("Removing temporary files");
 		for( part in 1:nslices ) {
 			fm = fm.open( paste0(param$dirtemp,"/TrCoverage_loc",part) );
 			closeAndDeleteFiles(fm);
@@ -1677,12 +1677,9 @@ ramwas3NormalizedCoverage = function( param ) {
 		}
 		fm = fm.open( paste0(param$dirtemp,"/0_sample_sums") );
 		closeAndDeleteFiles(fm);
-		
 	}
 	
 }
-
-
 if(FALSE){
 	param = parameterPreprocess(param);
 	cl = makePSOCKcluster(rep("localhost", param$cputhreads))
@@ -1706,27 +1703,27 @@ if(FALSE) { # Cell Type
 		maxrepeats = 3,
 		maxfragmentsize=200,
 		minfragmentsize=50,
-		filebam2sample = "bam2sample2.txt",
+		filebam2sample = NULL,#"bam2sample1.txt",
 		recalculate.QCs = TRUE,
 		buffersize = 1e9
 	);
-	if(Sys.getenv('computername') == "HP") {
+	if(Sys.getenv("computername") == "HP") {
 		param$dirtemp = "E:/RaMWAS_temp_CELL/"
 	} else {
 		param$dirtemp = "C:/AllWorkFiles/temp/"
 	}
 	{
 		tic = proc.time();
-		rbam = pipelineProcessBam(bamname = '150114_WBCS014_CD20_150', param );
+		rez = pipelineProcessBam(bamname = "141222_WBCS012_CD19_150", param );
 		toc = proc.time();
 		show(toc-tic);
-		qc = readRDS('D:/RW/CELL/rds_qc/150114_WBCS014_CD20_150.qc.rds')
-		cat(ramwas:::.qcTextLine(qc$qc, '150114_WBCS014_CD20_150'))
+		qc = readRDS("D:/RW/CELL/rds_qc/141222_WBCS012_CD19_150.qc.rds")
+		cat(ramwas:::.qcTextLine(qc$qc, "141222_WBCS012_CD19_150"))
 		# HP: 392.95   14.43  415.42
 		# HP: 374.86   14.03  391.68 
 	}
 	{
-		param$cputhreads = 4;
+		# param$cputhreads = 4;
 		tic = proc.time();
 		z = ramwas1scanBams( param );
 		toc = proc.time();
@@ -1738,14 +1735,6 @@ if(FALSE) { # Cell Type
 		z = ramwas2collectqc( param );
 		toc = proc.time();
 		show(toc-tic);
-		# HP: 61.37   18.86  184.10 
-	}
-	{
-		tic = proc.time();
-		z = ramwas2collectqc( param );
-		toc = proc.time();
-		show(toc-tic);
-		# DL: 33.42   10.06   80.37
 	}
 	{
 		param$cputhreads = 8;
@@ -1775,15 +1764,16 @@ if(FALSE) { # NESDA
 		buffersize = 1e9,
 		chrnorm = 1:22
 	);
-	if(Sys.getenv('computername') == "HP") {
+	if(Sys.getenv("computername") == "HP") {
 		param$dirtemp = "E:/RaMWAS_temp_NESDA/"
 	} else {
 		param$dirtemp = "C:/AllWorkFiles/temp/"
 	}
 	{
 		tic = proc.time();
-		rez = pipelineProcessBam(bamname = '150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311', param );
-		qc = readRDS('D:/RW/NESDA/rds_qc/150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311.qc.rds')
+		rez = pipelineProcessBam(bamname = "150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311", param );
+		qc = readRDS("D:/RW/NESDA/rds_qc/150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311.qc.rds")
+		cat(ramwas:::.qcTextLine(qc$qc, "150210_NS500538_0012_AH2T57BGXX_NESDA_04D02311"))
 		toc = proc.time();
 		show(toc-tic);
 		# HP: 61.37   18.86  184.10 
@@ -1794,7 +1784,7 @@ if(FALSE) { # NESDA
 		toc = proc.time();
 		show(toc-tic);
 		# DL, rescan: 7867.78
-	} 
+	}
 	{
 		tic = proc.time();
 		z = ramwas2collectqc( param );
@@ -1807,38 +1797,8 @@ if(FALSE) { # NESDA
 		z = ramwas3NormalizedCoverage( param );
 		toc = proc.time();
 		show(toc-tic);
-		# DL, 2e9, 8thr:   
 		# DL, 1e9, 8thr:  
-		# HP, 2e9, 8thr:  
-		# HP, 1e9, 8thr:  
-	}
-	{
-		tic = proc.time();
-		z = ramwas3NormalizedCoverage1( param );
-		toc = proc.time();
-		show(toc-tic);
-		# DL, 2e9, 8thr:   13.92    4.79 6110.45
-		# DL, 1e9, 8thr:   15.54    6.45 7125.52 
-		# HP, 2e9, 8thr:   21.79   14.44 4946.97
-		# HP, 1e9, 8thr:   23.14   16.61 5599.71
-	}
-	{
-		tic = proc.time();
-		z = ramwas3NormalizedCoverage2( param );
-		toc = proc.time();
-		show(toc-tic);
-		# 2961.89  657.59 5140.73
-		# 2966.73  650.12 5372.79
-		# 2965.59  642.71 5434.28
-	}
-	{
-		param$cputhreads = 2;
-		tic = proc.time();
-		ramwas3NormalizedCoverage3(param);
-		toc = proc.time();
-		show(toc-tic);
-		# 1 thread: 1767.03  477.41 4122.09
-		# 2 threads:   1.00    0.99 4067.15 
+		# HP, 1e9, 8thr:     44.64    25.86 10772.28 
 	}
 } # NESDA
 if(FALSE) { # RC2
@@ -1846,26 +1806,29 @@ if(FALSE) { # RC2
 	param = list(
 		dirbam = "D:/RW/RC2/bams/",
 		dirproject = "D:/RW/RC2/",
-		# dirtemp = "C:/AllWorkFiles/temp/",
-		dirtemp = "E:/RaMWAS_temp/",
+		dirtemp = NULL,
 		filebamlist = "000_list_of_files.txt",
 		scoretag = "AS",
 		minscore = 100,
 		cputhreads = 8,
-		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp.rds",
-		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_cushaw3_50bp_nonCpG.rds",
+		filecpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22_cushaw3_50bp.rds",
+		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22_cushaw3_50bp_nonCpG.rds",
 		maxrepeats = 3,
 		maxfragmentsize = 200,
 		minfragmentsize = 50,
-		filebam2sample = "bam2sample.txt",
+		filebam2sample = "bams2samples_KA160502.txt",
 		recalculate.QCs = TRUE,
-		buffersize = 2e9
+		buffersize = 1e9
 	);
-	
+	if(Sys.getenv("computername") == "HP") {
+		param$dirtemp = "E:/RaMWAS_temp_NESDA/"
+	} else {
+		param$dirtemp = "C:/AllWorkFiles/temp/"
+	}
 	{
 		tic = proc.time();
-		rbam = pipelineProcessBam(bamname = '01A01SM1429N', param );
-		readRDS('D:/RW/RC2/rds_qc/01A01SM1429N.qc.rds')
+		rbam = pipelineProcessBam(bamname = "01A01SM1429N", param );
+		readRDS("D:/RW/RC2/rds_qc/01A01SM1429N.qc.rds")
 		toc = proc.time();
 		show(toc-tic);
 		# HP: 61.37   18.86  184.10 
@@ -1886,21 +1849,7 @@ if(FALSE) { # RC2
 	}
 	{
 		tic = proc.time();
-		z = ramwas3NormalizedCoverage1( param );
-		toc = proc.time();
-		show(toc-tic);
-		# HP, 4e8: 
-	}
-	{
-		tic = proc.time();
-		samplesums = ramwas3NormalizedCoverage2( param );
-		toc = proc.time();
-		show(toc-tic);
-	}
-	{
-		param$cputhreads = 2;
-		tic = proc.time();
-		ramwas3NormalizedCoverage3(param);
+		ramwas3NormalizedCoverage(param);
 		toc = proc.time();
 		show(toc-tic);
 	}
