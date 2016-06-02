@@ -1139,7 +1139,7 @@ pipelineProcessBam = function(bamname, param){
 	}
 	
 	rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
-	rbam2 = bam.chrXY.qc(rbam5); 
+	rbam2 = bam.chrXY.qc(rbam2); 
 	rbam2$qc$nbams = 1L;
 	
 	if( !is.null(param$filecpgset) ) {
