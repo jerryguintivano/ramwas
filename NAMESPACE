@@ -1,9 +1,8 @@
 useDynLib(ramwas)
-importFrom(methods, setRefClass)
 exportPattern("^[[:alpha:]]+")
 
+importFrom("methods", "setRefClass", "new")
 importFrom("graphics", "abline", "legend", "lines", "par", "plot", "points", "title")
-importFrom("methods", "new")
 importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim")
 importFrom("utils", "flush.console", "tail", "tail.matrix")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
