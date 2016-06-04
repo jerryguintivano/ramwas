@@ -18,4 +18,4 @@ LazyLoad: yes
 Depends: R (>= 2.12.0), methods
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, BiocStyle
-Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, KernSmooth
+Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, KernSmooth, filematrix
