@@ -1,7 +1,7 @@
 ### Caching environment
 .ramwasEnv = new.env()
 
-`%add%` <- function(x, y) {
+`%add%` <- function(x, y){
 	if(is.null(x)) return(y);
 	if(is.null(y)) return(x);
 	l <- max(length(x), length(y))
@@ -20,7 +20,7 @@
 		return(TRUE)
 	return(FALSE);
 }
-makefullpath = function(path, filename) {
+makefullpath = function(path, filename){
 	if( is.null(path) )
 		return(filename);
 	if(.isAbsolutePath(filename)) {
@@ -90,16 +90,18 @@ parameterPreprocess = function( param ){
 	} else {
 		param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
 	}
-	if( is.null(param$dirrbam) ) param$dirrbam = paste0( param$dirfilter, "/rds_rbam");
-	if( is.null(param$dirrqc) ) param$dirrqc = paste0( param$dirfilter, "/rds_qc");
-	if( is.null(param$dirqc) ) param$dirqc = paste0( param$dirfilter, "/qc");
-	if( is.null(param$dirlog) ) param$dirlog = paste0( param$dirfilter, "/logs");
-	if( is.null(param$dirtemp) ) param$dirtemp  = "coverage_raw_temp";
+	if( is.null(param$dirrbam) ) param$dirrbam = "rds_rbam";
+	param$dirrbam = makefullpath( param$dirfilter, param$dirrbam);
+	if( is.null(param$dirrqc) ) param$dirrqc = "rds_qc";
+	param$dirrqc = makefullpath( param$dirfilter, param$dirrqc);
+	if( is.null(param$dirqc) ) param$dirqc = "qc";
+	param$dirqc = makefullpath( param$dirfilter, param$dirqc);
+	if( is.null(param$dirlog) ) param$dirlog = "logs";
+	param$dirlog = makefullpath( param$dirfilter, param$dirlog);
+	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
 	param$dirtemp  = makefullpath(param$dirproject, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
 	param$dircoveragenorm = makefullpath(param$dirproject, param$dircoveragenorm);
-	
-	
 	
 	### Filter parameters
 	if( is.null(param$scoretag) ) param$scoretag = "mapq";
@@ -111,7 +113,6 @@ parameterPreprocess = function( param ){
 	
 	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
-		
 		param$bamnames = readLines(makefullpath(param$dirproject,param$filebamlist));
 		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
 	}
@@ -401,7 +402,7 @@ plot.qcHistScore = function(x, samplename="", xstep = 25, ...){
 plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcEditDist = function(x, samplename="", xstep = 5, ...) {
+plot.qcEditDist = function(x, samplename="", xstep = 5, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
 plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...) {
@@ -1701,14 +1702,18 @@ ramwas3NormalizedCoverage = function( param ){
 	}
 	
 }
+
+ramwas4PCAandMWAS = function( param ){
+	param = parameterPreprocess(param);
+	
+}
 if(FALSE){ # cluster
 	param = parameterPreprocess(param);
 	cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 	clusterEvalQ(cl, library(filematrix));
 	z = clusterApplyLB(cl, 1, ramwas:::.ramwas3transposeFilterJob, param = param);
 	stopCluster(cl);
-}  # cluster
-
+} # cluster
 if(FALSE){ # Cell Type
 	library(ramwas);
 	param = list(
@@ -1780,7 +1785,7 @@ if(FALSE){ # NESDA
 		maxrepeats = 3,
 		maxfragmentsize = 200,
 		minfragmentsize = 50,
-		filebam2sample = "bam2samples_QC_04-15-2016.csv",
+		filebam2sample = "bam2samples.txt",#"bam2samples_QC_04-15-2016.csv",
 		recalculate.QCs = TRUE,
 		buffersize = 1e9,
 		chrnorm = 1:22
