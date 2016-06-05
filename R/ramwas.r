@@ -90,7 +90,8 @@ parameterPreprocess = function( param ){
 	} else {
 		param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
 	}
-	if( is.null(param$dirrbam) ) param$dirrbam = "rds_rbam";
+	if( is.null(param$dirrbam) ) 
+		param$dirrbam = "rds_rbam";
 	param$dirrbam = makefullpath( param$dirfilter, param$dirrbam);
 	if( is.null(param$dirrqc) ) param$dirrqc = "rds_qc";
 	param$dirrqc = makefullpath( param$dirfilter, param$dirrqc);
@@ -116,20 +117,37 @@ parameterPreprocess = function( param ){
 		param$bamnames = readLines(makefullpath(param$dirproject,param$filebamlist));
 		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
 	}
+	
 	### BAM2sample processing
 	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
 		filename = makefullpath(param$dirproject, param$filebam2sample);
 		param$bam2sample = parseBam2sample( readLines(filename) );
 		rm(filename);
 	}
-	### Analysis variables file
-	if( !is.null(param$fileanalysis) ) {
+	### Covariate file
+	if( !is.null(param$filecovariates) ) {
 		sep = "\t";
-		if(grepl("\\.csv$",param$fileanalysis)) 
+		if(grepl("\\.csv$",param$filecovariates)) 
 			sep = ",";
-		filename = makefullpath(param$dirproject, param$fileanalysis);
+		filename = makefullpath(param$dirproject, param$filecovariates);
 		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE);
 		rm(filename);
+		
+		if( any(duplicated(param$covariates[[1]])) )
+			stop("Repeated samples in the covariate file");
+		
+		if( !all(param$modelcovariates %in% names(param$covariates) ) )
+			stop( paste("Covariates (modelcovariates) missing in covariates data frame:",
+			 param$modelcovariates[ !(param$modelcovariates %in% names(param$covariates)) ]));
+		if( is.null(param$modelPCs) ) 
+			param$modelPCs = 0;
+		if( !is.null(param$modeloutcome) )
+			if( !( param$modeloutcome %in% names(param$covariates)) )
+				stop( paste("Model outcome not present in covariate file:", param$modeloutcome))
+		
+		if( is.null(param$dirmwas) ) 
+			param$dirmwas = paste0(param$modeloutcome,'_',length(param$modelcovariates),'covs_',param$modelPCs,'pc');
+		param$dirmwas = makefullpath(param$dircoveragenorm, param$dirmwas);
 	}
 
 	### CpG set should exist
