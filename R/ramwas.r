@@ -156,7 +156,7 @@ parameterPreprocess = function( param ){
 	}
 	if( is.null(param$doublesize) ) param$doublesize = 4;
 	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
-	if( is.null(param$buffersize) ) param$buffersize = 8e9;
+	if( is.null(param$buffersize) ) param$buffersize = 1e9;
 
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
@@ -1008,7 +1008,7 @@ if(FALSE){ # test code
 	}
 	return( cover );
 }
-calc.coverage = function(rbam, cpgset, fragdistr) {
+calc.coverage = function(rbam, cpgset, fragdistr){
 	# if( is.null(coveragelist) ) {
 		coveragelist = vector("list", length(cpgset));
 		names(coveragelist) = names(cpgset);
@@ -1190,7 +1190,7 @@ pipelineProcessBam = function(bamname, param){
 }
 
 ### Fragment size distribution estimation
-pipelineEstimateFragmentSizeDistribution = function(param){
+pipelineEstimateFragmentSizeDistribution = function( param ){
 	
 	param = parameterPreprocess(param);
 	
@@ -1275,7 +1275,7 @@ pipelineCoverage1Sample = function(colnum, param){
 
 ### RaMWAS pipeline
 .ramwas1scanBamJob = function(bamname, param){
-	cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), date(), 'Processing BAM', bamname, "\n", append = TRUE);
+	cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), date(), "Processing BAM", bamname, "\n", append = TRUE);
 	pipelineProcessBam(bamname = bamname, param = param);
 }
 ramwas1scanBams = function( param ){
@@ -1438,7 +1438,7 @@ ramwas2collectqc = function( param ){
 	fm = fm.open(fmname, lockfile = param$lockfile);
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dirlog,"/031_log_raw_coverage_calc.txt"),
-			 date(), 'Processing sample', colnum, names(param$bam2sample)[colnum], "\n", append = TRUE);
+			 date(), "Processing sample", colnum, names(param$bam2sample)[colnum], "\n", append = TRUE);
 	});
 	close(fm);
 	
@@ -1507,7 +1507,7 @@ ramwas2collectqc = function( param ){
 	
 	fmraw$filelock$lockedrun( {
 		cat(file = paste0(param$dirlog,"/032_log_transpose_and_filter.txt"), 
-			 date(), 'Processing slice', fmpart, "\n", append = TRUE);
+			 date(), "Processing slice", fmpart, "\n", append = TRUE);
 	});
 	closeAndDeleteFiles(fmraw);
 	return("OK.");
@@ -1529,7 +1529,7 @@ ramwas2collectqc = function( param ){
 	
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dirlog,"/033_log_normalize.txt"), 
-			 date(), 'Processing slice', fmpart_offset[1], "\n", append = TRUE);
+			 date(), "Processing slice", fmpart_offset[1], "\n", append = TRUE);
 	});
 
 	rm(mat);
@@ -1718,11 +1718,129 @@ ramwas3NormalizedCoverage = function( param ){
 		fm = fm.open( paste0(param$dirtemp,"/0_sample_sums") );
 		closeAndDeleteFiles(fm);
 	}
-	
 }
 
+.ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
+	# rng = rangeset[[1]];
+	library(filematrix);
+	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
+
+	covmat = 0;
+
+	step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
+	mm = rng[2]-rng[1]+1;
+	nsteps = ceiling(mm/step1);
+	for( part in 1:nsteps ) { # part = 1
+		cat( part, "of", nsteps, "\n");
+		fr = (part-1)*step1 + rng[1];
+		to = min(part*step1, mm) + rng[1] - 1;
+		
+		slice = fm[,fr:to];
+		if( !is.null(rowsubset) )
+			slice = slice[rowsubset,];
+		slice = t(slice);
+		
+		slice = slice - tcrossprod(slice, cvrtqr) %*% cvrtqr; ### rowMeans(slice) == 0
+		slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-3);   ### rowSums(slice^2) == 1
+		
+		covmat = covmat + crossprod(slice);
+		fm$filelock$lockedrun( {
+			cat(file = paste0(param$dirlog,"/041_log_PCA.txt"), 
+				 date(), "Job", rng[3], "processing slice", part, "of", nsteps, "\n", append = TRUE);
+		});
+		rm(slice);
+	}
+	close(fm)
+	return(covmat);
+}
 ramwas4PCAandMWAS = function( param ){
+	library(filematrix)
 	param = parameterPreprocess(param);
+	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
+	dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
+	dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
+	
+	### Get and match sample names
+	{
+		cvsamples = param$covariates[[1]];
+		
+		fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
+		fmsamples = rownames(fm);
+		ncpgs = ncol(fm);
+		close(fm);
+		
+		rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
+		if( any(rowsubset==0) )
+			stop( paste("Unknown samples in covariate file:", cvsamples[head(which(mch==0))]) );
+		
+		if( length(cvsamples) == length(fmsamples) )
+			if( all(rowsubset == seq_along(rowsubset)) )
+				rowsubset = NULL;
+	} # rowsubset, ncpgs
+	
+	### Prepare covariates
+	{
+		covmat = param$covariates[ param$modelcovariates ];
+		### Insert dummy treatment here
+		covmat = cbind( rep(1, length(cvsamples)), covmat);
+		
+		cvrtqr = t( qr.Q(qr(covmat)) );  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
+	}
+	
+	### Do PCA
+	{
+		cat(file = paste0(param$dirlog,"/041_log_PCA.txt"), 
+			 "Log, Principal Component Analysis:", date(), "\n", append = FALSE);
+		if( param$cputhreads > 1 ) {
+			rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
+			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
+			
+			param$lockfile2 = tempfile();
+			library(parallel);
+			cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
+			covmat = Reduce(f = `+`, x = covlist);
+			rm(covlist);
+			stopCluster(cl);
+			file.remove(param$lockfile2);
+		} else {
+			for( fmpart in seq_len(nslices) ) { # fmpart = 5
+				covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
+			}
+		}
+		e = eigen(covmat, symmetric=TRUE);
+		nonzeroPCs = sum(abs(e$values/e$values[1]) > length(e$values)*.Machine$double.eps);
+		# PCA plots
+		{		
+			pdf(paste0(param$dirmwas, '/PC_plot_covariates_removed.pdf'),7,7);
+			pc100 = head(e$values,40)/sum(e$values)*100;
+			plot(pc100, pch=19, col='blue', xlab = 'PCs', ylab = 'Variation Explained (%)', main='Principal components', yaxs = 'i', ylim = c(0,pc100[1]*1.05), xlim = c(0, length(pc100)+0.5), xaxs='i')
+			for( i in 1:min(20,nonzeroPCs) ) { # i=1
+				plot(e$vectors[,i], main=paste('PC',i), xlab = 'Samples', ylab = 'PC components', pch=19, col='blue1',
+					  xlim = c(0, length(e$values)+0.5), xaxs='i');
+				abline(h=0, col='grey')
+			}
+			dev.off();
+		}
+		# Save PCs and loadings
+		{
+			saveRDS(file = paste0(param$dirmwas,'/eigen.rds'), object = e, compress = FALSE)
+			saveRDS(file = paste0(param$dirmwas,'/covmat.rds'), object = covmat, compress = FALSE)
+			PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
+			rownames(PC_loads) = cvsamples;
+			colnames(PC_loads) = paste0('PC',seq_len(ncol(PC_loads)));
+			write.table(file = paste0(param$dirmwas, '/PC_loadings.txt'), 
+							x = data.frame(name=rownames(PC_loads),PC_loads), sep='\t', row.names = FALSE);
+			PC_values = data.frame(PC_num = paste0('PC',seq_lan(length(e$values))), e$values/sum(e$values))
+			write.table(file = paste0(param$dirmwas, '/PC_values.txt'),
+						  x = data.frame(PC_num = paste0('PC',seq_len(length(e$values))),
+						  					  var_explained = e$values/sum(e$values)),
+						  sep='\t', row.names = FALSE, quote = FALSE);
+		}
+		
+		
+	}
 	
 }
 if(FALSE){ # cluster
@@ -1797,7 +1915,7 @@ if(FALSE){ # NESDA
 		filebamlist = "000_list_of_files.txt",
 		scoretag = "AS",
 		minscore = 120,
-		cputhreads = 8,
+		cputhreads = 4,
 		filecpgset =    "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp.rds",
 		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22XY_bowtie2_75bp_nonCpG.rds",
 		maxrepeats = 3,
@@ -1806,12 +1924,20 @@ if(FALSE){ # NESDA
 		filebam2sample = "bam2samples.txt",#"bam2samples_QC_04-15-2016.csv",
 		recalculate.QCs = TRUE,
 		buffersize = 1e9,
-		chrnorm = 1:22
+		chrnorm = 1:22,
+		filecovariates = "Cannabis_4-15-2016.txt",
+		modelcovariates = c("sex","Age"),
+		modeloutcome = "adrug02_r"
+		
 	);
 	if(Sys.getenv("computername") == "HP") {
 		param$dirtemp = "E:/RaMWAS_temp_NESDA/"
 	} else {
 		param$dirtemp = "C:/AllWorkFiles/temp/"
+	}
+	{
+		param = parameterPreprocess(param);
+		param$covariates
 	}
 	{
 		tic = proc.time();
