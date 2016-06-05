@@ -1780,12 +1780,16 @@ ramwas4PCAandMWAS = function( param ){
 	
 	### Prepare covariates
 	{
-		covmat = param$covariates[ param$modelcovariates ];
-		### Insert dummy treatment here
-		covmat = cbind( rep(1, length(cvsamples)), covmat);
+		covset = c(const = list(rep(1, length(cvsamples))), param$covariates[ param$modelcovariates ]);
+		### covset = list( const = rep(1,8), a = 1:8, b = c('a','a','b','b','a','a','c','c'))
+		for( ind in which(sapply(covset, typeof)=='character')) { # ind = 3
+			fctr = factor(covset[[ind]]);
+			covset[[ind]] = model.matrix(~fctr)[,-1];
+		}
+		covmat = matrix(unlist(covset),length(cvsamples));
 		
 		cvrtqr = t( qr.Q(qr(covmat)) );  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
-	}
+	} # cvrtqr
 	
 	### Do PCA
 	{
