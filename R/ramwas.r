@@ -1720,6 +1720,70 @@ ramwas3NormalizedCoverage = function( param ){
 	}
 }
 
+.test1Variable = function(covariate, data, cvrtqr) {
+	mycov = covariate;
+	slice = data;
+	cvqr0 = cvrtqr;
+	
+	# mycov[1000:1050] = NA;
+	if( any(is.na(mycov)) ){
+		keep = which(colSums(is.na(mycov))==0);
+		
+		mycov = mycov[,keep,drop=FALSE];
+		slice = slice[,keep,drop=FALSE];
+		cvqr0 = cvqr0[,keep,drop=FALSE];
+		cvqr0 = t( qr.Q(qr(t(cvqr0))) );
+	}
+	
+	# mycov = as.character(round(mycov));
+	if( is.character(mycov) ) {
+		fctr = as.factor(mycov)
+		dummy = t(model.matrix(~fctr)[,-1]);
+		dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
+		mycov = t( qr.Q(qr(t(dummy))) );
+	}
+	
+	# if( !is.character(mycov) & !any(is.na(mycov)) ){
+	{
+		cvsumsq1 = sum( mycov^2 );
+		mycov = mycov - tcrossprod(mycov,cvqr0) %*% cvqr0;
+		cvsumsq2 = sum( mycov^2 );
+		mycov = mycov / pmax(sqrt(rowSums(mycov^2)), 1e-10);
+		# cvsumsq2 / cvsumsq1
+		
+		slsumsq1 = rowSums(slice^2)
+		slice = slice - tcrossprod(slice,cvqr0) %*% cvqr0;
+		slsumsq2 = rowSums(slice^2)
+		slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-10);
+		
+		cr = tcrossprod(mycov, slice);
+		
+		nVarTested = nrow(cr)
+		dfFull = ncol(slice) - nrow(cvqr0) - nVarTested;
+		if( nrow(cr) == nVarTested ) {
+			cor2tt = function(x) { return( x * sqrt( dfFull / (1 - pmin(x^2,1))));	}
+			tt2pv = function(x) { return( (pt(-abs(x),dfFull)*2)); }
+			tt = cor2tt(cr);
+			pv = tt2pv(tt);
+			
+			### Check: 
+			# c(tt[1], pv[1])
+			# summary(lm( as.vector(covariate) ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+			return( list(correlation = cr, tstat = tt, pvalue = pv) );
+		} else {
+			rsq = colSums(cr^2);
+			rsq2F = function(x) { return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) ); }
+			F2pv = function(x) { return( pf(x, nVarTested, dfFull, lower.tail = FALSE) ); }
+			ff = rsq2F(rsq);
+			pv = F2pv(ff);
+			
+			### Check: 
+			# c(ff[1], pv[1])
+			# anova(lm( data[1,] ~ 0 + t(cvrtqr) + as.factor(as.vector(as.character(round(covariate))))))[2,]
+			return( list(Rsquared = rsq, Fstat = ff, pvalue = pv) );
+		}
+	}
+}
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
 	# rng = rangeset[[1]];
 	library(filematrix);
