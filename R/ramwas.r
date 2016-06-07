@@ -146,7 +146,7 @@ parameterPreprocess = function( param ){
 				stop( paste("Model outcome not present in covariate file:", param$modeloutcome))
 		
 		if( is.null(param$dirmwas) ) 
-			param$dirmwas = paste0(param$modeloutcome,'_',length(param$modelcovariates),'covs_',param$modelPCs,'pc');
+			param$dirmwas = paste0(param$modeloutcome,"_",length(param$modelcovariates),"covs_",param$modelPCs,"pc");
 		param$dirmwas = makefullpath(param$dircoveragenorm, param$dirmwas);
 		
 		if( is.null(param$qqplottitle) ) {
@@ -1787,7 +1787,7 @@ ramwas3NormalizedCoverage = function( param ){
 			### Check: 
 			# c(tt[1], pv[1])
 			# summary(lm( as.vector(covariate) ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
-			return( list(correlation = cr, tstat = tt, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = '') );
+			return( list(correlation = cr, tstat = tt, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = "") );
 		} else {
 			rsq = colSums(cr^2);
 			rsq2F = function(x) { return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) ); }
@@ -1798,7 +1798,7 @@ ramwas3NormalizedCoverage = function( param ){
 			### Check: 
 			# c(ff[1], pv[1])
 			# anova(lm( data[1,] ~ 0 + t(cvrtqr) + as.factor(as.vector(as.character(round(covariate))))))
-			return( list(Rsquared = rsq, Fstat = ff, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = paste0('-F_',nVarTested)) );
+			return( list(Rsquared = rsq, Fstat = ff, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = paste0("-F_",nVarTested)) );
 		}
 	}
 }
@@ -1838,10 +1838,10 @@ if(FALSE){
 .testCovariates = function(covariates1, data, cvrtqr){
 	# covariates1 = param$covariates[-1]
 	# data = t(e$vectors[,seq_len(nonzeroPCs)])
-	crF = vector('list',length(covariates1));
-	pv = vector('list',length(covariates1));
+	crF = vector("list", length(covariates1));
+	pv  = vector("list", length(covariates1));
 	nms = character(length(covariates1));
-	for( i in seq_along(covariates1) ){ # i=1
+	for( i in seq_along(covariates1) ) { # i=1
 		rez = .test1Variable(covariates1[[i]], data, cvrtqr);
 		pv[[i]] = as.vector(rez[[3]]);
 		nms[i] = rez$statname;
@@ -1993,7 +1993,7 @@ ramwas4PCAandMWAS = function( param ){
 	
 	### Get and match sample names
 	{
-		message('Matching samples in covariates and data matrix');
+		message("Matching samples in covariates and data matrix");
 		cvsamples = param$covariates[[1]];
 		
 		fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
@@ -2018,10 +2018,10 @@ ramwas4PCAandMWAS = function( param ){
 	### Prepare covariates, defactor, 
 	{
 		# param$modelcovariates = c("Subject", "CellType", "Peak SQRT");
-		message('Preparing covariates (splitting dummy variables, orthonormalizing)');
+		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
 		cvrtset = c(const = list(rep(1, length(cvsamples))), param$covariates[ param$modelcovariates ]);
-		### cvrtset = list( const = rep(1,8), a = 1:8, b = c('a','a','b','b','a','a','c','c'))
-		for( ind in which(sapply(cvrtset, typeof)=='character')) { # ind = 3
+		### cvrtset = list( const = rep(1,8), a = 1:8, b = c("a","a","b","b","a","a","c","c"))
+		for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
 			fctr = factor(cvrtset[[ind]]);
 			cvrtset[[ind]] = model.matrix(~fctr)[,-1];
 			rm(fctr);
@@ -2035,7 +2035,7 @@ ramwas4PCAandMWAS = function( param ){
 	{
 		### Calculate covmat from the data matrix
 		{
-			message('Calculating Principal Components');
+			message("Calculating Principal Components");
 			cat(file = paste0(param$dirlog,"/041_log_PCA.txt"), 
 				 "Log, Principal Component Analysis:", date(), "\n", append = FALSE);
 			if( param$cputhreads > 1 ) {
@@ -2054,67 +2054,70 @@ ramwas4PCAandMWAS = function( param ){
 			} else {
 				covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
 			}
-			saveRDS(file = paste0(param$dirmwas,'/covmat.rds'), object = covmat, compress = FALSE);
-			# covmat = readRDS(paste0(param$dirmwas,'/covmat.rds'));
+			saveRDS(file = paste0(param$dirmwas,"/covmat.rds"), object = covmat, compress = FALSE);
+			# covmat = readRDS(paste0(param$dirmwas,"/covmat.rds"));
 		} # covmat
 		
 		### Eigenvalue decomposition
 		{
-			message('Performing Eigenvalue Decomposition');
+			message("Performing Eigenvalue Decomposition");
 			e = eigen(covmat, symmetric=TRUE);
 			nonzeroPCs = sum(abs(e$values/e$values[1]) > length(e$values)*.Machine$double.eps);
-			saveRDS(file = paste0(param$dirmwas,'/eigen.rds'), object = e, compress = FALSE);
-			# e = readRDS(paste0(param$dirmwas,'/eigen.rds'));
+			saveRDS(file = paste0(param$dirmwas,"/eigen.rds"), object = e, compress = FALSE);
+			# e = readRDS(paste0(param$dirmwas,"/eigen.rds"));
 		} # e, nonzeroPCs
 		
 		# PCA plots
 		{		
-			message('Saving PCA plots');
-			pdf(paste0(param$dirmwas, '/PC_plot_covariates_removed.pdf'),7,7);
+			message("Saving PCA plots");
+			pdf(paste0(param$dirmwas, "/PC_plot_covariates_removed.pdf"),7,7);
 			pc100 = head(e$values,40)/sum(e$values)*100;
-			plot(pc100, pch=19, col='blue', main='Principal components',
-				  xlab = 'PCs', ylab = 'Variation Explained (%)',
-				  yaxs = 'i', ylim = c(0,pc100[1]*1.05), xlim = c(0, length(pc100)+0.5), xaxs='i')
+			plot(pc100, pch = 19, col="blue", main = "Principal components",
+				  xlab = "PCs", ylab = "Variation Explained (%)",
+				  yaxs = "i", ylim = c(0,pc100[1]*1.05), 
+				  xaxs = "i", xlim = c(0, length(pc100)+0.5))
 			for( i in 1:min(20,nonzeroPCs) ) { # i=1
-				plot(e$vectors[,i], main=paste('PC',i), xlab = 'Samples', ylab = 'PC components', pch=19, col='blue1',
-					  xlim = c(0, length(e$values)+0.5), xaxs='i');
-				abline(h=0, col='grey')
+				plot(e$vectors[,i], main=paste("PC",i), xlab = "Samples", ylab = "PC components", pch=19, col="blue1",
+					  xlim = c(0, length(e$values)+0.5), xaxs="i");
+				abline(h = 0, col = "grey")
 			}
 			dev.off();
 		}
+		
 		# Save PCs and loadings
 		{
-			message('Saving PC values and vectors');
+			message("Saving PC values and vectors");
 			PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
 			rownames(PC_loads) = cvsamples;
-			colnames(PC_loads) = paste0('PC',seq_len(ncol(PC_loads)));
-			write.table(file = paste0(param$dirmwas, '/PC_loadings.txt'), 
-							x = data.frame(name=rownames(PC_loads),PC_loads), sep='\t', row.names = FALSE);
-			PC_values = data.frame(PC_num = paste0('PC',seq_len(length(e$values))), e$values/sum(e$values))
-			write.table(file = paste0(param$dirmwas, '/PC_values.txt'),
-						  x = data.frame(PC_num = paste0('PC',seq_len(length(e$values))),
+			colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
+			write.table(file = paste0(param$dirmwas, "/PC_loadings.txt"), 
+							x = data.frame(name=rownames(PC_loads),PC_loads), sep="\t", row.names = FALSE);
+			PC_values = data.frame(PC_num = paste0("PC",seq_len(length(e$values))), e$values/sum(e$values))
+			write.table(file = paste0(param$dirmwas, "/PC_values.txt"),
+						  x = data.frame(PC_num = paste0("PC",seq_len(length(e$values))),
 						  					  var_explained = e$values/sum(e$values)),
-						  sep='\t', row.names = FALSE, quote = FALSE);
+						  sep="\t", row.names = FALSE, quote = FALSE);
 		}
 		
+		# Saving PC vs. covariates association
 		if(ncol(param$covariates) > 1) {
-			message('Saving PC vs. covariates associations');
+			message("Saving PC vs. covariates associations");
 			cvrtqrconst = matrix(1/sqrt(length(e$values)),nrow = 1, ncol = length(e$values));
 			testcov = .testCovariates(covariates1 = param$covariates[-1], data = t(e$vectors[,seq_len(nonzeroPCs)]), cvrtqr = cvrtqrconst);
-			write.table(file = paste0(param$dirmwas, '/PC_vs_covariates_direct_corr.txt'), 
-							x = data.frame(name=paste0('PC',seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
-							sep='\t', row.names = FALSE);
-			write.table(file = paste0(param$dirmwas, '/PC_vs_covariates_direct_pvalue.txt'), 
-							x = data.frame(name=paste0('PC',seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
-							sep='\t', row.names = FALSE);
+			write.table(file = paste0(param$dirmwas, "/PC_vs_covariates_direct_corr.txt"), 
+							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
+							sep="\t", row.names = FALSE);
+			write.table(file = paste0(param$dirmwas, "/PC_vs_covariates_direct_pvalue.txt"), 
+							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
+							sep="\t", row.names = FALSE);
 			if( length(param$modelcovariates) > 0) {
 				testcov = .testCovariates(covariates1 = param$covariates[-1], data = t(e$vectors[,seq_len(nonzeroPCs)]), cvrtqr = cvrtqr);
-				write.table(file = paste0(param$dirmwas, '/PC_vs_covariates_fixed_corr.txt'), 
-								x = data.frame(name=paste0('PC',seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
-								sep='\t', row.names = FALSE);
-				write.table(file = paste0(param$dirmwas, '/PC_vs_covariates_fixed_pvalue.txt'), 
-								x = data.frame(name=paste0('PC',seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
-								sep='\t', row.names = FALSE);
+				write.table(file = paste0(param$dirmwas, "/PC_vs_covariates_fixed_corr.txt"), 
+								x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
+								sep="\t", row.names = FALSE);
+				write.table(file = paste0(param$dirmwas, "/PC_vs_covariates_fixed_pvalue.txt"), 
+								x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
+								sep="\t", row.names = FALSE);
 			}
 		}
 		
@@ -2144,7 +2147,7 @@ ramwas4PCAandMWAS = function( param ){
 				param$lockfile2 = tempfile();
 				library(parallel);
 				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
-				clusterExport(cl, "test1Variable")
+				clusterExport(cl, ".test1Variable")
 				clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
 									param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
 				stopCluster(cl);
@@ -2183,7 +2186,6 @@ ramwas4PCAandMWAS = function( param ){
 			
 		}
 	}
-	
 }
 
 
@@ -2211,13 +2213,16 @@ if(FALSE){ # Cell Type
 		maxfragmentsize=200,
 		minfragmentsize=50,
 		filebam2sample = "bam2sample1.txt",
-		filecovariates = 'Covariates.txt',
+		filecovariates = "Covariates.txt",
 		# modelcovariates = NULL,
-		# modelcovariates = 'Peak SQRT',
-		# modelcovariates = c("Subject", "Peak SQRT"),
+		# modelcovariates = "Peak SQRT",
+		# modelcovariates = c("RUFC % of aligned", "Peak SQRT"),
+		# modelcovariates = c("RUFC % of aligned", "Peak SQRT", "Subject"),
+		modelcovariates = c("RUFC % of aligned", "Peak SQRT", "Subject", "Reads used for coverage"),
 		# modelcovariates = c("Subject", "CellType", "Peak SQRT"),
-		modelcovariates = c("Subject", "CellType", "Peak SQRT", "ChrY reads (%)"),
-		modeloutcome = 'peak2',
+		# modelcovariates = c("Subject", "CellType", "Peak SQRT", "ChrY reads (%)"),
+		modeloutcome = "CellType",
+		modelPCs = 1,
 		recalculate.QCs = TRUE,
 		buffersize = 1e9
 	);
@@ -2226,6 +2231,8 @@ if(FALSE){ # Cell Type
 	} else {
 		param$dirtemp = "C:/AllWorkFiles/temp/"
 	}
+	# param = parameterPreprocess(param);
+	# param$modelcovariates %in% names(param$covariates)
 	{
 		tic = proc.time();
 		rez = pipelineProcessBam(bamname = "141222_WBCS012_CD19_150", param );
@@ -2255,13 +2262,6 @@ if(FALSE){ # Cell Type
 		ramwas3NormalizedCoverage(param);
 		toc = proc.time();
 		show(toc-tic);
-	}
-	{
-		tic = proc.time();
-		ramwas3NormalizedCoverage(param);
-		toc = proc.time();
-		show(toc-tic);
-		# HP:   17.81    2.62  395.09
 	}
 	{
 		tic = proc.time();
