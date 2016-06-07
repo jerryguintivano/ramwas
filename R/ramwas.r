@@ -67,6 +67,25 @@ parseBam2sample = function( lines ){
 	return(bamlist);
 }
 
+processCommandLine = function(.arg = NULL){
+	if( is.null(.arg))
+		.arg=commandArgs(TRUE);
+	# .arg = c("fileparam=\"D:/RW/CELL/param_file.txt\"","extraparameter=123123123")
+	if( length(.arg)==0 ) {
+		message("No arguments supplied"); 
+	} else {
+		for (.i in seq_along(.arg)) { # .i=1
+			message("Input parameter: ", .arg[.i]);
+			eval(parse(text=.arg[.i]));
+			if(exists('fileparam')) {
+				source(fileparam, local = TRUE);
+				rm(fileparam);
+			}
+		}
+	}
+	return(mget(ls()));
+}
+
 ### Fill in gaps in the parameter list
 parameterPreprocess = function( param ){
 	### Get from a file if param is not a list
