@@ -148,6 +148,15 @@ parameterPreprocess = function( param ){
 		if( is.null(param$dirmwas) ) 
 			param$dirmwas = paste0(param$modeloutcome,'_',length(param$modelcovariates),'covs_',param$modelPCs,'pc');
 		param$dirmwas = makefullpath(param$dircoveragenorm, param$dirmwas);
+		
+		if( is.null(param$qqplottitle) ) {
+			qqplottitle = paste0("Testing ",param$modeloutcome,"\n",param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
+			if(length(param$modelcovariates)>0)
+				qqplottitle = paste0(qqplottitle, " and covariate",if(length(param$modelcovariates)!=1)"s:\n"else": ",paste0(param$modelcovariates,collapse = ", "))
+			param$qqplottitle = qqplottitle;
+			rm(qqplottitle);
+		}
+			
 	}
 
 	### CpG set should exist
@@ -1883,6 +1892,98 @@ if(FALSE){
 	close(fm)
 	return(covmat);
 }
+.ramwas4MWASjob = function(rng, param, mwascvrtqr, rowsubset){
+	# rng = rangeset[[1]];
+	library(filematrix);
+	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
+
+	outmat = double(3*(rng[2]-rng[1]+1));
+	dim(outmat) = c((rng[2]-rng[1]+1),3);
+	
+	# fmout = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
+	# covmat = 0;
+	
+	step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
+	mm = rng[2]-rng[1]+1;
+	nsteps = ceiling(mm/step1);
+	for( part in 1:nsteps ) { # part = 1
+		cat( part, "of", nsteps, "\n");
+		fr = (part-1)*step1 + rng[1];
+		to = min(part*step1, mm) + rng[1] - 1;
+		
+		slice = fm[,fr:to];
+		if( !is.null(rowsubset) )
+			slice = slice[rowsubset,];
+		
+		rez = .test1Variable(covariate = param$covariates[[param$modeloutcome]],
+									data = t(slice), cvrtqr = mwascvrtqr)
+		
+		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
+		
+		fm$filelock$lockedrun( {
+			cat(file = paste0(param$dirlog,"/042_log_MWAS.txt"), 
+				 date(), "Job", rng[3], "processing slice", part, "of", nsteps, "\n", append = TRUE);
+		});
+		rm(slice);
+	}
+	close(fm)
+	
+	fmout = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
+	fmout[rng[1]:rng[2],1:3] = outmat;
+	close(fmout);
+	
+	return("OK");
+}
+qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
+	
+	if(is.null(ntests))
+		ntests = length(pvalues);
+	
+	if(is.unsorted(pvalues))
+		pvalues = sort.int(pvalues);
+	
+	ypvs = -log10(pvalues);
+	xpvs = -log10(seq_along(ypvs) / ntests);
+	
+	if(length(ypvs) > 1000) {
+		# need to filter a bit, make the plotting faster
+		levels = as.integer( (xpvs - xpvs[1])/(tail(xpvs,1) - xpvs[1]) * 2000);
+		keep = c(TRUE, diff(levels)!=0);
+		levels = as.integer( (ypvs - ypvs[1])/(tail(ypvs,1) - ypvs[1]) * 2000);
+		keep = keep | c(TRUE, diff(levels)!=0);
+		keep = which(keep);
+		ypvs = ypvs[keep];
+		xpvs = xpvs[keep];
+		# 		rm(keep)
+	} else {
+		keep = seq_along(ypvs)
+	}
+	mx = head(xpvs,1)*1.05;
+	my = max(mx*1.15,head(ypvs,1))*1.05;
+	plot(NA,NA, ylim = c(0,my), xlim = c(0,mx), xaxs="i", yaxs="i", 
+		  xlab = expression("\u2013 log"[10]*"(p-value), expected under null"),
+		  ylab = expression("\u2013 log"[10]*"(p-value), observed"));
+		  # xlab = "-Log10(p-value), expected under null", ylab = "-Log10(p-value), observed");
+	lines(c(0,mx),c(0,mx),col="grey")
+	points(xpvs, ypvs, col = "red", pch = 19, cex = 0.25);
+
+	if(!is.null(ci.level)) {
+		if((ci.level>0)&(ci.level<1)) {
+			quantiles <- qbeta(p = rep(c(ci.level/2,1-ci.level/2),each=length(xpvs)), shape1 = keep, shape2 = ntests - keep + 1)
+			quantiles = matrix(quantiles, ncol=2);
+			
+			lines( xpvs, -log10(quantiles[,1]), col="cyan4")
+			lines( xpvs, -log10(quantiles[,2]), col="cyan4")
+		}
+	}
+	legend("bottomright", c("P-values",sprintf("%.0f %% Confidence band",100-ci.level*100)),lwd = c(0,1), pch = c(19,NA_integer_), lty = c(0,1), col=c("red","cyan4"))
+	if(length(pvalues)*2>ntests) {
+		lambda = sprintf("%.3f",log10(pvalues[ntests/2]) / log10(0.5));
+		legend("bottom", legend = bquote(lambda == .(lambda)), bty = "n")
+		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
+	}
+}
+
 ramwas4PCAandMWAS = function( param ){
 	library(filematrix)
 	param = parameterPreprocess(param);
@@ -2017,6 +2118,70 @@ ramwas4PCAandMWAS = function( param ){
 			}
 		}
 		
+		# MWAS
+		{
+			message("Performing MWAS");
+			
+			# param$modelPCs = 1
+			mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
+			# tcrossprod(mwascvrtqr)
+			
+			fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
+			if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
+				colnames(fm) = c("cor","t-test","p-value","q-value");
+			} else {
+				colnames(fm) = c("R-squared","F-test","p-value","q-value");
+			}
+			close(fm);
+			
+			cat(file = paste0(param$dirlog,"/042_log_MWAS.txt"), 
+				 "Log, Methylome-wide association study:", date(), "\n", append = FALSE);
+			if( param$cputhreads > 1 ) {
+				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
+				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
+				
+				param$lockfile2 = tempfile();
+				library(parallel);
+				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+				clusterExport(cl, "test1Variable")
+				clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
+									param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
+				stopCluster(cl);
+				rm(cl, rng, rangeset);
+				file.remove(param$lockfile2);
+			} else {
+				covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
+			}
+			
+			# Fill in FDR column
+			{
+				fm = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"));
+				pvalues = fm[,3];
+				pvalues[pvalues==0] = .Machine$double.xmin;
+				ord = sort.list(pvalues);
+				FDR = pvalues[ord] * length(pvalues) / seq_along(pvalues);
+				FDR[length(FDR)] = min(FDR[length(FDR)], 1);
+				FDR = rev(cummin(rev(FDR)));
+				
+				savevec = pvalues;
+				savevec[ord] = FDR;
+				fm[,4] = savevec;
+				close(fm);
+				
+				sortedpv = pvalues[ord];
+				rm(fm, pvalues, ord, FDR, savevec);
+			} # sortedpv
+				
+			# QQ-plot
+			{
+				pdf(paste0(param$dirmwas, "/QQ_plot.pdf"),7,7);
+				qqplotFast(sortedpv);
+				title(param$qqplottitle);
+				dev.off();
+			}
+			
+		}
 	}
 	
 }
