@@ -1748,7 +1748,7 @@ ramwas3NormalizedCoverage = function( param ){
 	}
 }
 
-.test1Variable = function(covariate, data, cvrtqr){
+test1Variable = function(covariate, data, cvrtqr){
 	# covariate = covariates1[[1]]
 	mycov = matrix(covariate, nrow = 1);
 	slice = data;
@@ -1829,20 +1829,20 @@ if(FALSE){
 	
 	### Full numerical
 	covariate = runif(2000);
-	rez = .test1Variable(covariate, data, cvrtqr)
+	rez = test1Variable(covariate, data, cvrtqr)
 	sapply(rez, `[`, 1)
 	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
 	
 	### Full numerical with missing values
 	covariate = runif(2000);
 	covariate[1:100] = NA;
-	rez = .test1Variable(covariate, data, cvrtqr)
+	rez = test1Variable(covariate, data, cvrtqr)
 	sapply(rez, `[`, 1)
 	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
 	
 	### Categorical
 	covariate = as.character( round(runif(2000), 1) )
-	rez = .test1Variable(covariate, data, cvrtqr)
+	rez = test1Variable(covariate, data, cvrtqr)
 	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez, `[`, 1)
 
@@ -1850,7 +1850,7 @@ if(FALSE){
 	covariate = runif(2000);
 	covariate[1:100] = NA;
 	covariate = as.character( round(covariate, 1) )
-	rez = .test1Variable(covariate, data, cvrtqr)
+	rez = test1Variable(covariate, data, cvrtqr)
 	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez, `[`, 1)
 }
@@ -1861,7 +1861,7 @@ if(FALSE){
 	pv  = vector("list", length(covariates1));
 	nms = character(length(covariates1));
 	for( i in seq_along(covariates1) ) { # i=1
-		rez = .test1Variable(covariates1[[i]], data, cvrtqr);
+		rez = test1Variable(covariates1[[i]], data, cvrtqr);
 		pv[[i]] = as.vector(rez[[3]]);
 		nms[i] = rez$statname;
 		if(nchar(rez$statname)==0) {
@@ -1934,7 +1934,7 @@ if(FALSE){
 		if( !is.null(rowsubset) )
 			slice = slice[rowsubset,];
 		
-		rez = .test1Variable(covariate = param$covariates[[param$modeloutcome]],
+		rez = test1Variable(covariate = param$covariates[[param$modeloutcome]],
 									data = t(slice), cvrtqr = mwascvrtqr)
 		
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
@@ -2166,7 +2166,7 @@ ramwas4PCAandMWAS = function( param ){
 				param$lockfile2 = tempfile();
 				library(parallel);
 				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
-				clusterExport(cl, ".test1Variable")
+				clusterExport(cl, "test1Variable")
 				clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
 									param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
 				stopCluster(cl);
