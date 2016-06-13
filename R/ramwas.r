@@ -85,7 +85,7 @@ processCommandLine = function(.arg = NULL){
 		for (.i in seq_along(.arg)) { # .i=1
 			message("Input parameter: ", .arg[.i]);
 			eval(parse(text=.arg[.i]));
-			if(exists('fileparam')) {
+			if(exists("fileparam")) {
 				source(fileparam, local = TRUE);
 				rm(fileparam);
 			}
@@ -102,7 +102,7 @@ parameterPreprocess = function( param ){
 	}
 	
 	# Set up directories 
-	if( is.null(param$dirproject)) {
+	if( is.null(param$dirproject) ) {
 		param$dirproject = ".";
 	}
 	if( is.null(param$dirfilter) ) {
@@ -1270,15 +1270,11 @@ pipelineEstimateFragmentSizeDistribution = function( param ){
 
 ### Get coverage for 1 or more BAMs
 pipelineCoverage1Sample = function(colnum, param){
-	# library(ramwas);
-	# library(filematrix);
-	
+
 	cpgset = cachedRDSload(param$filecpgset);
 
 	bams = param$bam2sample[[colnum]];
 	
-	# bams = c(param$bam2sample[1], param$bam2sample[2]);
-
 	if( param$maxrepeats == 0 ) {
 		coverage = NULL;
 		for( j in seq_along(bams)) { # j=1
@@ -1585,7 +1581,7 @@ ramwas2collectqc = function( param ){
 	
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dircoveragenorm,"/logs/033_log_normalize.txt"),
-			 date(), ", Process ", Sys.getpid(), "Processing slice ", fmpart_offset[1], "\n", 
+			 date(), ", Process ", Sys.getpid(), ", Processing slice ", fmpart_offset[1], "\n", 
 			 sep = "", append = TRUE);
 	});
 
@@ -2089,21 +2085,8 @@ ramwas4PCAandMWAS = function( param ){
 	
 	### Prepare covariates, defactor, 
 	{
-		# param$modelcovariates = c("Subject", "CellType", "Peak SQRT");
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		# cvrtset = c(const = list(rep(1, length(cvsamples))), param$covariates[ param$modelcovariates ]);
-		# ### cvrtset = list( const = rep(1,8), a = 1:8, b = c("a","a","b","b","a","a","c","c"))
-		# for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
-		# 	fctr = factor(cvrtset[[ind]]);
-		# 	cvrtset[[ind]] = model.matrix(~fctr)[,-1];
-		# 	rm(fctr);
-		# }
-		# cvrtmat = matrix(unlist(cvrtset),length(cvsamples));
-		# cvrtqr = t( qr.Q(qr(cvrtmat)) );  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
-		# 
 		cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
-		# show(head(cvrtqr));
-		# rm(cvrtset, cvrtmat);
 	} # cvrtqr
 	
 	### PCA part
