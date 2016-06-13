@@ -127,9 +127,9 @@ parameterPreprocess = function( param ){
 	if( is.null(param$dirlog) ) param$dirlog = "logs";
 	param$dirlog = .makefullpath( param$dirfilter, param$dirlog);
 	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
-	param$dirtemp  = .makefullpath(param$dirproject, param$dirtemp );
+	param$dirtemp  = .makefullpath(param$dirfilter, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
-	param$dircoveragenorm = .makefullpath(param$dirproject, param$dircoveragenorm);
+	param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);
 	
 	### Filter parameters
 	if( is.null(param$scoretag) ) param$scoretag = "mapq";
@@ -172,11 +172,23 @@ parameterPreprocess = function( param ){
 			param$modelPCs = 0;
 		if( !is.null(param$modeloutcome) )
 			if( !( param$modeloutcome %in% names(param$covariates)) )
-				stop( paste("Model outcome not present in covariate file:", param$modeloutcome))
+				stop( paste("Model outcome not present in covariate file:", param$modeloutcome));
+		
+		
+		if( is.null(param$dirpca) ) {
+			if( length(param$modelcovariates) > 0 ) {
+				library(digest);
+				hash = digest( object = paste(sort(param$modelcovariates), collapse = "\t"), algo = "crc32", serialize = FALSE);
+				param$dirpca = sprintf("PCA_%02d_covariates_%s",length(param$modelcovariates), hash);
+			} else {
+				param$dirpca = "PCA_00_covariates";
+			}
+		}
+		param$dirpca = .makefullpath(param$dircoveragenorm, param$dirpca);
 		
 		if( is.null(param$dirmwas) ) 
 			param$dirmwas = paste0(param$modeloutcome,"_",length(param$modelcovariates),"covs_",param$modelPCs,"pc");
-		param$dirmwas = .makefullpath(param$dircoveragenorm, param$dirmwas);
+		param$dirmwas = .makefullpath(param$dirpca, param$dirmwas);
 		
 		if( is.null(param$qqplottitle) ) {
 			qqplottitle = paste0("Testing ",param$modeloutcome,"\n",param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
