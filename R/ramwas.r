@@ -20,7 +20,7 @@
 		return(TRUE)
 	return(FALSE);
 }
-makefullpath = function(path, filename){
+.makefullpath = function(path, filename){
 	if( is.null(path) )
 		return(filename);
 	if(.isAbsolutePath(filename)) {
@@ -37,6 +37,14 @@ if(FALSE){
 	.isAbsolutePath( "\\123" );    # TRUE
 	.isAbsolutePath( "asd\\123" ); # FALSE
 	.isAbsolutePath( "a\\123" );   # FALSE
+	
+	.makefullpath( "/dir", "C:/file");  # TRUE
+	.makefullpath( "/dir", "~file");    # FALSE
+	.makefullpath( "/dir", "~/file" );   # TRUE
+	.makefullpath( "/dir", "/file" );    # TRUE
+	.makefullpath( "\\dir", "\\file" );    # TRUE
+	.makefullpath( "\\dir", "dir2\\file" ); # FALSE
+	.makefullpath( "/dir", "dir2/file" );   # FALSE
 }
 
 ### Scan a file for parameters
@@ -107,21 +115,21 @@ parameterPreprocess = function( param ){
 			param$dirfilter = param$dirproject;
 		}
 	} else {
-		param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
+		param$dirfilter = .makefullpath(param$dirproject, param$dirfilter);
 	}
 	if( is.null(param$dirrbam) ) 
 		param$dirrbam = "rds_rbam";
-	param$dirrbam = makefullpath( param$dirfilter, param$dirrbam);
+	param$dirrbam = .makefullpath( param$dirfilter, param$dirrbam);
 	if( is.null(param$dirrqc) ) param$dirrqc = "rds_qc";
-	param$dirrqc = makefullpath( param$dirfilter, param$dirrqc);
+	param$dirrqc = .makefullpath( param$dirfilter, param$dirrqc);
 	if( is.null(param$dirqc) ) param$dirqc = "qc";
-	param$dirqc = makefullpath( param$dirfilter, param$dirqc);
+	param$dirqc = .makefullpath( param$dirfilter, param$dirqc);
 	if( is.null(param$dirlog) ) param$dirlog = "logs";
-	param$dirlog = makefullpath( param$dirfilter, param$dirlog);
+	param$dirlog = .makefullpath( param$dirfilter, param$dirlog);
 	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
-	param$dirtemp  = makefullpath(param$dirproject, param$dirtemp );
+	param$dirtemp  = .makefullpath(param$dirproject, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
-	param$dircoveragenorm = makefullpath(param$dirproject, param$dircoveragenorm);
+	param$dircoveragenorm = .makefullpath(param$dirproject, param$dircoveragenorm);
 	
 	### Filter parameters
 	if( is.null(param$scoretag) ) param$scoretag = "mapq";
@@ -133,13 +141,15 @@ parameterPreprocess = function( param ){
 	
 	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
-		param$bamnames = readLines(makefullpath(param$dirproject,param$filebamlist));
+		param$bamnames = readLines(.makefullpath(param$dirproject,param$filebamlist));
+	}
+	if( !is.null(param$bamnames)) {
 		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
 	}
 	
 	### BAM2sample processing
 	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
-		filename = makefullpath(param$dirproject, param$filebam2sample);
+		filename = .makefullpath(param$dirproject, param$filebam2sample);
 		param$bam2sample = parseBam2sample( readLines(filename) );
 		rm(filename);
 	}
@@ -148,7 +158,7 @@ parameterPreprocess = function( param ){
 		sep = "\t";
 		if(grepl("\\.csv$",param$filecovariates)) 
 			sep = ",";
-		filename = makefullpath(param$dirproject, param$filecovariates);
+		filename = .makefullpath(param$dirproject, param$filecovariates);
 		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE, check.names = FALSE);
 		rm(filename);
 		
@@ -166,7 +176,7 @@ parameterPreprocess = function( param ){
 		
 		if( is.null(param$dirmwas) ) 
 			param$dirmwas = paste0(param$modeloutcome,"_",length(param$modelcovariates),"covs_",param$modelPCs,"pc");
-		param$dirmwas = makefullpath(param$dircoveragenorm, param$dirmwas);
+		param$dirmwas = .makefullpath(param$dircoveragenorm, param$dirmwas);
 		
 		if( is.null(param$qqplottitle) ) {
 			qqplottitle = paste0("Testing ",param$modeloutcome,"\n",param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
@@ -1161,7 +1171,7 @@ pipelineProcessBam = function(bamname, param){
 		return("Parameter not set: maxfragmentsize");
 	
 	bamname = gsub("\\.bam$","",bamname);
-	bamfullname = makefullpath(param$dirbam, paste0(bamname,".bam"))
+	bamfullname = .makefullpath(param$dirbam, paste0(bamname,".bam"))
 
 	dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
 	dir.create(param$dirrqc, showWarnings = FALSE, recursive = TRUE)
