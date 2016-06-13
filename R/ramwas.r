@@ -2012,6 +2012,17 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
 }
+orthoCovariates = function(covariates) {
+	cvrtset = c(const = list(rep(1, nrow(covariates))), covariates);
+	for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
+		fctr = factor(cvrtset[[ind]]);
+		cvrtset[[ind]] = model.matrix(~fctr)[,-1];
+		rm(fctr);
+	}
+	cvrtmat = matrix(unlist(cvrtset), nrow(covariates));
+	cvrtqr = qr.Q(qr(cvrtmat));  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
+	return(cvrtqr)
+}
 
 ramwas4PCAandMWAS = function( param ){
 	library(filematrix)
@@ -2048,16 +2059,19 @@ ramwas4PCAandMWAS = function( param ){
 	{
 		# param$modelcovariates = c("Subject", "CellType", "Peak SQRT");
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		cvrtset = c(const = list(rep(1, length(cvsamples))), param$covariates[ param$modelcovariates ]);
-		### cvrtset = list( const = rep(1,8), a = 1:8, b = c("a","a","b","b","a","a","c","c"))
-		for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
-			fctr = factor(cvrtset[[ind]]);
-			cvrtset[[ind]] = model.matrix(~fctr)[,-1];
-			rm(fctr);
-		}
-		cvrtmat = matrix(unlist(cvrtset),length(cvsamples));
-		cvrtqr = t( qr.Q(qr(cvrtmat)) );  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
-		rm(cvrtset, cvrtmat);
+		# cvrtset = c(const = list(rep(1, length(cvsamples))), param$covariates[ param$modelcovariates ]);
+		# ### cvrtset = list( const = rep(1,8), a = 1:8, b = c("a","a","b","b","a","a","c","c"))
+		# for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
+		# 	fctr = factor(cvrtset[[ind]]);
+		# 	cvrtset[[ind]] = model.matrix(~fctr)[,-1];
+		# 	rm(fctr);
+		# }
+		# cvrtmat = matrix(unlist(cvrtset),length(cvsamples));
+		# cvrtqr = t( qr.Q(qr(cvrtmat)) );  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
+		# 
+		cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+		# show(head(cvrtqr));
+		# rm(cvrtset, cvrtmat);
 	} # cvrtqr
 	
 	### PCA part
