@@ -124,8 +124,6 @@ parameterPreprocess = function( param ){
 	param$dirrqc = .makefullpath( param$dirfilter, param$dirrqc);
 	if( is.null(param$dirqc) ) param$dirqc = "qc";
 	param$dirqc = .makefullpath( param$dirfilter, param$dirqc);
-	if( is.null(param$dirlog) ) param$dirlog = "logs";
-	param$dirlog = .makefullpath( param$dirfilter, param$dirlog);
 	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
 	param$dirtemp  = .makefullpath(param$dirfilter, param$dirtemp );
 	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
@@ -1325,16 +1323,18 @@ pipelineCoverage1Sample = function(colnum, param){
 
 ### RaMWAS pipeline
 .ramwas1scanBamJob = function(bamname, param){
-	cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), date(), "Processing BAM", bamname, "\n", append = TRUE);
+	cat(file = paste0(param$dirfilter,"/logs/011_log_scanning_bams.txt"),
+		 date(), ", Process ", Sys.getpid(),", Processing BAM: ", bamname, "\n", sep = "", append = TRUE);
 	pipelineProcessBam(bamname = bamname, param = param);
 }
 ramwas1scanBams = function( param ){
 	param = parameterPreprocess(param);
 	stopifnot( !is.null(param$bamnames));
+	dir.create(paste0(param$dirfilter,"/logs"), showWarnings = FALSE, recursive = TRUE);
 	
+	cat(file = paste0(param$dirfilter,"/logs/011_log_scanning_bams.txt"), 
+		 date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
 	if( param$cputhreads > 1) {
-		dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
-		cat(file = paste0(param$dirlog,"/011_log_scanning_bams.txt"), "Log, scanning bams:", date(), "\n", append = FALSE);
 		cl <- makeCluster(param$cputhreads, outfile="");
 		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, param = param); #[1:64]
 		stopCluster(cl);
@@ -1345,6 +1345,8 @@ ramwas1scanBams = function( param ){
 			z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i], param = param);
 		}
 	}
+	cat(file = paste0(param$dirfilter,"/logs/011_log_scanning_bams.txt"), 
+		 date(), ", Done scanning bams.", "\n", sep = "", append = TRUE);
 	return(z);
 }
 
@@ -1487,8 +1489,10 @@ ramwas2collectqc = function( param ){
 	fmname = paste0(param$dirtemp,"/RawCoverage_part",1);
 	fm = fm.open(fmname, lockfile = param$lockfile);
 	fm$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,"/031_log_raw_coverage_calc.txt"),
-			 date(), "Processing sample", colnum, names(param$bam2sample)[colnum], "\n", append = TRUE);
+		cat(file = paste0(param$dircoveragenorm,"/logs/031_log_raw_coverage_calc.txt"),
+			 date(), ", Process ", Sys.getpid(), 
+			 ", Processing sample ", colnum, " ", names(param$bam2sample)[colnum], "\n",
+			 sep = "", append = TRUE);
 	});
 	close(fm);
 	
@@ -1556,8 +1560,10 @@ ramwas2collectqc = function( param ){
 	close(fmss);
 	
 	fmraw$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,"/032_log_transpose_and_filter.txt"), 
-			 date(), "Processing slice", fmpart, "\n", append = TRUE);
+		cat(file = paste0(param$dircoveragenorm,"/logs/032_log_transpose_and_filter.txt"), 
+			 date(), ", Process ", Sys.getpid(), 
+			 ", Processing slice ", fmpart, "\n",  
+			 sep = "", append = TRUE);
 	});
 	closeAndDeleteFiles(fmraw);
 	return("OK.");
@@ -1578,8 +1584,9 @@ ramwas2collectqc = function( param ){
 	close(fm);
 	
 	fm$filelock$lockedrun( {
-		cat(file = paste0(param$dirlog,"/033_log_normalize.txt"), 
-			 date(), "Processing slice", fmpart_offset[1], "\n", append = TRUE);
+		cat(file = paste0(param$dircoveragenorm,"/logs/033_log_normalize.txt"),
+			 date(), ", Process ", Sys.getpid(), "Processing slice ", fmpart_offset[1], "\n", 
+			 sep = "", append = TRUE);
 	});
 
 	rm(mat);
@@ -1591,8 +1598,8 @@ ramwas3NormalizedCoverage = function( param ){
 	param = parameterPreprocess(param);
 	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
-	dir.create(param$dirlog, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
+	dir.create(paste0(param$dircoveragenorm,"/logs"), showWarnings = FALSE, recursive = TRUE);
 	
 	### data dimensions
 	cpgset = cachedRDSload(param$filecpgset);
@@ -1636,8 +1643,8 @@ ramwas3NormalizedCoverage = function( param ){
 	{
 		message("Calculating and saving raw coverage");
 		param$lockfile = tempfile();
-		cat(file = paste0(param$dirlog,"/031_log_raw_coverage_calc.txt"), 
-			 "Log, raw coverage:", date(), "\n", append = FALSE);
+		cat(file = paste0(param$dircoveragenorm,"/logs/031_log_raw_coverage_calc.txt"), 
+			 date(), ", Calculating raw coverage.", "\n", sep = "", append = FALSE);
 		library(parallel)
 		if( param$cputhreads > 1) {
 			cl = makeCluster(param$cputhreads);
@@ -1652,6 +1659,8 @@ ramwas3NormalizedCoverage = function( param ){
 				cat(i,z[i],"\n");
 			}
 		}
+		cat(file = paste0(param$dircoveragenorm,"/logs/031_log_raw_coverage_calc.txt"), 
+			 date(), ", Done calculating raw coverage.", "\n", sep = "", append = TRUE);
 		file.remove(param$lockfile);
 	}
 	
@@ -1662,8 +1671,8 @@ ramwas3NormalizedCoverage = function( param ){
 		fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"), nrow = nsamples, ncol = nslices);
 		close(fm);
 		
-		cat(file = paste0(param$dirlog,"/032_log_transpose_and_filter.txt"), 
-			 "Log, transpose and filter:", date(), "\n", append = FALSE);
+		cat(file = paste0(param$dircoveragenorm,"/logs/032_log_transpose_and_filter.txt"), 
+			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = FALSE);
 		if( param$cputhreads > 1 ) {
 			param$lockfile2 = tempfile();
 			library(parallel);
@@ -1676,6 +1685,8 @@ ramwas3NormalizedCoverage = function( param ){
 				.ramwas3transposeFilterJob( fmpart, param);
 			}
 		}
+		cat(file = paste0(param$dircoveragenorm,"/logs/032_log_transpose_and_filter.txt"), 
+			 date(), ", Done transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
 	}
 	
 	### Prepare CpG set for filtered CpGs	
@@ -1729,8 +1740,9 @@ ramwas3NormalizedCoverage = function( param ){
 		message("Normalizing coverage and saving in one matrix");
 		
 		fmpart_offset_list = as.list(data.frame(rbind( seq_len(nslices), sliceoffsets[-length(sliceoffsets)])));
-		cat(file = paste0(param$dirlog,"/033_log_normalize.txt"), "Log, normalize:", date(), "\n");
-		
+		cat(file = paste0(param$dircoveragenorm,"/logs/033_log_normalize.txt"), 
+			 date(), ", Normalizing coverage matrix.", "\n", sep = "", append = FALSE);
+
 		### Create big matrix for normalized coverage
 		fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"), 
 							nrow = nsamples, ncol = tail(sliceoffsets,1), size = param$doublesize);
@@ -1754,6 +1766,9 @@ ramwas3NormalizedCoverage = function( param ){
 				.ramwas3normalizeJob( fmpart_offset_list[[fmpart]], param, samplesums);
 			}
 		}
+		cat(file = paste0(param$dircoveragenorm,"/logs/033_log_normalize.txt"), 
+			 date(), ", Done normalizing coverage matrix.", "\n", sep = "", append = TRUE);
+		
 	}
 	
 	### Cleanup
@@ -1925,8 +1940,10 @@ if(FALSE){
 		
 		covmat = covmat + crossprod(slice);
 		fm$filelock$lockedrun( {
-			cat(file = paste0(param$dirlog,"/041_log_PCA.txt"), 
-				 date(), "Job", rng[3], "processing slice", part, "of", nsteps, "\n", append = TRUE);
+			cat(file = paste0(param$dirpca,"/logs/041_log_PCA.txt"),
+				 date(), ", Process ", Sys.getpid(), "Job", rng[3],
+				 ", processing slice ", part, " of ", nsteps, "\n",
+				 sep = "", append = TRUE);
 		});
 		rm(slice);
 	}
@@ -1962,8 +1979,10 @@ if(FALSE){
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
 		
 		fm$filelock$lockedrun( {
-			cat(file = paste0(param$dirlog,"/042_log_MWAS.txt"), 
-				 date(), "Job", rng[3], "processing slice", part, "of", nsteps, "\n", append = TRUE);
+			cat(file = paste0(param$dirmwas,"/logs/042_log_MWAS.txt"),
+				 date(), ", Process ", Sys.getpid(), "Job", rng[3],
+				 ", processing slice ", part, " of ", nsteps, "\n",
+				 sep = "", append = TRUE);
 		});
 		rm(slice);
 	}
@@ -2040,8 +2059,9 @@ ramwas4PCAandMWAS = function( param ){
 	library(filematrix)
 	param = parameterPreprocess(param);
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
-	dir.create(param$dirlog,  showWarnings = FALSE, recursive = TRUE);
+	dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
+	dir.create(paste0(param$dirpca,"/logs"), showWarnings = FALSE, recursive = TRUE);
 	
 	### Get and match sample names
 	{
@@ -2091,8 +2111,9 @@ ramwas4PCAandMWAS = function( param ){
 		### Calculate covmat from the data matrix
 		{
 			message("Calculating Principal Components");
-			cat(file = paste0(param$dirlog,"/041_log_PCA.txt"), 
-				 "Log, Principal Component Analysis:", date(), "\n", append = FALSE);
+			cat(file = paste0(param$dirpca,"/logs/041_log_PCA.txt"), 
+				 date(), ", Running Principal Component Analysis.", "\n", sep = "", append = FALSE);
+
 			if( param$cputhreads > 1 ) {
 				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
 				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
@@ -2192,8 +2213,8 @@ ramwas4PCAandMWAS = function( param ){
 			}
 			close(fm);
 			
-			cat(file = paste0(param$dirlog,"/042_log_MWAS.txt"), 
-				 "Log, Methylome-wide association study:", date(), "\n", append = FALSE);
+			cat(file = paste0(param$dirmwas,"/logs/011_log_scanning_bams.txt"), 
+				 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
 			if( param$cputhreads > 1 ) {
 				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
 				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
@@ -2211,6 +2232,9 @@ ramwas4PCAandMWAS = function( param ){
 			} else {
 				covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
 			}
+			cat(file = paste0(param$dirmwas,"/logs/011_log_scanning_bams.txt"), 
+				 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);
+			
 			
 			# Fill in FDR column
 			{
