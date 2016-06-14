@@ -2217,7 +2217,7 @@ ramwas5MWAS = function( param ){
 	} # cvrtqr
 	
 	### Reading PCs, add as coveriates
-	if( length(param$modelPCs)>0 ) {
+	if( param$modelPCs>0 ) {
 		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
 		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
 		rm(e);
