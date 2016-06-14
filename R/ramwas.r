@@ -2205,8 +2205,6 @@ ramwas5MWAS = function( param ){
 	
 	message("Performing MWAS");
 	
-	### Reading PCs
-	e = readRDS(paste0(param$dirpca,"/eigen.rds"));
 	
 	### Get and match sample names
 	{
@@ -2225,7 +2223,14 @@ ramwas5MWAS = function( param ){
 	} # cvrtqr
 	
 	# param$modelPCs = 1
-	mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
+	### Reading PCs
+	if( length(param$modelPCs)>0 ) {
+		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
+		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
+		rm(e);
+	} else {
+		mwascvrtqr = cvrtqr;
+	}
 	# tcrossprod(mwascvrtqr)
 	
 	fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
