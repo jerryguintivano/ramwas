@@ -2216,8 +2216,7 @@ ramwas5MWAS = function( param ){
 		cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
-	# param$modelPCs = 1
-	### Reading PCs
+	### Reading PCs, add as coveriates
 	if( length(param$modelPCs)>0 ) {
 		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
 		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
@@ -2227,38 +2226,44 @@ ramwas5MWAS = function( param ){
 	}
 	# tcrossprod(mwascvrtqr)
 	
-	fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
-	if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
-		colnames(fm) = c("cor","t-test","p-value","q-value");
-	} else {
-		colnames(fm) = c("R-squared","F-test","p-value","q-value");
+	### Outpout matrix. Cor / t-test / p-value / q-value
+	### Outpout matrix. R2  / F-test / p-value / q-value
+	{
+		fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
+		if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
+			colnames(fm) = c("cor","t-test","p-value","q-value");
+		} else {
+			colnames(fm) = c("R-squared","F-test","p-value","q-value");
+		}
+		close(fm);
 	}
-	close(fm);
 	
-	cat(file = paste0(param$dirmwas,"/Log.txt"), 
-		 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
-	if( param$cputhreads > 1 ) {
-		rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
-		rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
-		rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
-		
-		param$lockfile2 = tempfile();
-		library(parallel);
-		cl = makePSOCKcluster(rep("localhost", param$cputhreads))
-		clusterExport(cl, "test1Variable")
-		clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
-							param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
-		stopCluster(cl);
-		rm(cl, rng, rangeset);
-		file.remove(param$lockfile2);
-	} else {
-		covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
-	}
-	cat(file = paste0(param$dirmwas,"/Log.txt"), 
-		 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);
+	### Run MWAS in parallel
+	{
+		cat(file = paste0(param$dirmwas,"/Log.txt"), 
+			 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
+		if( param$cputhreads > 1 ) {
+			rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
+			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
+			
+			param$lockfile2 = tempfile();
+			library(parallel);
+			cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			clusterExport(cl, "test1Variable")
+			clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
+								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
+			stopCluster(cl);
+			rm(cl, rng, rangeset);
+			file.remove(param$lockfile2);
+		} else {
+			covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
+		}
+		cat(file = paste0(param$dirmwas,"/Log.txt"), 
+			 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);
+	}	
 	
-	
-	# Fill in FDR column
+	### Fill in FDR column
 	{
 		message("Calculating FDR (q-values)");
 		fm = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"));
@@ -2278,7 +2283,7 @@ ramwas5MWAS = function( param ){
 		rm(fm, pvalues, ord, FDR, savevec);
 	} # sortedpv
 		
-	# QQ-plot
+	### QQ-plot
 	{
 		message("Creating QQ-plot");
 		pdf(paste0(param$dirmwas, "/QQ_plot.pdf"),7,7);
