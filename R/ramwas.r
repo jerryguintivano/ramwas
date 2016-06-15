@@ -1442,6 +1442,14 @@ ramwas1scanBams = function( param ){
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	
+	parameterDump(dir = param$dirqc, param = param,
+		toplines = c("dirrqc",
+						 "filebamlist", "filebam2sample",
+						 "bam2sample", "bamnames",
+						 "scoretag", "minscore",
+						 "minfragmentsize", "maxfragmentsize", "maxrepeats",
+						 "filecpgset", "filenoncpgset"));
+	
 	bams = NULL;
 	if( !is.null(param$bamnames) )
 		bams = c(bams, param$bamnames);
@@ -1670,6 +1678,14 @@ ramwas3NormalizedCoverage = function( param ){
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
 
+	parameterDump(dir = param$dircoveragenorm, param = param,
+					  toplines = c("dircoveragenorm", "dirtemp", "dirrbam",
+					  				 "filebam2sample", "bam2sample",
+					  				 "maxrepeats",
+					  				 "minavgcpgcoverage", "minnonzerosamples",
+					  				 "filecpgset",
+					  				 "buffersize", "doublesize", "cputhreads"));
+	
 	### data dimensions
 	cpgset = cachedRDSload(param$filecpgset);
 	ncpgs = sum(sapply(cpgset, length));
@@ -2057,9 +2073,14 @@ orthoCovariates = function(covariates) {
 ramwas4PCA = function( param ){
 	library(filematrix)
 	param = parameterPreprocess(param);
-	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
 
+	parameterDump(dir = param$dirpca, param = param,
+					  toplines = c("dirpca", "dircoveragenorm",
+					  				 "filecovariates", "covariates",
+					  				 "modelcovariates",
+					  				 "cputhreads"));
+	
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
@@ -2269,9 +2290,16 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 ramwas5MWAS = function( param ){
 	library(filematrix)
 	param = parameterPreprocess(param);
-	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
 
+	parameterDump(dir = param$dirmwas, param = param,
+					  toplines = c("dirmwas", "dirpca", "dircoveragenorm",
+					  				 "filecovariates", "covariates",
+					  				 "modeloutcome", "modelcovariates", "modelPCs",
+					  				 "qqplottitle",
+					  				 "cputhreads"));
+	
+	
 	message("Performing MWAS");
 	
 	
