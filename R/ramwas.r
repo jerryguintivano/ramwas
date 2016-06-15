@@ -212,6 +212,81 @@ parameterPreprocess = function( param ){
 	return(param);
 }
 
+### Save parameters to a file in output directory
+parameterDump = function( dir, param, toplines = NULL) {
+	
+	.dump = function(fid, param) {
+		for( nm in names(param) ) { # nm = "modelcovariates"
+			value = param[[nm]];
+			if( is.data.frame(value) ) {
+				txt = paste0("<Data frame ",nrow(value)," x ",ncol(value),">");
+			} else if( is.list(value) ) {
+				txt = paste0("<List of length ", length(value), ">");
+			} else if( length(value) > 1 ) {
+				if(nm == "bamnames") {
+					txt = paste0("<Total ",length(value)," BAM names>");
+				} else {
+					txt = paste0(
+						"c(\n", 
+						paste0('  ',sapply(value, deparse),collapse = ",\n"),
+						")");
+				}
+			} else {
+				txt = deparse(value);
+			}
+			cat(file = fid, nm, "=", txt, '\n');
+			# dput(param[[nm]], file = fid)
+		}		
+	}
+	
+	fid = file( paste0(dir, '/UsedSettings.txt'), "wt");
+	writeLines(con = fid, c("### Parameters used to create the files in this directory",""));
+	if( !is.null(toplines)) {
+		.dump(fid, param[toplines]);
+		writeLines(con = fid, text = "");
+		.dump(fid, param[!(names(param) %in% toplines)]);
+	} else {
+		.dump(fid, param);
+	}
+	close(fid);
+}
+if(FALSE) {
+	dir = 'D:/RW';
+	param = list(
+		dirbam = "D:/RW/CELL/bams/",
+		dirproject = "D:/RW/CELL/",
+		filebamlist = "000_list_of_files.txt",
+		dirtemp = NULL,
+		scoretag = "AS",
+		minscore = 100,
+		cputhreads = 8,
+		filecpgset    = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22_bowtie2_75bp.rds",
+		filenoncpgset = "C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22_bowtie2_75bp_nonCpG.rds",
+		maxrepeats = 3,
+		maxfragmentsize=200,
+		minfragmentsize=50,
+		filebam2sample = "bam2sample1.txt",
+		filecovariates = "Covariates.txt",
+		# modelcovariates = NULL,
+		# modelcovariates = "Peak SQRT",
+		# modelcovariates = "Subject",
+		# modelcovariates = c("RUFC % of aligned", "Peak SQRT"),
+		# modelcovariates = c("RUFC % of aligned", "Peak SQRT", "Subject"),
+		# modelcovariates = c("RUFC % of aligned", "Peak SQRT", "Subject", "Reads used for coverage"),
+		# modelcovariates = c("Subject", "CellType", "Peak SQRT"),
+		modelcovariates = c("Subject", "CellType", "Peak SQRT", "ChrY reads (%)"),
+		modeloutcome = "CellType",
+		modelPCs = 1,
+		recalculate.QCs = FALSE,
+		buffersize = 1e9,
+		dirfilter = TRUE
+	);
+	param = parameterPreprocess(param);
+	
+	toplines = c("scoretag", "minscore")
+	
+}
+
 ###
 ### BAM processing
 ###
