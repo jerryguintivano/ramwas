@@ -2229,6 +2229,7 @@ ramwas5MWAS = function( param ){
 	### Outpout matrix. Cor / t-test / p-value / q-value
 	### Outpout matrix. R2  / F-test / p-value / q-value
 	{
+		message("Creating output matrix");
 		fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
 		if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
 			colnames(fm) = c("cor","t-test","p-value","q-value");
@@ -2238,8 +2239,9 @@ ramwas5MWAS = function( param ){
 		close(fm);
 	}
 	
-	### Run MWAS in parallel
+	### Running MWAS in parallel
 	{
+		message("Running MWAS");
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
 			 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
 		if( param$cputhreads > 1 ) {
