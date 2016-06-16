@@ -5,7 +5,7 @@ rowSumsSq = function(mat) {
 }
 
 colSumsSq = function(mat) {
-	output = double(NROW(mat));
+	output = double(NCOL(mat));
 	.Call("CcolSumsSq", mat, output);
 	return(output);
 }
