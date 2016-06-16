@@ -1955,7 +1955,7 @@ test1Variable = function(covariate, data, cvrtqr){
 		keep = which(colSums(is.na(mycov))==0);
 		
 		mycov = mycov[,keep,drop=FALSE];
-		slice = slice[,keep,drop=FALSE];
+		slice = slice[keep,,drop=FALSE];
 		cvqr0 = cvqr0[,keep,drop=FALSE];
 		cvqr0 = t( qr.Q(qr(t(cvqr0))) );
 	}
@@ -1984,16 +1984,16 @@ test1Variable = function(covariate, data, cvrtqr){
 	
 	### 
 	nVarTested = nrow(mycov)
-	dfFull = ncol(slice) - nrow(cvqr0) - nVarTested;
+	dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
 	if(nVarTested == 1) {
 		# SST = rowSums(slice^2);
-		SST = rowSumsSq(slice);
+		SST = colSumsSq(slice);
 		
-		cvD = tcrossprod(mycov, slice);
+		cvD = (mycov %*% slice);
 		# cvD2 = colSums(cvD^2);
 		# cvD2 = cvD2^2;
 		
-		cvC = tcrossprod(cvqr0, slice);
+		cvC = (cvqr0 %*% slice);
 		cvC2 = colSumsSq( cvC );
 		# cvC2 = colSums( cvC^2 );
 		
@@ -2012,13 +2012,13 @@ test1Variable = function(covariate, data, cvrtqr){
 		
 	} else {
 		# SST = rowSums(slice^2);
-		SST = rowSumsSq(slice);
+		SST = colSumsSq(slice);
 		
-		cvD = tcrossprod(mycov, slice);
+		cvD = (mycov %*% slice);
 		# cvD2 = colSums(cvD^2);
 		cvD2 = colSumsSq(cvD);
 		
-		cvC = tcrossprod(cvqr0, slice);
+		cvC = (cvqr0 %*% slice);
 		# cvC2 = colSums( cvC^2 );
 		cvC2 = colSumsSq( cvC );
 		
@@ -2039,7 +2039,7 @@ test1Variable = function(covariate, data, cvrtqr){
 }
 
 if(FALSE){
-	data = matrix(runif(1e6),50000,2000);
+	data = matrix(runif(1e6),2000,50000);
 	cvrt = matrix(runif(1e6),5,2000);
 	cvrt[1,] = 1;
 	cvrtqr = t( qr.Q(qr(t(cvrt))) );
@@ -2048,10 +2048,10 @@ if(FALSE){
 	covariate = runif(2000);
 	# rez = test1Variable(covariate, data, cvrtqr)
 	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
-	all.equal(rez1$correlation,rez2$correlation)
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	sapply(rez1, `[`, 1)
-	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+	summary(lm( covariate ~ 0 + data[,1] + t(cvrtqr)))$coefficients[1,]
 	show(cbind(tm1,tm2));
 	# 6.14    1.42    4.56
 	# 1.87    0.14    1.03
@@ -2060,18 +2060,18 @@ if(FALSE){
 	covariate = runif(2000);
 	covariate[1:100] = NA;
 	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
-	all.equal(rez1$correlation,rez2$correlation)
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	sapply(rez1, `[`, 1)
-	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+	summary(lm( covariate ~ 0 + data[,1] + t(cvrtqr)))$coefficients[1,]
 	show(cbind(tm1,tm2));
 	
 	### Categorical
 	covariate = as.character( round(runif(2000), 1) )
 	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
-	all.equal(rez1$Rsquared,rez2$Rsquared)
-	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
+	as.matrix(anova(lm( data[,1] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez1, `[`, 1)
 	show(cbind(tm1,tm2));
 	
@@ -2080,9 +2080,9 @@ if(FALSE){
 	covariate[1:100] = NA;
 	covariate = as.character( round(covariate, 1) )
 	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
-	all.equal(rez1$Rsquared,rez2$Rsquared)
-	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
+	as.matrix(anova(lm( data[,1] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez1, `[`, 1)
 	show(cbind(tm1,tm2));
 }
@@ -2283,7 +2283,7 @@ ramwas4PCA = function( param ){
 		if(ncol(param$covariates) > 1) {
 			message("Saving PC vs. covariates associations");
 			cvrtqrconst = matrix(1/sqrt(length(e$values)),nrow = 1, ncol = length(e$values));
-			testcov = .testCovariates(covariates1 = param$covariates[-1], data = t(e$vectors[,seq_len(nonzeroPCs)]), cvrtqr = cvrtqrconst);
+			testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqrconst);
 			write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_corr.txt"), 
 							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
 							sep="\t", row.names = FALSE);
@@ -2291,7 +2291,7 @@ ramwas4PCA = function( param ){
 							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
 							sep="\t", row.names = FALSE);
 			if( length(param$modelcovariates) > 0) {
-				testcov = .testCovariates(covariates1 = param$covariates[-1], data = t(e$vectors[,seq_len(nonzeroPCs)]), cvrtqr = cvrtqr);
+				testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqr);
 				write.table(file = paste0(param$dirpca, "/PC_vs_covariates_fixed_corr.txt"), 
 								x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
 								sep="\t", row.names = FALSE);
@@ -2314,7 +2314,7 @@ ramwas4PCA = function( param ){
 	# fmout = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
 	# covmat = 0;
 	
-	step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
+	step1 = ceiling( 256*1024*1024 / nrow(fm) / 8);
 	mm = rng[2]-rng[1]+1;
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
@@ -2327,7 +2327,7 @@ ramwas4PCA = function( param ){
 			slice = slice[rowsubset,];
 		
 		rez = test1Variable(covariate = param$covariates[[param$modeloutcome]],
-								  data = t(slice), cvrtqr = mwascvrtqr)
+								  data = slice, cvrtqr = mwascvrtqr)
 		
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
 		
