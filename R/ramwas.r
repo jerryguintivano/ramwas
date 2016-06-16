@@ -1455,7 +1455,7 @@ ramwas2collectqc = function( param ){
 	if( !is.null(param$bamnames) )
 		bams = c(bams, param$bamnames);
 	if( !is.null(param$bam2sample) )
-		bams = c(bams, unlist(param$bamnames, use.names = FALSE));
+		bams = c(bams, unlist(param$bam2sample, use.names = FALSE));
 	
 	bams = unique(basename(bams));
 	
