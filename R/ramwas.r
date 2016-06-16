@@ -1043,6 +1043,7 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
 	rezfit = plogis((param[1]-x)/param[2]);
 	keep = rezfit>0.05;
+	keep[length(keep)] = FALSE;
 	rezfit = rezfit - max(rezfit[!keep],0)
 	rezfit[1:seqLength] = rezfit[seqLength];
 	rezfit = rezfit[keep];
