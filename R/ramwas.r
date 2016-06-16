@@ -1870,7 +1870,7 @@ ramwas3NormalizedCoverage = function( param ){
 	}
 }
 
-test1Variable = function(covariate, data, cvrtqr){
+test1VariableOld = function(covariate, data, cvrtqr){
 	# covariate = covariates1[[1]]
 	mycov = matrix(covariate, nrow = 1);
 	slice = data;
@@ -1943,38 +1943,148 @@ test1Variable = function(covariate, data, cvrtqr){
 		}
 	}
 }
+
+test1Variable = function(covariate, data, cvrtqr){
+	# covariate = covariates1[[1]]
+	mycov = matrix(covariate, nrow = 1);
+	slice = data;
+	cvqr0 = cvrtqr;
+	
+	# mycov[1000:1050] = NA;
+	if( any(is.na(mycov)) ){
+		keep = which(colSums(is.na(mycov))==0);
+		
+		mycov = mycov[,keep,drop=FALSE];
+		slice = slice[,keep,drop=FALSE];
+		cvqr0 = cvqr0[,keep,drop=FALSE];
+		cvqr0 = t( qr.Q(qr(t(cvqr0))) );
+	}
+	
+	# mycov = as.character(round(mycov));
+	if( is.character(mycov) || is.factor(mycov)) {
+		fctr = as.factor(mycov)
+		dummy = t(model.matrix(~fctr)[,-1]);
+		dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
+		
+		q = qr(t(dummy));
+		keep = abs(diag(qr.R(q))) > .Machine$double.eps*ncol(mycov);
+		
+		mycov = t( qr.Q(qr(t(dummy))) );
+		mycov[!keep,] = 0;
+	} else {
+		cvsumsq1 = sum( mycov^2 );
+		mycov = mycov - tcrossprod(mycov,cvqr0) %*% cvqr0;
+		cvsumsq2 = sum( mycov^2 );
+		if( cvsumsq2 <= cvsumsq1 * .Machine$double.eps*ncol(mycov) ) {
+			mycov[] = 0; 
+		} else {
+			mycov = mycov / sqrt(rowSums(mycov^2));
+		}
+	}
+	
+	### 
+	nVarTested = nrow(mycov)
+	dfFull = ncol(slice) - nrow(cvqr0) - nVarTested;
+	if(nVarTested == 1) {
+		# SST = rowSums(slice^2);
+		SST = rowSumsSq(slice);
+		
+		cvD = tcrossprod(mycov, slice);
+		# cvD2 = colSums(cvD^2);
+		# cvD2 = cvD2^2;
+		
+		cvC = tcrossprod(cvqr0, slice);
+		cvC2 = colSumsSq( cvC );
+		# cvC2 = colSums( cvC^2 );
+		
+		# SSR = colSums( cvD^2 );
+		cr = cvD / sqrt(pmax(SST - cvC2, SST/1e16));
+		
+		cor2tt = function(x) { return( x * sqrt( dfFull / (1 - pmin(x^2,1))));	}
+		tt2pv = function(x) { return( (pt(-abs(x),dfFull)*2)); }
+		tt = cor2tt(cr);
+		pv = tt2pv(tt);
+		
+		### Check: 
+		# c(tt[1], pv[1])
+		# summary(lm( as.vector(covariate) ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+		return( list(correlation = cr, tstat = tt, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = "") );
+		
+	} else {
+		# SST = rowSums(slice^2);
+		SST = rowSumsSq(slice);
+		
+		cvD = tcrossprod(mycov, slice);
+		# cvD2 = colSums(cvD^2);
+		cvD2 = colSumsSq(cvD);
+		
+		cvC = tcrossprod(cvqr0, slice);
+		# cvC2 = colSums( cvC^2 );
+		cvC2 = colSumsSq( cvC );
+		
+		# SSR = colSums( cvD^2 );
+		rsq = cvD2 / pmax(SST - cvC2, SST/1e16);
+		
+		# rsq = colSums(cr^2);
+		rsq2F = function(x) { return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) ); }
+		F2pv = function(x) { return( pf(x, nVarTested, dfFull, lower.tail = FALSE) ); }
+		ff = rsq2F(rsq);
+		pv = F2pv(ff);
+		
+		### Check: 
+		# c(ff[1], pv[1])
+		# anova(lm( data[1,] ~ 0 + t(cvrtqr) + as.factor(as.vector(as.character(round(covariate))))))
+		return( list(Rsquared = rsq, Fstat = ff, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = paste0("-F_",nVarTested)) );
+	}
+}
+
 if(FALSE){
-	data = matrix(runif(1e6),500,2000);
+	data = matrix(runif(1e6),50000,2000);
 	cvrt = matrix(runif(1e6),5,2000);
 	cvrt[1,] = 1;
 	cvrtqr = t( qr.Q(qr(t(cvrt))) );
 	
 	### Full numerical
 	covariate = runif(2000);
-	rez = test1Variable(covariate, data, cvrtqr)
-	sapply(rez, `[`, 1)
+	# rez = test1Variable(covariate, data, cvrtqr)
+	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
+	all.equal(rez1$correlation,rez2$correlation)
+	sapply(rez1, `[`, 1)
 	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+	show(cbind(tm1,tm2));
+	# 6.14    1.42    4.56
+	# 1.87    0.14    1.03
 	
 	### Full numerical with missing values
 	covariate = runif(2000);
 	covariate[1:100] = NA;
-	rez = test1Variable(covariate, data, cvrtqr)
-	sapply(rez, `[`, 1)
+	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
+	all.equal(rez1$correlation,rez2$correlation)
+	sapply(rez1, `[`, 1)
 	summary(lm( covariate ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
+	show(cbind(tm1,tm2));
 	
 	### Categorical
 	covariate = as.character( round(runif(2000), 1) )
-	rez = test1Variable(covariate, data, cvrtqr)
+	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
+	all.equal(rez1$Rsquared,rez2$Rsquared)
 	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
-	sapply(rez, `[`, 1)
-
+	sapply(rez1, `[`, 1)
+	show(cbind(tm1,tm2));
+	
 	### Categorical, with missing values
 	covariate = runif(2000);
 	covariate[1:100] = NA;
 	covariate = as.character( round(covariate, 1) )
-	rez = test1Variable(covariate, data, cvrtqr)
+	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = test1VariableOld(covariate, data, cvrtqr)} )
+	all.equal(rez1$Rsquared,rez2$Rsquared)
 	as.matrix(anova(lm( data[1,] ~ 0 + t(cvrtqr) + covariate)))
-	sapply(rez, `[`, 1)
+	sapply(rez1, `[`, 1)
+	show(cbind(tm1,tm2));
 }
 .testCovariates = function(covariates1, data, cvrtqr){
 	# covariates1 = param$covariates[-1]
