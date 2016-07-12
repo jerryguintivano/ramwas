@@ -134,6 +134,7 @@ parameterPreprocess = function( param ){
 	### More analysis parameters
 	if( is.null(param$maxrepeats) ) param$maxrepeats = 0;
 	if( is.null(param$cputhreads) ) param$cputhreads = detectCores();
+	if( is.null(param$diskthreads) ) param$diskthreads = min(param$cputhreads,2);
 	
 	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
@@ -1451,6 +1452,7 @@ ramwas1scanBams = function( param ){
 }
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
+	dir.create(param$dirqc, showWarnings = FALSE, recursive = TRUE);
 	
 	parameterDump(dir = param$dirqc, param = param,
 		toplines = c("dirrqc",
@@ -1688,13 +1690,17 @@ ramwas3NormalizedCoverage = function( param ){
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
 
+	if( !is.null(param$covariates) )
+		param$bam2sample = param$bam2sample[param$covariates[[1]]];
+	
 	parameterDump(dir = param$dircoveragenorm, param = param,
 					  toplines = c("dircoveragenorm", "dirtemp", "dirrbam",
 					  				 "filebam2sample", "bam2sample",
 					  				 "maxrepeats",
 					  				 "minavgcpgcoverage", "minnonzerosamples",
 					  				 "filecpgset",
-					  				 "buffersize", "doublesize", "cputhreads"));
+					  				 "buffersize", "doublesize",
+					  				 "cputhreads", "diskthreads"));
 	
 	### data dimensions
 	cpgset = cachedRDSload(param$filecpgset);
@@ -1743,7 +1749,6 @@ ramwas3NormalizedCoverage = function( param ){
 		library(parallel)
 		if( param$cputhreads > 1) {
 			cl = makeCluster(param$cputhreads);
-			# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 			z = clusterApplyLB(cl, seq_len(nsamples), .ramwas3coverageJob, param = param, nslices = nslices);
 			stopCluster(cl);
 		} else {
@@ -1768,10 +1773,11 @@ ramwas3NormalizedCoverage = function( param ){
 		
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
 			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
-		if( param$cputhreads > 1 ) {
+		if( param$diskthreads > 1 ) {
 			param$lockfile2 = tempfile();
 			library(parallel);
-			cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			cl = makeCluster(param$diskthreads);
+			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, 1:nslices, .ramwas3transposeFilterJob, param = param);
 			stopCluster(cl);
 			file.remove(param$lockfile2);
@@ -1845,12 +1851,13 @@ ramwas3NormalizedCoverage = function( param ){
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
 			 date(), ", Normalizing coverage matrix.", "\n", sep = "", append = TRUE);
 		### normalize and fill in
-		if( param$cputhreads > 1 ) {
+		if( param$diskthreads > 1 ) {
 			
 			param$lockfile1 = tempfile();
 			param$lockfile2 = tempfile();
 			library(parallel);
-			cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			cl = makeCluster(param$diskthreads);
+			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, fmpart_offset_list, .ramwas3normalizeJob, param = param, samplesums = samplesums);
 			stopCluster(cl);
 			file.remove(param$lockfile1);
@@ -2199,7 +2206,7 @@ ramwas4PCA = function( param ){
 					  toplines = c("dirpca", "dircoveragenorm",
 					  				 "filecovariates", "covariates",
 					  				 "modelcovariates",
-					  				 "cputhreads"));
+					  				 "cputhreads", "diskthreads"));
 	
 	### Get and match sample names
 	{
