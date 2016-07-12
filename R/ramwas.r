@@ -126,9 +126,7 @@ parameterPreprocess = function( param ){
 	param$dirqc = .makefullpath( param$dirfilter, param$dirqc);
 	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
 	param$dirtemp  = .makefullpath(param$dirfilter, param$dirtemp );
-	if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
-	param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);
-	
+
 	### Filter parameters
 	if( is.null(param$scoretag) ) param$scoretag = "mapq";
 	if( is.null(param$minscore) ) param$minscore = 4;
@@ -152,13 +150,18 @@ parameterPreprocess = function( param ){
 		rm(filename);
 	}
 	### Covariate file
-	if( !is.null(param$filecovariates) ) {
+	if( !is.null(param$filecovariates) & is.null(param$covariates)) {
+		
 		sep = "\t";
 		if(grepl("\\.csv$",param$filecovariates)) 
 			sep = ",";
 		filename = .makefullpath(param$dirproject, param$filecovariates);
 		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE, check.names = FALSE);
 		rm(filename);
+	}
+	if( !is.null(param$covariates)) {
+		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",nrow(param$covariates));
+		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
 		
 		if( any(duplicated(param$covariates[[1]])) )
 			stop("Repeated samples in the covariate file");
@@ -196,6 +199,12 @@ parameterPreprocess = function( param ){
 			rm(qqplottitle);
 		}
 			
+	} else if( !is.null(param$bam2sample) ) {
+		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",length(param$bam2sample));
+		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
+	} else {
+		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
+		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
 	}
 
 	### CpG set should exist
