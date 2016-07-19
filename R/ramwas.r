@@ -2559,8 +2559,9 @@ if(FALSE){ # cluster
 
 
 ramwas6crossValidation = function(param) {
-	
-	parameterDump(dir = param$dirmwas, param = param,
+	param = parameterPreprocess(param);
+	dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
+	parameterDump(dir = param$dircv, param = param,
 					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds",
 					  				 "dirmwas", "dirpca", "dircoveragenorm",
 					  				 "filecovariates", "covariates",
@@ -2568,7 +2569,6 @@ ramwas6crossValidation = function(param) {
 					  				 "qqplottitle",
 					  				 "cputhreads"));
 	
-	param = parameterPreprocess(param);
 	nms = param$covariates[[1]];
 	nsamples = length(nms);
 	
