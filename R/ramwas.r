@@ -2559,8 +2559,6 @@ if(FALSE){ # cluster
 
 ramwas6crossValidation = function(param) {
 	
-	param1 = parameterPreprocess(param);
-	nms = param1$covariates[[1]];
 	parameterDump(dir = param$dirmwas, param = param,
 					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds",
 					  				 "dirmwas", "dirpca", "dircoveragenorm",
@@ -2568,25 +2566,28 @@ ramwas6crossValidation = function(param) {
 					  				 "modeloutcome", "modelcovariates", "modelPCs",
 					  				 "qqplottitle",
 					  				 "cputhreads"));
+	
+	param = parameterPreprocess(param);
+	nms = param$covariates[[1]];
 	nsamples = length(nms);
 	
-	starts = floor(seq(1, nsamples+1, length.out = param1$cvnfolds+1));
+	starts = floor(seq(1, nsamples+1, length.out = param$cvnfolds+1));
 	shuffle = sample(nsamples);
 	
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
 		
-		message("Running fold ",fold," of ",param$cvnfolds);
+		message("Running MWAS for fold ",fold," of ",param$cvnfolds);
 		
 		exclude = logical(nsamples);
 		exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
 		names(exclude) = nms;
 		
-		outcome = param1$covariates[[ param1$modeloutcome ]];
+		outcome = param$covariates[[ param$modeloutcome ]];
 		
-		param2$covariates[[ param1$modeloutcome ]][exclude] = NA;
 		param2 = param;
 		param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+		param2$covariates[[ param$modeloutcome ]][exclude] = NA;
 		
 		ramwas5MWAS(param2);
 		saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"), object = exclude);
@@ -2603,14 +2604,13 @@ ramwas7multiMarker = function(param) {
 	forecastS = NULL;
 	forecastC = NULL;
 	
-	cvrtqr = .getCovariates(param);
-	outcome = param2$covariates[[ param$modeloutcome ]];
+	cvrtqr = .getCovariates(param); # ramwas:::
+	outcome = param$covariates[[ param$modeloutcome ]];
 	outcomeR = outcome - crossprod(cvrtqr, cvrtqr %*% outcome);
-	
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
 		
-		message("Processing fold ", fold, " of", param$cvnfolds, "\n");
+		message("Processing fold ", fold, " of ", param$cvnfolds);
 		param2 = param;
 		param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
 		rdsfile = paste0(param2$dirmwas, "/exclude.rds");
