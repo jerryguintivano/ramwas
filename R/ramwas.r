@@ -2417,7 +2417,19 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
 }
-
+.getCovariates = function(param){
+	cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+	### Reading PCs, add as coveriates
+	if( param$modelPCs > 0 ) {
+		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
+		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
+		rm(e);
+	} else {
+		mwascvrtqr = cvrtqr;
+	}
+	stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
+	return(mwascvrtqr);
+}
 ramwas5MWAS = function( param ){
 	library(filematrix)
 	param = parameterPreprocess(param);
@@ -2447,18 +2459,10 @@ ramwas5MWAS = function( param ){
 	### Prepare covariates, defactor, 
 	{
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+		mwascvrtqr = .getCovariates(param);
+		# cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
-	### Reading PCs, add as coveriates
-	if( param$modelPCs>0 ) {
-		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
-		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
-		rm(e);
-	} else {
-		mwascvrtqr = cvrtqr;
-	}
-	# tcrossprod(mwascvrtqr)
 	
 	### Outpout matrix. Cor / t-test / p-value / q-value
 	### Outpout matrix. R2  / F-test / p-value / q-value
