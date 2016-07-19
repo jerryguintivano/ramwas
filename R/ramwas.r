@@ -151,6 +151,12 @@ parameterPreprocess = function( param ){
 		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
 	}
 	
+	### CV and MM
+	if( is.null(param$cvnfolds) ) param$cvnfolds = 10;
+	if( is.null(param$mmalpha) ) param$mmalpha = 0;
+	if( is.null(param$mmncpgs) ) param$mmncpgs = 1000;
+	
+	
 	### BAM2sample processing
 	if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
 		filename = .makefullpath(param$dirproject, param$filebam2sample);
@@ -206,7 +212,7 @@ parameterPreprocess = function( param ){
 			param$qqplottitle = qqplottitle;
 			rm(qqplottitle);
 		}
-			
+		if( is.null(param$dircv) ) param$dircv = sprintf("%s/CV_%02d_folds", param$dirmwas, param$cvnfolds);
 	} else if( !is.null(param$bam2sample) ) {
 		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",length(param$bam2sample));
 		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
@@ -226,9 +232,6 @@ parameterPreprocess = function( param ){
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
 
-	if( is.null(param$cvnfolds) ) param$cvnfolds = 10;
-	if( is.null(param$mmalpha) ) param$mmalpha = 0;
-	if( is.null(param$mmncpgs) ) param$mmncpgs = 1000;
 	
 	if( is.null(param$usefilelock) ) param$usefilelock = FALSE;
 	
@@ -2558,6 +2561,13 @@ ramwas6crossValidation = function(param) {
 	
 	param1 = parameterPreprocess(param);
 	nms = param1$covariates[[1]];
+	parameterDump(dir = param$dirmwas, param = param,
+					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds",
+					  				 "dirmwas", "dirpca", "dircoveragenorm",
+					  				 "filecovariates", "covariates",
+					  				 "modeloutcome", "modelcovariates", "modelPCs",
+					  				 "qqplottitle",
+					  				 "cputhreads"));
 	nsamples = length(nms);
 	
 	starts = floor(seq(1, nsamples+1, length.out = param1$cvnfolds+1));
@@ -2574,9 +2584,9 @@ ramwas6crossValidation = function(param) {
 		
 		outcome = param1$covariates[[ param1$modeloutcome ]];
 		
-		param2 = param1;
-		param2$dirmwas = sprintf("%s/CV_%02d_folds/fold_%02d", param1$dirmwas, param$cvnfolds, fold);
 		param2$covariates[[ param1$modeloutcome ]][exclude] = NA;
+		param2 = param;
+		param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
 		
 		ramwas5MWAS(param2);
 		saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"), object = exclude);
@@ -2602,7 +2612,7 @@ ramwas7multiMarker = function(param) {
 		
 		message("Processing fold ", fold, " of", param$cvnfolds, "\n");
 		param2 = param;
-		param2$dirmwas = sprintf("%s/CV_%02d_folds/fold_%02d", param$dirmwas, param$cvnfolds, fold);
+		param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
 		rdsfile = paste0(param2$dirmwas, "/exclude.rds");
 		if( !file.exists( rdsfile ) )
 			next;
@@ -2665,18 +2675,20 @@ ramwas7multiMarker = function(param) {
 	
 	forecast = forecastS/forecastC;
 	
-	pdf( sprintf("%s/CV_%02d_folds/prediction_%02d_folds.pdf", param$dirmwas, param$cvnfolds, param$cvnfolds) );
+	pdf( sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.pdf", param$dircv, param$cvnfolds, param2$mmncpgs, param$mmalpha) );
+	plot( c(outcomeR), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcomeR, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param2$mmncpgs), paste0("EN alpha = ", param2$mmalpha)));
 	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
 			main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
 								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
-	plot( c(outcomeR), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
-			main = sprintf("Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)", 
-								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
-								cor(outcomeR, forecast, use = "complete.obs", method = "spearman")))
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param2$mmncpgs), paste0("EN alpha = ", param2$mmalpha)));
 	dev.off();
 	
-	write.table( file = sprintf("%s/CV_%02d_folds/prediction_%02d_folds.txt", param$dirmwas, param$cvnfolds, param$cvnfolds),
+	write.table( file = sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.txt", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
 					 x = data.frame(samples = names(forecastS), outcome, outcomeR, forecast),
 					 sep = "\t", row.names = FALSE);
 	
