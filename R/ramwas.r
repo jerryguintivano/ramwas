@@ -1711,11 +1711,10 @@ ramwas3NormalizedCoverage = function( param ){
 	{
 		message("Checking if all required Rbam files present");
 		bams = unlist(param$bam2sample);
-		for( i in seq_along(bams) ) {
-			bname = bams[i];
-			filename = paste0( param$dirrbam, "/", bname, ".rbam.rds");
-			if( !file.exists(filename) ) {
-				stop(paste0("Rbam file for sample ",names(bams)[i]," does not exist: ", filename));
+		for( bname in bams) {
+			filename = paste0( param$dirrbam, "/", bname);
+			if( file.exists(filename) ) {
+				stop(paste0("Rbam file from bam2sample does not exist: ", filename));
 			}
 		}
 		rm(bams, bname, filename);
@@ -2233,14 +2232,14 @@ ramwas4PCA = function( param ){
 			cat(file = paste0(param$dirpca,"/Log.txt"), 
 				 date(), ", Running Principal Component Analysis.", "\n", sep = "", append = FALSE);
 
-			if( param$diskthreads > 1 ) {
-				rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
-				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
+			if( param$cputhreads > 1 ) {
+				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
+				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
 				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 				
 				param$lockfile2 = tempfile();
 				library(parallel);
-				cl = makePSOCKcluster(rep("localhost", param$diskthreads))
+				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
