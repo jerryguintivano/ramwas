@@ -64,6 +64,7 @@ parseBam2sample = function( lines ){
 	
 	lines = gsub(pattern = "\\.bam,", replacement = ",", lines);
 	lines = gsub(pattern = "\\.bam$", replacement = "",  lines);
+	lines = gsub(pattern = " $", replacement = "",  lines);
 	
 	split.eq = strsplit(lines, split = "=", fixed = TRUE);
 	samplenames = sapply(split.eq, `[`, 1);
@@ -73,6 +74,9 @@ parseBam2sample = function( lines ){
 	# bamvec = unlist(bamlist, use.names = FALSE)
 	# bamlist = lapply(bamlist, basename);
 	return(bamlist);
+}
+if(FALSE) {
+	lines = readLines( .makefullpath(param$dirproject, param$filebam2sample) );
 }
 
 processCommandLine = function(.arg = NULL){
