@@ -105,13 +105,9 @@ parameterPreprocess = function( param ){
 		param = parametersFromFile(param);
 	}
 	
-	# Set up directories 
-	if( is.null(param$dirproject) ) {
-		param$dirproject = ".";
-	}
-	if( is.null(param$dirfilter) ) {
-		param$dirfilter = FALSE;
-	}
+	# Set up basic directories 
+	if( is.null(param$dirproject) ) param$dirproject = ".";
+	if( is.null(param$dirfilter) ) param$dirfilter = FALSE;
 	if( is.logical(param$dirfilter) ) {
 		if( param$dirfilter ) {
 			param$dirfilter = paste0( param$dirproject, "/Filter_", param$scoretag, "_", param$minscore);
@@ -218,7 +214,7 @@ parameterPreprocess = function( param ){
 	}
 	if( is.null(param$doublesize) ) param$doublesize = 4;
 	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
-	if( is.null(param$buffersize) ) param$buffersize = 1e9;
+	if( is.null(param$buffersize) ) param$buffersize = 2e9;
 
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
@@ -1715,10 +1711,11 @@ ramwas3NormalizedCoverage = function( param ){
 	{
 		message("Checking if all required Rbam files present");
 		bams = unlist(param$bam2sample);
-		for( bname in bams) {
-			filename = paste0( param$dirrbam, "/", bname);
-			if( file.exists(filename) ) {
-				stop(paste0("Rbam file from bam2sample does not exist: ", filename));
+		for( i in seq_along(bams) ) {
+			bname = bams[i];
+			filename = paste0( param$dirrbam, "/", bname, ".rbam.rds");
+			if( !file.exists(filename) ) {
+				stop(paste0("Rbam file for sample ",names(bams)[i]," does not exist: ", filename));
 			}
 		}
 		rm(bams, bname, filename);
@@ -2236,14 +2233,14 @@ ramwas4PCA = function( param ){
 			cat(file = paste0(param$dirpca,"/Log.txt"), 
 				 date(), ", Running Principal Component Analysis.", "\n", sep = "", append = FALSE);
 
-			if( param$cputhreads > 1 ) {
-				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
-				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+			if( param$diskthreads > 1 ) {
+				rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
+				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
 				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 				
 				param$lockfile2 = tempfile();
 				library(parallel);
-				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+				cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
