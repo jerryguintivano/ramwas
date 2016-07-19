@@ -227,6 +227,8 @@ parameterPreprocess = function( param ){
 	if( is.null(param$mmalpha) ) param$mmalpha = 0;
 	if( is.null(param$mmncpgs) ) param$mmncpgs = 1000;
 	
+	if( is.null(param$usefilelock) ) param$usefilelock = FALSE;
+	
 	return(param);
 }
 
@@ -1751,7 +1753,7 @@ ramwas3NormalizedCoverage = function( param ){
 	### Fill in the raw coverage files
 	{
 		message("Calculating and saving raw coverage");
-		param$lockfile = tempfile();
+		if(param$usefilelock) param$lockfile = tempfile();
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
 			 date(), ", Calculating raw coverage.", "\n", sep = "", append = FALSE);
 		library(parallel)
@@ -1782,7 +1784,7 @@ ramwas3NormalizedCoverage = function( param ){
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
 			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
 		if( param$diskthreads > 1 ) {
-			param$lockfile2 = tempfile();
+			if(param$usefilelock) param$lockfile2 = tempfile();
 			library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
@@ -1861,8 +1863,8 @@ ramwas3NormalizedCoverage = function( param ){
 		### normalize and fill in
 		if( param$diskthreads > 1 ) {
 			
-			param$lockfile1 = tempfile();
-			param$lockfile2 = tempfile();
+			if(param$usefilelock) param$lockfile1 = tempfile();
+			if(param$usefilelock) param$lockfile2 = tempfile();
 			library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
@@ -2245,7 +2247,7 @@ ramwas4PCA = function( param ){
 				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
 				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 				
-				param$lockfile2 = tempfile();
+				if(param$usefilelock) param$lockfile2 = tempfile();
 				library(parallel);
 				cl <- makeCluster(param$cputhreads);
 				# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
@@ -2492,7 +2494,7 @@ ramwas5MWAS = function( param ){
 			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
 			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 			
-			param$lockfile2 = tempfile();
+			if(param$usefilelock) param$lockfile2 = tempfile();
 			library(parallel);
 			cl <- makeCluster(param$cputhreads);
 			# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
