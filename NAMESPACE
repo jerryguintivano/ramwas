@@ -10,8 +10,8 @@ importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile"
 importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "makePSOCKcluster")
 importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
-importFrom("glmnet", "cv.glmnet")
-importMethodsFrom("glmnet", "predict")
+importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
+# importMethodsFrom("glmnet", "predict")
 
 importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix")
 importClassesFrom("filematrix", "filematrix")
