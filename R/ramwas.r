@@ -1420,7 +1420,7 @@ ramwas1scanBams = function( param ){
 	cat(file = paste0(param$dirfilter,"/Log.txt"), 
 		 date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
 	if( param$cputhreads > 1) {
-		cl <- makeCluster(param$cputhreads, outfile="");
+		cl <- makeCluster(param$cputhreads);
 		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, param = param); #[1:64]
 		stopCluster(cl);
 	} else {
@@ -2243,7 +2243,8 @@ ramwas4PCA = function( param ){
 				
 				param$lockfile2 = tempfile();
 				library(parallel);
-				cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+				cl <- makeCluster(param$cputhreads);
+				# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
@@ -2489,7 +2490,8 @@ ramwas5MWAS = function( param ){
 			
 			param$lockfile2 = tempfile();
 			library(parallel);
-			cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			cl <- makeCluster(param$cputhreads);
+			# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 			clusterExport(cl, "test1Variable")
 			clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
 								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
