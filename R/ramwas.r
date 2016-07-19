@@ -46,6 +46,11 @@ if(FALSE){
 	.makefullpath( "\\dir", "dir2\\file" ); # FALSE
 	.makefullpath( "/dir", "dir2/file" );   # FALSE
 }
+.file.remove = function(x) {
+	if( !is.null(x) )
+		if( file.exists(x) )
+			file.remove(x);
+}
 
 ### Scan a file for parameters
 parametersFromFile = function( .parameterfile ){
@@ -1769,7 +1774,7 @@ ramwas3NormalizedCoverage = function( param ){
 		}
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
 			 date(), ", Done calculating raw coverage.", "\n", sep = "", append = TRUE);
-		file.remove(param$lockfile);
+		.file.remove(param$lockfile);
 	}
 	
 	### Transpose the slices, filter by average and fraction of non-zeroes
@@ -1788,7 +1793,7 @@ ramwas3NormalizedCoverage = function( param ){
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, 1:nslices, .ramwas3transposeFilterJob, param = param);
 			stopCluster(cl);
-			file.remove(param$lockfile2);
+			.file.remove(param$lockfile2);
 		} else {
 			for( fmpart in seq_len(nslices) ) { # fmpart = 5
 				.ramwas3transposeFilterJob( fmpart, param);
@@ -1868,8 +1873,8 @@ ramwas3NormalizedCoverage = function( param ){
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, fmpart_offset_list, .ramwas3normalizeJob, param = param, samplesums = samplesums);
 			stopCluster(cl);
-			file.remove(param$lockfile1);
-			file.remove(param$lockfile2);
+			.file.remove(param$lockfile1);
+			.file.remove(param$lockfile2);
 			
 		} else {
 			for( fmpart in seq_len(nslices) ) { # fmpart = 5
@@ -2253,7 +2258,7 @@ ramwas4PCA = function( param ){
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
 				rm(cl, rng, rangeset, covlist);
-				file.remove(param$lockfile2);
+				.file.remove(param$lockfile2);
 			} else {
 				covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
 			}
@@ -2501,7 +2506,7 @@ ramwas5MWAS = function( param ){
 								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
 			stopCluster(cl);
 			rm(cl, rng, rangeset);
-			file.remove(param$lockfile2);
+			.file.remove(param$lockfile2);
 		} else {
 			covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
 		}
