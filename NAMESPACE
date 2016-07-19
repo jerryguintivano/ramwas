@@ -13,8 +13,6 @@ importFrom("digest", "digest")
 importFrom("glmnet", "cv.glmnet")
 importMethodsFrom("glmnet", "predict")
 
-importMethodsFrom("filematrix", "close")
-
 importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix")
 importClassesFrom("filematrix", "filematrix")
 importMethodsFrom("filematrix", "close")
