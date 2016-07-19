@@ -105,9 +105,13 @@ parameterPreprocess = function( param ){
 		param = parametersFromFile(param);
 	}
 	
-	# Set up basic directories 
-	if( is.null(param$dirproject) ) param$dirproject = ".";
-	if( is.null(param$dirfilter) ) param$dirfilter = FALSE;
+	# Set up directories 
+	if( is.null(param$dirproject) ) {
+		param$dirproject = ".";
+	}
+	if( is.null(param$dirfilter) ) {
+		param$dirfilter = FALSE;
+	}
 	if( is.logical(param$dirfilter) ) {
 		if( param$dirfilter ) {
 			param$dirfilter = paste0( param$dirproject, "/Filter_", param$scoretag, "_", param$minscore);
@@ -214,7 +218,7 @@ parameterPreprocess = function( param ){
 	}
 	if( is.null(param$doublesize) ) param$doublesize = 4;
 	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
-	if( is.null(param$buffersize) ) param$buffersize = 2e9;
+	if( is.null(param$buffersize) ) param$buffersize = 1e9;
 
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
