@@ -2605,16 +2605,15 @@ ramwas7multiMarker = function(param) {
 	forecastS = NULL;
 	forecastC = NULL;
 	
-	cvrtqr = .getCovariates(param); # ramwas:::
+	cvrtqr = .getCovariates(param); # cvrtqr = ramwas:::.getCovariates(param)
 	outcome = param$covariates[[ param$modeloutcome ]];
 	outcomeR = outcome - crossprod(cvrtqr, cvrtqr %*% outcome);
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
 		
 		message("Processing fold ", fold, " of ", param$cvnfolds);
-		param2 = param;
-		param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
-		rdsfile = paste0(param2$dirmwas, "/exclude.rds");
+		dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+		rdsfile = paste0(dirmwas, "/exclude.rds");
 		if( !file.exists( rdsfile ) )
 			next;
 		exclude = readRDS( rdsfile )
@@ -2627,21 +2626,21 @@ ramwas7multiMarker = function(param) {
 		
 		# get p-values
 		{
-			fm = fm.open(paste0(param2$dirmwas, "/Stats_and_pvalues"))
+			fm = fm.open(paste0(dirmwas, "/Stats_and_pvalues"))
 			colnames(fm)
 			pv = fm[,3];
 			close(fm)
 		}
 		
-		# Find top param2$mmncpgs CpGs
+		# Find top param$mmncpgs CpGs
 		{
 			# tic = proc.time();
 			pvthr = 10^((-300):0);
 			fi = findInterval( pv, pvthr);
 			tab = cumsum(tabulate(fi));
-			upperfi = which(tab > param2$mmncpgs)[1];
+			upperfi = which(tab > param$mmncpgs)[1];
 			set1 = which(fi <= upperfi);
-			cpgset = set1[sort.list(pv[set1])[seq_len(param2$mmncpgs)]];
+			cpgset = set1[sort.list(pv[set1])[seq_len(param$mmncpgs)]];
 			cpgset = sort.int(cpgset);
 			rm(pvthr, fi, tab, upperfi, set1);
 			# toc = proc.time();
@@ -2649,7 +2648,7 @@ ramwas7multiMarker = function(param) {
 		} # 1.49			
 		# {
 		# 	tic = proc.time();
-		# 	cpgset = sort.list(pv)[seq_len(param2$mmncpgs)];
+		# 	cpgset = sort.list(pv)[seq_len(param$mmncpgs)];
 		# 	cpgset = sort.int(cpgset);
 		# 	toc = proc.time();
 		# 	show(toc-tic);
@@ -2657,7 +2656,7 @@ ramwas7multiMarker = function(param) {
 		
 		# get coverage
 		{
-			fm = fm.open( paste0(param2$dircoveragenorm,"/Coverage"));
+			fm = fm.open( paste0(param$dircoveragenorm,"/Coverage"));
 			coverage = fm[, cpgset];
 			rownames(coverage) = rownames(fm);
 			close(fm);
@@ -2666,6 +2665,8 @@ ramwas7multiMarker = function(param) {
 		# Residualize
 		resids = coverage - crossprod(cvrtqr, cvrtqr %*% coverage);
 		
+		if(param$mmncpgs == 1)
+			resids = cbind(resids,resids);
 		
 		z = cv.glmnet(x = resids[!exclude,], y = outcome[!exclude], nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
 		z2 = predict(z, newx=resids[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
@@ -2676,17 +2677,17 @@ ramwas7multiMarker = function(param) {
 	
 	forecast = forecastS/forecastC;
 	
-	pdf( sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.pdf", param$dircv, param$cvnfolds, param2$mmncpgs, param$mmalpha) );
+	pdf( sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.pdf", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
 	plot( c(outcomeR), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
 			main = sprintf("Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
 								cor(outcomeR, forecast, use = "complete.obs", method = "spearman")));
-	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param2$mmncpgs), paste0("EN alpha = ", param2$mmalpha)));
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
 	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
 			main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
 								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
-	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param2$mmncpgs), paste0("EN alpha = ", param2$mmalpha)));
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
 	dev.off();
 	
 	write.table( file = sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.txt", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
