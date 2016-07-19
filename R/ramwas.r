@@ -106,9 +106,7 @@ parameterPreprocess = function( param ){
 	}
 	
 	# Set up directories 
-	if( is.null(param$dirproject) ) {
-		param$dirproject = ".";
-	}
+	if( is.null(param$dirproject) ) param$dirproject = ".";
 	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
 	}
@@ -2242,15 +2240,15 @@ ramwas4PCA = function( param ){
 			cat(file = paste0(param$dirpca,"/Log.txt"), 
 				 date(), ", Running Principal Component Analysis.", "\n", sep = "", append = FALSE);
 
-			if( param$cputhreads > 1 ) {
-				rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
-				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+			if( param$diskthreads > 1 ) {
+				rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
+				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
 				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 				
 				if(param$usefilelock) param$lockfile2 = tempfile();
 				library(parallel);
-				cl <- makeCluster(param$cputhreads);
-				# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+				cl <- makeCluster(param$diskthreads);
+				# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
