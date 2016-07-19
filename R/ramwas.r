@@ -131,9 +131,7 @@ parameterPreprocess = function( param ){
 	param$dirrqc = .makefullpath( param$dirfilter, param$dirrqc);
 	if( is.null(param$dirqc) ) param$dirqc = "qc";
 	param$dirqc = .makefullpath( param$dirfilter, param$dirqc);
-	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
-	param$dirtemp  = .makefullpath(param$dirfilter, param$dirtemp );
-
+	
 	### Filter parameters
 	if( is.null(param$scoretag) ) param$scoretag = "mapq";
 	if( is.null(param$minscore) ) param$minscore = 4;
@@ -177,6 +175,7 @@ parameterPreprocess = function( param ){
 		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",nrow(param$covariates));
 		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
 		
+
 		if( any(duplicated(param$covariates[[1]])) )
 			stop("Repeated samples in the covariate file");
 		
@@ -221,6 +220,9 @@ parameterPreprocess = function( param ){
 		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
 	}
 
+	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
+	param$dirtemp = .makefullpath(param$dircoveragenorm, param$dirtemp );
+
 	### CpG set should exist
 	if( !is.null(param$filecpgset) ) {
 		stopifnot( file.exists(param$filecpgset) );
@@ -232,7 +234,6 @@ parameterPreprocess = function( param ){
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
 
-	
 	if( is.null(param$usefilelock) ) param$usefilelock = FALSE;
 	
 	return(param);
