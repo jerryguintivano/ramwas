@@ -223,6 +223,10 @@ parameterPreprocess = function( param ){
 	if( is.null(param$minavgcpgcoverage) ) param$minavgcpgcoverage = 0.3;
 	if( is.null(param$minnonzerosamples) ) param$minnonzerosamples = 0.3;
 
+	if( is.null(param$cvnfolds) ) param$cvnfolds = 10;
+	if( is.null(param$mmalpha) ) param$mmalpha = 0;
+	if( is.null(param$mmncpgs) ) param$mmncpgs = 1000;
+	
 	return(param);
 }
 
@@ -2542,3 +2546,137 @@ if(FALSE){ # cluster
 	z = clusterApplyLB(cl, 1, ramwas:::.ramwas3transposeFilterJob, param = param);
 	stopCluster(cl);
 } # cluster
+
+
+
+ramwas6crossValidation = function(param) {
+	
+	param1 = parameterPreprocess(param);
+	nms = param1$covariates[[1]];
+	nsamples = length(nms);
+	
+	starts = floor(seq(1, nsamples+1, length.out = param1$cvnfolds+1));
+	shuffle = sample(nsamples);
+	
+	
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+		
+		message('Running fold ',fold,'of',param$cvnfolds);
+		
+		exclude = logical(nsamples);
+		exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
+		names(exclude) = nms;
+		
+		outcome = param1$covariates[[ param1$modeloutcome ]];
+		
+		param2 = param1;
+		param2$dirmwas = sprintf("%s/CV_%02d_folds/fold_%02d", param1$dirmwas, param$cvnfolds, fold);
+		param2$covariates[[ param1$modeloutcome ]][exclude] = NA;
+		
+		ramwas5MWAS(param2);
+		saveRDS( file = paste0(param2$dirmwas, '/exclude.rds'), object = exclude);
+	}
+}
+
+ramwas7multiMarker = function(param) {
+	library(glmnet)
+	library(filematrix);
+	library(ramwas);
+	
+	param = parameterPreprocess(param);
+	
+	forecastS = NULL;
+	forecastC = NULL;
+	
+	cvrtqr = .getCovariates(param);
+	outcome = param2$covariates[[ param$modeloutcome ]];
+	outcomeR = outcome - crossprod(cvrtqr, cvrtqr %*% outcome);
+	
+	
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+		
+		cat('fold', fold, '\n')
+		param2 = param;
+		param2$dirmwas = sprintf("%s/CV_%02d_folds/fold_%02d", param$dirmwas, param$cvnfolds, fold);
+		rdsfile = paste0(param2$dirmwas, '/exclude.rds');
+		if( !file.exists( rdsfile ) )
+			next;
+		exclude = readRDS( rdsfile )
+		
+		if( is.null(forecastS) ) {
+			forecastS = double(length(exclude));
+			names(forecastS) = names(exclude);
+			forecastC = integer(length(exclude));
+		}
+		
+		# get p-values
+		{
+			fm = fm.open(paste0(param2$dirmwas, '/Stats_and_pvalues'))
+			colnames(fm)
+			pv = fm[,3];
+			close(fm)
+		}
+		
+		# Find top param2$mmncpgs CpGs
+		{
+			# tic = proc.time();
+			pvthr = 10^((-300):0);
+			fi = findInterval( pv, pvthr);
+			tab = cumsum(tabulate(fi));
+			upperfi = which(tab > param2$mmncpgs)[1];
+			set1 = which(fi <= upperfi);
+			cpgset = set1[sort.list(pv[set1])[seq_len(param2$mmncpgs)]];
+			cpgset = sort.int(cpgset);
+			rm(pvthr, fi, tab, upperfi, set1);
+			# toc = proc.time();
+			# show(toc-tic);
+		} # 1.49			
+		# {
+		# 	tic = proc.time();
+		# 	cpgset = sort.list(pv)[seq_len(param2$mmncpgs)];
+		# 	cpgset = sort.int(cpgset);
+		# 	toc = proc.time();
+		# 	show(toc-tic);
+		# } # 38.92
+		
+		# get coverage
+		{
+			fm = fm.open( paste0(param2$dircoveragenorm,'/Coverage'));
+			coverage = fm[, cpgset];
+			rownames(coverage) = rownames(fm);
+			close(fm);
+		}
+		
+		# Residualize
+		resids = coverage - crossprod(cvrtqr, cvrtqr %*% coverage);
+		
+		
+		z = cv.glmnet(x = resids[!exclude,], y = outcome[!exclude], nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		z2 = predict(z, newx=resids[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+		
+		forecastS[exclude] = forecastS[exclude] + z2;
+		forecastC[exclude] = forecastC[exclude] + 1;
+	}
+	
+	forecast = forecastS/forecastC;
+	
+	pdf( sprintf("%s/CV_%02d_folds/prediction_%02d_folds.pdf", param$dirmwas, param$cvnfolds, param$cvnfolds) );
+	plot( outcome, forecast, pch = 19, col = 'blue', xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf('Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)', 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
+	plot( c(outcomeR), forecast, pch = 19, col = 'blue', xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf('Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)', 
+								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcomeR, forecast, use = "complete.obs", method = "spearman")))
+	dev.off();
+	
+	write.table( file = sprintf("%s/CV_%02d_folds/prediction_%02d_folds.txt", param$dirmwas, param$cvnfolds, param$cvnfolds),
+					 x = data.frame(samples = names(forecastS), outcome, outcomeR, forecast),
+					 sep = "\t", row.names = FALSE);
+	
+	return( list(forecast = forecastS/forecastC, outcome = outcome, outcomeR = outcomeR) );
+}
+
+
+
