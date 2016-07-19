@@ -246,18 +246,18 @@ parameterDump = function( dir, param, toplines = NULL) {
 				} else {
 					txt = paste0(
 						"c(\n", 
-						paste0('  ',sapply(value, deparse),collapse = ",\n"),
+						paste0("  ",sapply(value, deparse),collapse = ",\n"),
 						")");
 				}
 			} else {
 				txt = deparse(value);
 			}
-			cat(file = fid, nm, "=", txt, '\n');
+			cat(file = fid, nm, "=", txt, "\n");
 			# dput(param[[nm]], file = fid)
 		}		
 	}
 	
-	fid = file( paste0(dir, '/UsedSettings.txt'), "wt");
+	fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
 	writeLines(con = fid, c("### Parameters used to create the files in this directory",""));
 	if( !is.null(toplines)) {
 		.dump(fid, param[toplines]);
@@ -269,7 +269,7 @@ parameterDump = function( dir, param, toplines = NULL) {
 	close(fid);
 }
 if(FALSE) {
-	dir = 'D:/RW';
+	dir = "D:/RW";
 	param = list(
 		dirbam = "D:/RW/CELL/bams/",
 		dirproject = "D:/RW/CELL/",
@@ -2561,7 +2561,7 @@ ramwas6crossValidation = function(param) {
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
 		
-		message('Running fold ',fold,'of',param$cvnfolds);
+		message("Running fold ",fold," of ",param$cvnfolds);
 		
 		exclude = logical(nsamples);
 		exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
@@ -2574,7 +2574,7 @@ ramwas6crossValidation = function(param) {
 		param2$covariates[[ param1$modeloutcome ]][exclude] = NA;
 		
 		ramwas5MWAS(param2);
-		saveRDS( file = paste0(param2$dirmwas, '/exclude.rds'), object = exclude);
+		saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"), object = exclude);
 	}
 }
 
@@ -2595,10 +2595,10 @@ ramwas7multiMarker = function(param) {
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
 		
-		cat('fold', fold, '\n')
+		message("Processing fold ", fold, " of", param$cvnfolds, "\n");
 		param2 = param;
 		param2$dirmwas = sprintf("%s/CV_%02d_folds/fold_%02d", param$dirmwas, param$cvnfolds, fold);
-		rdsfile = paste0(param2$dirmwas, '/exclude.rds');
+		rdsfile = paste0(param2$dirmwas, "/exclude.rds");
 		if( !file.exists( rdsfile ) )
 			next;
 		exclude = readRDS( rdsfile )
@@ -2611,7 +2611,7 @@ ramwas7multiMarker = function(param) {
 		
 		# get p-values
 		{
-			fm = fm.open(paste0(param2$dirmwas, '/Stats_and_pvalues'))
+			fm = fm.open(paste0(param2$dirmwas, "/Stats_and_pvalues"))
 			colnames(fm)
 			pv = fm[,3];
 			close(fm)
@@ -2641,7 +2641,7 @@ ramwas7multiMarker = function(param) {
 		
 		# get coverage
 		{
-			fm = fm.open( paste0(param2$dircoveragenorm,'/Coverage'));
+			fm = fm.open( paste0(param2$dircoveragenorm,"/Coverage"));
 			coverage = fm[, cpgset];
 			rownames(coverage) = rownames(fm);
 			close(fm);
@@ -2661,12 +2661,12 @@ ramwas7multiMarker = function(param) {
 	forecast = forecastS/forecastC;
 	
 	pdf( sprintf("%s/CV_%02d_folds/prediction_%02d_folds.pdf", param$dirmwas, param$cvnfolds, param$cvnfolds) );
-	plot( outcome, forecast, pch = 19, col = 'blue', xlab = param$modeloutcome, ylab = "CV prediction",
-			main = sprintf('Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)', 
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
 								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
-	plot( c(outcomeR), forecast, pch = 19, col = 'blue', xlab = param$modeloutcome, ylab = "CV prediction",
-			main = sprintf('Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)', 
+	plot( c(outcomeR), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
 								cor(outcomeR, forecast, use = "complete.obs", method = "spearman")))
 	dev.off();
