@@ -9,10 +9,13 @@ importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongRef
 importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam")
 importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "makePSOCKcluster")
 importFrom("KernSmooth","locpoly");
-importFrom("digest", "digest");
+importFrom("digest", "digest")
+importFrom("glmnet", "cv.glmnet")
+importMethodsFrom("glmnet", "predict")
+
 importMethodsFrom("filematrix", "close")
 
-importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix");
+importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix")
 importClassesFrom("filematrix", "filematrix")
 importMethodsFrom("filematrix", "close")
 

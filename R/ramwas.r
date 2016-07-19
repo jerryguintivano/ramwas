@@ -2580,8 +2580,8 @@ ramwas6crossValidation = function(param) {
 
 ramwas7multiMarker = function(param) {
 	library(glmnet)
-	library(filematrix);
-	library(ramwas);
+	# library(filematrix);
+	# library(ramwas);
 	
 	param = parameterPreprocess(param);
 	
