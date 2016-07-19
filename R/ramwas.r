@@ -241,7 +241,7 @@ parameterPreprocess = function( param ){
 
 ### Save parameters to a file in output directory
 parameterDump = function( dir, param, toplines = NULL) {
-	
+	message("Working in: ",dir);
 	.dump = function(fid, param) {
 		for( nm in names(param) ) { # nm = "modelcovariates"
 			value = param[[nm]];
@@ -2457,7 +2457,7 @@ ramwas5MWAS = function( param ){
 					  				 "cputhreads"));
 	
 	
-	message("Performing MWAS");
+	message("Preparing for MWAS");
 	
 	
 	### Get and match sample names
