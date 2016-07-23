@@ -625,7 +625,7 @@ qcmean.NULL = function(x){ NA }
 	"Total reads",
 	"Reads aligned\tRA % of total",
 	"Reads after filter\tRAF % of aligned",
-	"Reads removed as repeats\tRRAR % of aligned",
+	"Reads removed as duplicate\tRRAD % of aligned",
 	"Reads used for coverage\tRUFC % of aligned",
 	"Forward strand (%)",
 	"Avg alignment score",
@@ -638,6 +638,26 @@ qcmean.NULL = function(x){ NA }
 	"ChrX reads (%)",
 	"ChrY reads (%)",
 	"Peak SQRT")};
+.qcTextHeaderR = {paste(sep = "\t",
+							  "Sample",
+							  "NBAMs",
+							  "TotalReads",
+							  "ReadsAligned\tReadsAlignedPct",
+							  "ReadsAfterFilter\tReadsAfterFilterPct",
+							  "ReadsRemovedAsDuplicate\tReadsRemovedAsDuplicatePct",
+							  "ReadsUsedForCoverage\tReadsUsedForCoveragePct",
+							  "ForwardStrandPct",
+							  "AvgAlignmentScore",
+							  "AvgAlignedLength",
+							  "AvgEditDistance",
+							  "NonCpGreadsPct",
+							  "AvgNonCpGcoverage",
+							  "AvgCpGcoverage",
+							  "NonCpg2CpGcoverageRatio",
+							  "ChrXreadsPct",
+							  "ChrYreadsPct",
+							  "PeakSQRT")};
+
 .qccols = length(strsplit(.qcTextHeader,"\t",fixed = TRUE)[[1]])
 .qcTextLine = function(qc, name){
 	if( is.null(qc) )
@@ -1516,8 +1536,8 @@ ramwas2collectqc = function( param ){
 			text[ibam]  = .qcTextLine(  qc, names(bamset)[ibam] );
 			textR[ibam] = .qcTextLineR( qc, names(bamset)[ibam] );
 		}
-		writeLines(con = paste0(dirloc, "/Summary_QC.txt"),   text = c(.qcTextHeader, text));
-		writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeader, textR));
+		writeLines(con = paste0(dirloc, "/Summary_QC.txt"),   text = c(.qcTextHeader,  text));
+		writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeaderR, textR));
 		
 		figfun = function(qcname, plotname) {
 			message("Saving plots ", plotname);
