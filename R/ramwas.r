@@ -236,6 +236,9 @@ parameterPreprocess = function( param ){
 
 	if( is.null(param$usefilelock) ) param$usefilelock = FALSE;
 	
+	if( is.null(param$randseed) ) param$randseed = 18090212; #Charles Darwin Date of birth: February 12, 1809
+	
+	
 	return(param);
 }
 
@@ -2582,7 +2585,7 @@ ramwas6crossValidation = function(param) {
 	param = parameterPreprocess(param);
 	dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
 	parameterDump(dir = param$dircv, param = param,
-					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds",
+					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds","randseed",
 					  				 "dirmwas", "dirpca", "dircoveragenorm",
 					  				 "filecovariates", "covariates",
 					  				 "modeloutcome", "modelcovariates", "modelPCs",
@@ -2592,8 +2595,9 @@ ramwas6crossValidation = function(param) {
 	nms = param$covariates[[1]];
 	nsamples = length(nms);
 	
+	set.seed(param$randseed);
+	shuffle = sample.int(nsamples);
 	starts = floor(seq(1, nsamples+1, length.out = param$cvnfolds+1));
-	shuffle = sample(nsamples);
 	
 	
 	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
