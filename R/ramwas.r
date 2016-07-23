@@ -2688,16 +2688,16 @@ ramwas7multiMarker = function(param) {
 		if(param$mmncpgs == 1)
 			resids = cbind(resids,resids);
 		
-		z = cv.glmnet(x = resids[!exclude,], y = outcome[!exclude], nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		z = cv.glmnet(x = resids[!exclude,], y = as.vector(outcomeR[!exclude]), nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
 		z2 = predict(z, newx=resids[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
 		
 		forecastS[exclude] = forecastS[exclude] + z2;
-		forecastC[exclude] = forecastC[exclude] + 1;
+		forecastC[exclude] = forecastC[exclude] + 1L;
 	}
 	
 	forecast = forecastS/forecastC;
 	
-	pdf( sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.pdf", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
+	pdf( sprintf("%s/MMCV_prediction_folds=%02d_CpGs=%d_alpha=%s.pdf", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
 	plot( c(outcomeR), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
 			main = sprintf("Prediction success (residualized outcome)\n cor = %.3f / %.3f (Pearson / Spearman)", 
 								cor(outcomeR, forecast, use = "complete.obs", method = "pearson"),
@@ -2710,7 +2710,7 @@ ramwas7multiMarker = function(param) {
 	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
 	dev.off();
 	
-	write.table( file = sprintf("%s/prediction_folds=%02d_CpGs=%d_alpha=%s.txt", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
+	write.table( file = sprintf("%s/MMCV_prediction_folds=%02d_CpGs=%d_alpha=%s.txt", param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
 					 x = data.frame(samples = names(forecastS), outcome, outcomeR, forecast),
 					 sep = "\t", row.names = FALSE);
 	
