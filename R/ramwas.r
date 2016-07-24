@@ -4,11 +4,11 @@
 `%add%` <- function(x, y){
 	if(is.null(x)) return(y);
 	if(is.null(y)) return(x);
-	l <- max(length(x), length(y))
-	length(x) <- l
-	length(y) <- l
-	x[is.na(x)] <- 0
-	y[is.na(y)] <- 0
+	l = max(length(x), length(y))
+	length(x) = l
+	length(y) = l
+	x[is.na(x)] = 0
+	y[is.na(y)] = 0
 	return(x + y)
 }
 .isAbsolutePath = function( pathname ){
@@ -191,7 +191,7 @@ parameterPreprocess = function( param ){
 		
 		if( is.null(param$dirpca) ) {
 			if( length(param$modelcovariates) > 0 ) {
-				library(digest);
+				# library(digest);
 				hash = digest( object = paste(sort(param$modelcovariates), collapse = "\t"), algo = "crc32", serialize = FALSE);
 				param$dirpca = sprintf("PCA_%02d_cvrts_%s",length(param$modelcovariates), hash);
 			} else {
@@ -344,7 +344,7 @@ bam.scanBamFile = function( bamfilename, scoretag = "mapq", minscore = 4){
 		
 		flag = scanBamFlag(isUnmappedQuery=NA, isSecondMateRead=FALSE);
 		param = ScanBamParam(flag=flag, what=fields, tag=tags);
-		bf <- BamFile(bamfilename, yieldSize=1e6) ## typically, yieldSize=1e6
+		bf = BamFile(bamfilename, yieldSize=1e6) ## typically, yieldSize=1e6
 		open(bf);	
 		rm(fields, tags, flag);
 	} # bf, param
@@ -606,7 +606,7 @@ plot.qcCoverageByDensity = function(y, samplename="", ...){
 	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
 }
 
-qcmean <- function(x) UseMethod("qcmean", x)
+qcmean = function(x) UseMethod("qcmean", x)
 qcmean.qcHistScore = function(x) { .histmean(x)-1 }
 qcmean.qcHistScoreBF = function(x) { .histmean(x)-1 }
 qcmean.qcEditDist = function(x) { .histmean(x)-1 }
@@ -981,7 +981,7 @@ bam.coverage.by.density = function( rbam, cpgset, noncpgset, minfragmentsize, ma
 	axmax = ceiling(quantile(sqrtcpgdensity,0.99)*100)/100;
 	# axmaxsafe = ceiling(quantile(sqrtcpgdensity,0.9)*100)/100;
 
-	library(KernSmooth);
+	# library(KernSmooth);
 	z = locpoly(x = c(sqrtcpgdensity, double(length(noncoverage))),
 					y = c(cpgcoverage, noncoverage), 
 					bandwidth = 0.5, gridsize = axmax*100+1, range.x = c(0,axmax));
@@ -1108,7 +1108,7 @@ if(FALSE){ # test code
 	x = seq(0.01,0.99,0.01);
 	y = sqrt(abs(x-0.5))*sign(x-0.5)
 	plot(x,y)
-	log.ss <- nls(y ~ SSlogis(x, phi1, phi2, phi3))
+	log.ss = nls(y ~ SSlogis(x, phi1, phi2, phi3))
 	z = SSlogis(x, 0.59699, 0.61320, 0.04599)
 	lines(x, z, col="blue")
 	
@@ -1456,7 +1456,7 @@ ramwas1scanBams = function( param ){
 	cat(file = paste0(param$dirfilter,"/Log.txt"), 
 		 date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
 	if( param$cputhreads > 1) {
-		cl <- makeCluster(param$cputhreads);
+		cl = makeCluster(param$cputhreads);
 		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, param = param); #[1:64]
 		stopCluster(cl);
 	} else {
@@ -1600,8 +1600,8 @@ ramwas2collectqc = function( param ){
 }
 
 .ramwas3coverageJob = function(colnum, param, nslices){
-	library(ramwas);
-	library(filematrix)
+	# library(ramwas);
+	# library(filematrix)
 	coverage = pipelineCoverage1Sample(colnum, param);
 	coverage = unlist(coverage, use.names = FALSE);
 
@@ -1629,7 +1629,7 @@ ramwas2collectqc = function( param ){
 	return("OK");
 }
 .ramwas3transposeFilterJob = function(fmpart, param){
-	library(filematrix);
+	# library(filematrix);
 	# fmpart = 1
 	filename = paste0(param$dirtemp,"/RawCoverage_part",fmpart);
 	if( !file.exists(paste0(filename,".bmat")) || !file.exists(paste0(filename,".desc.txt")) )
@@ -1702,7 +1702,7 @@ ramwas2collectqc = function( param ){
 	# fmpart_offset = fmpart_offset_list[[2]]
 	scale = as.vector(samplesums) / mean(samplesums);
 	
-	library(filematrix);
+	# library(filematrix);
 	
 	filename = paste0(param$dirtemp, "/TrCoverage_part", fmpart_offset[1]);
 	mat = fm.load(filename, param$lockfile1);
@@ -1762,7 +1762,7 @@ ramwas3NormalizedCoverage = function( param ){
 
 	### Create raw coverage matrix slices
 	{
-		library(filematrix)
+		# library(filematrix)
 		# Sliced loop
 		kbblock = (128*1024)/8;
 		step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
@@ -1786,7 +1786,7 @@ ramwas3NormalizedCoverage = function( param ){
 		if(param$usefilelock) param$lockfile = tempfile();
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
 			 date(), ", Calculating raw coverage.", "\n", sep = "", append = FALSE);
-		library(parallel)
+		# library(parallel)
 		if( param$cputhreads > 1) {
 			cl = makeCluster(param$cputhreads);
 			z = clusterApplyLB(cl, seq_len(nsamples), .ramwas3coverageJob, param = param, nslices = nslices);
@@ -1815,7 +1815,7 @@ ramwas3NormalizedCoverage = function( param ){
 			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
 		if( param$diskthreads > 1 ) {
 			if(param$usefilelock) param$lockfile2 = tempfile();
-			library(parallel);
+			# library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, 1:nslices, .ramwas3transposeFilterJob, param = param);
@@ -1895,7 +1895,7 @@ ramwas3NormalizedCoverage = function( param ){
 			
 			if(param$usefilelock) param$lockfile1 = tempfile();
 			if(param$usefilelock) param$lockfile2 = tempfile();
-			library(parallel);
+			# library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 			z = clusterApplyLB(cl, fmpart_offset_list, .ramwas3normalizeJob, param = param, samplesums = samplesums);
@@ -2169,7 +2169,7 @@ if(FALSE){
 }
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
 	# rng = rangeset[[1]];
-	library(filematrix);
+	# library(filematrix);
 	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
 
 	covmat = 0;
@@ -2238,7 +2238,7 @@ orthoCovariates = function(covariates) {
 }
 
 ramwas4PCA = function( param ){
-	library(filematrix)
+	# library(filematrix)
 	param = parameterPreprocess(param);
 	dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
 
@@ -2278,8 +2278,8 @@ ramwas4PCA = function( param ){
 				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 				
 				if(param$usefilelock) param$lockfile2 = tempfile();
-				library(parallel);
-				cl <- makeCluster(param$diskthreads);
+				# library(parallel);
+				cl = makeCluster(param$diskthreads);
 				# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
 				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
@@ -2363,7 +2363,7 @@ ramwas4PCA = function( param ){
 
 .ramwas4MWASjob = function(rng, param, mwascvrtqr, rowsubset){
 	# rng = rangeset[[1]];
-	library(filematrix);
+	# library(filematrix);
 	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
 	
 	outmat = double(3*(rng[2]-rng[1]+1));
@@ -2440,7 +2440,7 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	
 	if(!is.null(ci.level)) {
 		if((ci.level>0)&(ci.level<1)) {
-			quantiles <- qbeta(p = rep(c(ci.level/2,1-ci.level/2),each=length(xpvs)), shape1 = keep, shape2 = ntests - keep + 1)
+			quantiles = qbeta(p = rep(c(ci.level/2,1-ci.level/2),each=length(xpvs)), shape1 = keep, shape2 = ntests - keep + 1);
 			quantiles = matrix(quantiles, ncol=2);
 			
 			lines( xpvs, -log10(quantiles[,1]), col="cyan4")
@@ -2468,7 +2468,7 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	return(mwascvrtqr);
 }
 ramwas5MWAS = function( param ){
-	library(filematrix)
+	# library(filematrix)
 	param = parameterPreprocess(param);
 	dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
 
@@ -2525,8 +2525,8 @@ ramwas5MWAS = function( param ){
 			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 			
 			if(param$usefilelock) param$lockfile2 = tempfile();
-			library(parallel);
-			cl <- makeCluster(param$cputhreads);
+			# library(parallel);
+			cl = makeCluster(param$cputhreads);
 			# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
 			clusterExport(cl, "test1Variable")
 			clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
@@ -2620,7 +2620,7 @@ ramwas6crossValidation = function(param) {
 }
 
 ramwas7multiMarker = function(param) {
-	library(glmnet)
+	# library(glmnet)
 	# library(filematrix);
 	# library(ramwas);
 	
