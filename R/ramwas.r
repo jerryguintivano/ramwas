@@ -67,8 +67,8 @@ parseBam2sample = function( lines ){
 	# remove trailing commas
 	lines = gsub(pattern = ",$", replacement = "", lines);
 	
-	lines = gsub(pattern = "\\.bam,", replacement = ",", lines);
-	lines = gsub(pattern = "\\.bam$", replacement = "",  lines);
+	lines = gsub(pattern = "\\.bam,", replacement = ",", lines, ignore.case = TRUE);
+	lines = gsub(pattern = "\\.bam$", replacement = "",  lines, ignore.case = TRUE);
 	lines = gsub(pattern = " $", replacement = "",  lines);
 	
 	split.eq = strsplit(lines, split = "=", fixed = TRUE);
@@ -146,7 +146,7 @@ parameterPreprocess = function( param ){
 		param$bamnames = readLines(.makefullpath(param$dirproject,param$filebamlist));
 	}
 	if( !is.null(param$bamnames)) {
-		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames);
+		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames, ignore.case = TRUE);
 	}
 	
 	### CV and MM
@@ -1306,7 +1306,7 @@ pipelineProcessBam = function(bamname, param){
 	if( !is.null(param$filecpgset) && is.null(param$maxfragmentsize) )
 		return("Parameter not set: maxfragmentsize");
 	
-	bamname = gsub("\\.bam$","",bamname);
+	bamname = gsub("\\.bam$", "", bamname, ignore.case = TRUE);
 	bamfullname = .makefullpath(param$dirbam, paste0(bamname,".bam"))
 
 	dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
