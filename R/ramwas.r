@@ -1,7 +1,8 @@
 ### Caching environment
 .ramwasEnv = new.env()
 
-`%add%` <- function(x, y){
+.notnull = function(x,replacement){if(is.null(x)){replacement}else{x}}
+`%add%` = function(x, y){
 	if(is.null(x)) return(y);
 	if(is.null(y)) return(x);
 	l = max(length(x), length(y))
