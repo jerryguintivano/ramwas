@@ -92,11 +92,11 @@ processCommandLine = function(.arg = NULL){
 		message("No arguments supplied"); 
 	} else {
 		for (.i in seq_along(.arg)) { # .i=1
+			fileparam = NULL;
 			message("Input parameter: ", .arg[.i]);
 			eval(parse(text=.arg[.i]));
-			if(exists("fileparam")) {
+			if(!is.null(fileparam)) {
 				source(fileparam, local = TRUE);
-				rm(fileparam);
 			}
 		}
 	}
