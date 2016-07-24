@@ -2536,7 +2536,7 @@ ramwas5MWAS = function( param ){
 			rm(cl, rng, rangeset);
 			.file.remove(param$lockfile2);
 		} else {
-			covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
+			covmat = .ramwas4MWASjob( rng = c(1, ncpgs, 0), param, mwascvrtqr, rowsubset);
 		}
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
 			 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);
