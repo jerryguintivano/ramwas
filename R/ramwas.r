@@ -2433,8 +2433,8 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	mx = head(xpvs,1)*1.05;
 	my = max(mx*1.15,head(ypvs,1))*1.05;
 	plot(NA,NA, ylim = c(0,my), xlim = c(0,mx), xaxs="i", yaxs="i", 
-		  xlab = expression("\u2013 log"[10]*"(p-value), expected under null"),
-		  ylab = expression("\u2013 log"[10]*"(p-value), observed"));
+		  xlab = expression("- log"[10]*"(p-value), expected under null"),
+		  ylab = expression("- log"[10]*"(p-value), observed"));
 	# xlab = "-Log10(p-value), expected under null", ylab = "-Log10(p-value), observed");
 	lines(c(0,mx),c(0,mx),col="grey")
 	points(xpvs, ypvs, col = "red", pch = 19, cex = 0.25);
