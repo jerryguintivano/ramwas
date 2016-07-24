@@ -2226,7 +2226,7 @@ orthoCovariates = function(covariates) {
 	
 	rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
 	if( any(rowsubset==0) )
-		stop( paste("Unknown samples in covariate file:", cvsamples[head(which(mch==0))]) );
+		stop( paste("Unknown samples in covariate file:", cvsamples[head(which(rowsubset==0))]) );
 	
 	if( length(cvsamples) == length(fmsamples) )
 	{
