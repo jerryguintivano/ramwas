@@ -588,8 +588,9 @@ plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...){
 plot.qcIsoDist = function(x, samplename="", xstep = 25, ...){
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
-plot.qcCoverageByDensity = function(y, samplename="", ...){
+plot.qcCoverageByDensity = function(x, samplename="", ...){
 	# y = rbam$qc$avg.coverage.by.density
+	y = x;
 	x = (seq_along(y)-1)/100;
 	param = list(...);
 	plotparam = list(x = x, y = y, type = "l", col = "magenta", 
