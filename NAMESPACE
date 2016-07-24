@@ -7,13 +7,13 @@ importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim", "model.ma
 importFrom("utils", "flush.console", "tail", "tail.matrix")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
 importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam")
-importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "makePSOCKcluster")
+importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "clusterExport") #"makePSOCKcluster"
 importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
 importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
 # importMethodsFrom("glmnet", "predict")
 
-importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix")
+importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix","closeAndDeleteFiles")
 importClassesFrom("filematrix", "filematrix")
 importMethodsFrom("filematrix", "close")
 
