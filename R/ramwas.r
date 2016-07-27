@@ -2216,7 +2216,7 @@ orthoCovariates = function(covariates) {
 	return(cvrtqr)
 }
 
-.ramwas45matchSamples = function( param ) {
+.matchCovmatCovar = function( param ) { # .ramwas45matchSamples
 
 	cvsamples = param$covariates[[1]];
 	
@@ -2253,7 +2253,7 @@ ramwas4PCA = function( param ){
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = .ramwas45matchSamples( param );
+		rez = .matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		cvsamples = param$covariates[[1]];
@@ -2488,7 +2488,7 @@ ramwas5MWAS = function( param ){
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = .ramwas45matchSamples( param );
+		rez = .matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		cvsamples = param$covariates[[1]];
