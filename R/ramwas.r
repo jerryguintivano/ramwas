@@ -2702,7 +2702,7 @@ ramwas7multiMarker = function(param) {
 			resids = cbind(resids,resids);
 		
 		z = cv.glmnet(x = resids[!exclude,], y = as.vector(outcomeR[!exclude]), nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
-		z2 = predict(z, newx=resids[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+		z2 = predict.cv.glmnet(z, newx=resids[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
 		
 		forecastS[exclude] = forecastS[exclude] + z2;
 		forecastC[exclude] = forecastC[exclude] + 1L;
