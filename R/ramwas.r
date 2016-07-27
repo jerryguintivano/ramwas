@@ -2581,8 +2581,6 @@ if(FALSE){ # cluster
 	stopCluster(cl);
 } # cluster
 
-
-
 ramwas6crossValidation = function(param) {
 	param = parameterPreprocess(param);
 	dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
@@ -2627,6 +2625,13 @@ ramwas7multiMarker = function(param) {
 	# library(ramwas);
 	
 	param = parameterPreprocess(param);
+	
+	{
+		message("Matching samples in covariates and data matrix");
+		rez = .matchCovmatCovar( param );
+		rowsubset = rez$rowsubset;
+		ncpgs     = rez$ncpgs;
+	}
 	
 	forecastS = NULL;
 	forecastC = NULL;
@@ -2684,7 +2689,9 @@ ramwas7multiMarker = function(param) {
 		{
 			fm = fm.open( paste0(param$dircoveragenorm,"/Coverage"));
 			coverage = fm[, cpgset];
-			rownames(coverage) = rownames(fm);
+			# rownames(coverage) = rownames(fm);
+			if( !is.null(rowsubset) )
+				coverage = coverage[rowsubset,];
 			close(fm);
 		}
 		
