@@ -2730,5 +2730,61 @@ ramwas7multiMarker = function(param) {
 	return( list(forecast = forecastS/forecastC, outcome = outcome, outcomeR = outcomeR) );
 }
 
-
+ramwasPC1CovariateSelection = function(param) {
+	message("Processing parameters");
+	param = parameterPreprocess(param);
+	
+	# covariates
+	ann = param$covariates;
+	
+	# covariance matrix
+	message("Loading sample covariance matrix");
+	filecovmat = paste0(param$dirpca, "/covmat.rds")
+	covmat = readRDS(filecovmat);
+	
+	covset = param$modelcovariates;
+	
+	repeat {
+		
+		# Orthogonalize covariates
+		
+		message("Removing covariates from covariance matrix");
+		
+		cvtrqr = orthoCovariates(ann[covset]);
+		covmat1 = covmat;
+		covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr)
+		covmat1 = covmat1 - cvtrqr %*% crossprod(cvtrqr, covmat1);
+		
+		### Eigenvalue decomposition
+		message("Performing eigenvalue decomposition");
+		e = eigen(covmat1, symmetric=TRUE);
+		
+		### First PC
+		pc1 = e$vectors[,1, drop=FALSE];
+		
+		message("Testing PC1 vs. covariates");
+		test1Variable( covariate = ann[[2]], data = pc1, cvrtqr = t(cvtrqr) )
+		
+		tests = t(sapply( lapply( lapply( ann[-1], test1Variable, data=pc1, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
+		tests = tests[order(tests[,3], -abs(tests[,2])), ];
+		tests = data.frame(covariates = rownames(tests), tests);
+		rownames(tests) = NULL;
+		cat("\n");
+		cat(paste0("Covariates Included: \n ", paste(covset, collapse = ",")), "\n")
+		show(head(tests,max(15,sum(tests[,4]<0.01))));
+		
+		cat("\n");
+		cat("Enter the line number for the new covariate, (0 to stop):","\n");
+		newcov = scan("stdin", integer(), n=1)
+		if( newcov == 0 ) 
+			break;
+		covset = c(covset, as.character(tests$covariates[as.integer(newcov)]) );
+	}
+	cat("New covariate line for parameter file:","\n","\n");
+	cat(paste0(
+		"modelcovariates = c(\n", 
+		paste0("  ",sapply(covset, deparse), collapse = ",\n"),
+		")"), "\n","\n");
+	return(invisible(newcov));
+}
 
