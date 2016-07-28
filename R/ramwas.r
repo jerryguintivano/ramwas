@@ -2013,14 +2013,14 @@ test1Variable = function(covariate, data, cvrtqr){
 	if( any(is.na(mycov)) ){
 		keep = which(colSums(is.na(mycov))==0);
 		
-		mycov = mycov[,keep,drop=FALSE];
-		slice = slice[keep,,drop=FALSE];
-		cvqr0 = cvqr0[,keep,drop=FALSE];
+		mycov = mycov[, keep, drop=FALSE];
+		slice = slice[keep, , drop=FALSE];
+		cvqr0 = cvqr0[, keep, drop=FALSE];
 		cvqr0 = t( qr.Q(qr(t(cvqr0))) );
 	}
 	
 	# mycov = as.character(round(mycov));
-	if( is.character(mycov) || is.factor(mycov)) {
+	if( is.character(mycov) || is.factor(mycov) ) {
 		fctr = as.factor(mycov)
 		dummy = t(model.matrix(~fctr)[,-1]);
 		dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
