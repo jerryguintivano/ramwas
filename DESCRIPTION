@@ -16,7 +16,7 @@ Description: RaMWAS provides a full set of tools for
  and multi-marker analysis using elastic net.
 License: LGPL-3
 LazyLoad: yes
-Depends: R (>= 3.3.0), methods
+Depends: R (>= 3.2.0), methods
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, BiocStyle
 Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, KernSmooth, filematrix, digest, glmnet
