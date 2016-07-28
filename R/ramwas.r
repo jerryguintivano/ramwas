@@ -239,6 +239,7 @@ parameterPreprocess = function( param ){
 	
 	if( is.null(param$randseed) ) param$randseed = 18090212; #Charles Darwin Date of birth: February 12, 1809
 	
+	if( is.null(param$toppvthreshold) ) param$toppvthreshold = 1e-6;
 	
 	return(param);
 }
@@ -2571,6 +2572,39 @@ ramwas5MWAS = function( param ){
 		title(param$qqplottitle);
 		dev.off();
 	}
+	return(invisible(NULL));
+}
+
+ramwas5saveTopFindings = function(param) {
+	# library(filematrix)
+	param = parameterPreprocess(param);
+	
+	message("Working in", param$dirmwas);
+	
+	message("Loading MWAS results");
+	mwas = fm.load( paste0(param$dirmwas, "/Stats_and_pvalues") );
+	
+	message("Loading CpG locations");
+	cpgloc = fm.load( paste0(param$dircoveragenorm, "/CpG_locations") );
+	chrnames = readLines( paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
+	
+	message("Finding top MWAS hits");
+	keep = which(mwas[,3] < param$toppvthreshold);
+	ord = keep[sort.list(abs(mwas[keep,2]),decreasing = TRUE)];
+	# mwas[ord,3]
+	mwas[ord[1],]
+	
+	message("Saving top MWAS hits");
+	write.table(
+		file = paste0(param$dirmwas,"/Top_tests.txt"),
+		sep = '\t', quote = FALSE, row.names = FALSE, 
+		x = data.frame( chr = chrnames[cpgloc[ord,1]],
+							 position = cpgloc[ord,2], 
+							 tstat = mwas[ord,2], 
+							 pvalue = mwas[ord,3],
+							 qvalue = mwas[ord,4])
+		);
+	return(invisible(NULL));
 }
 
 if(FALSE){ # cluster
