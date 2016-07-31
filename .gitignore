@@ -1,6 +1,10 @@
 # Compiled vignettes
 inst/doc/*
 
+# C compiling directories
+src-x64/*
+src-i386/*
+
 # compiled code
 *.o
 *.dll

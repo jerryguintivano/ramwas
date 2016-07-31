@@ -1,4 +1,4 @@
-useDynLib(ramwas)
+useDynLib(ramwas, .registration = TRUE)
 exportPattern("^[[:alpha:]]+")
 
 importFrom("methods", "setRefClass", "new")
