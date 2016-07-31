@@ -1,11 +1,13 @@
-rowSumsSq = function(mat) {
-	output = double(NROW(mat));
-	.Call("CrowSumsSq", mat, output);
+rowSumsSq = function(x) {
+	stopifnot( is.numeric(x) );
+	output = double(NROW(x));
+	.Call("CrowSumsSq", x, output);
 	return(output);
 }
 
-colSumsSq = function(mat) {
-	output = double(NCOL(mat));
-	.Call("CcolSumsSq", mat, output);
+colSumsSq = function(x) {
+	stopifnot( is.numeric(x) );
+	output = double(NCOL(x));
+	.Call("CcolSumsSq", x, output);
 	return(output);
 }
