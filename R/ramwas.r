@@ -2746,7 +2746,7 @@ ramwasPCsCovariateSelection = function(param) {
 		rownames(tests) = NULL;
 		cat("\n");
 		cat(paste0("Covariates Included: \n ", paste(covset, collapse = ",")), "\n");
-		show(head(tests,15));
+		print(head(tests,15));
 		
 		cat("\n");
 		cat("Enter the line number for the new covariate, (0 to stop):","\n");
