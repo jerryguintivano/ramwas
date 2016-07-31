@@ -2764,9 +2764,12 @@ ramwas7multiMarker = function(param) {
 	return( list(forecast = forecastS/forecastC, outcome = outcome, outcomeR = outcomeR) );
 }
 
-ramwasPC1CovariateSelection = function(param) {
+ramwasPCsCovariateSelection = function(param) {
 	message("Processing parameters");
 	param = parameterPreprocess(param);
+	
+	if( is.null(param$covselpcs) )
+		param$covselpcs = 3;
 	
 	# covariates
 	ann = param$covariates;
@@ -2794,22 +2797,43 @@ ramwasPC1CovariateSelection = function(param) {
 		e = eigen(covmat1, symmetric=TRUE);
 		
 		### First PC
-		pc1 = e$vectors[,1, drop=FALSE];
+		testslist = vector('list', param$covselpcs);
+		for( i in seq_len(param$covselpcs) ) { # i=1
+			pc = e$vectors[,i, drop=FALSE];
+			
+			message("Testing PC",i," vs. covariates");
+			test1Variable( covariate = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
+			
+			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], test1Variable, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
+		}
+		tstatsabs = lapply(testslist, function(x)abs(x[,2]))
+		tstatsabs = do.call(pmax, tstatsabs);
 		
-		message("Testing PC1 vs. covariates");
-		test1Variable( covariate = ann[[2]], data = pc1, cvrtqr = t(cvtrqr) )
+		ord = sort.list(tstatsabs, decreasing = TRUE);
 		
-		tests = t(sapply( lapply( lapply( ann[-1], test1Variable, data=pc1, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
-		tests = tests[order(tests[,3], -abs(tests[,2])), ];
-		tests = data.frame(covariates = rownames(tests), tests);
+		pvalues = lapply(testslist, function(x)abs(x[ord,3]))
+		names(pvalues) = paste0("PC",seq_len(param$covselpcs), "_pvalues");
+		
+		tests = data.frame( covariates = rownames(testslist[[1]])[ord], pvalues);
+		# tests = tests[order(tests[,3], -abs(tests[,2])), ];
+		# tests = data.frame(covariates = rownames(tests), tests);
 		rownames(tests) = NULL;
 		cat("\n");
-		cat(paste0("Covariates Included: \n ", paste(covset, collapse = ",")), "\n")
-		show(head(tests,max(15,sum(tests[,4]<0.01))));
+		cat(paste0("Covariates Included: \n ", paste(covset, collapse = ",")), "\n");
+		show(head(tests,15));
 		
 		cat("\n");
 		cat("Enter the line number for the new covariate, (0 to stop):","\n");
-		newcov = scan("stdin", integer(), n=1)
+		if(interactive()) {
+			newcov = readline();
+			if(nchar(newcov) == 0) {
+				newcov = 0; 
+			} else {
+				newcov = as.integer(newcov);
+			}
+		} else {
+			newcov = scan("stdin", integer(), n=1);
+		}
 		if( newcov == 0 ) 
 			break;
 		covset = c(covset, as.character(tests$covariates[as.integer(newcov)]) );
