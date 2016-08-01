@@ -1,49 +1,92 @@
 \name{pipeline}
-\alias{pipelineProcessBam}
 \alias{ramwas1scanBams}
-\title{Cached loading of an .rds file.}
+\alias{ramwas2collectqc}
+\alias{ramwas3NormalizedCoverage}
+\alias{ramwas4PCA}
+\alias{ramwas5MWAS}
+\alias{ramwas6crossValidation}
+\alias{ramwas7multiMarker}
+
+
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+	High Level Pipeline Functions.
+}
 \description{
-These functions provide a convenient, high level, way to run all steps of RaMWAS pipeline.
+	These functions provide a simple way to run all steps of RaMWAS pipeline.
 }
 \usage{
-pipelineProcessBam(bamname, param)
-
 ramwas1scanBams(param)
+ramwas2collectqc(param)
+ramwas3NormalizedCoverage(param)
+ramwas4PCA(param)
+ramwas5MWAS(param)
+ramwas6crossValidation(param)
+ramwas7multiMarker(param)
 }
+%- maybe also 'usage' for other objects documented here.
 \arguments{
-	\item{param}{
-		List of parameters for the RaMWAS pipeline.
-	}
-	\item{bamname}{
-		File name for the BAM file. Can include relative or absolute path to the file.
-	}
+  \item{param}{
+%%     ~~Describe \code{param} here~~
+}
 }
 \details{
-	\code{pipelineProcessBam} scans a single BAM file and records the read start locations and QC information.
-	
-	\code{ramwas1scanBams} executes \code{pipelineProcessBam} for each bam file.
-	The bam processing is done faster using multiple CPU cores if \code{cputhreads} parameter is set to be greater than one.
-	The function creates a local cluster with \code{param$cputhreads} nodes and runs the processing of BAMs on the cluster nodes.
+%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-	\code{pipelineProcessBam} returns a text string indicating the success (\code{"OK."}) or containing the error message.
-	
-	\code{ramwas1scanBams} returns a vector of success/error messages, one for each bam file.
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
 }
 \references{
-	.
-}
-\seealso{
-	See the vignettes.
-}
-\note{
-	.
+%% ~put references to the literature/web site here ~
 }
 \author{
-	Andrey Shabalin \email{ashabalin@vcu.edu}
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-0
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (param) 
+{
+    param = parameterPreprocess(param)
+    stopifnot(!is.null(param$bamnames))
+    cat(file = paste0(param$dirfilter, "/Log.txt"), date(), ", Scanning bams.", 
+        "\n", sep = "", append = FALSE)
+    if (param$cputhreads > 1) {
+        cl = makeCluster(param$cputhreads)
+        z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, 
+            param = param)
+        stopCluster(cl)
+    }
+    else {
+        z = character(length(param$bamnames))
+        names(z) = param$bamnames
+        for (i in seq_along(param$bamnames)) {
+            z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i], 
+                param = param)
+        }
+    }
+    cat(file = paste0(param$dirfilter, "/Log.txt"), date(), ", Done scanning bams.", 
+        "\n", sep = "", append = TRUE)
+    return(z)
+  }
 }
-\keyword{ bam }
-\keyword{ Rbam }
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
