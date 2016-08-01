@@ -1,23 +1,26 @@
 Package: ramwas
 Type: Package
-Title: Fast methylome-wide association study pipeline for enrichment platforms
-Version: 0.1
-Date: 2016-07-27
+Title: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
+Version: 0.99.0
+Date: 2016-08-01
 Author: Andrey A Shabalin
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
 Description: RaMWAS provides a full set of tools for 
- methylome-wide association studies for enrichment technologies.
- The steps of the pipeline include scanning aligned reads from BAM files,
- calculation of multiple quality control measures,
- creation of coverage matrix,
- principal component analysis for capturing batch effects and 
- accounting for cell composition differences, 
- association analysis with respect to phenotypes of interest correcting for PCs and known covariates,
- and multi-marker analysis using elastic net.
+    methylome-wide association studies for enrichment technologies.
+    The steps of the pipeline include scanning aligned reads from BAM files,
+    calculation of multiple quality control measures,
+    creation of coverage matrix,
+    principal component analysis for capturing batch effects and 
+    accounting for cell composition differences, 
+    association analysis with respect to phenotypes of interest correcting for PCs and known covariates,
+    and multi-marker analysis using elastic net.
+BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
 LazyLoad: yes
 Depends: R (>= 3.2.0), methods
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, BiocStyle
-Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, KernSmooth, filematrix, digest, glmnet
-biocViews: DNAMethylation, DifferentialMethylation, Sequencing, QualityControl, Preprocessing, Normalization, Visualization
+Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, 
+        KernSmooth, filematrix, digest, glmnet, grDevices, utils
+biocViews: DNAMethylation, Sequencing, QualityControl, Coverage, Preprocessing, 
+        Normalization, BatchEffect, PrincipalComponent, DifferentialMethylation, Visualization
