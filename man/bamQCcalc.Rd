@@ -1,9 +1,12 @@
-\name{bam.QCs}
+\name{bamQCcalc}
 \alias{bam.count.nonCpG.reads}
 \alias{bam.hist.isolated.distances}
-\title{Functions for quality control measures for Rbam files.}
+\alias{bam.chrXY.qc}
+\alias{bam.coverage.by.density}
+
+\title{Functions calculating quality control measures for R bam objects}
 \description{
-The functions listed here calculate quality control measures in addition to those calculated by \code{\link{bam.scanBamFile}} and \code{\link{bam.removeRepeats}}.
+Calculate quality control measures in addition to those calculated by \code{\link{bam.scanBamFile}} and \code{\link{bam.removeRepeats}}.
 
 The function \code{bam.count.nonCpG.reads} counts the number of reads that would not cover any CpGs if they were \code{distance} bp in length. With \code{distance} set large enough, the fraction of reads not covering any CpGs should be low (<2\%). 
 The function adds \code{$cnt.nonCpG.reads} QC measure which is a vector of two numbers.
@@ -50,7 +53,7 @@ bam.hist.isolated.distances(rbam, isocpgset, distance)
 	.
 }
 \author{
-	Andrey Shabalin \email{ashabalin@vcu.edu}
+	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \examples{
 
