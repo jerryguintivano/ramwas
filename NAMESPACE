@@ -12,7 +12,6 @@ importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopClu
 importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
 importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
-# importMethodsFrom("glmnet", "predict")
 
 importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix","closeAndDeleteFiles")
 importClassesFrom("filematrix", "filematrix")
@@ -42,5 +41,3 @@ S3method(qcmean, qcCoverageByDensity)
 S3method(qcmean, qcChrX)
 S3method(qcmean, qcChrY)
 S3method(qcmean, NULL)
-
-
