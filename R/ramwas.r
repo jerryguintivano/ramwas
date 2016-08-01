@@ -3,6 +3,10 @@
 
 # library(BiocCheck); setwd('C:/AllWorkFiles/Andrey/R/git/'); BiocCheck("ramwas_0.99.0.tar.gz")
 # devtools::build_vignettes()
+# BiocCheck Checking native routine registration
+# getDLLRegisteredRoutines('ramwas')
+# getDLLRegisteredRoutines.character
+# getLoadedDLLs()
 
 .notnull = function(x,replacement){if(is.null(x)){replacement}else{x}}
 `%add%` = function(x, y){

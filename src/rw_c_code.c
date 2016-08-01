@@ -112,6 +112,7 @@ static R_CallMethodDef callMethods[] = {
 	{NULL, NULL, 0}
 };
 
-void R_init_myLib(DllInfo *info)	{
+void R_init_ramwas(DllInfo *info)	{
+	// Rprintf("Registering AAA\n");
 	R_registerRoutines(info, NULL, callMethods, NULL, NULL);
 }
