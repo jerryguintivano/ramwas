@@ -25,8 +25,6 @@ colSumsSq(x)
 \author{
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
-\note{
-}
 \seealso{
 	See \code{\link[base]{rowSums}} and \code{\link[base]{colSums}} for simple (not squared) row/column sums.
 }
