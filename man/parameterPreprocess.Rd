@@ -11,7 +11,7 @@ parameterPreprocess(param)
 }
 \arguments{
   \item{param}{
-    List with RaMWAS parameters. The detailed description of all available parameters see at: \link[ramwas]{parameters}.
+    List with RaMWAS parameters.
 }
 }
 \details{
@@ -36,7 +36,8 @@ parameterPreprocess(param)
 	This function is not intended to be run by the user.
 }
 \seealso{
-	See \link{pipeline}.
+	See \link{pipeline}. \cr
+	For detailed description of all available parameters run:\cr \code{vignette("RaMWAS_param")}.
 }
 \examples{
 param = list(
