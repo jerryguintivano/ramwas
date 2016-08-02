@@ -233,9 +233,11 @@ parameterPreprocess = function( param ){
 	param$dirtemp = .makefullpath(param$dircoveragenorm, param$dirtemp );
 
 	### CpG set should exist
-	if( !is.null(param$filecpgset) ) {
+	if( !is.null(param$filecpgset) )
 		stopifnot( file.exists(param$filecpgset) );
-	}
+	if( !is.null(param$filenoncpgset) )
+		stopifnot( file.exists(param$filenoncpgset) );
+	
 	if( is.null(param$doublesize) ) param$doublesize = 4;
 	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
 	if( is.null(param$buffersize) ) param$buffersize = 1e9;
