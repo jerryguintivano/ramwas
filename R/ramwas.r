@@ -2140,7 +2140,7 @@ if(FALSE){
 	close(fm)
 	return(covmat);
 }
-orthoCovariates = function(covariates) {
+orthonormalizeCovariates = function(covariates) {
 	cvrtset = c(const = list(rep(1, nrow(covariates))), covariates);
 	for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
 		fctr = factor(cvrtset[[ind]]);
@@ -2199,7 +2199,7 @@ ramwas4PCA = function( param ){
 	### Prepare covariates, defactor, 
 	{
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+		cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
 	### PCA part
@@ -2393,7 +2393,7 @@ qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	}
 }
 .getCovariates = function(param){
-	cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+	cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	### Reading PCs, add as coveriates
 	if( param$modelPCs > 0 ) {
 		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
@@ -2435,7 +2435,7 @@ ramwas5MWAS = function( param ){
 	{
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
 		mwascvrtqr = .getCovariates(param);
-		# cvrtqr = t(orthoCovariates( param$covariates[ param$modelcovariates ] ));
+		# cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
 	
@@ -2721,7 +2721,7 @@ ramwasPCsCovariateSelection = function(param) {
 		
 		message("Removing covariates from covariance matrix");
 		
-		cvtrqr = orthoCovariates(ann[covset]);
+		cvtrqr = orthonormalizeCovariates(ann[covset]);
 		covmat1 = covmat;
 		covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr)
 		covmat1 = covmat1 - cvtrqr %*% crossprod(cvtrqr, covmat1);
