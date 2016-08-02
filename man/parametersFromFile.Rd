@@ -15,6 +15,9 @@ parametersFromFile(.parameterfile)
   }
 }
 \details{
+	Variables with names starting with period (.) are ignored.
+}
+\note{
 	The file \code{.parameterfile} is executed as R code, so use only trusted parameter files.
 }
 \value{

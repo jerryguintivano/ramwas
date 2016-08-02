@@ -39,12 +39,11 @@ parameterPreprocess(param)
 	See \link{pipeline}.
 }
 \examples{
-
 param = list(
     dirproject = '.'
     )
 
 param2 = parameterPreprocess(param)
 
-show(param2)
+print(param2)
 }

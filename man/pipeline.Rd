@@ -1,4 +1,5 @@
 \name{pipeline}
+\alias{pipeline}
 \alias{ramwas1scanBams}
 \alias{pipelineProcessBam}
 \alias{ramwas2collectqc}
@@ -121,6 +122,7 @@ ramwas7multiMarker(param)
 			\item The split of samples into folds is random. For consistency across runs, the random seed can be set by \var{randseed}. It is set to 18090212 by default.
 			\item The number of CpGs used to by elastic net is set by \var{mmncpgs} parameter. It is 1,000 by default.
 			\item The elastic net parameter labmda can be set by \var{mmalpha} parameter. It is 0 by default.
+			\item The output is saved in \var{dircv} directory, by default named like \code{"CV_10_folds"} and located in \var{dirmwas} directory.
 		}
 
 		

@@ -1,6 +1,8 @@
 useDynLib(ramwas, .registration = TRUE)
 exportPattern("^[[:alpha:]]+")
 
+# 
+
 importFrom("methods", "setRefClass", "new")
 importFrom("grDevices", "dev.off", "pdf")
 importFrom("graphics", "abline", "legend", "lines", "par", "plot", "points", "title", "axis", "barplot")

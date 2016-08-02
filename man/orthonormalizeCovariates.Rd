@@ -25,7 +25,7 @@ A matrix with orthogonal columns with unit length, whose columns spans the same 
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \note{
-  This function is used by several parts of the pipeline.
+  This function is used in several parts of the pipeline.
 }
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
