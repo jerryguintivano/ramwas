@@ -1,4 +1,4 @@
-\name{pipeline}
+\name{ramwas1scanBams}
 \alias{pipeline}
 \alias{ramwas1scanBams}
 \alias{pipelineProcessBam}
@@ -145,7 +145,6 @@ ramwas7multiMarker(param)
     For full description of the QC measures and the ploting options run\cr \code{vignette("RaMWAS_QCs")}
 }
 \examples{
-library(ramwas)
 param = list(
   dirbam = "/project/bams",
   dirproject = "/project",

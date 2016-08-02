@@ -1,7 +1,26 @@
 useDynLib(ramwas, .registration = TRUE)
-exportPattern("^[[:alpha:]]+")
-
-# 
+# exportPattern("^[[:alpha:]]+")
+export(
+	"cachedRDSload",
+	"orthonormalizeCovariates",
+	"parameterDump",
+	"parameterPreprocess",
+	"parametersFromFile",
+    "ramwas1scanBams",
+    "pipelineProcessBam",
+    "ramwas2collectqc",
+    "ramwas3NormalizedCoverage",
+    "ramwas4PCA",
+    "ramwas5MWAS",
+    "ramwas6crossValidation",
+    "ramwas7multiMarker",
+    "processCommandLine",
+    "qcmean",
+    "qqPlotFast",
+    "rowSumsSq",
+    "colSumsSq",
+    "testPhenotype"
+)
 
 importFrom("methods", "setRefClass", "new")
 importFrom("grDevices", "dev.off", "pdf")

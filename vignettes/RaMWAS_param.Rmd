@@ -31,7 +31,6 @@ param = list(
 	filebam2sample = "/ramwas_project/bam2sample.txt",
 	minavgcpgcoverage = 0.3,
 	minnonzerosamples = 0.3,
-	tbuffersize = 10e9,
 	covfile = "cov.txt",
 	chrkeep = 1:22
 );
@@ -60,26 +59,68 @@ if(.Platform$OS.type == "windows") {
 
 # Explanation of all parameters
 
+## Parameters pointing to files
+
+### File with BAM names
+
+Parameter 'filebamlist', if defined, must point to a text file with one BAM file name per line. BAM file names can contain path, relative or absolute.
+Such file may looks like this.
+```{r eval=FALSE}
+batch1/b1sample1.bam
+batch1/b1sample2.bam
+batch2/b2sample1.bam
+batch2/b2sample2.bam
+batch2/b2sample3.bam
+batch4/sample4.bam
+```
+
+This file is then loaded into `bamnames` parameter.
+Note that BAM names must be all different. Namely, such list of BAMS is **NOT** allowed:
+```{r eval=FALSE}
+batch1/sample1.bam
+batch1/sample2.bam
+batch2/sample1.bam
+batch2/sample2.bam
+```
 
 
-## Step 1, scan BAM files, record read start sites and QC information.
+### File with CpG locations
 
-**Overview.** The first step of the RaMWAS pipeline includes scanning BAM files, filtering reads and recording their start locations, and calculating the QC measures.
-See the separate vignette on the QC measures.
+RaMWAS calculates coverage at a prepared set of CpG locations. The set depends on the reference genome and usually includes CpGs created by common SNPs.
+The set of CpGs is stored as a `list` with one sorted vector of CpG locations per chromosome.
 
-**R function.** Step 1 can be run with a single call of the `ramwas1scanBams` or separate runs of `pipelineProcessBam` for each BAM file.
-The `ramwas1scanBams` function starts a local cluster with the number of jobs equal to the number of CPU cores, unless it is set by the `cputhreads` parameter.
-The `pipelineProcessBam` can be used if the user wants to manually spread the task across the nodes of a computing cluster.
+```{r CpGsetExample}
+cpgset = list( chr1 = c(12L, 57L, 123L),
+               chr2 = c(45L, 95L, 99L, 111L),
+               chr3 = c(22L, 40L, 199L, 211L) );
+```
 
-**Read filtering.** The alignments in the BAM files are usually filtered by the MAPQ or AS tag (set by `scoretag`), the reads with the score tag below `minscore` are discarded.
+Parameter `filecpgset` must be a file storing a set of CpG, in the format described above, saved using `saveRDS` function.
+Similarly, parameter `filenoncpgset`, if defined, must point to a file storing 'good' locations away from any CpGs. Here, good means not heaving major alignment issues (like a middle of centromere.
 
-**BAM files.** The list of BAMs can specified either in the character vector `bamnames` or listed in the `filebamlist` file, one bam name per file.
-The BAM file names can include full path, or path relative to `dirbam` or no path (BAMs should be in `dirbam` then).
+### File with bam 2 sample matching information
 
-**Files produced.** The information extracted from the BAMs is stored in R format in 'rds_rbam' subdirectory of the Project directory. The QC information in R format is stored in 'rds_qc' subdirectory of the Project directory. The QC plots and figures are stored in 'qc' subdirectory of the Project directory.
+Parameter `filebam2sample` must point to a file with information which samples correspont to which BAMs.
 
+The file here defines samples `sample1`, `sample2`, and `sample3`. Sample1 is assigned reads from bams `b1sample1` and `b2sample1`.
+```{r eval=FALSE}
+sample1=b1sample1,b2sample1
+sample2=b1sample2,b2sample2
+sample3=b2sample3
+sample4
+```
+If a sample has only one BAM and the BAM has the same name as the sample, the corresponding line can contain just that name (see `sample4` above).
 
+The `filebam2sample` file is scanned into `bam2sample` parameter.
 
+### File with covariates
+
+The parameter `filecovariates`, if defined, must point to a text file which can be read with `read.table`.
+If the file has extension ".csv", it is assumed to be comma separated, otherwise - tab separated.
+
+The file `filecovariates` is read into `covariates` parameter.
+
+## directory parameters
 
 
 

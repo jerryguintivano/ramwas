@@ -69,9 +69,9 @@ qcmean(x)
     Parameters passed to the underlying \code{\link[graphics]{plot}} or \code{\link[graphics]{barplot}} function.
   }
 }
-\details{
+%\details{
 %%  ~~ If necessary, more details than the description above ~~
-}
+%}
 \value{
 	%Function \code{qcmean} returns:
 	%\item{qcChrX}{Fraction of reads on chrX.}

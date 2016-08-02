@@ -35,8 +35,6 @@ parameterDump(dir, param, toplines = NULL)
 	See \link{pipeline}.
 }
 \examples{
-library(ramwas)
-
 param = list(
     number = 123123,
     integer = 312L,

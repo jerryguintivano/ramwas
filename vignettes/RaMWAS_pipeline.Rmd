@@ -1,13 +1,13 @@
 ---
-title: "RaMWAS parameters"
+title: "RaMWAS pipeline parts"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{RaMWAS parameters`
-  %\VignetteEngine{knitr::rmarkdown`
+  %\VignetteIndexEntry{RaMWAS pipeline parts}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 # Project directory structure

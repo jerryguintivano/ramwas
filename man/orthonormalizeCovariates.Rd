@@ -1,6 +1,5 @@
 \name{orthonormalizeCovariates}
 \alias{orthonormalizeCovariates}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 	Orthonormalize Covariates
 }
@@ -27,9 +26,6 @@ A matrix with orthogonal columns with unit length, whose columns spans the same 
 \note{
   This function is used in several parts of the pipeline.
 }
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
 \examples{
 # Sample matrix of covariates
 covariates = data.frame(a = 1:12, b = 12:1)
