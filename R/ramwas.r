@@ -282,13 +282,14 @@ parameterDump = function( dir, param, toplines = NULL) {
 	fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
 	writeLines(con = fid, c("### Parameters used to create the files in this directory",""));
 	if( !is.null(toplines)) {
-		.dump(fid, param[toplines]);
+		.dump(fid, param[toplines[toplines %in% names(param)]]);
 		writeLines(con = fid, text = "");
 		.dump(fid, param[!(names(param) %in% toplines)]);
 	} else {
 		.dump(fid, param);
 	}
 	close(fid);
+	return(invisible(NULL));
 }
 if(FALSE) {
 	dir = "D:/RW";
