@@ -3,6 +3,7 @@
 
 # library(BiocCheck); setwd('C:/AllWorkFiles/Andrey/R/git/'); BiocCheck("ramwas_0.99.0.tar.gz")
 # library(devtools); devtools::build_vignettes()
+# browseVignettes(package = 'ramwas')
 # BiocCheck Checking native routine registration
 # getDLLRegisteredRoutines('ramwas')
 # getDLLRegisteredRoutines.character
@@ -109,6 +110,7 @@ processCommandLine = function(.arg = NULL){
 			}
 		}
 	}
+	rm(fileparam);
 	return(mget(ls()));
 }
 
