@@ -7,6 +7,7 @@
 # getDLLRegisteredRoutines('ramwas')
 # getDLLRegisteredRoutines.character
 # getLoadedDLLs()
+# package.skeleton(name = 'ramwas', path = 'C:/AllWorkFiles/Andrey/R/git/Skel/', environment = as.environment("package:ramwas"))
 
 .notnull = function(x,replacement){if(is.null(x)){replacement}else{x}}
 `%add%` = function(x, y){
@@ -2308,7 +2309,7 @@ ramwas4PCA = function( param ){
 	# fmout = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
 	# covmat = 0;
 	
-	step1 = ceiling( 256*1024*1024 / nrow(fm) / 8);
+	step1 = ceiling( 512*1024*1024 / nrow(fm) / 8);
 	mm = rng[2]-rng[1]+1;
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
@@ -2413,7 +2414,7 @@ ramwas5MWAS = function( param ){
 					  				 "filecovariates", "covariates",
 					  				 "modeloutcome", "modelcovariates", "modelPCs",
 					  				 "qqplottitle",
-					  				 "cputhreads"));
+					  				 "diskthreads"));
 	
 	
 	message("Preparing for MWAS");
@@ -2455,15 +2456,14 @@ ramwas5MWAS = function( param ){
 		message("Running MWAS");
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
 			 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
-		if( param$cputhreads > 1 ) {
-			rng = round(seq(1, ncpgs+1, length.out = param$cputhreads+1));
-			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$cputhreads));
+		if( param$diskthreads > 1 ) {
+			rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
+			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
 			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
 			
 			if(param$usefilelock) param$lockfile2 = tempfile();
 			# library(parallel);
-			cl = makeCluster(param$cputhreads);
-			# cl = makePSOCKcluster(rep("localhost", param$cputhreads))
+			cl = makeCluster(param$diskthreads);
 			clusterExport(cl, "test1Variable")
 			clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
 								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
