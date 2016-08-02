@@ -2324,7 +2324,7 @@ ramwas4PCA = function( param ){
 		if( !is.null(rowsubset) )
 			slice = slice[rowsubset,];
 		
-		rez = testPhenotype(covariate = param$covariates[[param$modeloutcome]],
+		rez = testPhenotype(phenotype = param$covariates[[param$modeloutcome]],
 								  data = slice, cvrtqr = mwascvrtqr)
 		
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
@@ -2738,7 +2738,7 @@ ramwasPCsCovariateSelection = function(param) {
 			pc = e$vectors[,i, drop=FALSE];
 			
 			message("Testing PC",i," vs. covariates");
-			testPhenotype( covariate = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
+			testPhenotype( phenotype = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
 			
 			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], testPhenotype, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
 		}
