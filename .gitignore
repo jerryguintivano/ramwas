@@ -1,5 +1,4 @@
 # Compiled vignettes
-inst/doc/*
 
 # C compiling directories
 src-x64/*
