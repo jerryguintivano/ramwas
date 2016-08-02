@@ -33,7 +33,9 @@ ramwas7multiMarker(param)
 }
 \arguments{
   \item{param}{
-    List with RaMWAS parameters. The detailed description of all available parameters see at: \link[ramwas]{parameters}.
+    List with RaMWAS parameters. \cr
+    For detailed description of all available parameters run:\cr \code{vignette("RaMWAS_param")}.
+
   }
   \item{bamname}{
     Name of the BAM file to process. Can be absolute or relative to \code{dirbam} parameter.
@@ -138,8 +140,9 @@ ramwas7multiMarker(param)
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-For more on QC measures see: \link[ramwas]{QCs}. \cr
-For more on pipeline parameters see: \link[ramwas]{parameters}.
+    For detailed description of all available parameters run:\cr \code{vignette("RaMWAS_param")}.
+    
+    For full description of the QC measures and the ploting options run\cr \code{vignette("RaMWAS_QCs")}
 }
 \examples{
 library(ramwas)
