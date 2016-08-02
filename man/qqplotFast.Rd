@@ -8,7 +8,7 @@ Plots a QQ-plot with a confidence band and an estimate of inflation factor lambd
 Works quickly even for tens of millions of p-values.
 }
 \usage{
-qqplotFast(pvalues, ntests = NULL, ci.level = 0.05)
+qqPlotFast(pvalues, ntests = NULL, ci.level = 0.05)
 }
 \arguments{
   \item{pvalues}{
