@@ -2345,7 +2345,7 @@ ramwas4PCA = function( param ){
 	
 	return("OK");
 }
-qqplotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
+qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	
 	if(is.null(ntests))
 		ntests = length(pvalues);
@@ -2504,7 +2504,7 @@ ramwas5MWAS = function( param ){
 	{
 		message("Creating QQ-plot");
 		pdf(paste0(param$dirmwas, "/QQ_plot.pdf"),7,7);
-		qqplotFast(sortedpv);
+		qqPlotFast(sortedpv);
 		title(param$qqplottitle);
 		dev.off();
 	}
