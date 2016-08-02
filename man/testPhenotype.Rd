@@ -8,7 +8,7 @@
 	It tests the phenotype of interest for Association with Methylation Coverage.
 }
 \usage{
-test1Variable(phenotype, data, cvrtqr)
+testPhenotype(phenotype, data, cvrtqr)
 }
 \arguments{
   \item{phenotype}{
