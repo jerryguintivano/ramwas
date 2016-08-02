@@ -1,10 +1,10 @@
 \name{parametersFromFile}
 \alias{parametersFromFile}
 \title{
-	Scan Parameters From a R Code File.
+	Scan Parameters From a R Code File
 }
 \description{
-	The pipeline parameters can be stored in a simple file, formatted as R code. This function transforms them into a parameter list used by the functions of this pipeline.
+	The pipeline parameters can be stored in a simple file, formatted as R code. \code{parametersFromFile} transforms them into a parameter list used by the functions of this pipeline.
 }
 \usage{
 parametersFromFile(.parameterfile)
