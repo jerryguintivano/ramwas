@@ -1,0 +1,51 @@
+\name{parametersFromFile}
+\alias{parametersFromFile}
+\title{
+	Scan Parameters From a R Code File.
+}
+\description{
+	The pipeline parameters can be stored in a simple file, formatted as R code. This function transforms them into a parameter list used by the functions of this pipeline.
+}
+\usage{
+parametersFromFile(.parameterfile)
+}
+\arguments{
+  \item{.parameterfile}{
+    Name of the file with the parameters set as R variables. See the example below.
+  }
+}
+\details{
+	The file \code{.parameterfile} is executed as R code, so use only trusted parameter files.
+}
+\value{
+    Returns the list with all the variables set in the file.
+}
+\author{
+	Andrey A Shabalin \email{ashabalin@vcu.edu}
+}
+\seealso{
+	See \link{pipeline}.
+}
+\examples{
+
+filename = tempfile();
+
+# Create a file with lines
+# dirproject = '.'
+# modelcovariates = c('Age','Sex')
+
+writeLines(
+    con = filename,
+    text = c(
+        "dirproject = '.'",
+        "modelcovariates = c('Age','Sex')")
+    )
+
+# Scan the file into a list
+param = parametersFromFile(filename)
+
+# Show the list
+print(param)
+
+file.remove(filename)
+}
