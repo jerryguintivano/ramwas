@@ -1939,9 +1939,9 @@ ramwas3NormalizedCoverage = function( param ){
 	}
 }
 
-test1Variable = function(covariate, data, cvrtqr){
+testPhenotype = function(phenotype, data, cvrtqr){
 	# covariate = covariates1[[1]]
-	mycov = matrix(covariate, nrow = 1);
+	mycov = matrix(phenotype, nrow = 1);
 	slice = data;
 	cvqr0 = cvrtqr;
 	
@@ -2041,9 +2041,9 @@ if(FALSE){
 	
 	### Full numerical
 	covariate = runif(2000);
-	# rez = test1Variable(covariate, data, cvrtqr)
-	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	# rez = testPhenotype(covariate, data, cvrtqr)
+	tm1 = system.time( {rez1 = testPhenotype(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = testPhenotypeOld(covariate, t(data), cvrtqr)} )
 	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	sapply(rez1, `[`, 1)
 	summary(lm( covariate ~ 0 + data[,1] + t(cvrtqr)))$coefficients[1,]
@@ -2054,8 +2054,8 @@ if(FALSE){
 	### Full numerical with missing values
 	covariate = runif(2000);
 	covariate[1:100] = NA;
-	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	tm1 = system.time( {rez1 = testPhenotype(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = testPhenotypeOld(covariate, t(data), cvrtqr)} )
 	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	sapply(rez1, `[`, 1)
 	summary(lm( covariate ~ 0 + data[,1] + t(cvrtqr)))$coefficients[1,]
@@ -2063,8 +2063,8 @@ if(FALSE){
 	
 	### Categorical
 	covariate = as.character( round(runif(2000), 1) )
-	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	tm1 = system.time( {rez1 = testPhenotype(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = testPhenotypeOld(covariate, t(data), cvrtqr)} )
 	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	as.matrix(anova(lm( data[,1] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez1, `[`, 1)
@@ -2074,8 +2074,8 @@ if(FALSE){
 	covariate = runif(2000);
 	covariate[1:100] = NA;
 	covariate = as.character( round(covariate, 1) )
-	tm1 = system.time( {rez1 = test1Variable(covariate, data, cvrtqr)} )
-	tm2 = system.time( {rez2 = test1VariableOld(covariate, t(data), cvrtqr)} )
+	tm1 = system.time( {rez1 = testPhenotype(covariate, data, cvrtqr)} )
+	tm2 = system.time( {rez2 = testPhenotypeOld(covariate, t(data), cvrtqr)} )
 	stopifnot(all.equal(rez1$pvalue,rez2$pvalue))
 	as.matrix(anova(lm( data[,1] ~ 0 + t(cvrtqr) + covariate)))
 	sapply(rez1, `[`, 1)
@@ -2088,7 +2088,7 @@ if(FALSE){
 	pv  = vector("list", length(covariates1));
 	nms = character(length(covariates1));
 	for( i in seq_along(covariates1) ) { # i=1
-		rez = test1Variable(covariates1[[i]], data, cvrtqr);
+		rez = testPhenotype(covariates1[[i]], data, cvrtqr);
 		pv[[i]] = as.vector(rez[[3]]);
 		nms[i] = rez$statname;
 		if(nchar(rez$statname)==0) {
@@ -2322,7 +2322,7 @@ ramwas4PCA = function( param ){
 		if( !is.null(rowsubset) )
 			slice = slice[rowsubset,];
 		
-		rez = test1Variable(covariate = param$covariates[[param$modeloutcome]],
+		rez = testPhenotype(covariate = param$covariates[[param$modeloutcome]],
 								  data = slice, cvrtqr = mwascvrtqr)
 		
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
@@ -2465,7 +2465,7 @@ ramwas5MWAS = function( param ){
 			if(param$usefilelock) param$lockfile2 = tempfile();
 			# library(parallel);
 			cl = makeCluster(param$diskthreads);
-			clusterExport(cl, "test1Variable")
+			clusterExport(cl, "testPhenotype")
 			clusterApplyLB(cl, rangeset, .ramwas4MWASjob, 
 								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
 			stopCluster(cl);
@@ -2736,9 +2736,9 @@ ramwasPCsCovariateSelection = function(param) {
 			pc = e$vectors[,i, drop=FALSE];
 			
 			message("Testing PC",i," vs. covariates");
-			test1Variable( covariate = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
+			testPhenotype( covariate = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
 			
-			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], test1Variable, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
+			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], testPhenotype, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
 		}
 		tstatsabs = lapply(testslist, function(x)abs(x[,2]))
 		tstatsabs = do.call(pmax, tstatsabs);
