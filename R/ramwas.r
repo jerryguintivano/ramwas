@@ -2276,23 +2276,23 @@ ramwas4PCA = function( param ){
 		# Saving PC vs. covariates association
 		if(ncol(param$covariates) > 1) {
 			message("Saving PC vs. covariates associations");
-			cvrtqrconst = matrix(1/sqrt(length(e$values)),nrow = 1, ncol = length(e$values));
-			testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqrconst);
-			write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_corr.txt"), 
-							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
-							sep="\t", row.names = FALSE);
-			write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_pvalue.txt"), 
-							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
-							sep="\t", row.names = FALSE);
-			if( length(param$modelcovariates) > 0) {
+			# cvrtqrconst = matrix(1/sqrt(length(e$values)),nrow = 1, ncol = length(e$values));
+			# testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqrconst);
+			# write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_corr.txt"), 
+			# 				x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
+			# 				sep="\t", row.names = FALSE);
+			# write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_pvalue.txt"), 
+			# 				x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
+			# 				sep="\t", row.names = FALSE);
+			# # if( length(param$modelcovariates) > 0) {
 				testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqr);
-				write.table(file = paste0(param$dirpca, "/PC_vs_covariates_fixed_corr.txt"), 
+				write.table(file = paste0(param$dirpca, "/PC_vs_covariates_corr.txt"), 
 								x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
 								sep="\t", row.names = FALSE);
-				write.table(file = paste0(param$dirpca, "/PC_vs_covariates_fixed_pvalue.txt"), 
+				write.table(file = paste0(param$dirpca, "/PC_vs_covariates_pvalue.txt"), 
 								x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
 								sep="\t", row.names = FALSE);
-			}
+			# }
 		}
 	}
 }
