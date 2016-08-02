@@ -2,7 +2,7 @@
 .ramwasEnv = new.env()
 
 # library(BiocCheck); setwd('C:/AllWorkFiles/Andrey/R/git/'); BiocCheck("ramwas_0.99.0.tar.gz")
-# devtools::build_vignettes()
+# library(devtools); devtools::build_vignettes()
 # BiocCheck Checking native routine registration
 # getDLLRegisteredRoutines('ramwas')
 # getDLLRegisteredRoutines.character
@@ -593,13 +593,13 @@ plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...) {
 	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
 plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n",samplename), firstvalue=1, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of aligned length\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
 plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of length of aligned part of read\n(including excluded reads)\n",samplename), firstvalue=1, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of aligned length\n(including excluded reads)\n",samplename), firstvalue=1, xstep = xstep, ...);
 }
 plot.qcIsoDist = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), main2 = paste0("Distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
 }
 plot.qcCoverageByDensity = function(x, samplename="", ...){
 	# y = rbam$qc$avg.coverage.by.density
