@@ -2341,6 +2341,11 @@ ramwas4PCA = function( param ){
 	}
 	close(fm)
 	
+	if(rng[1]==1) {
+		writeLines( con = paste0(param$dirmwas, "/DegreesOfFreedom.txt"), 
+						text = as.character(c(rez$nVarTested, rez$dfFull)))
+	}
+	
 	fmout = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
 	fmout[rng[1]:rng[2],1:3] = outmat;
 	close(fmout);
