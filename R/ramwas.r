@@ -2418,6 +2418,16 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	rez = t(orthonormalizeCovariates(mwascvrtqr));
 	return(rez);
 }
+pvalue2qvalue = function(pv, n = length(pv)){
+	if(is.unsorted(pv))
+		ord = sort.list(pv);
+	FDR = pv[ord] * n / seq_along(pv);
+	FDR[length(FDR)] = min(FDR[length(FDR)], 1);
+	FDR = rev(cummin(rev(FDR)));
+	
+	rez = pv;
+	rez[ord] = FDR;
+	return(rez)
 }
 ramwas5MWAS = function( param ){
 	# library(filematrix)
@@ -2501,25 +2511,17 @@ ramwas5MWAS = function( param ){
 		fm = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"));
 		pvalues = fm[,3];
 		pvalues[pvalues==0] = .Machine$double.xmin;
-		ord = sort.list(pvalues);
-		FDR = pvalues[ord] * length(pvalues) / seq_along(pvalues);
-		FDR[length(FDR)] = min(FDR[length(FDR)], 1);
-		FDR = rev(cummin(rev(FDR)));
-		
-		savevec = pvalues;
-		savevec[ord] = FDR;
-		fm[,4] = savevec;
+		fm[,4] = pvalue2qvalue( pvalues );
 		close(fm);
 		
-		sortedpv = pvalues[ord];
-		rm(fm, pvalues, ord, FDR, savevec);
+		rm(fm);
 	} # sortedpv
 		
 	### QQ-plot
 	{
 		message("Creating QQ-plot");
 		pdf(paste0(param$dirmwas, "/QQ_plot.pdf"),7,7);
-		qqPlotFast(sortedpv);
+		qqPlotFast(pvalues);
 		title(param$qqplottitle);
 		dev.off();
 	}
