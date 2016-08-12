@@ -2434,7 +2434,10 @@ ramwas5MWAS = function( param ){
 	
 	message("Preparing for MWAS");
 	
-	
+	### Kill NA outcomes
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
@@ -2574,6 +2577,9 @@ ramwas6crossValidation = function(param) {
 					  				 "qqplottitle",
 					  				 "cputhreads"));
 	
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
 	nms = param$covariates[[1]];
 	nsamples = length(nms);
 	
@@ -2607,6 +2613,10 @@ ramwas7multiMarker = function(param) {
 	# library(ramwas);
 	
 	param = parameterPreprocess(param);
+	
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
 	
 	{
 		message("Matching samples in covariates and data matrix");
