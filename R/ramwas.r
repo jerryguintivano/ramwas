@@ -2401,18 +2401,23 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
 }
-.getCovariates = function(param){
-	cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
+.getCovariates = function(param, rowsubset){
+	cvrtqr = param$covariates[ param$modelcovariates ];
 	### Reading PCs, add as coveriates
 	if( param$modelPCs > 0 ) {
 		e = readRDS(paste0(param$dirpca,"/eigen.rds"));
-		mwascvrtqr = rbind(cvrtqr, t(e$vectors[,seq_len(param$modelPCs)]));
+		PCs = e$vectors[, seq_len(param$modelPCs), drop=FALSE];
+		if(!is.null( rowsubset )) 
+			PCs = PCs[rowsubset,];
+		mwascvrtqr = cbind(cvrtqr, PCs);
 		rm(e);
 	} else {
 		mwascvrtqr = cvrtqr;
 	}
-	stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
-	return(mwascvrtqr);
+	# stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
+	rez = t(orthonormalizeCovariates(mwascvrtqr));
+	return(rez);
+}
 }
 ramwas5MWAS = function( param ){
 	# library(filematrix)
@@ -2443,7 +2448,7 @@ ramwas5MWAS = function( param ){
 	### Prepare covariates, defactor, 
 	{
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		mwascvrtqr = .getCovariates(param);
+		mwascvrtqr = .getCovariates(param, rowsubset);
 		# cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
@@ -2613,7 +2618,9 @@ ramwas7multiMarker = function(param) {
 	forecastS = NULL;
 	forecastC = NULL;
 	
-	cvrtqr = .getCovariates(param); # cvrtqr = ramwas:::.getCovariates(param)
+	
+	
+	cvrtqr = .getCovariates(param, rowsubset); # cvrtqr = ramwas:::.getCovariates(param)
 	outcome = param$covariates[[ param$modeloutcome ]];
 	outcomeR = outcome - crossprod(cvrtqr, cvrtqr %*% outcome);
 	
