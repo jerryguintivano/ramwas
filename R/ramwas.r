@@ -2525,6 +2525,7 @@ ramwas5MWAS = function( param ){
 		title(param$qqplottitle);
 		dev.off();
 	}
+	ramwas5saveTopFindings(param);
 	return(invisible(NULL));
 }
 
