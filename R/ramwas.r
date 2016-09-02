@@ -255,6 +255,7 @@ parameterPreprocess = function( param ){
 	
 	# BioInformatics paramters
 	
+	if( is.null(param$bihost) ) param$bihost = "grch37.ensembl.org";
 	if( is.null(param$bimart) ) param$bimart = "ENSEMBL_MART_ENSEMBL"; 
 	
 	# listDatasets(useMart(param$bimart))
@@ -2558,7 +2559,7 @@ ramwasAnnotateLocations = function(param, chr, pos) {
 	# Call biomaRt	
 	{
 		library(biomaRt)
-		gene_ensembl = useMart(biomart=param$bimart, dataset=param$bidataset)
+		gene_ensembl = useMart(biomart=param$bimart, host = param$bihost, dataset=param$bidataset)
 		bioresp = getBM(mart = gene_ensembl,
 							 attributes = unique(c(
 							 	param$biattributes,
