@@ -2439,8 +2439,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 	return(rez);
 }
 pvalue2qvalue = function(pv, n = length(pv)){
-	if(is.unsorted(pv))
-		ord = sort.list(pv);
+	ord = sort.list(pv);
 	FDR = pv[ord] * n / seq_along(pv);
 	FDR[length(FDR)] = min(FDR[length(FDR)], 1);
 	FDR = rev(cummin(rev(FDR)));
