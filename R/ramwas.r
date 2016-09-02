@@ -2417,7 +2417,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
 }
-.getCovariates = function(param, rowsubset){
+.getCovariates = function(param, rowsubset, normalize = TRUE){
 	cvrtqr = param$covariates[ param$modelcovariates ];
 	### Reading PCs, add as coveriates
 	if( param$modelPCs > 0 ) {
@@ -2431,7 +2431,11 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05) {
 		mwascvrtqr = cvrtqr;
 	}
 	# stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
-	rez = t(orthonormalizeCovariates(mwascvrtqr));
+	if(normalize) {
+		rez = t(orthonormalizeCovariates(mwascvrtqr));
+	} else {
+		rez = t(mwascvrtqr);
+	}
 	return(rez);
 }
 pvalue2qvalue = function(pv, n = length(pv)){
