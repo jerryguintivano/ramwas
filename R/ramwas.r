@@ -2714,7 +2714,7 @@ ramwas6crossValidation = function(param) {
 	}
 }
 
-ramwas7multiMarker = function(param) {
+ramwas7multiMarker1 = function(param) {
 	# library(glmnet)
 	# library(filematrix);
 	# library(ramwas);
@@ -2913,3 +2913,544 @@ ramwasPCsCovariateSelection = function(param) {
 	return(invisible(newcov));
 }
 
+ramwas7multiMarker2 = function(param) {
+	# library(glmnet)
+	# library(filematrix);
+	# library(ramwas);
+	
+	param = parameterPreprocess(param);
+	
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
+	
+	{
+		message("Matching samples in covariates and data matrix");
+		rez = ramwas:::.matchCovmatCovar( param );
+		rowsubset = rez$rowsubset;
+		ncpgs     = rez$ncpgs;
+	}
+	
+	cvrt = t(ramwas:::.getCovariates(param, rowsubset, FALSE)); # cvrtqr = ramwas:::.getCovariates(param, rowsubset)
+	outcome = param$covariates[[ param$modeloutcome ]];
+	
+	forecast0 = NULL;
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+		
+		message("Processing fold ", fold, " of ", param$cvnfolds);
+		dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+		rdsfile = paste0(dirmwas, "/exclude.rds");
+		if( !file.exists( rdsfile ) ) {
+			warning('Missing CV MWAS:', rdsfile);
+			next;
+		}
+		exclude = readRDS( rdsfile )
+		
+		# Initialize forecast variables
+		if( is.null(forecast0) ) {
+			forecast0 = double(length(exclude)*2);
+			dim(forecast0) = c(2, length(exclude));
+			colnames(forecast0) = names(exclude);
+			forecast1 = forecast0;
+			forecast2 = forecast0;
+		}
+		
+		# Predict with just covariates
+		{
+			z = cv.glmnet(x = cvrt[!exclude,], y = as.vector(outcome[!exclude]), nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+			z2 = predict.cv.glmnet(z, newx = cvrt[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+			forecast0[1,exclude] = forecast0[1,exclude] + z2;
+			forecast0[2,exclude] = forecast0[2,exclude] + 1;
+		}
+		
+		# load p-values
+		{
+			fm = fm.open(paste0(dirmwas, "/Stats_and_pvalues"))
+			colnames(fm)
+			pv = fm[,3];
+			close(fm)
+		}
+		
+		# Find top param$mmncpgs CpGs
+		{
+			# tic = proc.time();
+			pvthr = 10^((-300):0);
+			fi = findInterval( pv, pvthr);
+			tab = cumsum(tabulate(fi));
+			upperfi = which(tab > param$mmncpgs)[1];
+			set1 = which(fi <= upperfi);
+			cpgset = set1[sort.list(pv[set1])[seq_len(param$mmncpgs)]];
+			cpgset = sort.int(cpgset);
+			rm(pvthr, fi, tab, upperfi, set1);
+			# toc = proc.time();
+			# show(toc-tic);
+			rm(pv)
+		} # 1.49			
+		# {
+		# 	tic = proc.time();
+		# 	cpgset = sort.list(pv)[seq_len(param$mmncpgs)];
+		# 	cpgset = sort.int(cpgset);
+		# 	toc = proc.time();
+		# 	show(toc-tic);
+		# } # 38.92
+		
+		# get coverage
+		{
+			fm = fm.open( paste0(param$dircoveragenorm,"/Coverage"));
+			coverage = fm[, cpgset];
+			# rownames(coverage) = rownames(fm);
+			if( !is.null(rowsubset) )
+				coverage = coverage[rowsubset,];
+			close(fm);
+		}
+		
+		# Residualize
+		# resids = coverage - crossprod(cvrtqr, cvrtqr %*% coverage);
+		
+		if(param$mmncpgs == 1)
+			coverage = cbind(coverage,coverage);
+		coverage1 = coverage[!exclude,]
+		coverage2 = coverage[exclude,]
+		rm(coverage);
+		gc();
+		z = cv.glmnet(x = coverage1, y = as.vector(outcome[!exclude]), 
+						  nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		z2 = predict.cv.glmnet(z, newx=coverage2, type="response", s="lambda.min", alpha = param$mmalpha);
+		forecast1[1,exclude] = forecast1[1,exclude] + z2;
+		forecast1[2,exclude] = forecast1[2,exclude] + 1;
+		
+		# coverage = cbind(cvrt, coverage);
+		# y = cv.glmnet(x = coverage[!exclude,], y = as.vector(outcome[!exclude]), 
+		# 				  nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		# y2 = predict.cv.glmnet(y, newx=coverage[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+		# forecast2[1,exclude] = forecast2[1,exclude] + y2;
+		# forecast2[2,exclude] = forecast2[2,exclude] + 1;
+		rm(z,z2);gc();
+	}
+	
+	
+	# cor(outcome, forecast0[1,], method = "spearman")
+	# cor(outcome, forecast1[1,], method = "spearman")
+	# cor(outcome, forecast2[1,], method = "spearman")
+	
+	pdf( sprintf("%s/MMCV2_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
+					 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
+	forecast = forecast1[1,] / forecast1[2,];
+	plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	# forecast = forecast2[1,] / forecast2[2,];
+	# plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+	# 		main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
+	# 							cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+	# 							cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	# legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	forecast = forecast0[1,] / forecast0[2,];
+	plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success with covariates only\n cor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	dev.off();
+	
+	rez = data.frame(samples = colnames(forecast1), 
+						  outcome, 
+						  forecast = forecast1[1,] / forecast1[2,], 
+						  forecastCVRT = forecast0[1,] / forecast0[2,])
+	
+	write.table( 
+		file = sprintf("%s/MMCV2_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
+							param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
+		x = rez,
+		sep = "\t", row.names = FALSE);
+	
+	return( rez );
+}
+
+ramwas7multiMarker3 = function(param) {
+	# library(glmnet)
+	# library(filematrix);
+	# library(ramwas);
+	
+	param = parameterPreprocess(param);
+	
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
+	
+	{
+		message("Matching samples in covariates and data matrix");
+		rez = ramwas:::.matchCovmatCovar( param );
+		rowsubset = rez$rowsubset;
+		ncpgs     = rez$ncpgs;
+	}
+	
+	cvrt = t(ramwas:::.getCovariates(param, rowsubset, FALSE)); # cvrtqr = ramwas:::.getCovariates(param, rowsubset)
+	outcome = param$covariates[[ param$modeloutcome ]];
+	
+	forecast0 = NULL;
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+		
+		message("Processing fold ", fold, " of ", param$cvnfolds);
+		dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+		rdsfile = paste0(dirmwas, "/exclude.rds");
+		if( !file.exists( rdsfile ) ) {
+			warning('Missing CV MWAS:', rdsfile);
+			next;
+		}
+		exclude = readRDS( rdsfile )
+		
+		# Initialize forecast variables
+		if( is.null(forecast0) ) {
+			forecast0 = double(length(exclude)*2);
+			dim(forecast0) = c(2, length(exclude));
+			colnames(forecast0) = names(exclude);
+			forecast1 = forecast0;
+			forecast2 = forecast0;
+		}
+		
+		# Predict with just covariates
+		{
+			z = cv.glmnet(x = cvrt[!exclude,], y = as.vector(outcome[!exclude]), nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+			z2 = predict.cv.glmnet(z, newx = cvrt[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+			forecast0[1,exclude] = forecast0[1,exclude] + z2;
+			forecast0[2,exclude] = forecast0[2,exclude] + 1;
+		}
+		
+		# load p-values
+		{
+			fm = fm.open(paste0(dirmwas, "/Stats_and_pvalues"))
+			colnames(fm)
+			pv = fm[,3];
+			close(fm)
+		}
+		
+		# Find top param$mmncpgs CpGs
+		{
+			# tic = proc.time();
+			pvthr = 10^((-300):0);
+			fi = findInterval( pv, pvthr);
+			tab = cumsum(tabulate(fi));
+			upperfi = which(tab > param$mmncpgs)[1];
+			set1 = which(fi <= upperfi);
+			cpgset = set1[sort.list(pv[set1])[seq_len(param$mmncpgs)]];
+			cpgset = sort.int(cpgset);
+			rm(pvthr, fi, tab, upperfi, set1);
+			# toc = proc.time();
+			# show(toc-tic);
+			rm(pv);
+		} # 1.49			
+		# {
+		# 	tic = proc.time();
+		# 	cpgset = sort.list(pv)[seq_len(param$mmncpgs)];
+		# 	cpgset = sort.int(cpgset);
+		# 	toc = proc.time();
+		# 	show(toc-tic);
+		# } # 38.92
+		
+		# get coverage
+		{
+			fm = fm.open( paste0(param$dircoveragenorm,"/Coverage"));
+			coverage = fm[, cpgset];
+			# rownames(coverage) = rownames(fm);
+			if( !is.null(rowsubset) )
+				coverage = coverage[rowsubset,];
+			close(fm);
+		}
+		
+		# Residualize
+		# resids = coverage - crossprod(cvrtqr, cvrtqr %*% coverage);
+		
+		if(param$mmncpgs == 1)
+			coverage = cbind(coverage,coverage);
+		
+		# z = cv.glmnet(x = coverage[!exclude,], y = as.vector(outcome[!exclude]), 
+		# 				  nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		# z2 = predict.cv.glmnet(z, newx=coverage[exclude,], type="response", s="lambda.min", alpha = param$mmalpha);
+		# forecast1[1,exclude] = forecast1[1,exclude] + z2;
+		# forecast1[2,exclude] = forecast1[2,exclude] + 1;
+		
+		# coverage = cbind(cvrt[!exclude,], coverage[!exclude,]);
+		coverage1 = cbind(cvrt[!exclude,],coverage[!exclude,])
+		coverage2 = cbind(cvrt[ exclude,],coverage[ exclude,])
+		rm(coverage);
+		gc();
+		# coverage = coverage;
+		gc();
+		y = cv.glmnet(x = coverage1, y = as.vector(outcome[!exclude]),
+						  nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		y2 = predict.cv.glmnet(y, newx=coverage2, type="response", s="lambda.min", alpha = param$mmalpha);
+		forecast1[1,exclude] = forecast1[1,exclude] + y2;
+		forecast1[2,exclude] = forecast1[2,exclude] + 1;
+		rm(y,y2);gc();
+	}
+	
+	
+	# cor(outcome, forecast0[1,], method = "spearman")
+	# cor(outcome, forecast1[1,], method = "spearman")
+	# cor(outcome, forecast2[1,], method = "spearman")
+	
+	pdf( sprintf("%s/MMCV3_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
+					 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
+	forecast = forecast1[1,] / forecast1[2,];
+	plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success with covariates\n cor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	# forecast = forecast2[1,] / forecast2[2,];
+	# plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+	# 		main = sprintf("Prediction success\n cor = %.3f / %.3f (Pearson / Spearman)", 
+	# 							cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+	# 							cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	# legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	forecast = forecast0[1,] / forecast0[2,];
+	plot( c(outcome), forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success with covariates only\n cor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
+	legend(x = "bottomright", legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	dev.off();
+	
+	rez = data.frame(samples = colnames(forecast1), 
+						  outcome, 
+						  forecast = forecast1[1,] / forecast1[2,], 
+						  forecastCVRT = forecast0[1,] / forecast0[2,])
+	
+	write.table( 
+		file = sprintf("%s/MMCV3_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
+							param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
+		x = rez,
+		sep = "\t", row.names = FALSE);
+	
+	return( rez );
+}
+
+ramwas7multiMarker4 = function(param) {
+	# library(glmnet)
+	# library(filematrix);
+	# library(ramwas);
+	
+	param = parameterPreprocess(param);
+	
+	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+	}
+	
+	{
+		message("Matching samples in covariates and data matrix");
+		rez = ramwas:::.matchCovmatCovar( param );
+		rowsubset = rez$rowsubset;
+		ncpgs     = rez$ncpgs;
+	}
+	
+	
+	
+	
+	cvrt = ramwas:::.getCovariates(param, rowsubset, FALSE); # cvrtqr = ramwas:::.getCovariates(param)
+	outcome = param$covariates[[ param$modeloutcome ]];
+	
+	forecast0 = NULL;
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+		
+		message("Processing fold ", fold, " of ", param$cvnfolds);
+		dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+		rdsfile = paste0(dirmwas, "/exclude.rds");
+		if( !file.exists( rdsfile ) ) {
+			warning("Missing CV MWAS: ", rdsfile);
+			next;
+		}
+		exclude = readRDS( rdsfile )
+		
+		# Initialize forecast variables
+		if( is.null(forecast0) ) {
+			forecast0 = double(length(exclude)*2);
+			dim(forecast0) = c(2, length(exclude));
+			colnames(forecast0) = names(exclude);
+			forecast1 = forecast0;
+			forecast2 = forecast0;
+		}
+		
+		# orthonormalize training covariates
+		{
+			cvrt0 = cvrt[ , !exclude];
+			qq = qr(t(cvrt0));		
+			# 	range( solve(t(qr.R(qq))) %*% cvrt0 - t(qr.Q(qq)) )
+			cvrt0 = t(qr.Q(qq));
+			cvrtQR = solve(t(qr.R(qq))) %*% cvrt;
+			cvrt1  = solve(t(qr.R(qq))) %*% cvrt[, exclude];
+			
+			range(cvrtQR[,!exclude] - cvrt0)
+		}
+		
+		# Predict with EM using just covariates
+		{
+			z = cv.glmnet(x = t(cvrt[,!exclude]), y = as.vector(outcome[!exclude]), 
+							  nfolds = param$cvnfolds, keep = TRUE, 
+							  parallel = FALSE, alpha = param$mmalpha);
+			z2 = predict.cv.glmnet(z, newx = t(cvrt[,exclude]), 
+										  type="response", s="lambda.min", alpha = param$mmalpha);
+			forecast1[1,exclude] = forecast1[1,exclude] + z2;
+			forecast1[2,exclude] = forecast1[2,exclude] + 1;
+		}
+		
+		# Predict with EM using just covariates
+		{
+			z2 = tcrossprod(outcome[!exclude],cvrt0) %*% cvrt1;
+			forecast0[1,exclude] = forecast0[1,exclude] + z2;
+			forecast0[2,exclude] = forecast0[2,exclude] + 1;
+		}
+		
+		# get p-values
+		{
+			fm = fm.open(paste0(dirmwas, "/Stats_and_pvalues"))
+			colnames(fm)
+			pv = fm[,3];
+			close(fm)
+		}
+		
+		# Find top param$mmncpgs CpGs
+		{
+			# tic = proc.time();
+			pvthr = 10^((-300):0);
+			fi = findInterval( pv, pvthr);
+			tab = cumsum(tabulate(fi));
+			upperfi = which(tab > param$mmncpgs)[1];
+			set1 = which(fi <= upperfi);
+			cpgset = set1[sort.list(pv[set1])[seq_len(param$mmncpgs)]];
+			cpgset = sort.int(cpgset);
+			rm(pvthr, fi, tab, upperfi, set1);
+			# toc = proc.time();
+			# show(toc-tic);
+		} # 1.49			
+		# {
+		# 	tic = proc.time();
+		# 	cpgset = sort.list(pv)[seq_len(param$mmncpgs)];
+		# 	cpgset = sort.int(cpgset);
+		# 	toc = proc.time();
+		# 	show(toc-tic);
+		# } # 38.92
+		
+		# get coverage
+		{
+			fm = fm.open( paste0(param$dircoveragenorm,"/Coverage"));
+			coverage = fm[, cpgset];
+			# rownames(coverage) = rownames(fm);
+			if( !is.null(rowsubset) )
+				coverage = coverage[rowsubset,];
+			close(fm);
+		}
+		
+		# weights = cvrt0 %*% coverage[!exclude,];
+		
+		# Residualize
+		# resids = coverage - crossprod(cvrtQR, cvrt0 %*% coverage[!exclude,]);
+		weights = cvrt0 %*% coverage[!exclude,];
+		coverage0 = coverage[!exclude,] - crossprod(cvrt0, weights);
+		coverage1 = coverage[ exclude,] - crossprod(cvrt1, weights);
+		rm(coverage,weights);gc();
+		
+		outcomeR = outcome - crossprod(cvrtQR, cvrt0 %*% outcome[!exclude ]);
+		
+		if(param$mmncpgs == 1)
+			resids = cbind(resids,resids);
+		
+		z = cv.glmnet(x = coverage0, y = as.vector(outcomeR[!exclude]), nfolds = param$cvnfolds, keep = TRUE, parallel = FALSE, alpha = param$mmalpha);
+		z2 = predict.cv.glmnet(z, newx=coverage1, type="response", s="lambda.min", alpha = param$mmalpha);
+		
+		forecast2[1,exclude] = forecast2[1,exclude] + z2;
+		forecast2[2,exclude] = forecast2[2,exclude] + 1;
+		
+		rm(coverage0, coverage1);
+	}
+	
+	# 
+	# cor( outcome, forecast0[1,])
+	# plot(outcome, forecast0[1,])
+	# 
+	# cor( outcome, forecast1[1,])
+	# plot(outcome, forecast1[1,])
+	# 
+	# cor( outcome, forecast2[1,])
+	# plot(outcome, forecast2[1,])
+	# 
+	# cor( outcome, forecast2[1,]+forecast0[1,], method = "spearman")
+	# plot(outcome, forecast2[1,]+forecast0[1,])
+	# 
+	# cor( outcome, forecast2[1,]+forecast1[1,], method = "spearman")
+	# plot(outcome, forecast2[1,]+forecast1[1,])
+	# 
+	# 0.867-0.868
+	# 
+	rm(outcomeR)	
+	
+	pdf( sprintf("%s/MMCV4_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
+					 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
+	forecast = forecast2[1,]/forecast2[2,] + forecast1[1,]/forecast1[2,];
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success (resid-d + EN cvrt only)\ncor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", 
+			 legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	forecast = forecast2[1,]/forecast2[2,] + forecast0[1,]/forecast0[2,];
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success (resid-d + LM cvrt only)\ncor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", 
+			 legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	forecast = forecast2[1,]/forecast2[2,];
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success (resid-d only)\ncor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")));
+	legend(x = "bottomright", 
+			 legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	
+	forecast = forecast1[1,]/forecast1[2,];
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success with covariates only, EN\ncor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
+	legend(x = "bottomright",
+			 legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	forecast = forecast0[1,]/forecast0[2,];
+	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
+			main = sprintf("Prediction success with covariates only, LM\ncor = %.3f / %.3f (Pearson / Spearman)", 
+								cor(outcome, forecast, use = "complete.obs", method = "pearson"),
+								cor(outcome, forecast, use = "complete.obs", method = "spearman")))
+	legend(x = "bottomright",
+			 legend = c(paste0("# CpGs = ", param$mmncpgs), paste0("EN alpha = ", param$mmalpha)));
+	
+	dev.off();
+	
+	rez = data.frame(samples = colnames(forecast0), 
+						  outcome, 
+						  forecastRESID = forecast2[1,]/forecast2[2,],
+						  forecastEN = forecast2[1,]/forecast2[2,] + forecast1[1,]/forecast1[2,], 
+						  forecastLM = forecast2[1,]/forecast2[2,] + forecast0[1,]/forecast0[2,],
+						  forecastCVRT_EN = forecast1[1,]/forecast1[2,],
+						  forecastCVRT_LM = forecast0[1,]/forecast0[2,]
+	)
+	
+	
+	write.table( file = sprintf("%s/MMCV4_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
+										 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
+					 x = rez,
+					 sep = "\t", row.names = FALSE);
+	
+	return( list(rez) );
+}
+
+ramwas7multiMarker = ramwas7multiMarker4
