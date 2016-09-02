@@ -2570,6 +2570,12 @@ ramwasAnnotateLocations = function(param, chr, pos) {
 							 				param$bifilters)
 		)
 	}	
+	
+	if(nrow(bioresp) == 0) {
+		rez = rep(list(rep("", length(chr))), length(param$biattributes))
+		names(rez) = param$biattributes;
+		return( data.frame(rez, stringsAsFactors = FALSE));
+	}
 	# Match Biomart response to chr/pos locations
 	{
 		# Transform chr/pos into single number coordinates
