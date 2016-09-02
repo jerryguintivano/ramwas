@@ -2471,7 +2471,7 @@ ramwas5MWAS = function( param ){
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = .matchCovmatCovar( param );
+		rez = .matchCovmatCovar( param ); # rez = ramwas:::.matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		cvsamples = param$covariates[[1]];
@@ -2482,6 +2482,7 @@ ramwas5MWAS = function( param ){
 	{
 		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
 		mwascvrtqr = .getCovariates(param, rowsubset);
+		# mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
 		# cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
@@ -2627,7 +2628,7 @@ ramwas5saveTopFindings = function(param) {
 	# library(filematrix)
 	param = parameterPreprocess(param);
 	
-	message("Working in", param$dirmwas);
+	message("Working in: ", param$dirmwas);
 	
 	message("Loading MWAS results");
 	mwas = fm.load( paste0(param$dirmwas, "/Stats_and_pvalues") );
@@ -2650,9 +2651,9 @@ ramwas5saveTopFindings = function(param) {
 	
 	# saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 	
-	if( !is.null(param$biattributes) ) {
+	if( !is.null(param$biattributes) && (nrow(toptable)>0L) ) {
 		message('Annotating top MWAS hits');
-		bio = ramwasAnnotateLocations(param, toptable$chr, toptable$position);
+		bio = ramwasAnnotateLocations(param, chr = toptable$chr, pos = toptable$position);
 		toptable = data.frame(toptable, bio);
 	}
 	
@@ -2695,7 +2696,7 @@ ramwas6crossValidation = function(param) {
 	starts = floor(seq(1, nsamples+1, length.out = param$cvnfolds+1));
 	
 	
-	for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+	for( fold in seq_len(param$cvnfolds) ) { # fold = 9
 		
 		message("Running MWAS for fold ",fold," of ",param$cvnfolds);
 		
