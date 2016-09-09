@@ -228,6 +228,12 @@ ramwas2collectqc = function( param ){
 			writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeaderR, textR));
 			rm(textT, textR);
 		} # text summary
+		
+		histqc = function(qcfun, plottitle, filename){
+			vec = unlist(lapply(bigqc, qcfun));
+			pdf(paste0(dirloc,"/Fig_hist_",filename,".pdf"));
+			hist(vec, breaks = 3*round(sqrt(length(vec))), main = plottitle, col = 'lightblue', xlab = 'value', yaxs = 'i')
+			dev.off()
 		}
 		
 		figfun = function(qcname, plotname) {
@@ -250,6 +256,27 @@ ramwas2collectqc = function( param ){
 		figfun(qcname = "bf.hist.length.matched", plotname = "matched_length_before_filter");
 		figfun(qcname = "hist.isolated.dist1", plotname = "isolated_distance");
 		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
+		histqc(qcfun = function(x){x$avg.cpg.coverage / x$avg.noncpg.coverage},
+				 plottitle = "Enrichment lower bound\n(Avg CpG / avg non-CpG coverage)",
+				 filename = "enrichment")
+		histqc(qcfun = function(x){x$avg.noncpg.coverage / x$avg.cpg.coverage * 100},
+				 plottitle = "Background noise level\n(Avg non-CpG / avg CpG coverage, %)",
+				 filename = "noise")
+		histqc(qcfun = function(x){x$reads.recorded.no.repeats/1e6},
+				 plottitle = "Reads after filters, millions",
+				 filename = "Nreads")
+		histqc(qcfun = function(x){qcmean(x$hist.edit.dist1)},
+				 plottitle = "Average edit distance of aligned reads",
+				 filename = "edit_dist")
+		histqc(qcfun = function(x){qcmean(x$avg.coverage.by.density)},
+				 plottitle = "CpG density at the peak sensitivity (SQRT)\n(a value per BAM / sample)",
+				 filename = "peak")
+		histqc(qcfun = function(x){qcmean(x$cnt.nonCpG.reads)},
+				 plottitle = "Fraction of reads not covering any CpGs",
+				 filename = "noncpg_reads")
+		
+		bigqc[[1]]$cnt.nonCpG.reads
+		
 		return(invisible(bigqc));
 	}
 	
