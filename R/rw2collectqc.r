@@ -38,7 +38,7 @@
 								"ChrYreadsPct",
 								"PeakSQRT")};
 
-.qccols = length(strsplit(.qcTextHeader,"\t",fixed = TRUE)[[1]])
+.qccols = length(strsplit(.qcTextHeaderT,"\t",fixed = TRUE)[[1]])
 .qcTextLineT = function(qc){
 	name = qc$name;
 	if( is.null(qc) )
@@ -257,25 +257,26 @@ ramwas2collectqc = function( param ){
 		figfun(qcname = "hist.isolated.dist1", plotname = "isolated_distance");
 		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
 		# bigqc[[1]]$cnt.nonCpG.reads
-		histqc(qcfun = function(x){x$avg.cpg.coverage / x$avg.noncpg.coverage},
-				 plottitle = "Enrichment lower bound\n(Avg CpG / avg non-CpG coverage)",
-				 filename = "enrichment")
-		histqc(qcfun = function(x){x$avg.noncpg.coverage / x$avg.cpg.coverage * 100},
-				 plottitle = "Background noise level\n(Avg non-CpG / avg CpG coverage, %)",
-				 filename = "noise")
-		histqc(qcfun = function(x){x$reads.recorded.no.repeats/1e6},
-				 plottitle = "Reads after filters, millions",
-				 filename = "Nreads")
-		histqc(qcfun = function(x){qcmean(x$hist.edit.dist1)},
-				 plottitle = "Average edit distance of aligned reads",
-				 filename = "edit_dist")
-		histqc(qcfun = function(x){qcmean(x$avg.coverage.by.density)},
-				 plottitle = "CpG density at the peak sensitivity (SQRT)\n(a value per BAM / sample)",
-				 filename = "peak")
-		histqc(qcfun = function(x){qcmean(x$cnt.nonCpG.reads)},
-				 plottitle = "Fraction of reads not covering any CpGs",
-				 filename = "noncpg_reads")
-		
+		if(length(bigqc) >= 10) {
+			histqc(qcfun = function(x){x$avg.cpg.coverage / x$avg.noncpg.coverage},
+					 plottitle = "Enrichment lower bound\n(Avg CpG / avg non-CpG coverage)",
+					 filename = "enrichment")
+			histqc(qcfun = function(x){x$avg.noncpg.coverage / x$avg.cpg.coverage * 100},
+					 plottitle = "Background noise level\n(Avg non-CpG / avg CpG coverage, %)",
+					 filename = "noise")
+			histqc(qcfun = function(x){x$reads.recorded.no.repeats/1e6},
+					 plottitle = "Number of reads after filters, millions",
+					 filename = "Nreads")
+			histqc(qcfun = function(x){qcmean(x$hist.edit.dist1)},
+					 plottitle = "Average edit distance of aligned reads",
+					 filename = "edit_dist")
+			histqc(qcfun = function(x){qcmean(x$avg.coverage.by.density)},
+					 plottitle = "CpG density at the peak sensitivity (SQRT)\n(a value per BAM / sample)",
+					 filename = "peak")
+			histqc(qcfun = function(x){qcmean(x$cnt.nonCpG.reads)},
+					 plottitle = "Fraction of reads not covering any CpGs",
+					 filename = "noncpg_reads")
+		}
 		return(invisible(bigqc));
 	}
 	
