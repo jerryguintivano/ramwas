@@ -161,6 +161,36 @@ if(FALSE){
 	return(list(qc = bigqc));
 }
 
+loadBamQC = function(param, bams){
+	rbamlist = vector("list", length(bams));
+	names(rbamlist) = bams;
+	for( bamname in bams) { # bamname = bams[1]
+		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
+		if(file.exists(rdsqcfile)) {
+			rbamlist[[bamname]] = readRDS(rdsqcfile);
+		} else {
+			message("QC file not found: ",rdsqcfile)
+		}
+	}
+	return(rbamlist)
+}
+combineBamQcIntoSamples = function(rbamlist, bamset){
+	bigqc = vector("list", length(bamset));
+	names(bigqc) = names(bamset);
+	for( ibam in seq_along(bamset) ) { # ibam=1
+		curbams = rbamlist[bamset[[ibam]]];
+		qc = .combine.bams.qc(curbams)$qc;
+		if( length(qc) > 0 ) {
+			bigqc[[ibam]] = qc;
+		} else {
+			bigqc[[ibam]] = list();
+		}
+		bigqc[[ibam]]$name = names(bamset)[ibam];
+	}
+	return(bigqc);
+}
+
+
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	dir.create(param$dirqc, showWarnings = FALSE, recursive = TRUE);
@@ -180,38 +210,24 @@ ramwas2collectqc = function( param ){
 		bams = c(bams, unlist(param$bam2sample, use.names = FALSE));
 	
 	bams = unique(basename(bams));
-	
-	message("Load BAM QC info");
-	rbamlist = vector("list", length(bams));
-	names(rbamlist) = bams;
-	for( bamname in bams) {
-		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
-		if(file.exists(rdsqcfile))
-			rbamlist[[bamname]] = readRDS(rdsqcfile);
+	{
+		message("Load BAM QC info");
+		rbamlist = loadBamQC(param, bams);
 	}
 	
 	collect.qc.summary = function(bamset, dirname) {
 		dirloc = paste0(param$dirqc, "/", dirname);
 		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
 		
-		message("Saving text summary");
-		bigqc = vector("list", length(bamset));
-		names(bigqc) = names(bamset);
-		text = character(length(bamset));
-		textR = character(length(bamset));
-		for( ibam in seq_along(bamset) ) { # ibam=7
-			curbams = rbamlist[bamset[[ibam]]];
-			qc = .combine.bams.qc(curbams)$qc;
-			if( length(qc) > 0 ) {
-				bigqc[[ibam]] = qc;
-			} else {
-				qc = NULL;
-			}
-			text[ibam]  = .qcTextLine(  qc, names(bamset)[ibam] );
-			textR[ibam] = .qcTextLineR( qc, names(bamset)[ibam] );
+		bigqc = combineBamQcIntoSamples(rbamlist = rbamlist, bamset = bamset);
+		{
+			textT = sapply(bigqc, .qcTextLineT)
+			textR = sapply(bigqc, .qcTextLineR)
+			writeLines(con = paste0(dirloc, "/Summary_QC.txt"),   text = c(.qcTextHeaderT, textT));
+			writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeaderR, textR));
+			rm(textT, textR);
+		} # text summary
 		}
-		writeLines(con = paste0(dirloc, "/Summary_QC.txt"),   text = c(.qcTextHeader,  text));
-		writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"), text = c(.qcTextHeaderR, textR));
 		
 		figfun = function(qcname, plotname) {
 			message("Saving plots ", plotname);
