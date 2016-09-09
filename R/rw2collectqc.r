@@ -202,14 +202,15 @@ ramwas2collectqc = function( param ){
 					  				 "scoretag", "minscore",
 					  				 "minfragmentsize", "maxfragmentsize", "maxrepeats",
 					  				 "filecpgset", "filenoncpgset"));
+	{
+		bams = NULL;
+		if( !is.null(param$bamnames) )
+			bams = c(bams, param$bamnames);
+		if( !is.null(param$bam2sample) )
+			bams = c(bams, unlist(param$bam2sample, use.names = FALSE));
+		bams = unique(basename(bams));
+	} # bams
 	
-	bams = NULL;
-	if( !is.null(param$bamnames) )
-		bams = c(bams, param$bamnames);
-	if( !is.null(param$bam2sample) )
-		bams = c(bams, unlist(param$bam2sample, use.names = FALSE));
-	
-	bams = unique(basename(bams));
 	{
 		message("Load BAM QC info");
 		rbamlist = loadBamQC(param, bams);
