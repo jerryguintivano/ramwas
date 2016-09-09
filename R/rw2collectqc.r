@@ -256,6 +256,7 @@ ramwas2collectqc = function( param ){
 		figfun(qcname = "bf.hist.length.matched", plotname = "matched_length_before_filter");
 		figfun(qcname = "hist.isolated.dist1", plotname = "isolated_distance");
 		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
+		# bigqc[[1]]$cnt.nonCpG.reads
 		histqc(qcfun = function(x){x$avg.cpg.coverage / x$avg.noncpg.coverage},
 				 plottitle = "Enrichment lower bound\n(Avg CpG / avg non-CpG coverage)",
 				 filename = "enrichment")
@@ -274,8 +275,6 @@ ramwas2collectqc = function( param ){
 		histqc(qcfun = function(x){qcmean(x$cnt.nonCpG.reads)},
 				 plottitle = "Fraction of reads not covering any CpGs",
 				 filename = "noncpg_reads")
-		
-		bigqc[[1]]$cnt.nonCpG.reads
 		
 		return(invisible(bigqc));
 	}
