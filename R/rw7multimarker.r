@@ -15,7 +15,7 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
 	
 	plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
 			xlim = rng, ylim = rng,
-			main = sprintf("%s\nMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\nR2 = %.3f / %.3f, p-value = %.1e / %.1e",
+			main = sprintf("%s\nRMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\nR2 = %.3f / %.3f, p-value = %.1e / %.1e",
 								main, MSE, MAD, c1, c2, c1p^2, c2p^2, tt2pv(cor2tt(c1p)), tt2pv(cor2tt(c2p)))
 	);
 	legend(x = "bottomright", 
@@ -127,13 +127,13 @@ ramwas7multiMarkerNoCvrt = function(param){
 							  outcome = outcome,
 							  forecast = forecast0[1,]/forecast0[2,]
 		)
-		write.table( file = sprintf("%s/MMCV4_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
+		write.table( file = sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
 											 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
 						 x = rez,
 						 sep = "\t", row.names = FALSE);
 	} # rez
 	{
-		pdf( sprintf("%s/MMCV4_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
+		pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
 						 param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
 		plotPrediction(param, outcome, rez$forecast, 
 							main = "Prediction success (EN on coverage)");
