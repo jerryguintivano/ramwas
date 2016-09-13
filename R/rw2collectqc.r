@@ -190,6 +190,126 @@ combineBamQcIntoSamples = function(rbamlist, bamset){
 	return(bigqc);
 }
 
+estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
+	
+	if( length(hist.isolated.distances) == seqLength )
+		return( rep(1, seqLength) );
+	
+	### Point of crossing the middle
+	ytop = median(hist.isolated.distances[1:seqLength]);
+	ybottom = median(tail(hist.isolated.distances,seqLength));
+	ymidpoint = ( ytop + ybottom )/2;
+	yrange = ( ytop - ybottom );
+	overymid = (hist.isolated.distances > ymidpoint)
+	xmidpoint = which.max( cumsum( overymid - mean(overymid) ) );
+	
+	### interquartile range estimate
+	xqrange = 
+		which.max(cumsum( ((hist.isolated.distances > quantile(hist.isolated.distances,0.25))-0.75) )) -
+		which.max(cumsum( ((hist.isolated.distances > quantile(hist.isolated.distances,0.75))-0.25) ));
+	
+	logitrange = diff(qlogis(c(0.25,0.75)));
+	
+	initparam = c(xmidpoint = xmidpoint, 
+					  xdivider = (xqrange/logitrange)/2, 
+					  ymultiplier = yrange, 
+					  ymean = ybottom);
+	
+	fsPredict = function( x, param) {
+		(plogis((param[1]-x)/param[2]))*param[3]+param[4]
+	}
+	
+	x = seq_along(hist.isolated.distances);
+	
+	# plot( x, hist.isolated.distances)
+	# lines( x, fsPredict(x, initparam), col="blue", lwd = 3)
+	
+	fmin = function(param) {
+		fit2 = fsPredict(x, param); 
+		# (plogis((param[1]-x)/param[2]))*param[3]+param[4];
+		error = hist.isolated.distances - fit2;
+		e2 = error^2;
+		e2s = sort.int(e2,decreasing = TRUE);
+		return(sum(e2s[-(1:10)]));
+	}
+	
+	estimate = optim(par = initparam, fn = fmin, method = "BFGS");
+	param = estimate$par;
+	fit = fsPredict(x, param);
+	
+	rezfit = plogis((param[1]-x)/param[2]);
+	keep = rezfit>0.05;
+	keep[length(keep)] = FALSE;
+	rezfit = rezfit - max(rezfit[!keep],0)
+	rezfit[1:seqLength] = rezfit[seqLength];
+	rezfit = rezfit[keep];
+	rezfit = rezfit / rezfit[1];
+	
+	# lz = lm(hist.isolated.distances[seq_along(rezfit)] ~ rezfit)
+	# lines(rezfit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col="red");
+	
+	return(rezfit);
+}
+if(FALSE){ # test code
+	x = seq(0.01,0.99,0.01);
+	y = sqrt(abs(x-0.5))*sign(x-0.5)
+	plot(x,y)
+	log.ss = nls(y ~ SSlogis(x, phi1, phi2, phi3))
+	z = SSlogis(x, 0.59699, 0.61320, 0.04599)
+	lines(x, z, col="blue")
+	
+	
+	# setwd("D:/RW/NESDA/ramwas/AS120_sba/");
+	setwd("D:/RW/RC2/ramwas/AS38_gap0/");
+	# setwd("D:/RW/Celltype//ramwas/AS120_sba/");
+	lst = list.files(pattern = "\\.qc\\.");
+	qcs = lapply(lst, function(x){load(x);return(bam);})
+	histinfo = Reduce( `+`, lapply( lapply(qcs, `[[`, "qcflt"), `[[`, "hist.iso.dist.250"), init = 0);
+	rng = range(histinfo[-(1:10)]);
+	plot(histinfo/1e3, ylim = rng/1e3, pch=19, col="blue")
+	
+	hist.isolated.distances = histinfo;
+	seqLength = 50;
+	
+	fit = estimateFragmentSizeDistribution(hist.isolated.distances, seqLength)
+	
+	x = seq_along(hist.isolated.distances)
+	plot( x, hist.isolated.distances)
+	lz = lm(hist.isolated.distances[seq_along(fit)] ~ fit)
+	lines(fit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col="red");
+	
+}
+
+
+# pipelineEstimateFragmentSizeDistribution = function( param ){
+# 	
+# 	param = parameterPreprocess(param);
+# 	
+# 	if( !is.null(param$bam2sample) ) {
+# 		bams = unlist( param$bam2sample, use.names = FALSE);
+# 	} else if (!is.null(param$bamnames)) {
+# 		bams = param$bamnames;
+# 	} else {
+# 		stop("Bams are not defined. Set filebam2sample, filebamlist, bam2sample or bamnames.","\n");
+# 	}
+# 	bams = unique(basename(bams));
+# 	
+# 	qclist = vector("list", length(bams));
+# 	names(qclist) = bams;
+# 	
+# 	for( bamname in bams) {
+# 		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
+# 		qclist[[bamname]] = readRDS(rdsqcfile);
+# 	}
+# 	
+# 	qcset = lapply(lapply( qclist, `[[`, "qc"),`[[`,"hist.isolated.dist1")
+# 	bighist = Reduce(`%add%`, qcset);
+# 	estimate = estimateFragmentSizeDistribution(bighist, param$minfragmentsize);
+# 	
+# 	writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"), text = as.character(estimate));
+# 	
+# 	return(estimate);
+# }
 
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
