@@ -27,6 +27,8 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
 ramwas7multiMarkerNoCvrt = function(param){
 	# library(glmnet);library(filematrix)
 	# library(ramwas);
+	param = parameterPreprocess(param);
+	message("Working in: ",param$dircv);
 	{
 		if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
 			param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
@@ -145,6 +147,8 @@ ramwas7multiMarkerNoCvrt = function(param){
 ramwas7multiMarkerWithCvrt = function(param){
 	# library(glmnet);library(filematrix)
 	# library(ramwas);
+	param = parameterPreprocess(param);
+	message("Working in: ",param$dircv);
 	{
 		if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
 			param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
@@ -313,8 +317,6 @@ ramwas7multiMarkerWithCvrt = function(param){
 }
 
 ramwas7multiMarker = function(param){
-	param = parameterPreprocess(param);
-	message("Working in: ",param$dircv)
 	if( length(param$modelcovariates) == 0){
 		ramwas7multiMarkerNoCvrt(param);
 	} else {
