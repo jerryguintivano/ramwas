@@ -221,6 +221,7 @@ ramwas2collectqc = function( param ){
 		dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
 		
 		bigqc = combineBamQcIntoSamples(rbamlist = rbamlist, bamset = bamset);
+		saveRDS(file = paste0(dirloc,"/qclist.rds"), object = bigqc);
 		{
 			textT = sapply(bigqc, .qcTextLineT)
 			textR = sapply(bigqc, .qcTextLineR)
