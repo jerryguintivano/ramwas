@@ -169,8 +169,8 @@ ramwasPCsCovariateSelection = function(param) {
 	ann = param$covariates;
 	
 	# covariance matrix
-	message("Loading sample covariance matrix");
 	filecovmat = paste0(param$dirpca, "/covmat.rds")
+	message("Loading sample covariance matrix\n",filecovmat);
 	covmat = readRDS(filecovmat);
 	
 	covset = param$modelcovariates;
@@ -181,7 +181,7 @@ ramwasPCsCovariateSelection = function(param) {
 		
 		message("Removing covariates from covariance matrix");
 		
-		cvtrqr = orthonormalizeCovariates(ann[covset]);
+		cvtrqr = orthonormalizeCovariates(covariates = ann[covset]);
 		covmat1 = covmat;
 		covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr)
 		covmat1 = covmat1 - cvtrqr %*% crossprod(cvtrqr, covmat1);
@@ -199,11 +199,17 @@ ramwasPCsCovariateSelection = function(param) {
 			testPhenotype( phenotype = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
 			
 			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], testPhenotype, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
+			# options(warn=2)
+			# for( j in seq_along(ann[-1])) { # j=1
+			# 	cat('j',j,'\n');
+			# 		show( unlist(testPhenotype(phenotype = ann[[j+1]], data=pc, cvrtqr=t(cvtrqr))))
+			# 	# show(warnings())
+			# }
 		}
-		tstatsabs = lapply(testslist, function(x)abs(x[,2]))
-		tstatsabs = do.call(pmax, tstatsabs);
+		tstatsabs = lapply(testslist, function(x)abs(x[,3]))
+		tstatsabs = do.call(pmin, tstatsabs);
 		
-		ord = sort.list(tstatsabs, decreasing = TRUE);
+		ord = sort.list(tstatsabs, decreasing = FALSE);
 		
 		pvalues = lapply(testslist, function(x)abs(x[ord,3]))
 		names(pvalues) = paste0("PC",seq_len(param$covselpcs), "_pvalues");
