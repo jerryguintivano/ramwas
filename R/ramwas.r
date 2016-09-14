@@ -1150,6 +1150,9 @@ testPhenotype = function(phenotype, data, cvrtqr){
 	nVarTested = nrow(mycov)
 	dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
 	if(nVarTested == 1) {
+		if(dfFull <= 0)
+			return(list(correlation = 0, tstat = 0, pvalue = 1, nVarTested = nVarTested, dfFull = dfFull, statname = ""));
+
 		# SST = rowSums(slice^2);
 		SST = colSumsSq(slice);
 		
@@ -1175,6 +1178,9 @@ testPhenotype = function(phenotype, data, cvrtqr){
 		return( list(correlation = cr, tstat = tt, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = "") );
 		
 	} else {
+		if(dfFull <= 0)
+			return( list(Rsquared = 0, Fstat = 0, pvalue = 1, nVarTested = nVarTested, dfFull = dfFull, statname = paste0("-F_",nVarTested)) );
+
 		# SST = rowSums(slice^2);
 		SST = colSumsSq(slice);
 		
@@ -1276,6 +1282,8 @@ if(FALSE){
 }
 
 orthonormalizeCovariates = function(covariates) {
+	if(any(sapply(lapply(covariates, is.na),any)))
+		stop("Missing values are not allowed in the covariates")
 	cvrtset = c(const = list(rep(1, nrow(covariates))), covariates);
 	for( ind in which(sapply(cvrtset, typeof)=="character")) { # ind = 3
 		fctr = factor(cvrtset[[ind]]);
