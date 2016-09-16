@@ -24,6 +24,7 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
 			 );
 	abline(a = 0, b = 1, col = "gray")
 }
+
 ramwas7multiMarkerNoCvrt = function(param){
 	# library(glmnet);library(filematrix)
 	# library(ramwas);
