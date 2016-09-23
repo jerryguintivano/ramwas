@@ -98,11 +98,11 @@ pipelineCoverage1Sample = function(colnum, param){
 	mm = nrow(mat);
 	nsteps = ceiling(mm/step1);
 	for( part in 1:nsteps ) { # part = 1
-		message(fmpart, part, "of", nsteps);
+		message(part, " of ", nsteps);
 		fr = (part-1)*step1 + 1;
 		to = min(part*step1, mm);
 		
-		subslice = mat[fr:to,];
+		subslice = mat[fr:to,,drop=FALSE];
 		
 		### Filtering criteria
 		cpgmean = rowMeans( subslice );
