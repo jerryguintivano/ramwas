@@ -42,7 +42,8 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
 	}
 	legend("bottomright", c("P-values",sprintf("%.0f %% Confidence band",100-ci.level*100)),lwd = c(0,1), pch = c(19,NA_integer_), lty = c(0,1), col=c("red","cyan4"))
 	if(length(pvalues)*2>ntests) {
-		lambda = sprintf("%.3f",log10(pvalues[ntests/2]) / log10(0.5));
+		# lambda = sprintf("%.3f",log10(pvalues[ntests/2]) / log10(0.5));
+		lambda = sprintf("%.3f",qchisq(pvalues[ntests/2],1,lower.tail = FALSE) / qchisq(0.5,1,lower.tail = FALSE));
 		legend("bottom", legend = bquote(lambda == .(lambda)), bty = "n")
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
