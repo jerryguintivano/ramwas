@@ -253,12 +253,14 @@ RaMWAS can perform N-fold cross-validation and assess performance of elastic net
 ```{r cv}
 {
 	suppressMessages({
+	suppressWarnings({
 	param$modeloutcomes = "age"
 	ramwas6crossValidation(param)
 	param$mmncpgs = 10
 	ramwas7multiMarker(param)
 	param$mmncpgs = 100
 	ramwas7multiMarker(param)
+	})
 	})
 	message("The generated files and directories in Multi-marker directory are:");
 	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds")), collate="\n"))
