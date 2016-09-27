@@ -1,4 +1,4 @@
-ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "chr22", randseed = 18090212){
+ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "chr22", randseed = 18090212, verbose = TRUE){
 
 	# Create Directory
 	dir.create(paste0(dir,"/bams"), showWarnings = FALSE, recursive = TRUE);
@@ -64,7 +64,8 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "
 	cpgprob = rep(1,length(locsgood));
 	for( bam in seq_len(nsamples)){ # bam = 1
 		
-		message("Creating BAM ", bam, " of ", nsamples);
+		if(verbose)
+			message("Creating BAM ", bam, " of ", nsamples);
 		
 		# Change CpG probabilities
 		# by age and case-control status
