@@ -317,10 +317,12 @@ ramwas7multiMarkerWithCvrt = function(param){
 	return( invisible(rez) );
 }
 
-ramwas7multiMarker = function(param){
-	if( length(param$modelcovariates) == 0){
-		ramwas7multiMarkerNoCvrt(param);
-	} else {
-		ramwas7multiMarkerWithCvrt(param);
-	}
-}
+ramwas7multiMarker = ramwas7multiMarkerNoCvrt;
+
+# ramwas7multiMarker = function(param){
+# 	if( length(param$modelcovariates) == 0){
+# 		ramwas7multiMarkerNoCvrt(param);
+# 	} else {
+# 		ramwas7multiMarkerWithCvrt(param);
+# 	}
+# }
