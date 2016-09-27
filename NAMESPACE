@@ -1,11 +1,12 @@
 useDynLib(ramwas, .registration = TRUE)
 # exportPattern("^[[:alpha:]]+")
 export(
-	"cachedRDSload",
-	"orthonormalizeCovariates",
-	"parameterDump",
-	"parameterPreprocess",
-	"parametersFromFile",
+    "cachedRDSload",
+    "orthonormalizeCovariates",
+    "parameterDump",
+    "parameterPreprocess",
+    "parametersFromFile",
+    "ramwas0createArtificialData",
     "ramwas1scanBams",
     "pipelineProcessBam",
     "ramwas2collectqc",
@@ -28,7 +29,7 @@ importFrom("graphics", "abline", "legend", "lines", "par", "plot", "points", "ti
 importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim", "model.matrix", "quantile", "median", "qlogis", "plogis", "qbeta", "cor", "lm")
 importFrom("utils", "flush.console", "head", "tail", "tail.matrix", "read.table", "write.table")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
-importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam")
+importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam", "asBam")
 importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "clusterExport") #"makePSOCKcluster"
 importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
