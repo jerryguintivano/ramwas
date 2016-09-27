@@ -60,8 +60,8 @@ ramwas0createArtificialData(dir,
                             
 message("Artificial project files created in:")
 message(dir)
-
-show(as.matrix(list.files(dir, recursive=TRUE)))
+message("The generated files are:");
+message(paste(list.files(dir, recursive=TRUE), collate="\n"))
 
 ### Clean up
 unlink(dir, recursive=TRUE)
