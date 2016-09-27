@@ -73,6 +73,7 @@ ramwas1scanBams = function( param ){
 	param = parameterPreprocess(param);
 	stopifnot( !is.null(param$bamnames));
 	
+	dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE)
 	cat(file = paste0(param$dirfilter,"/Log.txt"), 
 		 date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
 	if( param$cputhreads > 1) {

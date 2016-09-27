@@ -379,7 +379,7 @@ ramwas2collectqc = function( param ){
 		figfun(qcname = "avg.coverage.by.density", plotname = "coverage_by_density");
 		# bigqc[[1]]$cnt.nonCpG.reads
 		if(length(bigqc) >= 10) {
-			histqc(qcfun = function(x){x$avg.cpg.coverage / x$avg.noncpg.coverage},
+			histqc(qcfun = function(x){x$avg.cpg.coverage / max(x$avg.noncpg.coverage,.Machine$double.eps)},
 					 plottitle = "Enrichment lower bound\n(Avg CpG / avg non-CpG coverage)",
 					 filename = "enrichment")
 			histqc(qcfun = function(x){x$avg.noncpg.coverage / x$avg.cpg.coverage * 100},

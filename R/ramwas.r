@@ -122,7 +122,7 @@ parameterPreprocess = function( param ){
 	}
 	
 	# Set up directories 
-	if( is.null(param$dirproject) ) param$dirproject = ".";
+	if( is.null(param$dirproject) ) param$dirproject = getwd();
 	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
 	}
@@ -640,10 +640,10 @@ plot.qcCoverageByDensity = function(x, samplename="", ...){
 }
 
 qcmean = function(x) UseMethod("qcmean", x)
-qcmean.qcHistScore = function(x) { .histmean(x)-1 }
-qcmean.qcHistScoreBF = function(x) { .histmean(x)-1 }
-qcmean.qcEditDist = function(x) { .histmean(x)-1 }
-qcmean.qcEditDistBF = function(x) { .histmean(x)-1 }
+qcmean.qcHistScore = function(x) { pmax(.histmean(x)-1,0) }
+qcmean.qcHistScoreBF = function(x) { pmax(.histmean(x)-1,0) }
+qcmean.qcEditDist = function(x) { pmax(.histmean(x)-1,0) }
+qcmean.qcEditDistBF = function(x) { pmax(.histmean(x)-1,0) }
 qcmean.qcLengthMatched = function(x) { .histmean(x) }
 qcmean.qcLengthMatchedBF = function(x) { .histmean(x) }
 qcmean.qcIsoDist = function(x) { .histmean(x) }
