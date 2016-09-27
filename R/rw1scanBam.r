@@ -89,5 +89,5 @@ ramwas1scanBams = function( param ){
 	}
 	cat(file = paste0(param$dirfilter,"/Log.txt"), 
 		 date(), ", Done scanning bams.", "\n", sep = "", append = TRUE);
-	return(z);
+	return(invisible(z));
 }
