@@ -14,7 +14,8 @@ ramwas0createArtificialData(dir,
                             nsamples = 20, 
                             nreads = 1e6, 
                             chr = "chr22", 
-                            randseed = 18090212)
+                            randseed = 18090212,
+                            verbose = TRUE)
 }
 \arguments{
   \item{dir}{
@@ -31,6 +32,9 @@ ramwas0createArtificialData(dir,
   }
   \item{randseed}{
     Random number generator seed for consistency of the output.
+  }
+  \item{verbose}{
+    If TRUE, produce a message for each BAM file.
   }
 }
 \details{
