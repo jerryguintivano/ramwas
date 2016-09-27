@@ -19,8 +19,6 @@ Ramwas provides a full set of tools for
 	\tabular{ll}{
 		Package: \tab ramwas\cr
 		Type: \tab Package\cr
-		Version: \tab 0.1\cr
-		Date: \tab 2016-04-15\cr
 		License: \tab LGPL-3 \cr
 		LazyLoad: \tab yes\cr
 		Depends: \tab methods\cr
