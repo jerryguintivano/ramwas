@@ -15,12 +15,14 @@ vignette: >
 The following function generates an artificial data set which would be useful for illustrating the steps of RaMWAS pipeline.
 
 ```{r generateData}
-library(ramwas)
-dir = paste0(tempdir(), '/simulated_project');
-ramwas0createArtificialData(dir, nsamples = 20, nreads = 1e6, verbose=FALSE)
-cat("Artificial project files created in:", "\n", dir, "\n")
-message("The generated files and directories are:");
-message(paste(list.files(dir), collate="\n"))
+{
+	suppressPackageStartupMessages(library(ramwas))
+	dir = paste0(tempdir(), '/simulated_project');
+	ramwas0createArtificialData(dir, nsamples = 20, nreads = 1e6, verbose=FALSE)
+	cat("Artificial project files created in:", "\n", dir, "\n")
+	message("The generated files and directories are:");
+	message(paste(list.files(dir), collate="\n"))
+}
 ```
 
 # Project directory structure
@@ -67,9 +69,13 @@ See `r vignette("RaMWAS_param")` for full information on the available parameter
 The BAM files must be located in `dirbam` and listed in `filebamlist`. The reads are filtered out if they have tag `scoretag` value less than `minscore`. The the read start information and other QC measures is then recorded. The scanning is done in parallel using at most `cputhreads` threads.
 
 ```{r scan bams}
-ramwas1scanBams(param)
-message("The generated files and directories are:");
-message(paste(list.files(dir), collate="\n"))
+{
+	suppressMessages({
+	ramwas1scanBams(param)
+	})
+	message("The generated files and directories are:");
+	message(paste(list.files(dir), collate="\n"))
+}
 ```
 
 **R function.** This task can be run with a single call of the `ramwas1scanBams` or separate runs of `pipelineProcessBam` for each BAM file.
@@ -98,9 +104,13 @@ The `pipelineProcessBam` can be used if the user wants to manually spread the ta
 
 Next we collect QC information across BAMs, collect it by samples (if multiple BAMs correspond to one sample), and estimate fragment size distribution from the read start locations around isolated CpGs.
 ```{r collectQC}
-ramwas2collectqc(param)
-message("The generated files and directories in QC directory are:");
-message(paste(list.files(paste0(dir,"/qc")), collate="\n"))
+{
+	suppressMessages({
+	ramwas2collectqc(param)
+	})
+	message("The generated files and directories in QC directory are:");
+	message(paste(list.files(paste0(dir,"/qc")), collate="\n"))
+}
 ```
 
 **Parameters**
@@ -120,9 +130,13 @@ Next, we create a coverage matrix, normalized to have the same average for each 
 The coverage matrix is stored in big file as a `filematrix` object. See `filematrix` package for format details.
 Again, the task is parallelized across `cputhreads` threads.
 ```{r normCoverage}
-ramwas3NormalizedCoverage(param)
-message("The generated files and directories in coverage directory are:");
-message(paste(list.files(paste0(dir,"/coverage_norm_20")), collate="\n"))
+{
+	suppressMessages({
+	ramwas3NormalizedCoverage(param)
+	})
+	message("The generated files and directories in coverage directory are:");
+	message(paste(list.files(paste0(dir,"/coverage_norm_20")), collate="\n"))
+}
 ```
 
 **Parameters**
@@ -151,13 +165,17 @@ First, we aim to capture main directions of variation in the data and correct fo
 Second, the sample loadings of the first PCs can indicate highly irregular samples which should be excluded.
 
 ```{r pca}
-ramwas4PCA(param)
-message("The generated files and directories in PCA directory are:");
-message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts")), collate="\n"))
-message("Correlation of top PCs with covariates are:");
-head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt"), sep = "\t", header = TRUE))
-message("P-values for the associuation of top PCs with covariates are:");
-head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt"), sep = "\t", header = TRUE))
+{
+	suppressMessages({
+	ramwas4PCA(param)
+	})
+	message("The generated files and directories in PCA directory are:")
+	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts")), collate="\n"))
+	message("Correlation of top PCs with covariates are:");
+	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt"), sep = "\t", header = TRUE))
+	message("P-values for the associuation of top PCs with covariates are:");
+	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt"), sep = "\t", header = TRUE))
+}
 ```
 
 **Parameters**
@@ -182,26 +200,34 @@ head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pva
 Next we test for association between the outcome variable and methylation coverage.
 The testing accounts for the set of covariates and top principal components.
 ```{r mwas1}
-param$modeloutcome = "casecontrol"
-ramwas5MWAS(param)
-message("The generated files and directories in MWAS directories are:");
-message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs")), collate="\n"))
-message("The top MWAS findings are:");
-head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
-qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Stats_and_pvalues"))[,3])
-title("Case-control status vs. methylation coverage")
+{
+	suppressMessages({
+	param$modeloutcome = "casecontrol"
+	ramwas5MWAS(param)
+	})
+	message("The generated files and directories in MWAS directories are:");
+	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs")), collate="\n"))
+	message("The top MWAS findings are:");
+	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
+	qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Stats_and_pvalues"))[,3])
+	title("Case-control status vs. methylation coverage")
+}
 ```
 
 The testing can easily be repeated for another outcome variable (age):
 ```{r mwas2}
-param$modeloutcome = "age"
-ramwas5MWAS(param)
-message("The generated files and directories in MWAS directories are:");
-message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs")), collate="\n"))
-message("The top MWAS findings are:");
-head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
-qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Stats_and_pvalues"))[,3])
-title("Age vs. methylation coverage")
+{
+	suppressMessages({
+	param$modeloutcome = "age"
+	ramwas5MWAS(param)
+	})
+	message("The generated files and directories in MWAS directories are:");
+	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs")), collate="\n"))
+	message("The top MWAS findings are:");
+	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
+	qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Stats_and_pvalues"))[,3])
+	title("Age vs. methylation coverage")
+}
 ```
 
 **Parameters**
@@ -225,14 +251,18 @@ title("Age vs. methylation coverage")
 
 RaMWAS can perform N-fold cross-validation and assess performance of elastic net applied to the top MWAS sites.
 ```{r cv}
-param$modeloutcomes = "age"
-ramwas6crossValidation(param);
-param$mmncpgs = 10;
-ramwas7multiMarker(param)
-param$mmncpgs = 100;
-ramwas7multiMarker(param)
-message("The generated files and directories in Multi-marker directory are:");
-message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds")), collate="\n"))
+{
+	suppressMessages({
+	param$modeloutcomes = "age"
+	ramwas6crossValidation(param)
+	param$mmncpgs = 10
+	ramwas7multiMarker(param)
+	param$mmncpgs = 100
+	ramwas7multiMarker(param)
+	})
+	message("The generated files and directories in Multi-marker directory are:");
+	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds")), collate="\n"))
+}
 ```
 
 **R functions.** RaMWAS pipeline can estimate predictive power of elastic net applied to top CpGs from MWAS.
