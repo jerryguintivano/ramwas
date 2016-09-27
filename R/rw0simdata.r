@@ -22,7 +22,7 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "
 
 	# Exclude CpGs with density over 15
 	{
-		coverage = ramwas:::calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), 
+		coverage = calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), 
 													 cpgset = cpgset, 
 													 fragdistr = fragdistr);
 		locsgood = locs[ coverage[[1]] <= 15 ];

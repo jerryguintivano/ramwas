@@ -59,7 +59,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
 	
 	# Call biomaRt	
 	{
-		library(biomaRt)
+		# library(biomaRt)
 		gene_ensembl = useMart(biomart=param$bimart, host = param$bihost, dataset=param$bidataset)
 		bioresp = getBM(mart = gene_ensembl,
 							 attributes = unique(c(

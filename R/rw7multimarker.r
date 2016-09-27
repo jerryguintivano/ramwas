@@ -37,7 +37,7 @@ ramwas7multiMarkerNoCvrt = function(param){
 	} # remove samples with NA's in outcome
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = ramwas:::.matchCovmatCovar( param );
+		rez = .matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		rm(rez);
@@ -157,14 +157,14 @@ ramwas7multiMarkerWithCvrt = function(param){
 	} # remove samples with NA's in outcome
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = ramwas:::.matchCovmatCovar( param );
+		rez = .matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		rm(rez);
 	} # rowsubset, ncpgs
 	{
 		outcome = param$covariates[[ param$modeloutcome ]];
-		cvrt = ramwas:::.getCovariates(param, rowsubset, FALSE); # cvrtqr = ramwas:::.getCovariates(param)
+		cvrt = .getCovariates(param, rowsubset, FALSE); # cvrtqr = ramwas:::.getCovariates(param)
 		# cvrt = cvrt - rowMeans(cvrt);
 		cvrt = rbind(rep(1,ncol(cvrt)), cvrt);
 	} # outcome, cvrt (with constant)
