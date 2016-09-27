@@ -1,5 +1,6 @@
 ramwas6crossValidation = function(param) {
 	param = parameterPreprocess(param);
+	param$toppvthreshold = 1e-300;
 	dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
 	parameterDump(dir = param$dircv, param = param,
 					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds","randseed",
