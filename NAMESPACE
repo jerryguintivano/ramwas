@@ -25,17 +25,27 @@ export(
 
 importFrom("methods", "setRefClass", "new")
 importFrom("grDevices", "dev.off", "pdf")
-importFrom("graphics", "abline", "legend", "lines", "par", "plot", "points", "title", "axis", "barplot")
-importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim", "model.matrix", "quantile", "median", "qlogis", "plogis", "qbeta", "cor", "lm")
-importFrom("utils", "flush.console", "head", "tail", "tail.matrix", "read.table", "write.table")
-importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", "cigarWidthAlongReferenceSpace")
-importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", "open.BamFile", "scanBam", "asBam")
-importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", "stopCluster", "detectCores", "clusterExport") #"makePSOCKcluster"
+importFrom("graphics", "abline", "legend", "lines", "par", "plot", 
+			  "points", "title", "axis", "barplot", "hist")
+importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim", 
+			  "model.matrix", "quantile", "median", "qlogis", 
+			  "plogis", "qbeta", "cor", "lm", "qchisq")
+importFrom("utils", "flush.console", "head", "tail", 
+			  "tail.matrix", "read.table", "write.table")
+importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace", 
+			  "cigarWidthAlongReferenceSpace")
+importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile", 
+			  "open.BamFile", "scanBam", "asBam")
+importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB", 
+			  "stopCluster", "detectCores", "clusterExport")
 importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
 importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
+importFrom("biomaRt", "useMart", "getBM")
 
-importFrom("filematrix", "fm.create", "fm.load", "fm.open", "fm.create.from.matrix","closeAndDeleteFiles")
+
+importFrom("filematrix", "fm.create", "fm.load", "fm.open",
+			  "fm.create.from.matrix", "closeAndDeleteFiles")
 importClassesFrom("filematrix", "filematrix")
 importMethodsFrom("filematrix", "close")
 
