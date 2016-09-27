@@ -35,7 +35,6 @@ ramwas7multiMarker(param)
   \item{param}{
     List with RaMWAS parameters. \cr
     For detailed description of all available parameters run:\cr \code{vignette("RaMWAS_param")}.
-
   }
   \item{bamname}{
     Name of the BAM file to process. Can be absolute or relative to \code{dirbam} parameter.
