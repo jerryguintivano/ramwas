@@ -279,3 +279,9 @@ This procedure is then applied 10 times to have a prediction for all samples.
 * The elastic net parameter labmda can be set by `mmalpha` parameter. It is 0 by default.
 * The output is saved in `dircv` directory, by default named like "CV_10_folds" and located in `dirmwas` directory.
 
+## Cleanup
+
+Here we remove all the files created by the code chunks above.
+```{r clean}
+unlink(dir, recursive=TRUE)
+```
