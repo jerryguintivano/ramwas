@@ -1,8 +1,8 @@
 Package: ramwas
 Type: Package
 Title: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
-Version: 0.99.0
-Date: 2016-08-01
+Version: 0.99.1
+Date: 2016-09-26
 Author: Andrey A Shabalin
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
 Description: RaMWAS provides a full set of tools for 

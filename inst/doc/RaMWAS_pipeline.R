@@ -61,9 +61,9 @@ param = list(
 	message("The generated files and directories in PCA directory are:")
 	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts")), collate="\n"))
 	message("Correlation of top PCs with covariates are:");
-	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt"), sep = "\t", header = TRUE))
+	show(head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt"), sep = "\t", header = TRUE)))
 	message("P-values for the associuation of top PCs with covariates are:");
-	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt"), sep = "\t", header = TRUE))
+	show(head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt"), sep = "\t", header = TRUE)))
 }
 
 ## ----mwas1---------------------------------------------------------------
@@ -75,7 +75,7 @@ param = list(
 	message("The generated files and directories in MWAS directories are:");
 	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs")), collate="\n"))
 	message("The top MWAS findings are:");
-	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
+	show(head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE)))
 	qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Stats_and_pvalues"))[,3])
 	title("Case-control status vs. methylation coverage")
 }
@@ -89,7 +89,7 @@ param = list(
 	message("The generated files and directories in MWAS directories are:");
 	message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs")), collate="\n"))
 	message("The top MWAS findings are:");
-	head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE))
+	show(head( read.table(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt"), sep = "\t", header = TRUE)))
 	qqPlotFast(fm.load(paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Stats_and_pvalues"))[,3])
 	title("Age vs. methylation coverage")
 }
