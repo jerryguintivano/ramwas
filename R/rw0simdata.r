@@ -5,7 +5,8 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "
 	
 	# CpG locations
 	{
-		cpgset = readRDS("C:/AllWorkFiles/Andrey/VCU/RaMWAS3/cpgset/hg19_1kG_MAF_0.01_chr1-22.rds")
+		
+		cpgset = readRDS(system.file("extdata", "hg19_1kG_MAF_0.01_chr1-22.rds", package="ramwas"))
 		cpgset = cpgset[chr]
 		locs = cpgset[[1]]
 		saveRDS(object = cpgset, file = paste0(dir,"/Single_chromosome.rds"), compress = "xz")
