@@ -1147,7 +1147,7 @@ testPhenotype = function(phenotype, data, cvrtqr){
 	}
 	
 	### 
-	nVarTested = nrow(mycov)
+	nVarTested = nrow(mycov);
 	dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
 	if(nVarTested == 1) {
 		if(dfFull <= 0)
@@ -1165,7 +1165,7 @@ testPhenotype = function(phenotype, data, cvrtqr){
 		# cvC2 = colSums( cvC^2 );
 		
 		# SSR = colSums( cvD^2 );
-		cr = cvD / sqrt(pmax(SST - cvC2, SST/1e16));
+		cr = cvD / sqrt(pmax(SST - cvC2, 1e-50));
 		
 		cor2tt = function(x) { return( x * sqrt( dfFull / (1 - pmin(x^2,1))));	}
 		tt2pv = function(x) { return( (pt(-abs(x),dfFull)*2)); }
