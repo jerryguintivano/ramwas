@@ -1,15 +1,20 @@
-ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "chr22", randseed = 18090212, verbose = TRUE){
+ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, ncpgs = 500e3, randseed = 18090212, verbose = TRUE){
 
+	set.seed(randseed);
+	
 	# Create Directory
 	dir.create(paste0(dir,"/bams"), showWarnings = FALSE, recursive = TRUE);
 	
 	# CpG locations
 	{
-		
-		cpgset = readRDS(system.file("extdata", "hg19_1kG_MAF_0.01_chr1-22.rds", package="ramwas"))
-		cpgset = cpgset[chr]
-		locs = cpgset[[1]]
-		saveRDS(object = cpgset, file = paste0(dir,"/Single_chromosome.rds"), compress = "xz")
+		# ncpgs = 500e3
+		chrlen = ncpgs*50
+		probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
+		locs = which(probs > runif(chrlen));
+		rm(probs);
+
+		cpgset = list( chr1 = locs );
+		saveRDS(object = cpgset, file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
 	} # locs, cpgset, /Single_chromosome.rds
 	
 	# Fragment size distribution, with 150 median fragment size
@@ -23,16 +28,14 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "
 	# Exclude CpGs with density over 15
 	{
 		coverage = calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), 
-													 cpgset = cpgset, 
-													 fragdistr = fragdistr);
+										 cpgset = cpgset, 
+										 fragdistr = fragdistr);
 		locsgood = locs[ coverage[[1]] <= 15 ];
 		rm(coverage, cpgset, locs)
-		
 	} # locsgood, -locs, -cpgset
 	
 	# Age covariate and effects
 	{
-		set.seed(randseed);
 		age = sample(20:80, size = nsamples, replace = TRUE)
 		cpgageset = rep(sort.int(sample(floor(length(locsgood)/6)-1, length(locsgood)/600)), each = 6)*6+(0:5);
 		cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
@@ -95,9 +98,9 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, chr = "
 		# Write sam file
 		filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
 		fid = file(description = filesam, open = "wt")
-		writeLines(con = fid, sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:%s\tLN:%d",chr,tail(locsgood,1)+1e5L));
+		writeLines(con = fid, sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",chrlen+1e4));
 		writeLines(con = fid, 
-					  sprintf("%06d\t%d\tchr22\t%d\t65\t1M\t*\t0\t0\tA\t*", 
+					  sprintf("%06d\t%d\tchr1\t%d\t65\t1M\t*\t0\t0\tA\t*", 
 					  		  1:nreads, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
 					  		  readdir*16L, # FLAG Int [0,216-1] bitwise FLAG
 					  		  # RNAME String \*|[!-()+-<>-~][!-~]* Reference sequence NAME

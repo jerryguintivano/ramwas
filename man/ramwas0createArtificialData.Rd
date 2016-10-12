@@ -13,7 +13,7 @@
 ramwas0createArtificialData(dir, 
                             nsamples = 20, 
                             nreads = 1e6, 
-                            chr = "chr22", 
+                            ncpgs = 500e3, 
                             randseed = 18090212,
                             verbose = TRUE)
 }
@@ -27,8 +27,8 @@ ramwas0createArtificialData(dir,
   \item{nreads}{
     Number of reads in each BAM file.
   }
-  \item{chr}{
-    Reads are generated on this chromosome of human genome (hg19).
+  \item{ncpgs}{
+    Number of CpGs in the generated genome (with a single chromosome).
   }
   \item{randseed}{
     Random number generator seed for consistency of the output.
@@ -60,7 +60,8 @@ dir = paste0(tempdir(), '/simulated_project');
 
 ramwas0createArtificialData(dir, 
                             nsamples = 4, 
-                            nreads = 1e4)
+                            nreads = 10e3,
+                            ncpgs = 1e3)
                             
 message("Artificial project files created in:")
 message(dir)
