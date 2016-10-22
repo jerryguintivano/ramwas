@@ -176,7 +176,11 @@ pipelineCoverage1Sample = function(colnum, param){
 ramwas3NormalizedCoverage = function( param ){
 	# Prepare
 	param = parameterPreprocess(param);
-	param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
+	if( param$minfragmentsize < param$maxfragmentsize ){
+		param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
+	} else {
+		param$fragdistr = rep(1, param$maxfragmentsize);
+	}
 	dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 	dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
 	
