@@ -1,0 +1,47 @@
+---
+title: "RaMWAS CpG sets"
+author: "Andrey A Shabalin"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true # table of content true
+vignette: >
+  %\VignetteIndexEntry{RaMWAS pipeline parts}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+# CpG sets
+
+One the of the required inputd for RaMWAS pipeline is the set of CpGs for which it calculates methylation coverage (at step 3). The set of CpGs must to be provided in a form of .rds file (`filecpgset` parameter). Here we present several carefully prepared CpGs sets for human and mouse genomes.
+
+## Downloadable CpG sets
+
+The numan CpG sets below account for SNPs which can create and destroy CpGs. The SNPs are derived from 1000 Genomes populations ([more info](http://www.internationalgenome.org/category/population/)). Only SNPs with minor allele frequency above 1% are included.
+
+The CpGs in the regions with poor alignment, as indicated by our in-silico experiment, are excluded. The details of the in-silico experiment are presented in the section below.
+
+Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
+:---:|:---|:---:|:---:|:---:|:---:
+ALL|All samples         | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+AFR|African           | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+AMR|Ad\ Mixed\ American | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+EAS|East Asian        | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+EUR|European          | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+SAS|South Asian       | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
+---|Reference\ Genome | [link](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22.rds)          | [link](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22.rds "hg38, ref, noQC")          | [link](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22_bowtie2_75bp.rds)
+
+Table: Human genome CpG sets.
+
+Genome | No\ QC | With\ QC
+:---:|:---:|:---:
+GRCm38.p4 | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p4.rds) | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p4_bowtie2_75bp.rds)
+GRCm38.p5 | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds) | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p5_bowtie2_75bp.rds)
+
+Table: Mouse genome CpG sets.
+
+## CpG filtering by in-silico alignment experiment
+
+We conducted an in-silico experiment to find and exclude CpGs located in regions that do not align well. The experiment was conducted as follows.
+First, we created an artificial set of reads with all possible 75 bp genomic fragments from the referene genome. Then, these fragments were aligned with Bowtie2 aligner to the same reference genome.
+Next, we calculated read coverage for all candidate CpGs. Note that if the alignment was perfect, each CpG would have coverage of exactly 75. We excluded all CpG with coverage below 65 or above 85, which was about 2% of all CpGs for human genomes and 4% for mouse. The remaining CpGs formed the CpG sets in the "With\ QC" column of the tables above.
+
