@@ -20,7 +20,8 @@ export(
     "qqPlotFast",
     "rowSumsSq",
     "colSumsSq",
-    "testPhenotype"
+    "testPhenotype",
+    "getCpGset",
 )
 
 importFrom("methods", "setRefClass", "new")
@@ -42,7 +43,7 @@ importFrom("KernSmooth","locpoly");
 importFrom("digest", "digest")
 importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
 importFrom("biomaRt", "useMart", "getBM")
-
+importFrom("Biostrings","matchPattern")
 
 importFrom("filematrix", "fm.create", "fm.load", "fm.open",
 			  "fm.create.from.matrix", "closeAndDeleteFiles")
