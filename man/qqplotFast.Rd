@@ -1,7 +1,7 @@
 \name{qqPlotFast}
 \alias{qqPlotFast}
 \title{
-	Fast QQ-plot for large number of p-values.
+	Fast QQ-plot for Large Number of P-values
 }
 \description{
 Plots a QQ-plot with a confidence band and an estimate of inflation factor lambda.

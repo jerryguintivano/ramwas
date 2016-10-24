@@ -3,7 +3,7 @@
 \alias{ramwas}
 \docType{package}
 \title{
-	Fast methylome-wide association study pipeline for enrichment platforms
+	Fast Methylome-wide Association Study Pipeline for Enrichment Platforms
 }
 \description{
 Ramwas provides a full set of tools for 

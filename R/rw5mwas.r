@@ -175,9 +175,6 @@ ramwas5saveTopFindings = function(param){
 	outmat = double(3*(rng[2]-rng[1]+1));
 	dim(outmat) = c((rng[2]-rng[1]+1),3);
 	
-	# fmout = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
-	# covmat = 0;
-	
 	step1 = ceiling( 512*1024*1024 / nrow(fm) / 8);
 	mm = rng[2]-rng[1]+1;
 	nsteps = ceiling(mm/step1);
@@ -288,7 +285,7 @@ ramwas5MWAS = function( param ){
 			rm(cl, rng, rangeset);
 			.file.remove(param$lockfile2);
 		} else {
-			covmat = .ramwas5MWASjob( rng = c(1, ncpgs, 0), param, mwascvrtqr, rowsubset);
+			covmat = .ramwas5MWASjob(rng = c(1, ncpgs, 0), param, mwascvrtqr, rowsubset);
 		}
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
 			 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);

@@ -1,8 +1,7 @@
 \name{parameterDump}
 \alias{parameterDump}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-	Save Parameters in a Text File.
+	Save Parameters in a Text File
 }
 \description{
 	Saves parameters in a text file, prioritizing those listed in \code{toplines}.
