@@ -12,36 +12,96 @@ vignette: >
 
 # CpG sets
 
-One the of the required inputd for RaMWAS pipeline is the set of CpGs for which it calculates methylation coverage (at step 3). The set of CpGs must to be provided in a form of .rds file (`filecpgset` parameter). Here we present several carefully prepared CpGs sets for human and mouse genomes.
+One the of the required inputs for RaMWAS pipeline is 
+the set of CpGs at which it calculates methylation coverage
+(step 3 of the pipeline). 
+The set of CpGs has to be provided in a form of .rds file (`filecpgset` parameter).
+Here we present several prepared CpGs sets for human and mouse genomes.
+We also provide detailed instructions for preparing a CpG set.
 
-## Downloadable CpG sets
+# Downloadable CpG sets
 
-The numan CpG sets below account for SNPs which can create and destroy CpGs. The SNPs are derived from 1000 Genomes populations ([more info](http://www.internationalgenome.org/category/population/)). Only SNPs with minor allele frequency above 1% are included.
+The human CpG sets provided in the tables below
+account for SNPs which can create and destroy CpGs.
+The SNPs are derived from the 1000 Genomes populations 
+([more info](http://www.internationalgenome.org/category/population/)). 
+Only SNPs with minor allele frequency above 1% are included.
 
-The CpGs in the regions with poor alignment, as indicated by our in-silico experiment, are excluded. The details of the in-silico experiment are presented in the section below.
+We excluded CpGs in the regions with poor alignment,
+as indicated by our in-silico experiment.
+The details of the in-silico experiment are presented in the corresponding section below.
 
 Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
 :---:|:---|:---:|:---:|:---:|:---:
-ALL|All samples         | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
-AFR|African           | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
-AMR|Ad\ Mixed\ American | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
-EAS|East Asian        | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
-EUR|European          | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
-SAS|South Asian       | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22.rds) | [link](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds)
----|Reference\ Genome | [link](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22.rds)          | [link](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22_bowtie2_75bp.rds) | [link](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22.rds "hg38, ref, noQC")          | [link](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22_bowtie2_75bp.rds)
+ALL | All samples | [28.4M](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22.rds "28,368,579 CpGs, 31.1 MB file") | [28.0M](http://shabal.in/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,985,891 CpGs, 30.8 MB file") | [29.5M](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22.rds "29,469,696 CpGs, 32.3 MB file") | [27.8M](http://shabal.in/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,789,753 CpGs, 30.7 MB file") 
+AFR | African | [28.7M](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22.rds "28,697,922 CpGs, 31.5 MB file") | [28.3M](http://shabal.in/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "28,312,550 CpGs, 31.1 MB file") | [29.8M](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22.rds "29,797,951 CpGs, 32.6 MB file") | [28.1M](http://shabal.in/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "28,108,517 CpGs, 31.0 MB file") 
+AMR | Ad\ Mixed\ American | [28.1M](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22.rds "28,083,940 CpGs, 30.9 MB file") | [27.7M](http://shabal.in/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,703,792 CpGs, 30.5 MB file") | [29.2M](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22.rds "29,185,829 CpGs, 32.0 MB file") | [27.5M](http://shabal.in/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,515,085 CpGs, 30.4 MB file") 
+EAS | East Asian | [27.8M](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22.rds "27,806,911 CpGs, 30.6 MB file") | [27.4M](http://shabal.in/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,429,290 CpGs, 30.2 MB file") | [28.9M](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22.rds "28,909,399 CpGs, 31.8 MB file") | [27.2M](http://shabal.in/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,248,407 CpGs, 30.1 MB file") 
+EUR | European | [27.9M](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22.rds "27,924,665 CpGs, 30.7 MB file") | [27.5M](http://shabal.in/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,546,110 CpGs, 30.4 MB file") | [29.0M](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22.rds "29,027,050 CpGs, 31.9 MB file") | [27.4M](http://shabal.in/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,361,657 CpGs, 30.2 MB file") 
+SAS | South Asian | [28.0M](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22.rds "27,979,088 CpGs, 30.8 MB file") | [27.6M](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,599,943 CpGs, 30.4 MB file") | [29.1M](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22.rds "29,081,038 CpGs, 31.9 MB file") | [27.4M](http://shabal.in/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,413,926 CpGs, 30.3 MB file") 
+--- | Reference\ Genome | [26.8M](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22.rds "26,752,702 CpGs, 29.6 MB file") | [26.4M](http://shabal.in/RaMWAS/cpgset_ref_hg19_chr1-22_bowtie2_75bp.rds "26,396,375 CpGs, 29.2 MB file") | [27.9M](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22.rds "27,852,739 CpGs, 30.7 MB file") | [27.1M](http://shabal.in/RaMWAS/cpgset_ref_hg38_chr1-22_bowtie2_75bp.rds "27,083,315 CpGs, 30.0 MB file") 
 
-Table: Human genome CpG sets.
+Table: CpG sets for human genome (autosomes only).
 
 Genome | No\ QC | With\ QC
 :---:|:---:|:---:
-GRCm38.p4 | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p4.rds) | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p4_bowtie2_75bp.rds)
-GRCm38.p5 | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds) | [link](http://shabal.in/RaMWAS/cpgset_GRCm38.p5_bowtie2_75bp.rds)
+GRCm38.p4 | [22.6M](http://shabal.in/RaMWAS/cpgset_GRCm38.p4.rds "22,607,414 CpGs, 26.1 MB file") | [21.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p4_bowtie2_75bp.rds "21,689,478 CpGs, 25.1 MB file") 
+GRCm38.p5 | [22.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpGs, 26.1 MB file") | [21.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p5_bowtie2_75bp.rds "21,726,529 CpGs, 25.2 MB file") 
 
-Table: Mouse genome CpG sets.
+Table: CpG sets for mouse genome.
 
-## CpG filtering by in-silico alignment experiment
+# CpG filtering by in-silico alignment experiment
 
-We conducted an in-silico experiment to find and exclude CpGs located in regions that do not align well. The experiment was conducted as follows.
-First, we created an artificial set of reads with all possible 75 bp genomic fragments from the referene genome. Then, these fragments were aligned with Bowtie2 aligner to the same reference genome.
-Next, we calculated read coverage for all candidate CpGs. Note that if the alignment was perfect, each CpG would have coverage of exactly 75. We excluded all CpG with coverage below 65 or above 85, which was about 2% of all CpGs for human genomes and 4% for mouse. The remaining CpGs formed the CpG sets in the "With\ QC" column of the tables above.
+We conducted an in-silico experiment to find and exclude 
+CpGs located in regions with alignment problems.
+The experiment was conducted as follows.
+First, we created an artificial set of reads 
+with all possible 75 bp genomic fragments 
+from the referene genome. 
+Then, these fragments were aligned to the same reference genome.
+Next, we calculated read coverage for all candidate CpGs.
+If the alignment were perfect, 
+each CpG would have coverage of exactly 75.
+We allowed for +-10 deviation, namely 
+we excluded all CpG with coverage below 65 or above 85, 
+which was about 2% of all CpGs for human genomes and 4% for mouse.
+The remaining CpGs formed the CpG sets in the "With\ QC" columns in the tables above.
+
+We used Bowtie 2 aligner version 2.2.9 with default settings.
+
+# Constructing a CpG set
+
+## Constructing a CpG set for a reference genome
+
+A CpG set can be constructed quickly from a reference genome with the `getCpGset` function.
+It can use any genome available in Bioconductor as BSGenome class.
+Additional genomes can be loaded using `readDNAStringSet` function from .fa files.
+
+```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
+suppressPackageStartupMessages(library(ramwas))
+suppressPackageStartupMessages(library(BSgenome.Ecoli.NCBI.20080805))
+```
+
+```{r cpgsFromGenome, warning=FALSE, message=FALSE}
+library(ramwas)
+library(BSgenome.Ecoli.NCBI.20080805)
+cpgset = getCpGset(BSgenome.Ecoli.NCBI.20080805);
+# First 10 CpGs in NC_008253:
+print(cpgset$NC_008253[1:10])
+```
+
+## In-silico alignment experiment
+
+```{r insilicoFASTQ, warning=FALSE}
+## There are four 4 bp fragments in a 7 basepair sequence:
+insilicoFASTQ(con="", gensequence = "ABCDEFG", fraglength=4)
+```
+
+
+
+
+
+
+
+
 
