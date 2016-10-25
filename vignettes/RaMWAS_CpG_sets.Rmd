@@ -73,7 +73,7 @@ We used Bowtie 2 aligner version 2.2.9 with default settings.
 
 ## Constructing a CpG set for a reference genome
 
-A CpG set can be constructed quickly from a reference genome with the `getCpGset` function.
+A CpG set can be constructed quickly from a reference genome with the `getCpGsetCG` and `getCpGsetALL` functions.
 It can use any genome available in Bioconductor as BSGenome class.
 Additional genomes can be loaded using `readDNAStringSet` function from .fa files.
 
@@ -85,10 +85,34 @@ suppressPackageStartupMessages(library(BSgenome.Ecoli.NCBI.20080805))
 ```{r cpgsFromGenome, warning=FALSE, message=FALSE}
 library(ramwas)
 library(BSgenome.Ecoli.NCBI.20080805)
-cpgset = getCpGset(BSgenome.Ecoli.NCBI.20080805);
+cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
 # First 10 CpGs in NC_008253:
 print(cpgset$NC_008253[1:10])
 ```
+
+For a genome with injected SNPs, we provide function `getCpGsetALL` for also finding CpGs that can be created by SNPs.
+The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome.
+As we already mentioned above, this finds a abundance of CpGs that almost never occur due to low minor allele frequency.
+
+
+```{r getCpGsetALL, eval=FALSE, warning=FALSE, message=FALSE}
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
+genome = injectSNPs(Hsapiens, "SNPlocs.Hsapiens.dbSNP144.GRCh37")
+cpgset = getCpGsetALL(genome)
+# Number of CpGs with all SNPs injected
+sum( sapply(cpgset[1:22], length))
+```{r echo=FALSE}
+42841152
+```
+
+
+The code above shows that with all SNPS we get over 42 million CpGs instead of about 29 million when using only SNPs with minor allele frequency above 1%.
+Unfortunately, Bioconductor packages with SNP information do not provide any information on SNP minor allele frequency.
+To alleviate this problem, we provide a way to inject SNP information from 1000 Genomes data or any other VCF file.
+
+
+
 
 ## In-silico alignment experiment
 

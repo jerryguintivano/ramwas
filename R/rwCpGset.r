@@ -1,4 +1,4 @@
-getCpGset = function( genome ){
+getCpGsetCG = function( genome ){
 	cpgset = vector('list', length(genome))
 	names(cpgset) = names(genome);
 	for( i in seq_along(genome) ){ # i = length(genome)
@@ -6,6 +6,37 @@ getCpGset = function( genome ){
 	}
 	return(cpgset);
 }
+
+# library(BSgenome.Hsapiens.UCSC.hg19);
+# library(SNPlocs.Hsapiens.dbSNP144.GRCh37);
+# genome <- injectSNPs(Hsapiens, "SNPlocs.Hsapiens.dbSNP144.GRCh37");
+# cpgset = getCpGsetALL(genome);
+# Number of CpGs with all SNPs injected
+# sum( sapply(cpgset[1:22], length))
+
+getCpGsetALL = function( genome ){
+	Cset = c('C','Y','S','M','B','H','V'); #,'N'
+	Gset = c('G','R','S','K','B','D','V'); #,'N'
+	
+	Craw = sapply(Cset,charToRaw);
+	Graw = sapply(Gset,charToRaw);
+	
+	Cint = logical(256); Cint[as.integer(Craw)] = TRUE;
+	Gint = logical(256); Gint[as.integer(Graw)] = TRUE;
+	
+	starts_fun = function(chrom) {
+		which( Cint[as.integer(chrom[-length(chrom)])] & Gint[as.integer(chrom[-1])] )
+	}
+
+	cpgset = vector('list', length(genome))
+	names(cpgset) = names(genome);
+	for( i in seq_along(genome) ){ # i = length(genome)
+		message('Processing ',names(genome)[i]);
+		cpgset[[i]] = starts_fun(charToRaw(as.character(genome[[i]])));
+	}
+	return(cpgset);
+}
+
 
 insilicoFASTQ = function(con, gensequence, fraglength){
 	# con=""; gensequence = "ABCDEFG"; fraglength=4;

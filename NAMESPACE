@@ -21,7 +21,8 @@ export(
     "rowSumsSq",
     "colSumsSq",
     "testPhenotype",
-    "getCpGset",
+    "getCpGsetALL",
+    "getCpGsetCG",
     "insilicoFASTQ"
 )
 
