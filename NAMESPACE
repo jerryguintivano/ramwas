@@ -23,7 +23,8 @@ export(
     "testPhenotype",
     "getCpGsetALL",
     "getCpGsetCG",
-    "insilicoFASTQ"
+    "insilicoFASTQ",
+    "injectSNPsMAF"
 )
 
 importFrom("methods", "setRefClass", "new")
