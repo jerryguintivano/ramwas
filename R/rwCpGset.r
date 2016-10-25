@@ -1,4 +1,5 @@
 getCpGsetCG = function( genome ){
+	# library(Biostrings)
 	cpgset = vector('list', length(genome))
 	names(cpgset) = names(genome);
 	for( i in seq_along(genome) ){ # i = length(genome)
@@ -6,13 +7,6 @@ getCpGsetCG = function( genome ){
 	}
 	return(cpgset);
 }
-
-# library(BSgenome.Hsapiens.UCSC.hg19);
-# library(SNPlocs.Hsapiens.dbSNP144.GRCh37);
-# genome <- injectSNPs(Hsapiens, "SNPlocs.Hsapiens.dbSNP144.GRCh37");
-# cpgset = getCpGsetALL(genome);
-# Number of CpGs with all SNPs injected
-# sum( sapply(cpgset[1:22], length))
 
 getCpGsetALL = function( genome ){
 	Cset = c('C','Y','S','M','B','H','V'); #,'N'
@@ -36,7 +30,6 @@ getCpGsetALL = function( genome ){
 	}
 	return(cpgset);
 }
-
 
 insilicoFASTQ = function(con, gensequence, fraglength){
 	# con=""; gensequence = "ABCDEFG"; fraglength=4;

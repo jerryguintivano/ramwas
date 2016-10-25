@@ -27,7 +27,7 @@ getCpGsetALL(genome)
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \examples{
-### Using a BSGenome
+### Using a BSGenome input
 
 library(BSgenome.Ecoli.NCBI.20080805)
 cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805);
@@ -36,7 +36,7 @@ print('First 10 CpGs in NC_008253:')
 print(cpgset$NC_008253[1:10])
 
 
-### Using a character vector
+### Using a character vector input
 
 genome = list(
   chr1 = 'AGCGTTTTCATTCTGACTGCAACGGGCYR',

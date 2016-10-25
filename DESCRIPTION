@@ -19,7 +19,10 @@ License: LGPL-3
 LazyLoad: yes
 Depends: R (>= 3.2.0), methods, filematrix
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, BiocStyle
+Suggests: knitr, rmarkdown, BiocStyle, 
+        BSgenome.Hsapiens.UCSC.hg19,
+        SNPlocs.Hsapiens.dbSNP144.GRCh37,
+        BSgenome.Ecoli.NCBI.20080805
 Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, 
         KernSmooth, digest, glmnet, grDevices, utils, biomaRt, Biostrings
 biocViews: DNAMethylation, Sequencing, QualityControl, Coverage, Preprocessing, 
