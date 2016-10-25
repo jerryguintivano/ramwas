@@ -52,6 +52,7 @@ importFrom("filematrix", "fm.create", "fm.load", "fm.open",
 			  "fm.create.from.matrix", "closeAndDeleteFiles")
 importClassesFrom("filematrix", "filematrix")
 importMethodsFrom("filematrix", "close")
+importMethodsFrom("BiocGenerics","start");
 
 S3method(plot, qcHistScore)
 S3method(plot, qcEditDist)

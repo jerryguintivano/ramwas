@@ -24,6 +24,6 @@ Suggests: knitr, rmarkdown, BiocStyle,
         SNPlocs.Hsapiens.dbSNP144.GRCh37,
         BSgenome.Ecoli.NCBI.20080805
 Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, 
-        KernSmooth, digest, glmnet, grDevices, utils, biomaRt, Biostrings
+        KernSmooth, digest, glmnet, grDevices, utils, biomaRt, Biostrings, BiocGenerics
 biocViews: DNAMethylation, Sequencing, QualityControl, Coverage, Preprocessing, 
         Normalization, BatchEffect, PrincipalComponent, DifferentialMethylation, Visualization
