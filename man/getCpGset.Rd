@@ -13,7 +13,7 @@ getCpGsetALL(genome)
 }
 \arguments{
   \item{genome}{
-    A \code{\linkS4class{BSgenome}} object or a character vector with genome sequences.
+    A \code{\link[BSgenome]{BSgenome}} object or a character vector with genome sequences.
   }
 }
 \details{
