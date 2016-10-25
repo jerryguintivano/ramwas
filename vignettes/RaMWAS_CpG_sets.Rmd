@@ -13,23 +13,18 @@ vignette: >
 # CpG sets
 
 One the of the required inputs for RaMWAS pipeline is 
-the set of CpGs at which it calculates methylation coverage
+the set of CpGs at which RaMWAS calculates methylation coverage
 (step 3 of the pipeline). 
 The set of CpGs has to be provided in a form of .rds file (`filecpgset` parameter).
 Here we present several prepared CpGs sets for human and mouse genomes.
-We also provide detailed instructions for preparing a CpG set.
+We also provide detailed instructions for preparing a custom CpG set.
 
 # Downloadable CpG sets
 
-The human CpG sets provided in the tables below
-account for SNPs which can create and destroy CpGs.
-The SNPs are derived from the 1000 Genomes populations 
-([more info](http://www.internationalgenome.org/category/population/)). 
-Only SNPs with minor allele frequency above 1% are included.
-
-We excluded CpGs in the regions with poor alignment,
-as indicated by our in-silico experiment.
-The details of the in-silico experiment are presented in the corresponding section below.
+Although it is common to use only CpGs found in the reference genome
+we chose to also incorporate SNP information as SNPs can often create or destroy CpGs.
+We also exclude CpGs with unreliable coverage estimates due to poor alignment
+as indicated by our in-silico experiment (details below).
 
 Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
 :---:|:---|:---:|:---:|:---:|:---:
@@ -50,7 +45,13 @@ GRCm38.p5 | [22.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpG
 
 Table: CpG sets for mouse genome.
 
-# CpG filtering by in-silico alignment experiment
+The human CpG sets provided in the table above
+account for SNPs which can create and destroy CpGs.
+The SNPs are derived from the 1000 Genomes super populations 
+([more info](http://www.internationalgenome.org/category/population/)). 
+Only SNPs with minor allele frequency above 1% are included.
+
+## CpG filtering by in-silico alignment experiment
 
 We conducted an in-silico experiment to find and exclude 
 CpGs located in regions with alignment problems.
@@ -62,19 +63,19 @@ Then, these fragments were aligned to the same reference genome.
 Next, we calculated read coverage for all candidate CpGs.
 If the alignment were perfect, 
 each CpG would have coverage of exactly 75.
-We allowed for +-10 deviation, namely 
+We allowed for +/-10 deviation, namely 
 we excluded all CpG with coverage below 65 or above 85, 
 which was about 2% of all CpGs for human genomes and 4% for mouse.
-The remaining CpGs formed the CpG sets in the "With\ QC" columns in the tables above.
+The remaining CpGs formed the CpG sets in the "with\ QC" columns in the tables above.
 
 We used Bowtie 2 aligner version 2.2.9 with default settings.
 
-# Constructing a CpG set
+# Constructing a custom CpG set
 
 ## Constructing a CpG set for a reference genome
 
-A CpG set can be constructed quickly from a reference genome with the `getCpGsetCG` and `getCpGsetALL` functions.
-It can use any genome available in Bioconductor as BSGenome class.
+A CpG set can be constructed quickly from a reference genome with the `getCpGsetCG` function.
+The functions can use any genome available in Bioconductor as `BSGenome` class.
 Additional genomes can be loaded using `readDNAStringSet` function from .fa files.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
@@ -90,42 +91,136 @@ cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
 print(cpgset$NC_008253[1:10])
 ```
 
-For a genome with injected SNPs, we provide function `getCpGsetALL` for also finding CpGs that can be created by SNPs.
+For a genome with injected SNPs, we provide the function `getCpGsetALL` for also finding CpGs that can be created by injected SNPs.
 The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome.
-As we already mentioned above, this finds a abundance of CpGs that almost never occur due to low minor allele frequency.
+We do NOT advice using all dbSNP144 SNPs, as it causes an abundance of CpGs that almost never occur in the population.
 
-
-```{r getCpGsetALL, eval=FALSE, warning=FALSE, message=FALSE}
+```{r getCpGsetALL1, eval=FALSE, warning=FALSE, message=FALSE}
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
 genome = injectSNPs(Hsapiens, "SNPlocs.Hsapiens.dbSNP144.GRCh37")
 cpgset = getCpGsetALL(genome)
-# Number of CpGs with all SNPs injected
-sum( sapply(cpgset[1:22], length))
+# Number of CpGs with all SNPs injected in autosomes
+sum(sapply(cpgset[1:22], length))
 ```{r echo=FALSE}
 42841152
 ```
 
 
-The code above shows that with all SNPS we get over 42 million CpGs instead of about 29 million when using only SNPs with minor allele frequency above 1%.
-Unfortunately, Bioconductor packages with SNP information do not provide any information on SNP minor allele frequency.
-To alleviate this problem, we provide a way to inject SNP information from 1000 Genomes data or any other VCF file.
+The code above shows that using all dbSNP144 SNPs 
+we get over 42 million CpGs instead of 
+about 29 million when using only 
+SNPs with minor allele frequency above 1%.
+Unfortunately, Bioconductor packages with SNP information 
+do not provide any data on SNP allele frequency.
+To alleviate this problem, we provide a way 
+to inject SNP information from 1000 Genomes data or any other VCF.
 
+First, the VCf files, obtained from 1000 Genomes project or otherwise, 
+need to be processed by `vcftools` command `--counts`, like this one:
 
+> vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt
 
+The generated allele count file can then be used to inject SNPs using the function `injectSNPsMAF`.
+
+```{r getCpGsetALL2, eval=FALSE}
+# Do for all chromosomes
+genome[['chr22']] = 
+    injectSNPsMAF(
+        gensequence = BSGenome[['chr22']],
+        frqcount = 'count_ALL_chr22.txt',
+        MAF = 0.01)
+
+# Find the CpGs
+cpgset = getCpGsetALL(genome)
+```
+
+Once a CpG set is generated, it can be saves with `saveRDS` function for use by RaMWAS.
+
+```{r save1, eval=FALSE}
+saveRDS(file = 'My_cpgset.rds', object = cpgset)
+```
 
 ## In-silico alignment experiment
 
-```{r insilicoFASTQ, warning=FALSE}
-## There are four 4 bp fragments in a 7 basepair sequence:
-insilicoFASTQ(con="", gensequence = "ABCDEFG", fraglength=4)
+For a typical animal genome
+the in-silico experiment is rather computationally intensive, 
+as it requires alignment of billions of artificially created reads.
+
+The files with artificial reads can be created with function `insilicoFASTQ`.
+It supports gz compression of the output files, 
+decreasing disk space requirements from about 500 GB to 17 GB for human genome.
+
+Here is an example for the `insilicoFASTQ` function
+
+```{r insilicoFASTQ, eval=FALSE}
+# Do for all chromosomes
+insilicoFASTQ(
+    con="chr1.fastq.gz",
+    gensequence = BSGenome[['chr1']],
+    fraglength=75)
 ```
 
+The generated FASTQ files are then aligned to the reference genome with commands like this
 
+> bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam
 
+The generated BAMs are then scanned with RaMWAS and the coverage for one sample combining all the BAMs is calculated:
 
+```{r RaMWAS, eval=FALSE}
+library(ramwas)
+chrset = paste0('chr',1:22)
+targetcov = 75
+covtolerance = 10
 
+param = list(
+	dirproject = '.',
+	dirbam = './bams',
+	dirfilter = TRUE,
+	bamnames = chrset,
+	bam2sample = list(all_samples = chrset),
+	scoretag = "AS",
+	minscore = 100,
+	minfragmentsize = targetcov,
+	maxfragmentsize = targetcov,
+	minavgcpgcoverage = 0,
+	minnonzerosamples = 0,
+	# filecpgset - file with the CpG set being QC-ed
+	filecpgset = filecpgset
+)
+param1 = parameterPreprocess(param)
+ramwas1scanBams(param)
+ramwas3NormalizedCoverage(param)
+```
 
+The following code then filters CpGs by the in-silico coverage
 
+```{r filter, eval=FALSE}
+# Preprocess parameters to learn the location of coverage matrix
+param1 = parameterPreprocess(param)
 
+# Load the coverage matrix (vector)
+cover = fm.load( paste0(param1$dircoveragenorm, '/Coverage'))
+
+# split the coverage by chromosomes
+# `cpgset` - the CpG set being QC-ed
+fac = rep(seq_along(cpgset), times = sapply(cpgset, length))
+levels(fac) = names(cpgset)
+class(fac) = 'factor'
+cover = split(cover, fac)
+	
+# filter CpGs on each chromosome by the coverage
+cpgsetQC = cpgset
+for( i in seq_along(cpgset) ){
+    keep = (cover[[i]] >= (targetcov - covtolerance)) & 
+           (cover[[i]] <= (targetcov + covtolerance))
+    cpgsetQC[[i]] = cpgset[[i]][ keep ]
+}
+```
+
+Once the desired CpG set is generated, it can be saves with `saveRDS` function for use by RaMWAS.
+
+```{r save2, eval=FALSE}
+saveRDS(file = 'My_cpgset_QC.rds', object = cpgsetQC)
+```
 
