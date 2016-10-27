@@ -119,7 +119,7 @@ to inject SNP information from 1000 Genomes data or any other VCF.
 First, the VCf files, obtained from 1000 Genomes project or otherwise, 
 need to be processed by `vcftools` command `--counts`, like this one:
 
-> vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt
+> `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
 
 The generated allele count file can then be used to inject SNPs using the function `injectSNPsMAF`.
 
@@ -163,7 +163,7 @@ insilicoFASTQ(
 
 The generated FASTQ files are then aligned to the reference genome with commands like this
 
-> bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam
+> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam`
 
 The generated BAMs are then scanned with RaMWAS and the coverage for one sample combining all the BAMs is calculated:
 
