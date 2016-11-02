@@ -123,6 +123,8 @@ parameterPreprocess = function( param ){
 	
 	# Set up directories 
 	if( is.null(param$dirproject) ) param$dirproject = getwd();
+	param$dirbam = .makefullpath(param$dirproject, param$dirbam);
+	
 	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
 	}
@@ -235,10 +237,14 @@ parameterPreprocess = function( param ){
 	param$dirtemp = .makefullpath(param$dircoveragenorm, param$dirtemp );
 
 	### CpG set should exist
-	if( !is.null(param$filecpgset) )
+	if( !is.null(param$filecpgset) ) {
+	    param$filecpgset = .makefullpath(param$dirproject, param$filecpgset);
 		stopifnot( file.exists(param$filecpgset) );
-	if( !is.null(param$filenoncpgset) )
+	}
+	if( !is.null(param$filenoncpgset) ) {
+	    param$filenoncpgset = .makefullpath(param$dirproject, param$filenoncpgset);
 		stopifnot( file.exists(param$filenoncpgset) );
+    }
 	
 	if( is.null(param$doublesize) ) param$doublesize = 4;
 	if( is.null(param$recalculate.QCs) ) param$recalculate.QCs = FALSE;
