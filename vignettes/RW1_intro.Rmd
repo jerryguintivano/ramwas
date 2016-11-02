@@ -11,14 +11,14 @@ vignette: >
 ---
 
 ```{r switcher, echo=FALSE}
-# library('knitr')
-# opts_chunk$set(eval=FALSE)
+library('knitr')
+opts_chunk$set(eval=FALSE)
 ```
 
 # Introduction
 
 [RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html) 
-provides a full set of tools for methylome-wide association studies for enrichment technologies.
+provides a full set of tools for methylome-wide association studies on enrichment technologies.
 The steps of the pipeline include scanning aligned reads from BAM files,
 calculation of multiple quality control measures,
 creation of coverage matrix,
@@ -29,7 +29,7 @@ and multi-marker analysis using elastic net.
 
 Most steps of RaMWAS are internally parallelized. This is made possible, in part, by the use of [filematrix](https://cran.r-project.org/web/packages/filematrix/index.html) package for storing the data and accessing it in parallel jobs.
 
-# Getting started
+# Getting Started
 
 ## Installation
 
@@ -41,7 +41,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("ramwas")
 ```
 
-## Loading package and viewing documentation
+## Loading Package and Viewing Documentation
 
 The package vignettes and reference manual are available at Bioconductor [page](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html) and, once the package is loaded, with the following commands within R.
 
@@ -51,14 +51,14 @@ help(package="ramwas") # Lists package functions
 browseVignettes('ramwas') # Opens vignette
 ```
 
-# Steps of the pipeline
+# Steps of the Pipeline
 
-## Creating artificial data set
+## Creating Artificial Data Set
 
 To illustrate the workflow of RaMWAS pipeline we need a data set.
-The function `ramwas0createArtificialData` creates an artificial CpG set and a number of BAM files with aligned reads.
+The function `ramwas0createArtificialData` creates an artificial CpG set and a number of BAM files.
 
-One may choose to change the project directory `dir` to a more convenient location when running this code.
+One may choose to set the project directory `dr` to a more convenient location when running this code.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
 suppressPackageStartupMessages(library(ramwas))
@@ -78,22 +78,21 @@ cat(dr)
 
 Now the project directory `dr` contains 
 
-* `"bams"` - directory with the simulated BAM files
-* `"bam_list.txt"` - file with names of all the BAM files
-* `"covariates.txt"` - file with casecontrol and age covariates. The methylation level of some CpGs is simulated to depend on one or the other covariate.
-* `"Simulated_chromosome.rds"` - file with locations of all CpGs. See [CpG set vignette](RW4_CpG_sets.html) for more information.
+* `bams` - directory with the simulated BAM files
+* `bam_list.txt` - file with names of all the BAM files
+* `covariates.txt` - file with casecontrol and age covariates. The methylation level of some CpGs is simulated to depend on one or the other covariate.
+* `Simulated_chromosome.rds` - file with locations of all CpGs. See [CpG set vignette](RW4_CpG_sets.html) for more information.
 
-## Pipeline parameters
+## Pipeline Parameters
 
 Each of pipeline steps accepts parameters in a form of a list with named elements.
-A minimal parameter list below points RaMWAS to the files listed above.
+A minimal parameter list below points RaMWAS to the directories and files listed above.
 
 ```{r parameters0}
 param = list(
     dirproject = dr,
     dirbam = "bams",
     filebamlist = "bam_list.txt",
-    # filecovariates = "covariates.txt",
     filecpgset = "Simulated_chromosome.rds"
 )
 ```
@@ -102,21 +101,21 @@ param = list(
 param$cputhreads = 2
 ```
 
-## Step 1, Scan BAM files
+## Step 1, Scan BAM Files
 
-At step 1 RaMWAS scans all BAM files listed in `filebamlist` and calculates a number of quality control metrics. 
+This step scans all BAM files listed in `filebamlist` and calculates a number of quality control metrics. 
 
-The reads are filtered by `scoretag` parameter, which is usually 'MAPQ` field or `AS` tag. The `minscore` parameter sets the minimum admissible score, reads with scores below that are excluded.
+The reads are filtered by `scoretag` parameter, which is usually `MAPQ` field or `AS` tag. The `minscore` parameter sets the minimum admissible score, reads with scores below that are excluded.
 
 ```{r parameters1}
 param$scoretag = "AS"
 param$minscore = 4
 ```
 
-The `minfragmentsize` and `maxfragmentsize` parameters are set to the minimum and maximum size of sequenced DNA fragments.
+The `minfragmentsize` and `maxfragmentsize` parameters define the minimum and maximum size of DNA fragments that were sequenced.
 
 The CpGs are called isolated if they are located at least `maxfragmentsize` basepairs away from all other CpGs.
-The distribution of reads around these CpGs is later used for estimation of fragment size distribution.
+The distribution of reads around these CpGs is used later for estimation of fragment size distribution.
 
 ```{r parameters2}
 param$minfragmentsize = 50
@@ -129,31 +128,28 @@ With all parameters set we can run Step 1 of the pipeline.
 ramwas1scanBams(param)
 ```
 
-The following directories are created in the project directory:
+This creates the following subdirectories in the project directory:
 
-* `rds_rbam` -- directory with BAM read start locations, one RDS file per BAM.
-* `rds_qc` -- directory with BAM quality control metrics, one RDS file per BAM.
+* `rds_rbam` -- directory with BAM read start locations, one R data file per BAM.
+* `rds_qc` -- directory with BAM quality control metrics, one R data file per BAM.
 * `qc/coverage_by_density` - plots showing average coverage at a function of CpG density, one plot per BAM.\
   These plots illustrate the performance of enrichment protocol. It is a sign of good quality data if the shape of these plots is the same across BAMs.
 * `qc/edit_distance` - plots showing distribution of edit distance, i.e. number of mismatches between the read and the reference genome, one plot per BAM. 
 * `qc/isolated_distance` - plots showing distribution of distances from read starts to isolated CpGs, one plot per BAM.
 * `qc/matched_length` - plots showing distribution of the length of the reads aligned to the reference genome, one plot per BAM.
-* `qc/matched_length` - plots showing distribution of the score (`scoretag` parameter), one plot per BAM.
+* `qc/score` - plots showing distribution of the score (`scoretag` parameter), one plot per BAM.
 
-Here is a sample `coverage_by_density` plot from the simulated data. It shows higher average coverage for regions with higher CpG densities. The drop down on the right is usually caused by low levels of methylation in highly CpG dense regions.
-![coverage_by_density](coverage_by_density1.png){width=100px}
+Here is a sample `coverage_by_density` plot from the simulated data. It shows higher average coverage for regions with higher CpG densities. The drop on the right is usually observed in real data as well. It caused by both lab protocol and low levels of methylation in highly CpG dense regions.
+![coverage_by_density](coverage_by_density1.png)
 
-**Note**
+**Note.** If a BAM has already been scanned before, it is not processed again.
 
-* BAMs can be located in different directories, but must have unique names.
-* If a BAM has already been scanned before, it is not processed again.
-
-## Step 2, collect QC measures from individual BAMs, summarize by samples
+## Step 2, Collect QC Measures from Individual BAMs, Summarize by Samples
 
 This step aggregates quality control metrics across all scanned BAM files, produces a number of summary plots, and estimates fragment size distribution.
 
-This step requires an extra parameter `filebam2sample`, a file indicating how BAMs are combined into samples.
-Each line in `filebam2sample` has information regarding one sample. If sample1 contains reads from bam1, bam2 and bam3, the line should be
+This step requires an extra parameter `filebam2sample`, which names a file with information on how the BAMs are combined into samples.
+Each line in `filebam2sample` has information on one sample. If sample1 contains reads from bam1, bam2 and bam3, the line should be
 
 > sample1=bam1,bam2,bam3
 
@@ -161,7 +157,7 @@ If the sample name matches the bam name, the line can simply contain that name:
 
 > sample1
 
-Let's assume that each our BAM match exacly one sample with the same name. Then `filebam2sample` should simply list bam names.
+Let's assume that each BAM matches exacly one sample with the same name. Then `filebam2sample` should simply be a list of bam names.
 
 ```{r parameters3}
 param$filebam2sample = "bam_list.txt"
@@ -176,8 +172,8 @@ ramwas2collectqc(param)
 The following files and directories are created in the project directory:
 
 * `Fragment_size_distribution.txt` - text file with estimated fragment size distribution.
-* `Fragment_size_distribution_estimate.pdf` - plot showing both estimated fragment size distribution and the distribution of distances from read starts to isolated CpGs.\
-  Poor fit may indicate lab-tachincal problems or incorrect selection of `minfragmentsize` and `maxfragmentsize` parameters.
+* `qc/Fragment_size_distribution_estimate.pdf` - plot showing both estimated fragment size distribution and the distribution of distances from read starts to isolated CpGs.\
+  Poor fit may indicate lab-techincal problems or incorrect selection of `minfragmentsize` and `maxfragmentsize` parameters.
 * Four directories with QC measures aggregated
     + `qc/summary_bams` - by BAMs
     + `qc/summary_bams_in_bam2sample` - by BAMs, but only those listed in `filebam2sample` parameter
@@ -187,7 +183,8 @@ The following files and directories are created in the project directory:
     - `Summary_QC.txt` - table with a number of numerical QC measures, in Excel friendly format.
     - `Summary_QC_R.txt` - table with a number of numerical QC measures, in R friendly format.
     - `qclist.rds` - an R file with list of QC objects.
-    - PDF files with various QC plots, one page per BAM/sample.
+    - `Fig_hist_*.pdf` - histograms of several QC measures across samples.
+    - `Fig_*.pdf` - PDF files with various QC plots, one page per BAM/sample.
 
 Here is an example of a good fit of estimated fragment size distribution.
 ![plot](Fragment_size_distribution_estimate.png)
@@ -195,7 +192,7 @@ Here is an example of a good fit of estimated fragment size distribution.
 **Note.** The fragment size distribution is estimated using all BAMs in `bam2sample` parameter (if defined).
 
 
-## Step 3, Calculate coverage matrix
+## Step 3, Calculate Coverage Matrix
 
 This step creates a coverage matrix.
 The coverage is initially calculated for all samples in `filebam2sample` and all CpGs in the CpG set (`filecpgset` parameter).
@@ -352,15 +349,6 @@ ramwas7multiMarker(param)
 
 For the simulated data we get good prediction power even with only 10 top CpGs.
 ![plot](mm50.png)
-
-
-**Parameters**
-
-* By default, 10-fold cross validatidation is performed. The number of folds can be set by `cvnfolds` parameter.
-* The split of samples into folds is random. For consistency across runs, the random seed can be set by `randseed`. It is set to 18090212 by default.
-* The number of CpGs used to by elastic net is set by `mmncpgs` parameter. It is 1,000 by default.
-* The elastic net parameter labmda can be set by `mmalpha` parameter. It is 0 by default.
-* The output is saved in `dircv` directory, by default named like "CV_10_folds" and located in `dirmwas` directory.
 
 ## Cleanup
 
