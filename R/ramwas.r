@@ -1034,31 +1034,6 @@ if(FALSE){
 	sapply(rez1, `[`, 1)
 	show(cbind(tm1,tm2));
 }
-.testCovariates = function(covariates1, data, cvrtqr){
-	# covariates1 = param$covariates[-1]
-	# data = t(e$vectors[,seq_len(nonzeroPCs)])
-	crF = vector("list", length(covariates1));
-	pv  = vector("list", length(covariates1));
-	nms = character(length(covariates1));
-	for( i in seq_along(covariates1) ) { # i=1
-		rez = testPhenotype(covariates1[[i]], data, cvrtqr);
-		pv[[i]] = as.vector(rez[[3]]);
-		nms[i] = rez$statname;
-		if(nchar(rez$statname)==0) {
-			crF[[i]] = as.vector(rez$correlation);
-		} else {
-			crF[[i]] = as.vector(rez$Fstat);
-		}
-	}
-	crF = data.frame(crF);
-	names(crF) = paste0(names(covariates1),nms);
-
-	pv = data.frame(pv);
-	names(pv) = paste0(names(covariates1),nms);
-	return(list(crF=crF, pv=pv));
-	
-}
-
 orthonormalizeCovariates = function(covariates) {
 	if(any(sapply(lapply(covariates, is.na),any)))
 		stop("Missing values are not allowed in the covariates")
