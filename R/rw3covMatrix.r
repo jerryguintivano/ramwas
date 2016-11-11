@@ -1,3 +1,4 @@
+# calculate CpG score matrix for 1 sample
 pipelineCoverage1Sample = function(colnum, param){
 	
 	cpgset = cachedRDSload(param$filecpgset);
@@ -46,6 +47,7 @@ pipelineCoverage1Sample = function(colnum, param){
 	return(coverage);
 }
 
+# Job function for calculation of raw CpG score matrix
 .ramwas3coverageJob = function(colnum, param, nslices){
 	# library(ramwas);
 	# library(filematrix)
@@ -76,6 +78,7 @@ pipelineCoverage1Sample = function(colnum, param){
 	return("OK");
 }
 
+# Job function for filtering CpGs
 .ramwas3transposeFilterJob = function(fmpart, param){
 	# library(filematrix);
 	# fmpart = 1
@@ -147,6 +150,7 @@ pipelineCoverage1Sample = function(colnum, param){
 	return("OK.");
 }
 
+# Job function for sample normalization
 .ramwas3normalizeJob = function(fmpart_offset, param, samplesums){
 	# fmpart_offset = fmpart_offset_list[[2]]
 	scale = as.vector(samplesums) / mean(samplesums);
@@ -173,6 +177,7 @@ pipelineCoverage1Sample = function(colnum, param){
 	return("OK.");
 }
 
+# Step 3 of RaMWAS
 ramwas3NormalizedCoverage = function( param ){
 	# Prepare
 	param = parameterPreprocess(param);

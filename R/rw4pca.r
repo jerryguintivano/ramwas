@@ -23,6 +23,8 @@
     return(list(crF=crF, pv=pv));
 }
 
+# Job function for PCA analysis 
+# (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
 	# rng = rangeset[[1]];
 	# library(filematrix);
@@ -59,6 +61,7 @@
 	return(covmat);
 }
 
+# Step 4 of RaMWAS
 ramwas4PCA = function( param ){
 	# library(filematrix)
 	param = parameterPreprocess(param);
@@ -183,7 +186,9 @@ ramwas4PCA = function( param ){
 	}
 }
 
-ramwasPCsCovariateSelection = function(param) {
+# Interactive covariate selection via
+# correlations with PCs
+ramwasPCsCovariateSelection = function(param){
 	message("Processing parameters");
 	param = parameterPreprocess(param);
 	

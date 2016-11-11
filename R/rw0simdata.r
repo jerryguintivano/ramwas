@@ -1,4 +1,4 @@
-ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, ncpgs = 500e3, randseed = 18090212, verbose = TRUE){
+# Sample a subset in groups of 5 (gr)
 groupSample = function(len, size, gr){
     len = 1000;
     size = 36;
@@ -8,6 +8,15 @@ groupSample = function(len, size, gr){
     rez = rep(groupstarts, each = gr)*gr + (seq_len(gr)-1L)
     return(rez);
 }
+
+
+# Create artificial data set for vignettes and examples
+ramwas0createArtificialData = function(dir,
+                                       nsamples = 20,
+                                       nreads = 1e6,
+                                       ncpgs = 500e3,
+                                       randseed = 18090212,
+                                       verbose = TRUE){
 
 	set.seed(randseed);
 	

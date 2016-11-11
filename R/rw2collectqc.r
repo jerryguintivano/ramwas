@@ -1,4 +1,4 @@
-### Make text line for the QC set
+### Text QC file headers
 .qcTextHeaderT = {paste(sep = "\t",
 							  "Sample",
 							  "# BAMs",
@@ -38,7 +38,10 @@
 								"ChrYreadsPct",
 								"PeakSQRT")};
 
+# number of columns in the header
 .qccols = length(strsplit(.qcTextHeaderT,"\t",fixed = TRUE)[[1]])
+
+# Create a line for Excel friendly text QC file
 .qcTextLineT = function(qc){
 	name = qc$name;
 	if( is.null(qc) )
@@ -50,10 +53,10 @@
 	
 	if( !is.null(qc$hist.score1))							class(qc$hist.score1) = "qcHistScore";
 	if( !is.null(qc$bf.hist.score1))			 			class(qc$bf.hist.score1) = "qcHistScoreBF";
-	if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
-	if( !is.null(qc$bf.hist.edit.dist1))				class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
-	if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
-	if( !is.null(qc$bf.hist.length.matched))			class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
+	if( !is.null(qc$hist.edit.dist1))					    class(qc$hist.edit.dist1) = "qcEditDist";
+	if( !is.null(qc$bf.hist.edit.dist1))				    class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
+	if( !is.null(qc$hist.length.matched))				    class(qc$hist.length.matched) = "qcLengthMatched";
+	if( !is.null(qc$bf.hist.length.matched))			    class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
 	if( !is.null(qc$frwrev) ) 								class(qc$frwrev) = "qcFrwrev";
 	
 	rez = paste( sep = "\t",
@@ -79,6 +82,7 @@
 	# message(rez);
 	return(rez);
 }
+# Create a line for R friendly text QC file
 .qcTextLineR = function(qc){
 	name = qc$name;
 	if( is.null(qc) )
@@ -89,11 +93,11 @@
 	s = identity;
 	
 	if( !is.null(qc$hist.score1))							class(qc$hist.score1) = "qcHistScore";
-	if( !is.null(qc$bf.hist.score1))			 			class(qc$bf.hist.score1) = "qcHistScoreBF";
-	if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
-	if( !is.null(qc$bf.hist.edit.dist1))				class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
-	if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
-	if( !is.null(qc$bf.hist.length.matched))			class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
+	if( !is.null(qc$bf.hist.score1))			 		    class(qc$bf.hist.score1) = "qcHistScoreBF";
+	if( !is.null(qc$hist.edit.dist1))					    class(qc$hist.edit.dist1) = "qcEditDist";
+	if( !is.null(qc$bf.hist.edit.dist1))				    class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
+	if( !is.null(qc$hist.length.matched))				    class(qc$hist.length.matched) = "qcLengthMatched";
+	if( !is.null(qc$bf.hist.length.matched))			    class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
 	if( !is.null(qc$frwrev) ) 								class(qc$frwrev) = "qcFrwrev";
 	
 	rez = paste( sep = "\t",
@@ -118,31 +122,9 @@
 	);
 	return(rez);
 }
-if(FALSE){
-	name = "My_bam";
-	rbam = readRDS("D:/Cell_type/rds_rbam/150114_WBCS014_CD20_150.rbam.rds");
-	rbam$qc$avg.cpg.coverage
-	cpgset = cachedRDSload("C:/AllWorkFiles/Andrey/VCU/RaMWAS_2/code/Prepare_CpG_list/hg19/cpgset_hg19_SNPS_at_MAF_0.05.rds");
-	minfragmentsize = 50;
-	maxfragmentsize = 200;
-	rbam = bam.coverage.by.density(rbam, cpgset, minfragmentsize, maxfragmentsize);
-	rbam$qc$avg.cpg.coverage
-	qc = rbam$qc;
-	class(qc$frwrev) = "qcFrwrev";
-	class(qc$frwrev.no.repeats) = "qcFrwrev";
-	class(qc$cnt.nonCpG.reads) = "qcNonCpGreads"
-	qc$nbams = 1;
-	
-	cat( qcTextLine(qc, "bam name"), "\n")
-	
-	as.matrix(names(qc))
-	
-	with(qc, paste0("avg.noncpg.coverage", avg.noncpg.coverage, "\n"));
-	with(qc, is.null(qc$nbams))
-}
 
+# combine QC metrics of multiple Rbam's
 .combine.bams.qc = function( bamlist ){
-	# bamlist = curbams
 	if(length(bamlist)==1)
 		return(bamlist[[1]]);
 	
@@ -161,6 +143,7 @@ if(FALSE){
 	return(list(qc = bigqc));
 }
 
+# Load QC metrics for all BAMs
 loadBamQC = function(param, bams){
 	rbamlist = vector("list", length(bams));
 	names(rbamlist) = bams;
@@ -174,6 +157,8 @@ loadBamQC = function(param, bams){
 	}
 	return(rbamlist)
 }
+
+# Combine BAM QCs by sample
 combineBamQcIntoSamples = function(rbamlist, bamset){
 	bigqc = vector("list", length(bamset));
 	names(bigqc) = names(bamset);
@@ -190,6 +175,7 @@ combineBamQcIntoSamples = function(rbamlist, bamset){
 	return(bigqc);
 }
 
+# Estimate fragmet size distribution
 estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
 	if( length(hist.isolated.distances) == seqLength )
@@ -250,67 +236,8 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 	
 	return(rezfit);
 }
-if(FALSE){ # test code
-	x = seq(0.01,0.99,0.01);
-	y = sqrt(abs(x-0.5))*sign(x-0.5)
-	plot(x,y)
-	log.ss = nls(y ~ SSlogis(x, phi1, phi2, phi3))
-	z = SSlogis(x, 0.59699, 0.61320, 0.04599)
-	lines(x, z, col="blue")
-	
-	
-	# setwd("D:/RW/NESDA/ramwas/AS120_sba/");
-	setwd("D:/RW/RC2/ramwas/AS38_gap0/");
-	# setwd("D:/RW/Celltype//ramwas/AS120_sba/");
-	lst = list.files(pattern = "\\.qc\\.");
-	qcs = lapply(lst, function(x){load(x);return(bam);})
-	histinfo = Reduce( `+`, lapply( lapply(qcs, `[[`, "qcflt"), `[[`, "hist.iso.dist.250"), init = 0);
-	rng = range(histinfo[-(1:10)]);
-	plot(histinfo/1e3, ylim = rng/1e3, pch=19, col="blue")
-	
-	hist.isolated.distances = histinfo;
-	seqLength = 50;
-	
-	fit = estimateFragmentSizeDistribution(hist.isolated.distances, seqLength)
-	
-	x = seq_along(hist.isolated.distances)
-	plot( x, hist.isolated.distances)
-	lz = lm(hist.isolated.distances[seq_along(fit)] ~ fit)
-	lines(fit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col="red");
-	
-}
 
-
-# pipelineEstimateFragmentSizeDistribution = function( param ){
-# 	
-# 	param = parameterPreprocess(param);
-# 	
-# 	if( !is.null(param$bam2sample) ) {
-# 		bams = unlist( param$bam2sample, use.names = FALSE);
-# 	} else if (!is.null(param$bamnames)) {
-# 		bams = param$bamnames;
-# 	} else {
-# 		stop("Bams are not defined. Set filebam2sample, filebamlist, bam2sample or bamnames.","\n");
-# 	}
-# 	bams = unique(basename(bams));
-# 	
-# 	qclist = vector("list", length(bams));
-# 	names(qclist) = bams;
-# 	
-# 	for( bamname in bams) {
-# 		rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
-# 		qclist[[bamname]] = readRDS(rdsqcfile);
-# 	}
-# 	
-# 	qcset = lapply(lapply( qclist, `[[`, "qc"),`[[`,"hist.isolated.dist1")
-# 	bighist = Reduce(`%add%`, qcset);
-# 	estimate = estimateFragmentSizeDistribution(bighist, param$minfragmentsize);
-# 	
-# 	writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"), text = as.character(estimate));
-# 	
-# 	return(estimate);
-# }
-
+# Step 2 of RaMWAS
 ramwas2collectqc = function( param ){
 	param = parameterPreprocess(param);
 	dir.create(param$dirqc, showWarnings = FALSE, recursive = TRUE);

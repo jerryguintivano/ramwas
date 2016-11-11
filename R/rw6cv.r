@@ -1,3 +1,5 @@
+# Run 10 (cvnfolds) MWASes 
+# each on 90% of the data.
 ramwas6crossValidation = function(param) {
 	param = parameterPreprocess(param);
 	param$toppvthreshold = 1e-300;
@@ -40,6 +42,8 @@ ramwas6crossValidation = function(param) {
 	}
 }
 
+# Plot true outcome vs. prediction
+# with correlations and p-value in the title
 plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
     rng = range(c(outcome, forecast));
     c1 = cor(outcome, forecast, use = "complete.obs", method = "pearson");
@@ -66,6 +70,9 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
     );
     abline(a = 0, b = 1, col = "gray")
 }
+
+# Apply Elastic Net 10 times and collect
+# out of sample predictions
 ramwas7multiMarker = function(param){
     # library(glmnet);library(filematrix)
     # library(ramwas);

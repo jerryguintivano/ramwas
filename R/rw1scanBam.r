@@ -148,6 +148,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
     return( rbam );
 }
 
+# Scan a BAM, calculate QCs, generate plots
 pipelineProcessBam = function(bamname, param){
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
 	
@@ -213,12 +214,14 @@ pipelineProcessBam = function(bamname, param){
 	return(paste0("OK. ", bamname));
 }
 
+# Parallel job function
 .ramwas1scanBamJob = function(bamname, param){
 	cat(file = paste0(param$dirfilter,"/Log.txt"),
 		 date(), ", Process ", Sys.getpid(),", Processing BAM: ", bamname, "\n", sep = "", append = TRUE);
 	pipelineProcessBam(bamname = bamname, param = param);
 }
 
+# Step 1 of the pipeline
 ramwas1scanBams = function( param ){
 	param = parameterPreprocess(param);
 	stopifnot( !is.null(param$bamnames));

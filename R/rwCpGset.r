@@ -1,3 +1,4 @@
+# Find 'CG's in the reference genome
 getCpGsetCG = function( genome ){
 	# library(Biostrings)
 	cpgset = vector('list', length(genome))
@@ -8,6 +9,8 @@ getCpGsetCG = function( genome ){
 	return(cpgset);
 }
 
+# Find any pair of letters which can become 'CG'
+# in reference genome with SNPs injected
 getCpGsetALL = function( genome ){
 	Cset = c('C','Y','S','M','B','H','V'); #,'N'
 	Gset = c('G','R','S','K','B','D','V'); #,'N'
@@ -31,6 +34,8 @@ getCpGsetALL = function( genome ){
 	return(cpgset);
 }
 
+# Create compressed FASTQ files 
+# in in-silico alignment experiment
 insilicoFASTQ = function(con, gensequence, fraglength){
 	# con=""; gensequence = "ABCDEFG"; fraglength=4;
 	# con="D:/fastq.gz"; gensequence = "ABCDEFG"; fraglength=4;
@@ -87,6 +92,8 @@ insilicoFASTQ = function(con, gensequence, fraglength){
 	return(invisible(TRUE));
 }
 
+# inject SNPs into a genome sequence
+# with MAF filtering
 injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ # 
 	# http://droog.gs.washington.edu/parc/images/iupac.html
 	{

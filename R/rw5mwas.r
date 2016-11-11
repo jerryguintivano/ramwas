@@ -1,3 +1,6 @@
+# Fast QQ-plot
+# With confidence band and lambda
+# Makes small PDFs even with billions of p-values
 qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
 	
 	if(is.null(ntests))
@@ -49,6 +52,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
 	}
 }
 
+# Annotate findings with BioMaRt
 ramwasAnnotateLocations = function(param, chr, pos){
 	# Sanity check
 	if(any(pos > 1e9L))
@@ -125,6 +129,8 @@ ramwasAnnotateLocations = function(param, chr, pos){
 	return(genes);
 }
 
+# Save top findings in a text file
+# with annotation
 ramwas5saveTopFindings = function(param){
 	# library(filematrix)
 	param = parameterPreprocess(param);
@@ -167,6 +173,7 @@ ramwas5saveTopFindings = function(param){
 	return(invisible(NULL));
 }
 
+# Job function for MWAS
 .ramwas5MWASjob = function(rng, param, mwascvrtqr, rowsubset){
 	# rng = rangeset[[1]];
 	# library(filematrix);
@@ -214,6 +221,7 @@ ramwas5saveTopFindings = function(param){
 	return("OK");
 }
 
+# Setp 5 of RaMWAS
 ramwas5MWAS = function( param ){
 	# library(filematrix)
 	param = parameterPreprocess(param);
