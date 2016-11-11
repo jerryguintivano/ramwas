@@ -10,6 +10,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
+```{r switcher, echo=FALSE}
+library('knitr')
+opts_chunk$set(eval=FALSE)
+```
+
 # Creating artificial data set
 
 The following function generates an artificial data set which would be useful for illustrating the steps of RaMWAS pipeline.
@@ -60,7 +65,7 @@ param = list(
 )
 ```
 
-See `r vignette("RaMWAS_param")` for full information on the available parameters.
+See [parameter vignette](RW5_param.html) for full information on the available parameters.
             
 # Pipeline, 6 major parts
 
