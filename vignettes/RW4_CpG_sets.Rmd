@@ -53,7 +53,7 @@ Table: CpG sets for mouse genome.
 
 Note: SNPs were obtained from the 1000 Genomes super populations (Phase 3 data, [more info](http://www.internationalgenome.org/category/population/)). 
 Only SNPs with minor allele frequency above 1% are included. 
-In silico alignment experiments assumed 75 bp single-end reads and alignment with Bowtie2.
+In silico alignment experiments assumed 75 bp single-end reads and alignment with [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
 
 ## CpG filtering by in-silico alignment experiment {#insilico}
 
@@ -97,7 +97,7 @@ print(cpgset$NC_008253[1:10])
 
 For a genome with injected SNPs, we provide the function `getCpGsetALL` for also finding CpGs that can be created by injected SNPs.
 The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome.
-We do NOT advice using all dbSNP144 SNPs, as it causes an abundance of CpGs that almost never occur in the population.
+We do NOT advice using all dbSNP144 SNPs, as it causes an large number of CpGs that almost never occur in the population.
 
 ```{r getCpGsetALL1, eval=FALSE, warning=FALSE, message=FALSE}
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -120,8 +120,10 @@ do not provide any data on SNP allele frequency.
 To alleviate this problem, we provide a way 
 to inject SNP information from 1000 Genomes data or any other VCF.
 
-First, the VCf files, obtained from 1000 Genomes project or otherwise, 
-need to be processed by `vcftools` command `--counts`, e.g.:
+First, the VCF files, obtained from 1000 Genomes project or otherwise, 
+need to be processed by 
+[`vcftools`](https://vcftools.github.io/man_latest.html)
+command `--counts`, e.g.:
 
 > `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
 
