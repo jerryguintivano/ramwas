@@ -1,4 +1,13 @@
 ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, ncpgs = 500e3, randseed = 18090212, verbose = TRUE){
+groupSample = function(len, size, gr){
+    len = 1000;
+    size = 36;
+    gr = 6;
+    set.seed(18090212);
+    groupstarts = sample(floor(len/gr)-1, size/gr);
+    rez = rep(groupstarts, each = gr)*gr + (seq_len(gr)-1L)
+    return(rez);
+}
 
 	set.seed(randseed);
 	
@@ -37,7 +46,7 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, ncpgs =
 	# Age covariate and effects
 	{
 		age = sample(20:80, size = nsamples, replace = TRUE)
-		cpgageset = rep(sort.int(sample(floor(length(locsgood)/6)-1, length(locsgood)/600)), each = 6)*6+(0:5);
+		cpgageset = groupSample( len = length(locsgood), size = length(locsgood)/100, gr = 6);
 		cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
 		cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
 		rm(cpgageset)
@@ -46,7 +55,7 @@ ramwas0createArtificialData = function(dir, nsamples = 20, nreads = 1e6, ncpgs =
 	# casecontrol
 	{
 		ccs = seq_len(nsamples) %% 2L;
-		cpgccset = rep(sort.int(sample(floor(length(locsgood)/6)-1, 100)), each = 6)*6+(0:5);
+		cpgccset = groupSample( len = length(locsgood), size = 600, gr = 6);
 		cpgccc1 = cpgccset[  1:(length(cpgccset)/2) ];
 		cpgccc2 = cpgccset[-(1:(length(cpgccset)/2))];
 		rm(cpgccset)
