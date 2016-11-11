@@ -1,3 +1,153 @@
+# Scan a BAM file into Rbam object
+bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
+    fields = c("qname","rname","pos","cigar","flag") 		
+    # "qname" is read name, "rname" is chromosome
+    tags = "NM";# character();
+    
+    # Open the BAM file
+    {
+        if(scoretag == "mapq") {
+            fields = c(fields,scoretag);
+        } else {
+            tags = c(tags, scoretag);
+        }
+        
+        flag = scanBamFlag(isUnmappedQuery=NA, isSecondMateRead=FALSE);
+        param = ScanBamParam(flag=flag, what=fields, tag=tags);
+        bf = BamFile(bamfilename, yieldSize=1e6) ## typically, yieldSize=1e6
+        open(bf);	
+        rm(fields, tags, flag);
+    } # bf, param
+    
+    qc = list(nbams = 1L);
+    
+    startlistfwd = NULL;
+    repeat{
+        ### Read "yieldSize" rows
+        bb = scanBam(file=bf, param=param)[[1]];
+        if( length(bb[[1]])==0 )
+            break;
+        
+        ### Put tags in the main list
+        bb = c(bb[names(bb) != "tag"], bb$tag);
+        # data.frame(lapply(bb,`[`, 1:60), check.rows = FALSE, stringsAsFactors = FALSE)
+        
+        # stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
+        
+        ### Create output lists
+        if(is.null(startlistfwd)) {
+            startlistfwd = vector("list",length(levels(bb$rname)));
+            startlistrev = vector("list",length(levels(bb$rname)));
+            names(startlistfwd) = levels(bb$rname);
+            names(startlistrev) = levels(bb$rname);
+            startlistfwd[] = list(list())
+            startlistrev[] = list(list())
+        } # startlistfwd, startlistrev 
+        
+        ### Keep only primary reads
+        {
+            keep = bitwAnd(bb$flag, 256L) == 0L;
+            if(!all(keep))
+                bb = lapply(bb,`[`,which(keep));
+            rm(keep);
+        }
+        
+        qc$reads.total = qc$reads.total %add% length(bb[[1]]);
+        
+        ### Keep only aligned reads
+        {
+            keep = bitwAnd(bb$flag, 4L) == 0L;
+            if(!all(keep))
+                bb = lapply(bb,`[`,which(keep));
+            rm(keep);
+        }
+        
+        if(length(bb[[1]])==0) {
+            message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
+            next;
+        }
+        
+        bb$matchedAlongQuerySpace = cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
+        
+        qc$reads.aligned = qc$reads.aligned %add% length(bb[[1]]);
+        qc$bf.hist.score1 = qc$bf.hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
+        qc$bf.hist.edit.dist1 = qc$bf.hist.edit.dist1 %add% tabulate(bb$NM+1L);
+        qc$bf.hist.length.matched = qc$bf.hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
+        
+        ### Keep score >= minscore
+        if( !is.null(minscore) ) {
+            score = bb[[scoretag]];
+            keep = score >= minscore;
+            keep[is.na(keep)] = FALSE;
+            if(!all(keep))
+                bb = lapply(bb,`[`,which(keep));
+            rm(keep);
+        }
+        
+        qc$reads.recorded = qc$reads.recorded %add% length(bb[[1]]);
+        qc$hist.score1 = qc$hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
+        qc$hist.edit.dist1 = qc$hist.edit.dist1 %add% tabulate(bb$NM+1L);
+        qc$hist.length.matched = qc$hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
+        
+        ### Forward vs. Reverse strand
+        bb$isReverse = bitwAnd(bb$flag, 0x10) > 0;
+        qc$frwrev = qc$frwrev %add% tabulate(bb$isReverse + 1L)
+        
+        
+        ### Read start positions (accounting for direction)
+        {
+            bb$startpos = bb$pos;
+            bb$startpos[bb$isReverse] = bb$startpos[bb$isReverse] + 
+            (cigarWidthAlongReferenceSpace(bb$cigar[bb$isReverse])-1L) - 1L;
+            # Last -1L is for shift from C on reverse strand to C on the forward
+        } # startpos
+        
+        ### Split and store the start locations
+        {
+            offset = length(startlistfwd);
+            split.levels = as.integer(bb$rname) + offset*bb$isReverse;
+            levels(split.levels) = c(names(startlistfwd),paste0(names(startlistfwd),"-"));
+            class(split.levels) = "factor";
+            splt = split( bb$startpos, split.levels, drop = FALSE);
+            # print(sapply(splt,length))
+            for( i in seq_along(startlistfwd) ) {
+                if( length(splt[i]) > 0 ) {
+                    startlistfwd[[i]][[length(startlistfwd[[i]])+1L]] = splt[[i]];
+                }
+                if( length(splt[i+offset]) > 0 ) {
+                    startlistrev[[i]][[length(startlistrev[[i]])+1L]] = splt[[i+offset]];
+                }
+            }
+            rm(offset, split.levels, splt);
+        } # startlistfwd, startlistrev	
+        message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
+    }
+    close(bf);
+    rm(bf); # , oldtail
+    
+    startsfwd = startlistfwd;
+    startsrev = startlistrev;
+    
+    ### combine and sort lists in "outlist"
+    for( i in seq_along(startlistfwd) ) {
+        startsfwd[[i]] = sort.int(unlist(startlistfwd[[i]]));
+        startsrev[[i]] = sort.int(unlist(startlistrev[[i]]));
+    }		
+    gc();
+    
+    if( !is.null(qc$hist.score1))						class(qc$hist.score1) = "qcHistScore";
+    if( !is.null(qc$bf.hist.score1))			 		class(qc$bf.hist.score1) = "qcHistScoreBF";
+    if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
+    if( !is.null(qc$bf.hist.edit.dist1))				class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
+    if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
+    if( !is.null(qc$bf.hist.length.matched))			class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
+    if( !is.null(qc$frwrev) ) 							class(qc$frwrev) = "qcFrwrev";
+    
+    info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore, filesize = file.size(bamfilename));
+    rbam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
+    return( rbam );
+}
+
 pipelineProcessBam = function(bamname, param){
 	# Used parameters: scoretag, minscore, filecpgset, maxrepeats
 	
