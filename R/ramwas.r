@@ -123,7 +123,7 @@ parameterPreprocess = function( param ){
 	
 	# Set up directories 
 	if( is.null(param$dirproject) ) param$dirproject = getwd();
-	param$dirbam = .makefullpath(param$dirproject, param$dirbam);
+	if(!is.null(param$dirbam)) param$dirbam = .makefullpath(param$dirproject, param$dirbam);
 	
 	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
