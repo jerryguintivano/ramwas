@@ -8,7 +8,7 @@ pipelineCoverage1Sample = function(colnum, param){
 	if( param$maxrepeats == 0 ) {
 		coverage = NULL;
 		for( j in seq_along(bams)) { # j=1
-			rbam = readRDS( paste0( param$dirrbam, "/", bams[j], ".rbam.rds" ) );
+			rbam = readRDS(paste0(param$dirrbam, "/", bams[j], ".rbam.rds"));
 			cov = calc.coverage(rbam = rbam, 
 			                    cpgset = cpgset, 
 			                    fragdistr = param$fragdistr)
@@ -23,7 +23,8 @@ pipelineCoverage1Sample = function(colnum, param){
 	} else {
 		rbams = vector("list",length(bams));
 		for( j in seq_along(bams)) { # j=1
-			rbams[[j]] = readRDS( paste0( param$dirrbam, "/", bams[j], ".rbam.rds" ) );
+			rbams[[j]] = 
+			    readRDS(paste0( param$dirrbam,"/",bams[j],".rbam.rds"));
 		}
 		if(length(bams) > 1) {
 			rbam = list(startsfwd = list(), startsrev = list());
