@@ -9,7 +9,9 @@ pipelineCoverage1Sample = function(colnum, param){
 		coverage = NULL;
 		for( j in seq_along(bams)) { # j=1
 			rbam = readRDS( paste0( param$dirrbam, "/", bams[j], ".rbam.rds" ) );
-			cov = calc.coverage(rbam = rbam, cpgset = cpgset, fragdistr = param$fragdistr)
+			cov = calc.coverage(rbam = rbam, 
+			                    cpgset = cpgset, 
+			                    fragdistr = param$fragdistr)
 			if(is.null(coverage)) {
 				coverage = cov;
 			} else {
@@ -30,19 +32,23 @@ pipelineCoverage1Sample = function(colnum, param){
 				
 				fwd = lapply(rbams, function(x,y){x$startsfwd[[y]]}, nm);
 				fwd = sort.int( unlist(fwd, use.names = FALSE) );
-				rbam$startsfwd[[nm]] = remove.repeats.over.maxrep(fwd, param$maxrepeats);
+				rbam$startsfwd[[nm]] = 
+				    remove.repeats.over.maxrep(fwd, param$maxrepeats);
 				rm(fwd);
 				
 				rev = lapply(rbams, function(x,y){x$startsrev[[y]]}, nm);
 				rev = sort.int( unlist(rev, use.names = FALSE) );
-				rbam$startsrev[[nm]] = remove.repeats.over.maxrep(rev, param$maxrepeats);
+				rbam$startsrev[[nm]] = 
+				    remove.repeats.over.maxrep(rev, param$maxrepeats);
 				rm(rev);
 			}
 		} else {
 			rbam = bam.removeRepeats( rbams[[1]], param$maxrepeats );
 		}
 		rm(rbams);
-		coverage = calc.coverage(rbam = rbam, cpgset = cpgset, fragdistr = param$fragdistr)
+		coverage = calc.coverage(rbam = rbam, 
+		                         cpgset = cpgset, 
+		                         fragdistr = param$fragdistr)
 	}
 	return(coverage);
 }
@@ -70,7 +76,8 @@ pipelineCoverage1Sample = function(colnum, param){
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
 			 date(), ", Process ", Sys.getpid(), 
-			 ", Processing sample ", colnum, " ", names(param$bam2sample)[colnum], "\n",
+			 ", Processing sample ", colnum, " ", 
+			 names(param$bam2sample)[colnum], "\n",
 			 sep = "", append = TRUE);
 	});
 	close(fm);
@@ -83,16 +90,23 @@ pipelineCoverage1Sample = function(colnum, param){
 	# library(filematrix);
 	# fmpart = 1
 	filename = paste0(param$dirtemp,"/RawCoverage_part",fmpart);
-	if( !file.exists(paste0(filename,".bmat")) || !file.exists(paste0(filename,".desc.txt")) )
+	if( !file.exists(paste0(filename,".bmat")) || 
+	    !file.exists(paste0(filename,".desc.txt")) )
 		return(paste0("Raw coverage slice filematrix not found: ", filename));
 	fmraw = fm.open(filename, lockfile = param$lockfile2);
 	mat = fmraw[];
 	# mat = as.matrix(fmraw);
 	
 	fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart), 
-							 nrow = ncol(mat), ncol = 0, size = param$doublesize, lockfile = param$lockfile2);
+	                   nrow = ncol(mat), 
+	                   ncol = 0, 
+	                   size = param$doublesize, 
+	                   lockfile = param$lockfile2);
 	fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart), 
-							 nrow = 1, ncol = 0, type = "integer", lockfile = param$lockfile2);
+	                   nrow = 1, 
+	                   ncol = 0, 
+	                   type = "integer", 
+	                   lockfile = param$lockfile2);
 	
 	samplesums = rep(0, ncol(mat));
 	
@@ -110,7 +124,8 @@ pipelineCoverage1Sample = function(colnum, param){
 		### Filtering criteria
 		cpgmean = rowMeans( subslice );
 		cpgnonz = rowMeans( subslice>0 );
-		keep = (cpgmean >= param$minavgcpgcoverage) & (cpgnonz >= param$minnonzerosamples);
+		keep = (cpgmean >= param$minavgcpgcoverage) & 
+		       (cpgnonz >= param$minnonzerosamples);
 		if( !any(keep) )
 			next;
 		
@@ -136,7 +151,8 @@ pipelineCoverage1Sample = function(colnum, param){
 	close(fmout);
 	close(fmpos);
 	
-	fmss = fm.open( paste0(param$dirtemp,"/0_sample_sums"), lockfile = param$lockfile2);
+	fmss = fm.open( paste0(param$dirtemp,"/0_sample_sums"), 
+	                lockfile = param$lockfile2);
 	fmss[,fmpart] = samplesums;
 	close(fmss);
 	
@@ -168,7 +184,8 @@ pipelineCoverage1Sample = function(colnum, param){
 	
 	fm$filelock$lockedrun( {
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-			 date(), ", Process ", Sys.getpid(), ", Processing slice ", fmpart_offset[1], "\n", 
+			 date(), ", Process ", Sys.getpid(), 
+			 ", Processing slice ", fmpart_offset[1], "\n", 
 			 sep = "", append = TRUE);
 	});
 	
@@ -182,7 +199,9 @@ ramwas3NormalizedCoverage = function( param ){
 	# Prepare
 	param = parameterPreprocess(param);
 	if( param$minfragmentsize < param$maxfragmentsize ){
-		param$fragdistr = as.double( readLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt")));
+	    filename = paste0(param$dirfilter,"/Fragment_size_distribution.txt");
+		param$fragdistr = as.double( readLines(con = filename));
+		rm(filename);
 	} else {
 		param$fragdistr = rep(1, param$maxfragmentsize);
 	}
@@ -213,7 +232,7 @@ ramwas3NormalizedCoverage = function( param ){
 		for( bname in bams) {
 			filename = paste0( param$dirrbam, "/", bname);
 			if( file.exists(filename) ) {
-				stop(paste0("Rbam file from bam2sample does not exist: ", filename));
+				stop(paste0("Rbam file from bam2sample not found: ", filename));
 			}
 		}
 		rm(bams, bname, filename);
@@ -227,13 +246,17 @@ ramwas3NormalizedCoverage = function( param ){
 		step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
 		mm = ncpgs;
 		nslices = ceiling(mm/step1);
-		message("Creating ", nslices, " file matrices for raw coverage at: ", param$dirtemp);
+		message("Creating ", nslices, " file matrices for raw scores at: ", 
+		        param$dirtemp);
 		for( part in 1:nslices ) { # part = 1
-			# cat("Creating raw coverage matrix slices", part, "of", nslices, "\n");
+			# cat("Creating raw  matrix slices", part, "of", nslices, "\n");
 			fr = (part-1)*step1 + 1;
 			to = min(part*step1, mm);
 			fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
-			fm = fm.create(fmname, nrow = to-fr+1, ncol = nsamples, size = param$doublesize)
+			fm = fm.create(fmname, 
+			               nrow = to-fr+1, 
+			               ncol = nsamples, 
+			               size = param$doublesize)
 			close(fm);
 		}
 		rm(part, step1, mm, fr, to, fmname);
@@ -244,40 +267,54 @@ ramwas3NormalizedCoverage = function( param ){
 		message("Calculating and saving raw coverage");
 		if(param$usefilelock) param$lockfile = tempfile();
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
-			 date(), ", Calculating raw coverage.", "\n", sep = "", append = FALSE);
+			 date(), ", Calculating raw coverage.", "\n", 
+			 sep = "", append = FALSE);
 		# library(parallel)
 		if( param$cputhreads > 1) {
 			cl = makeCluster(param$cputhreads);
-			z = clusterApplyLB(cl, seq_len(nsamples), .ramwas3coverageJob, param = param, nslices = nslices);
+			z = clusterApplyLB(cl, 
+			                   seq_len(nsamples), 
+			                   .ramwas3coverageJob, 
+			                   param = param, 
+			                   nslices = nslices);
 			stopCluster(cl);
 		} else {
 			z = character(nsamples);
 			names(z) = names(param$bam2sample);
 			for(i in seq_along(param$bam2sample)) { # i=1
-				z[i] = .ramwas3coverageJob(colnum = i, param = param, nslices = nslices);
+				z[i] = .ramwas3coverageJob(colnum = i, 
+				                           param = param, 
+				                           nslices = nslices);
 				cat(i,z[i],"\n");
 			}
 		}
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
-			 date(), ", Done calculating raw coverage.", "\n", sep = "", append = TRUE);
+			 date(), ", Done calculating raw coverage.", "\n", 
+			 sep = "", append = TRUE);
 		.file.remove(param$lockfile);
 	}
 	
 	### Transpose the slices, filter by average and fraction of non-zeroes
 	{
-		message("Transposing coverage matrices and filtering CpGs by coverage");
+		message("Transposing score matrices and filtering CpGs by score");
 		
-		fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"), nrow = nsamples, ncol = nslices);
+		fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"), 
+		                nrow = nsamples, 
+		                ncol = nslices);
 		close(fm);
 		
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
-			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
+			 date(), ", Transposing coverage matrix, filtering CpGs.", "\n", 
+			 sep = "", append = TRUE);
 		if( param$diskthreads > 1 ) {
 			if(param$usefilelock) param$lockfile2 = tempfile();
 			# library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
-			z = clusterApplyLB(cl, 1:nslices, .ramwas3transposeFilterJob, param = param);
+			z = clusterApplyLB(cl, 
+			                   1:nslices, 
+			                   .ramwas3transposeFilterJob, 
+			                   param = param);
 			stopCluster(cl);
 			.file.remove(param$lockfile2);
 		} else {
@@ -286,7 +323,8 @@ ramwas3NormalizedCoverage = function( param ){
 			}
 		}
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"), 
-			 date(), ", Done transposing coverage matrix, filtering CpGs.", "\n", sep = "", append = TRUE);
+			 date(), ", Done transposing coverage matrix, filtering CpGs.", 
+			 "\n", sep = "", append = TRUE);
 	}
 	
 	### Prepare CpG set for filtered CpGs	
@@ -309,18 +347,24 @@ ramwas3NormalizedCoverage = function( param ){
 			fr = (part-1)*step1 + 1;
 			to = min(part*step1, mm);
 			
-			indx = as.vector(fm.load( paste0(param$dirtemp,"/TrCoverage_loc",part) ));
+			indx = fm.load( paste0(param$dirtemp,"/TrCoverage_loc",part) );
+			indx = as.vector(indx)
 			cpgsloclist[[part]] = cpgsloc1e9[fr:to][indx];
 		}
 		rm(part, step1, mm, nsteps, fr, to, kbblock, indx);
 		sliceoffsets = c(0L, cumsum(sapply(cpgsloclist, length)));
 		
 		cpgslocvec = unlist(cpgsloclist, use.names = FALSE);
-		cpgslocmat = cbind( chr = as.integer(cpgslocvec %/% 1e9), position = as.integer(cpgslocvec %% 1e9));
+		cpgslocmat = cbind( chr = as.integer(cpgslocvec %/% 1e9), 
+		                    position = as.integer(cpgslocvec %% 1e9));
 		
-		fm = fm.create.from.matrix( filenamebase = paste0(param$dircoveragenorm, "/CpG_locations"), mat = cpgslocmat);
+		fm = fm.create.from.matrix( 
+		    filenamebase = paste0(param$dircoveragenorm, "/CpG_locations"),
+		    mat = cpgslocmat);
 		close(fm);
-		writeLines(con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt"), text = names(cpgset));
+		writeLines(
+		    con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt"),
+            text = names(cpgset));
 		rm(cpgsloc1e9, cpgsloclist, cpgslocvec, cpgslocmat);
 	} # /CpG_locations, sliceoffsets
 	
@@ -331,7 +375,9 @@ ramwas3NormalizedCoverage = function( param ){
 		mat = fm.load( paste0(param$dirtemp,"/0_sample_sums") );
 		samplesums = rowSums(mat);
 		rm(mat);
-		fm = fm.create.from.matrix( paste0(param$dircoveragenorm,"/raw_sample_sums"), samplesums);
+		fm = fm.create.from.matrix( 
+		    filenamebase = paste0(param$dircoveragenorm,"/raw_sample_sums"), 
+		    mat = samplesums);
 		close(fm);
 	}
 	
@@ -339,16 +385,21 @@ ramwas3NormalizedCoverage = function( param ){
 	{
 		message("Normalizing coverage and saving in one matrix");
 		
-		fmpart_offset_list = as.list(data.frame(rbind( seq_len(nslices), sliceoffsets[-length(sliceoffsets)])));
+		fmpart_offset_list = as.list(data.frame(rbind(
+		    seq_len(nslices), 
+		    sliceoffsets[-length(sliceoffsets)])));
 		
 		### Create big matrix for normalized coverage
-		fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"), 
-							nrow = nsamples, ncol = tail(sliceoffsets,1), size = param$doublesize);
+		fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"),
+		               nrow = nsamples, 
+		               ncol = tail(sliceoffsets,1), 
+		               size = param$doublesize);
 		rownames(fm) = names(param$bam2sample);
 		close(fm);
 		
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-			 date(), ", Normalizing coverage matrix.", "\n", sep = "", append = TRUE);
+			 date(), ", Normalizing coverage matrix.", "\n", 
+			 sep = "", append = TRUE);
 		### normalize and fill in
 		if( param$diskthreads > 1 ) {
 			
@@ -357,18 +408,25 @@ ramwas3NormalizedCoverage = function( param ){
 			# library(parallel);
 			cl = makeCluster(param$diskthreads);
 			# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
-			z = clusterApplyLB(cl, fmpart_offset_list, .ramwas3normalizeJob, param = param, samplesums = samplesums);
+			z = clusterApplyLB(cl, 
+			                   fmpart_offset_list, 
+			                   .ramwas3normalizeJob,
+			                   param = param, 
+			                   samplesums = samplesums);
 			stopCluster(cl);
 			.file.remove(param$lockfile1);
 			.file.remove(param$lockfile2);
 			
 		} else {
 			for( fmpart in seq_len(nslices) ) { # fmpart = 5
-				.ramwas3normalizeJob( fmpart_offset_list[[fmpart]], param, samplesums);
+				.ramwas3normalizeJob( fmpart_offset_list[[fmpart]], 
+				                      param, 
+				                      samplesums);
 			}
 		}
 		cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-			 date(), ", Done normalizing coverage matrix.", "\n", sep = "", append = TRUE);
+			 date(), ", Done normalizing coverage matrix.", "\n", 
+			 sep = "", append = TRUE);
 		
 	}
 	

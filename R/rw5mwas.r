@@ -30,23 +30,33 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
 	plot(NA,NA, ylim = c(0,my), xlim = c(0,mx), xaxs="i", yaxs="i", 
 		  xlab = expression("- log"[10]*"(p-value), expected under null"),
 		  ylab = expression("- log"[10]*"(p-value), observed"));
-	# xlab = "-Log10(p-value), expected under null", ylab = "-Log10(p-value), observed");
+	# xlab = "-Log10(p-value), expected under null", 
+	# ylab = "-Log10(p-value), observed");
 	lines(c(0,mx),c(0,mx),col="grey")
 	points(xpvs, ypvs, col = "red", pch = 19, cex = 0.25);
 	
 	if(!is.null(ci.level)) {
 		if((ci.level>0)&(ci.level<1)) {
-			quantiles = qbeta(p = rep(c(ci.level/2,1-ci.level/2),each=length(xpvs)), shape1 = keep, shape2 = ntests - keep + 1);
+			quantiles = qbeta(p = rep(c(ci.level/2,1-ci.level/2),
+			                          each=length(xpvs)), 
+			                  shape1 = keep, 
+			                  shape2 = ntests - keep + 1);
 			quantiles = matrix(quantiles, ncol=2);
 			
 			lines( xpvs, -log10(quantiles[,1]), col="cyan4")
 			lines( xpvs, -log10(quantiles[,2]), col="cyan4")
 		}
 	}
-	legend("bottomright", c("P-values",sprintf("%.0f %% Confidence band",100-ci.level*100)),lwd = c(0,1), pch = c(19,NA_integer_), lty = c(0,1), col=c("red","cyan4"))
+	legend("bottomright", 
+	       c("P-values", sprintf("%.0f %% Confidence band",100-ci.level*100)),
+	       lwd = c(0,1), 
+	       pch = c(19,NA_integer_), 
+	       lty = c(0,1), 
+	       col=c("red","cyan4"))
 	if(length(pvalues)*2>ntests) {
-		# lambda = sprintf("%.3f",log10(pvalues[ntests/2]) / log10(0.5));
-		lambda = sprintf("%.3f",qchisq(pvalues[ntests/2],1,lower.tail = FALSE) / qchisq(0.5,1,lower.tail = FALSE));
+		lambda = sprintf("%.3f", 
+		                 qchisq(pvalues[ntests/2],1,lower.tail = FALSE) / 
+		                 qchisq(0.5,1,lower.tail = FALSE));
 		legend("bottom", legend = bquote(lambda == .(lambda)), bty = "n")
 		# 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
 	}
@@ -64,15 +74,19 @@ ramwasAnnotateLocations = function(param, chr, pos){
 	# Call biomaRt	
 	{
 		# library(biomaRt)
-		gene_ensembl = useMart(biomart=param$bimart, host = param$bihost, dataset=param$bidataset)
+		gene_ensembl = useMart(biomart=param$bimart, 
+		                       host = param$bihost, 
+		                       dataset=param$bidataset)
 		bioresp = getBM(mart = gene_ensembl,
 							 attributes = unique(c(
 							 	param$biattributes,
 							 	'chromosome_name',
 							 	'start_position',
 							 	'end_position')),
-							 filters = c(list(chromosomal_region = paste0(nochr,':',pos,':',pos+1L)),
-							 				param$bifilters)
+							 filters = c(list(
+							     chromosomal_region = 
+							         paste0(nochr,':',pos,':',pos+1L)),
+							 			 param$bifilters)
 		)
 	}	
 	
@@ -97,15 +111,17 @@ ramwasAnnotateLocations = function(param, chr, pos){
 		
 		### Find CpGs which match each returned gene
 		### CpGs [fi1+1 : fi2] for each gene
-		fi1 = findInterval( resppos1, tablepos[ord]+2) # offset by 1 for G in CpG, another 1 for strict inequality
+	    # offset by 1 for G in CpG, another 1 for strict inequality
+		fi1 = findInterval( resppos1, tablepos[ord]+2) 
 		fi2 = findInterval( resppos2, tablepos[ord])
 		
 		## Enumerate all CpG-gene pairs
 		## xx - CpG index (among sorted), factored for 'split' call 
 		## yy - Gene index (within biomart response)
-		xx = unlist(lapply(which(fi1<fi2),FUN=function(x){((fi1[x]+1):(fi2[x]))}));
+		xx = unlist(lapply(which(fi1<fi2),
+		                   FUN=function(x){((fi1[x]+1):(fi2[x]))}));
 		levels(xx) = paste0(seq_along(tablepos));
-		class(xx) = 'factor'
+		class(xx) = 'factor';
 		yy = rep(seq_along(fi1), times = fi2-fi1)
 		
 		spl = split(yy, xx)
@@ -141,8 +157,10 @@ ramwas5saveTopFindings = function(param){
 	mwas = fm.load( paste0(param$dirmwas, "/Stats_and_pvalues") );
 	
 	message("Loading CpG locations");
-	cpgloc = fm.load( paste0(param$dircoveragenorm, "/CpG_locations") );
-	chrnames = readLines( paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
+	cpgloc = fm.load( 
+	    filenamebase = paste0(param$dircoveragenorm, "/CpG_locations") );
+	chrnames = readLines( 
+	    con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
 	
 	message("Finding top MWAS hits");
 	keep = which(mwas[,3] < param$toppvthreshold);
@@ -160,7 +178,9 @@ ramwas5saveTopFindings = function(param){
 	
 	if( !is.null(param$biattributes) && (nrow(toptable)>0L) ) {
 		message('Annotating top MWAS hits');
-		bio = ramwasAnnotateLocations(param, chr = toptable$chr, pos = toptable$position);
+		bio = ramwasAnnotateLocations(param, 
+		                              chr = toptable$chr, 
+		                              pos = toptable$position);
 		toptable = data.frame(toptable, bio);
 	}
 	
@@ -177,7 +197,9 @@ ramwas5saveTopFindings = function(param){
 .ramwas5MWASjob = function(rng, param, mwascvrtqr, rowsubset){
 	# rng = rangeset[[1]];
 	# library(filematrix);
-	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
+	fm = fm.open( filenamebase = paste0(param$dircoveragenorm, "/Coverage"), 
+	              readonly = TRUE, 
+	              lockfile = param$lockfile2);
 	
 	outmat = double(3*(rng[2]-rng[1]+1));
 	dim(outmat) = c((rng[2]-rng[1]+1),3);
@@ -195,7 +217,8 @@ ramwas5saveTopFindings = function(param){
 			slice = slice[rowsubset,];
 		
 		rez = testPhenotype(phenotype = param$covariates[[param$modeloutcome]],
-								  data = slice, cvrtqr = mwascvrtqr)
+		                    data = slice, 
+		                    cvrtqr = mwascvrtqr)
 		
 		outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
 		
@@ -214,7 +237,8 @@ ramwas5saveTopFindings = function(param){
 						text = as.character(c(rez$nVarTested, rez$dfFull)))
 	}
 	
-	fmout = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"), lockfile = param$lockfile2);
+	fmout = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"), 
+	                lockfile = param$lockfile2);
 	fmout[rng[1]:rng[2],1:3] = outmat;
 	close(fmout);
 	
@@ -230,7 +254,8 @@ ramwas5MWAS = function( param ){
 	parameterDump(dir = param$dirmwas, param = param,
 					  toplines = c("dirmwas", "dirpca", "dircoveragenorm",
 					  				 "filecovariates", "covariates",
-					  				 "modeloutcome", "modelcovariates", "modelPCs",
+					  				 "modeloutcome", "modelcovariates", 
+					  				 "modelPCs",
 					  				 "qqplottitle",
 					  				 "diskthreads"));
 	
@@ -239,12 +264,16 @@ ramwas5MWAS = function( param ){
 	
 	### Kill NA outcomes
 	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+		param$covariates = data.frame(lapply( 
+		    param$covariates, 
+		    `[`, 
+		    !is.na(param$covariates[[ param$modeloutcome ]])));
 	}
 	### Get and match sample names
 	{
 		message("Matching samples in covariates and data matrix");
-		rez = .matchCovmatCovar( param ); # rez = ramwas:::.matchCovmatCovar( param );
+		rez = .matchCovmatCovar( param ); 
+	    # rez = ramwas:::.matchCovmatCovar( param );
 		rowsubset = rez$rowsubset;
 		ncpgs     = rez$ncpgs;
 		cvsamples = param$covariates[[1]];
@@ -253,10 +282,9 @@ ramwas5MWAS = function( param ){
 	
 	### Prepare covariates, defactor, 
 	{
-		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
+		message("Preparing covariates (splitting dummies, orthonormalizing)");
 		mwascvrtqr = .getCovariates(param, rowsubset);
 		# mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
-		# cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
 	
@@ -264,7 +292,9 @@ ramwas5MWAS = function( param ){
 	### Outpout matrix. R2  / F-test / p-value / q-value
 	{
 		message("Creating output matrix");
-		fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), nrow = ncpgs, ncol = 4);
+		fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"), 
+		                nrow = ncpgs, 
+		                ncol = 4);
 		if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
 			colnames(fm) = c("cor","t-test","p-value","q-value");
 		} else {
@@ -277,26 +307,38 @@ ramwas5MWAS = function( param ){
 	{
 		message("Running MWAS");
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
-			 date(), ", Running methylome-wide association study.", "\n", sep = "", append = FALSE);
+			 date(), ", Running methylome-wide association study.", "\n", 
+			 sep = "", append = FALSE);
 		if( param$diskthreads > 1 ) {
 			rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
-			rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
-			rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
+			rangeset = rbind( rng[-length(rng)], 
+			                  rng[-1]-1, 
+			                  seq_len(param$diskthreads));
+			rangeset = lapply(seq_len(ncol(rangeset)), 
+			                  function(i) rangeset[,i])
 			
 			if(param$usefilelock) param$lockfile2 = tempfile();
 			# library(parallel);
 			cl = makeCluster(param$diskthreads);
 			clusterExport(cl, "testPhenotype")
-			clusterApplyLB(cl, rangeset, .ramwas5MWASjob, 
-								param = param, mwascvrtqr = mwascvrtqr, rowsubset = rowsubset);
+			clusterApplyLB(cl, 
+			               rangeset, 
+			               .ramwas5MWASjob, 
+			               param = param, 
+			               mwascvrtqr = mwascvrtqr, 
+			               rowsubset = rowsubset);
 			stopCluster(cl);
 			rm(cl, rng, rangeset);
 			.file.remove(param$lockfile2);
 		} else {
-			covmat = .ramwas5MWASjob(rng = c(1, ncpgs, 0), param, mwascvrtqr, rowsubset);
+			covmat = .ramwas5MWASjob(rng = c(1, ncpgs, 0), 
+			                         param, 
+			                         mwascvrtqr, 
+			                         rowsubset);
 		}
 		cat(file = paste0(param$dirmwas,"/Log.txt"), 
-			 date(), ", Done running methylome-wide association study.", "\n", sep = "", append = TRUE);
+			 date(), ", Done running methylome-wide association study.", "\n", 
+			 sep = "", append = TRUE);
 	}	
 	
 	### Fill in FDR column

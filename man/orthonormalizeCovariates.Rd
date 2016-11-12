@@ -4,7 +4,8 @@
 	Orthonormalize Covariates
 }
 \description{
-	Takes a set of covariates, add a constant covariate, and orthonormalizes the set.
+	Takes a set of covariates, add a constant covariate, and 
+	orthonormalizes the set.
 }
 \usage{
 orthonormalizeCovariates(covariates)
@@ -18,7 +19,8 @@ orthonormalizeCovariates(covariates)
 	The operation is performed via QR decomposition (\link[base]{qr}).
 }
 \value{
-A matrix with orthogonal columns with unit length, whose columns spans the same space as the covariates plus a constant.
+A matrix with orthogonal columns with unit length, 
+whose columns spans the same space as the covariates plus a constant.
 }
 \author{
 	Andrey A Shabalin \email{ashabalin@vcu.edu}

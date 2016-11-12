@@ -40,9 +40,13 @@ ramwas0createArtificialData(dir,
 \details{
   The function generates a number of files within \code{dir} directory.
   \enumerate{
-     \item \code{bam_list.txt} - list of created BAM files. To be used in \code{filebamlist} and \code{filebam2sample} parameters in the pipeline.
-     \item \code{covariates.txt} - table with and and case-control status covariates. For use in \code{filecovariates} parameter in the pipeline.
-     \item \code{Single_chromosome.rds} - CpG location file with the selected chromosome only.
+     \item \code{bam_list.txt} - list of created BAM files. 
+     To be used in \code{filebamlist} and 
+     \code{filebam2sample} parameters in the pipeline.
+     \item \code{covariates.txt} - table with age and sex status covariates. 
+     For use in \code{filecovariates} parameter in the pipeline.
+     \item \code{Single_chromosome.rds} - CpG location file 
+     with the selected chromosome only.
      \item \code{bams} - directory with all the BAM files.
   }
 }
@@ -50,9 +54,11 @@ ramwas0createArtificialData(dir,
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    For detailed description of all available parameters run:\cr \code{vignette("RaMWAS_param")}.
+    For detailed description of all available parameters run:\cr 
+    \code{vignette("RW5_param")}.
     
-    For full description of the QC measures and the ploting options run\cr \code{vignette("RaMWAS_QCs")}
+    For full description of the QC measures and the ploting options run\cr 
+    \code{vignette("RW3_BAM_QCs")}
 }
 \examples{
 ### Location for the artificial project

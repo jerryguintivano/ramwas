@@ -22,7 +22,8 @@ getCpGsetALL = function( genome ){
 	Gint = logical(256); Gint[as.integer(Graw)] = TRUE;
 	
 	starts_fun = function(chrom) {
-		which( Cint[as.integer(chrom[-length(chrom)])] & Gint[as.integer(chrom[-1])] )
+		which( Cint[as.integer(chrom[-length(chrom)])] & 
+		       Gint[as.integer(chrom[-1])] )
 	}
 
 	cpgset = vector('list', length(genome))
@@ -53,7 +54,9 @@ insilicoFASTQ = function(con, gensequence, fraglength){
 		}
 	}
 	
-	qual = charToRaw(paste0('\n+\n',paste(rep('A',fraglength),collapse = ''),'\n'));
+	qual = charToRaw(paste0('\n+\n',paste(rep('A',fraglength),
+	                                      collapse = ''),
+	                        '\n'));
 
 	sequence = as.character(gensequence);
 	Encoding(sequence) = "bytes";
@@ -76,8 +79,10 @@ insilicoFASTQ = function(con, gensequence, fraglength){
 			dim(mat) = c(3,to-fr+1);
 			mat[3,] = list(qual);
 		}
-		mat[1,] = lapply(paste0('@',formatC(fr:to, width = 9, flag = "0"),'\n'), charToRaw);
-		mat[2,] = lapply(fr:to, function(a) { y[a:(a+fraglength-1)] } );
+		mat[1,] = lapply(paste0('@',formatC(fr:to, width = 9, flag = "0"),'\n'), 
+		                 charToRaw);
+		mat[2,] = lapply(fr:to, 
+		                 function(a) { y[a:(a+fraglength-1)] } );
 		
 		keep = (y[fr:to]!=0x4e) & (y[(fr:to)+fraglength-1]!=0x4e);
 		if(any(keep)) {

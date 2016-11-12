@@ -28,7 +28,9 @@
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
 	# rng = rangeset[[1]];
 	# library(filematrix);
-	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE, lockfile = param$lockfile2);
+	fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), 
+	              readonly = TRUE, 
+	              lockfile = param$lockfile2);
 	
 	covmat = 0;
 	
@@ -45,8 +47,10 @@
 			slice = slice[rowsubset,];
 		slice = t(slice);
 		
-		slice = slice - tcrossprod(slice, cvrtqr) %*% cvrtqr; ### rowMeans(slice) == 0
-		slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-3);   ### rowSums(slice^2) == 1
+		slice = slice - tcrossprod(slice, cvrtqr) %*% cvrtqr; 
+		### rowMeans(slice) == 0
+		slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-3);   
+		### rowSums(slice^2) == 1
 		
 		covmat = covmat + crossprod(slice);
 		fm$filelock$lockedrun( {
@@ -85,8 +89,9 @@ ramwas4PCA = function( param ){
 	
 	### Prepare covariates, defactor, 
 	{
-		message("Preparing covariates (splitting dummy variables, orthonormalizing)");
-		cvrtqr = t(orthonormalizeCovariates( param$covariates[ param$modelcovariates ] ));
+		message("Preparing covariates (splitting dummies, orthonormalizing)");
+		cvrtqr = t(orthonormalizeCovariates( 
+                        param$covariates[ param$modelcovariates ] ));
 	} # cvrtqr
 	
 	### PCA part
@@ -95,29 +100,44 @@ ramwas4PCA = function( param ){
 		{
 			message("Calculating Principal Components");
 			cat(file = paste0(param$dirpca,"/Log.txt"), 
-				 date(), ", Running Principal Component Analysis.", "\n", sep = "", append = FALSE);
+				 date(), ", Running Principal Component Analysis.", "\n", 
+				 sep = "", append = FALSE);
 			
 			if( param$diskthreads > 1 ) {
 				rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
-				rangeset = rbind( rng[-length(rng)], rng[-1]-1, seq_len(param$diskthreads));
-				rangeset = lapply(seq_len(ncol(rangeset)), function(i) rangeset[,i])
+				rangeset = rbind( rng[-length(rng)], 
+				                  rng[-1]-1, 
+				                  seq_len(param$diskthreads));
+				rangeset = lapply(seq_len(ncol(rangeset)), 
+				                  function(i) rangeset[,i])
 				
 				if(param$usefilelock) param$lockfile2 = tempfile();
 				# library(parallel);
 				cl = makeCluster(param$diskthreads);
 				# cl = makePSOCKcluster(rep("localhost", param$diskthreads))
-				covlist = clusterApplyLB(cl, rangeset, .ramwas4PCAjob, param = param, cvrtqr = cvrtqr, rowsubset = rowsubset);
+				covlist = clusterApplyLB(cl, 
+				                         rangeset, 
+				                         .ramwas4PCAjob, 
+				                         param = param, 
+				                         cvrtqr = cvrtqr, 
+				                         rowsubset = rowsubset);
 				covmat = Reduce(f = `+`, x = covlist);
 				stopCluster(cl);
 				rm(cl, rng, rangeset, covlist);
 				.file.remove(param$lockfile2);
 			} else {
-				covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), param, cvrtqr, rowsubset);
+				covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), 
+				                         param, 
+				                         cvrtqr, 
+				                         rowsubset);
 			}
 			cat(file = paste0(param$dirpca,"/Log.txt"), 
-				 date(), ", Done running Principal Component Analysis.", "\n", sep = "", append = TRUE);
+				 date(), ", Done running Principal Component Analysis.", "\n", 
+				 sep = "", append = TRUE);
 			
-			saveRDS(file = paste0(param$dirpca,"/covmat.rds"), object = covmat, compress = FALSE);
+			saveRDS(file = paste0(param$dirpca,"/covmat.rds"), 
+			        object = covmat, 
+			        compress = FALSE);
 			# covmat = readRDS(paste0(param$dirpca,"/covmat.rds"));
 		} # covmat
 		
@@ -125,8 +145,11 @@ ramwas4PCA = function( param ){
 		{
 			message("Performing Eigenvalue Decomposition");
 			e = eigen(covmat, symmetric=TRUE);
-			nonzeroPCs = sum(abs(e$values/e$values[1]) > length(e$values)*.Machine$double.eps);
-			saveRDS(file = paste0(param$dirpca,"/eigen.rds"), object = e, compress = FALSE);
+			nonzeroPCs = sum(abs(e$values/e$values[1]) > 
+			                     length(e$values)*.Machine$double.eps);
+			saveRDS(file = paste0(param$dirpca,"/eigen.rds"), 
+			        object = e, 
+			        compress = FALSE);
 			# e = readRDS(paste0(param$dirpca,"/eigen.rds"));
 		} # e, nonzeroPCs
 		
@@ -140,8 +163,14 @@ ramwas4PCA = function( param ){
 				  yaxs = "i", ylim = c(0,pc100[1]*1.05), 
 				  xaxs = "i", xlim = c(0, length(pc100)+0.5))
 			for( i in 1:min(20,nonzeroPCs) ) { # i=1
-				plot(e$vectors[,i], main=paste("PC",i), xlab = "Samples", ylab = "PC components", pch=19, col="blue1",
-					  xlim = c(0, length(e$values)+0.5), xaxs="i");
+				plot(e$vectors[,i], 
+				     main=paste("PC",i), 
+				     xlab = "Samples", 
+				     ylab = "PC components", 
+				     pch=19, 
+				     col="blue1",
+					 xlim = c(0, length(e$values)+0.5), 
+					 xaxs="i");
 				abline(h = 0, col = "grey")
 			}
 			dev.off();
@@ -154,34 +183,37 @@ ramwas4PCA = function( param ){
 			rownames(PC_loads) = cvsamples;
 			colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
 			write.table(file = paste0(param$dirpca, "/PC_loadings.txt"), 
-							x = data.frame(name=rownames(PC_loads),PC_loads), sep="\t", row.names = FALSE);
-			PC_values = data.frame(PC_num = paste0("PC",seq_len(length(e$values))), e$values/sum(e$values))
+						x = data.frame(name=rownames(PC_loads),PC_loads), 
+						sep="\t", 
+						row.names = FALSE);
+			PC_values = data.frame(
+    			    PC_num = paste0("PC",seq_len(length(e$values))), 
+    			    e$values/sum(e$values));
 			write.table(file = paste0(param$dirpca, "/PC_values.txt"),
-							x = data.frame(PC_num = paste0("PC",seq_len(length(e$values))),
-												var_explained = e$values/sum(e$values)),
-							sep="\t", row.names = FALSE, quote = FALSE);
+						x = PC_values,
+						sep="\t", 
+						row.names = FALSE, 
+						quote = FALSE);
 		}
 		
 		# Saving PC vs. covariates association
 		if(ncol(param$covariates) > 1) {
 			message("Saving PC vs. covariates associations");
-			# cvrtqrconst = matrix(1/sqrt(length(e$values)),nrow = 1, ncol = length(e$values));
-			# testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqrconst);
-			# write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_corr.txt"), 
-			# 				x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
-			# 				sep="\t", row.names = FALSE);
-			# write.table(file = paste0(param$dirpca, "/PC_vs_covariates_direct_pvalue.txt"), 
-			# 				x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
-			# 				sep="\t", row.names = FALSE);
-			# # if( length(param$modelcovariates) > 0) {
-			testcov = .testCovariates(covariates1 = param$covariates[-1], data = e$vectors[,seq_len(nonzeroPCs)], cvrtqr = cvrtqr);
-			write.table(file = paste0(param$dirpca, "/PC_vs_covariates_corr.txt"), 
-							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$crF, check.names = FALSE),
+			testcov = .testCovariates(covariates1 = param$covariates[-1], 
+			                          data = e$vectors[,seq_len(nonzeroPCs)], 
+			                          cvrtqr = cvrtqr);
+			write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"), 
+							x = data.frame(
+							    name=paste0("PC",seq_len(nonzeroPCs)), 
+							    testcov$crF, 
+							    check.names = FALSE),
 							sep="\t", row.names = FALSE);
-			write.table(file = paste0(param$dirpca, "/PC_vs_covariates_pvalue.txt"), 
-							x = data.frame(name=paste0("PC",seq_len(nonzeroPCs)), testcov$pv, check.names = FALSE),
+			write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"), 
+							x = data.frame(
+							    name=paste0("PC",seq_len(nonzeroPCs)), 
+							    testcov$pv, 
+							    check.names = FALSE),
 							sep="\t", row.names = FALSE);
-			# }
 		}
 	}
 }
@@ -226,15 +258,15 @@ ramwasPCsCovariateSelection = function(param){
 			pc = e$vectors[,i, drop=FALSE];
 			
 			message("Testing PC",i," vs. covariates");
-			testPhenotype( phenotype = ann[[2]], data = pc, cvrtqr = t(cvtrqr) )
+			# testPhenotype(phenotype = ann[[2]], data = pc, cvrtqr = t(cvtrqr))
 			
-			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], testPhenotype, data=pc, cvrtqr=t(cvtrqr)), `[`, 1:3), unlist))
-			# options(warn=2)
-			# for( j in seq_along(ann[-1])) { # j=1
-			# 	cat('j',j,'\n');
-			# 		show( unlist(testPhenotype(phenotype = ann[[j+1]], data=pc, cvrtqr=t(cvtrqr))))
-			# 	# show(warnings())
-			# }
+			testslist[[i]] = t(sapply( lapply( lapply( ann[-1], 
+			                                           testPhenotype, 
+			                                           data=pc, 
+			                                           cvrtqr=t(cvtrqr)), 
+			                                   `[`, 
+			                                   1:3), 
+			                           unlist));
 		}
 		tstatsabs = lapply(testslist, function(x)abs(x[,3]))
 		tstatsabs = do.call(pmin, tstatsabs);
@@ -244,12 +276,15 @@ ramwasPCsCovariateSelection = function(param){
 		pvalues = lapply(testslist, function(x)abs(x[ord,3]))
 		names(pvalues) = paste0("PC",seq_len(param$covselpcs), "_pvalues");
 		
-		tests = data.frame( covariates = rownames(testslist[[1]])[ord], pvalues);
+		tests = data.frame( covariates = rownames(testslist[[1]])[ord], 
+		                    pvalues);
 		# tests = tests[order(tests[,3], -abs(tests[,2])), ];
 		# tests = data.frame(covariates = rownames(tests), tests);
 		rownames(tests) = NULL;
-		cat("\n");
-		cat(paste0("Covariates Included: \n ", paste(covset, collapse = ",")), "\n");
+		cat("\n",
+		    paste0("Covariates Included: \n ", 
+		           paste(covset, collapse = ",")), 
+		    "\n");
 		print(head(tests,15));
 		
 		cat("\n");

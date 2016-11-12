@@ -29,9 +29,6 @@ Ramwas provides a full set of tools for
 	
 	Maintainer: Andrey Shabalin <ashabalin@vcu.edu>
 }
-\references{
-	.%The package website: \url{http://www.bios.unc.edu/research/genomic_software/Matrix_eQTL/}
-}
 \keyword{ package }
 \keyword{ ramwas }
 \keyword{ RaMWAS }

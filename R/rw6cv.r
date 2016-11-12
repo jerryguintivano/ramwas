@@ -5,15 +5,20 @@ ramwas6crossValidation = function(param) {
 	param$toppvthreshold = 1e-300;
 	dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
 	parameterDump(dir = param$dircv, param = param,
-					  toplines = c("dircv", "mmncpgs", "mmalpha", "cvnfolds","randseed",
-					  				 "dirmwas", "dirpca", "dircoveragenorm",
-					  				 "filecovariates", "covariates",
-					  				 "modeloutcome", "modelcovariates", "modelPCs",
-					  				 "qqplottitle",
-					  				 "cputhreads"));
+					  toplines = c("dircv", "mmncpgs", "mmalpha", 
+					               "cvnfolds","randseed",
+    				  				"dirmwas", "dirpca", "dircoveragenorm",
+    				  				"filecovariates", "covariates",
+    				  				"modeloutcome", "modelcovariates", 
+    				  				"modelPCs",
+    				  				"qqplottitle",
+    				  				"cputhreads"));
 	
 	if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-		param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+		param$covariates = data.frame(lapply( 
+		    param$covariates, 
+		    `[`, 
+		    !is.na(param$covariates[[ param$modeloutcome ]])));
 	}
 	nms = param$covariates[[1]];
 	nsamples = length(nms);
@@ -38,7 +43,8 @@ ramwas6crossValidation = function(param) {
 		param2$covariates[[ param$modeloutcome ]][exclude] = NA;
 		
 		ramwas5MWAS(param2);
-		saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"), object = exclude);
+		saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"), 
+		         object = exclude);
 	}
 }
 
@@ -59,10 +65,23 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
     MAD = median( abs(outcome - forecast) )
     # z = summary(lm(outcome ~ forecast)); z$coefficients[2,4]
     
-    plot( outcome, forecast, pch = 19, col = "blue", xlab = param$modeloutcome, ylab = "CV prediction",
-          xlim = rng, ylim = rng,
-          main = sprintf("%s\nRMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\nR2 = %.3f / %.3f, p-value = %.1e / %.1e",
-                         main, MSE, MAD, c1, c2, c1p^2, c2p^2, tt2pv(cor2tt(c1p)), tt2pv(cor2tt(c2p)))
+    plot( outcome, 
+          forecast, 
+          pch = 19, 
+          col = "blue", 
+          xlab = param$modeloutcome, 
+          ylab = "CV prediction",
+          xlim = rng, 
+          ylim = rng,
+          main = sprintf(paste0(
+              "%s\n",
+              "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
+              "R2 = %.3f / %.3f, p-value = %.1e / %.1e"),
+            main, MSE, MAD, 
+            c1, c2, c1p^2, 
+            c2p^2, 
+            tt2pv(cor2tt(c1p)), 
+            tt2pv(cor2tt(c2p)))
     );
     legend(x = "bottomright", 
            legend = c(paste0("# CpGs = ",   param$mmncpgs), 
@@ -80,7 +99,10 @@ ramwas7multiMarker = function(param){
     message("Working in: ",param$dircv);
     {
         if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-            param$covariates = data.frame(lapply( param$covariates, `[`, !is.na(param$covariates[[ param$modeloutcome ]])));
+            param$covariates = data.frame(lapply( 
+                param$covariates, 
+                `[`, 
+                !is.na(param$covariates[[ param$modeloutcome ]])));
         } 
     } # remove samples with NA's in outcome
     {
@@ -178,14 +200,21 @@ ramwas7multiMarker = function(param){
                          outcome = outcome,
                          forecast = forecast0[1,]/forecast0[2,]
         )
-        write.table( file = sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
-                                    param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha),
+        write.table( file = sprintf(
+            "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt", 
+            param$dircv, 
+            param$cvnfolds, 
+            param$mmncpgs, 
+            param$mmalpha),
                      x = rez,
                      sep = "\t", row.names = FALSE);
     } # rez
     {
         pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf", 
-                     param$dircv, param$cvnfolds, param$mmncpgs, param$mmalpha) );
+                     param$dircv, 
+                     param$cvnfolds, 
+                     param$mmncpgs, 
+                     param$mmalpha) );
         plotPrediction(param, outcome, rez$forecast, 
                        main = "Prediction success (EN on coverage)");
         dev.off();

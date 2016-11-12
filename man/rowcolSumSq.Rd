@@ -5,8 +5,9 @@
 Form Row and Column Sums of Squares
 }
 \description{
-Form row and column sums of squares for numeric matrices. % Complement functions \code{\link[base]{rowSums}} and \code{\link[base]{colSums}}.
-The functions are introduced as faster analogs of \code{rowSums(x^2)} and \code{colSums(x^2)} calls.
+Form row and column sums of squares for numeric matrices. 
+The functions are introduced as faster analogs of 
+\code{rowSums(x^2)} and \code{colSums(x^2)} calls.
 }
 \usage{
 rowSumsSq(x)
@@ -20,13 +21,15 @@ colSumsSq(x)
 	The function is implemented in C for better performance.
 }
 \value{
-	Return a vector of sums of values in each row/column for matrix \code{x} (\code{rowSumsSq}/\code{colSumsSq}).
+	Return a vector of sums of values in each row/column for matrix 
+	\code{x} (\code{rowSumsSq}/\code{colSumsSq}).
 }
 \author{
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-	See \code{\link[base]{rowSums}} and \code{\link[base]{colSums}} for simple (not squared) row/column sums.
+	See \code{\link[base]{rowSums}} and \code{\link[base]{colSums}} 
+	for simple (not squared) row/column sums.
 }
 \examples{
 x = matrix( 1:99, 9, 11)

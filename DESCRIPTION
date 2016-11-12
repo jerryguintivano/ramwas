@@ -12,7 +12,8 @@ Description: RaMWAS provides a full set of tools for
     creation of coverage matrix,
     principal component analysis for capturing batch effects and 
     accounting for cell composition differences, 
-    association analysis with respect to phenotypes of interest correcting for PCs and known covariates,
+    association analysis with respect to phenotypes of 
+    interest correcting for PCs and known covariates,
     and multi-marker analysis using elastic net.
 BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
@@ -24,6 +25,8 @@ Suggests: knitr, rmarkdown, BiocStyle,
         SNPlocs.Hsapiens.dbSNP144.GRCh37,
         BSgenome.Ecoli.NCBI.20080805
 Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, 
-        KernSmooth, digest, glmnet, grDevices, utils, biomaRt, Biostrings, BiocGenerics
+        KernSmooth, digest, glmnet, grDevices, utils, 
+        biomaRt, Biostrings, BiocGenerics
 biocViews: DNAMethylation, Sequencing, QualityControl, Coverage, Preprocessing, 
-        Normalization, BatchEffect, PrincipalComponent, DifferentialMethylation, Visualization
+        Normalization, BatchEffect, PrincipalComponent, 
+        DifferentialMethylation, Visualization

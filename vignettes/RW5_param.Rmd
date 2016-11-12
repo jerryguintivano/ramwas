@@ -12,7 +12,8 @@ vignette: >
 
 # Initialize RaMWAS Parameters
 
-There are several ways to initialize the parameters for calling any RaMWAS pipeline function.
+There are several ways to initialize the parameters 
+for calling any RaMWAS pipeline function.
 The parameters can be stored in an R list like this:
 
 ```{r eval=FALSE}
@@ -36,7 +37,8 @@ param = list(
 );
 ```
 
-Alternatively, the parameters can be set in a separate R code file, which is processed into a list as above by `parametersFromFile` function.
+Alternatively, the parameters can be set in a separate R code file, 
+which is processed into a list as above by `parametersFromFile` function.
 The R code file can contain lines like this:
 
 ```{r eval=FALSE}
@@ -63,7 +65,9 @@ if(.Platform$OS.type == "windows") {
 
 ### File with BAM names
 
-Parameter 'filebamlist', if defined, must point to a text file with one BAM file name per line. BAM file names can contain path, relative or absolute.
+Parameter 'filebamlist', if defined, must point to a text file 
+with one BAM file name per line. BAM file names can contain path, 
+relative or absolute.
 Such file may looks like this.
 ```{r eval=FALSE}
 batch1/b1sample1.bam
@@ -75,7 +79,8 @@ batch4/sample4.bam
 ```
 
 This file is then loaded into `bamnames` parameter.
-Note that BAM names must be all different. Namely, such list of BAMS is **NOT** allowed:
+Note that BAM names must be all different. 
+Namely, such list of BAMS is **NOT** allowed:
 ```{r eval=FALSE}
 batch1/sample1.bam
 batch1/sample2.bam
@@ -86,8 +91,11 @@ batch2/sample2.bam
 
 ### File with CpG locations
 
-RaMWAS calculates coverage at a prepared set of CpG locations. The set depends on the reference genome and usually includes CpGs created by common SNPs.
-The set of CpGs is stored as a `list` with one sorted vector of CpG locations per chromosome.
+RaMWAS calculates coverage at a prepared set of CpG locations. 
+The set depends on the reference genome and 
+usually includes CpGs created by common SNPs.
+The set of CpGs is stored as a `list` with 
+one sorted vector of CpG locations per chromosome.
 
 ```{r CpGsetExample}
 cpgset = list( chr1 = c(12L, 57L, 123L),
@@ -95,28 +103,37 @@ cpgset = list( chr1 = c(12L, 57L, 123L),
                chr3 = c(22L, 40L, 199L, 211L) );
 ```
 
-Parameter `filecpgset` must be a file storing a set of CpG, in the format described above, saved using `saveRDS` function.
-Similarly, parameter `filenoncpgset`, if defined, must point to a file storing 'good' locations away from any CpGs. Here, good means not heaving major alignment issues (like a middle of centromere.
+Parameter `filecpgset` must be a file storing a set of CpG, 
+in the format described above, saved using `saveRDS` function.
+Similarly, parameter `filenoncpgset`, if defined, 
+must point to a file storing 'good' locations away from any CpGs. 
+Here, good means not heaving major alignment issues 
+(like a middle of centromere).
 
 ### File with bam 2 sample matching information
 
-Parameter `filebam2sample` must point to a file with information which samples correspont to which BAMs.
+Parameter `filebam2sample` must point to a file with 
+information which samples correspont to which BAMs.
 
-The file here defines samples `sample1`, `sample2`, and `sample3`. Sample1 is assigned reads from bams `b1sample1` and `b2sample1`.
+The file here defines samples `sample1`, `sample2`, and `sample3`. 
+Sample1 is assigned reads from bams `b1sample1` and `b2sample1`.
 ```{r eval=FALSE}
 sample1=b1sample1,b2sample1
 sample2=b1sample2,b2sample2
 sample3=b2sample3
 sample4
 ```
-If a sample has only one BAM and the BAM has the same name as the sample, the corresponding line can contain just that name (see `sample4` above).
+If a sample has only one BAM and the BAM has the same name as the sample, 
+the corresponding line can contain just that name (see `sample4` above).
 
 The `filebam2sample` file is scanned into `bam2sample` parameter.
 
 ### File with covariates
 
-The parameter `filecovariates`, if defined, must point to a text file which can be read with `read.table`.
-If the file has extension ".csv", it is assumed to be comma separated, otherwise - tab separated.
+The parameter `filecovariates`, if defined, 
+must point to a text file which can be read with `read.table`.
+If the file has extension ".csv", it is assumed to be comma separated, 
+otherwise - tab separated.
 
 The file `filecovariates` is read into `covariates` parameter.
 

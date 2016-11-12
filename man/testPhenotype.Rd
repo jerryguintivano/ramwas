@@ -5,7 +5,8 @@
 }
 \description{
 	An internal, low-level function for fast association testing.
-	It tests the phenotype of interest for Association with Methylation Coverage.
+	It tests the phenotype of interest for 
+	association with methylation coverage.
 }
 \usage{
 testPhenotype(phenotype, data, cvrtqr)
@@ -18,15 +19,18 @@ testPhenotype(phenotype, data, cvrtqr)
   	Matrix with normalized coverage, one CpG per column.
 }
   \item{cvrtqr}{
-    Orthonormalized covariates (transposed). See \code{\link{orthonormalizeCovariates}}.
+    Orthonormalized covariates (transposed). 
+    See \code{\link{orthonormalizeCovariates}}.
 }
 }
 \details{
-	The testing is performed in a fast way, using an approach similar to that in \pkg{MatrixEQTL}.
+	The testing is performed in a fast way, 
+	using an approach similar to that in \pkg{MatrixEQTL}.
 }
 \value{
 	If the phenotype is numerical, the output is a list with
-	\item{correlation}{Correlations between residualized phenotype and data columns.}
+	\item{correlation}{Correlations between residualized phenotype and 
+	  data columns.}
 	\item{tstat}{Corresponding T-statistics}
 	\item{pvalue}{Corresponding P-values}
 	\item{nVarTested}{Always 1}
@@ -36,7 +40,8 @@ testPhenotype(phenotype, data, cvrtqr)
 	\item{Rsquared}{R-squared for the residualized ANOVA F-test.}
 	\item{Fstat}{Corresponding F-test}
 	\item{pvalue}{Corresponding P-values}
-	\item{nVarTested}{First number of degrees of freedom of the F-test. Equal to the number of factor levels reduced by 1}
+	\item{nVarTested}{First number of degrees of freedom of the F-test.
+	  Equal to the number of factor levels reduced by 1}
 	\item{dfFull}{Second number of degrees of freedom of the F-test.}
 }
 \author{

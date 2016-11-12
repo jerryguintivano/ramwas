@@ -51,9 +51,13 @@ GRCm38.p5 | [22.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpG
 
 Table: CpG sets for mouse genome.
 
-Note: SNPs were obtained from the 1000 Genomes super populations (Phase 3 data, [more info](http://www.internationalgenome.org/category/population/)). 
+Note: SNPs were obtained from the 1000 Genomes super populations 
+(Phase 3 data, 
+[more info](http://www.internationalgenome.org/category/population/)). 
 Only SNPs with minor allele frequency above 1% are included. 
-In silico alignment experiments assumed 75 bp single-end reads and alignment with [Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
+In silico alignment experiments assumed 75 bp single-end reads and 
+alignment with 
+[Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
 
 ## CpG filtering by in-silico alignment experiment {#insilico}
 
@@ -70,7 +74,8 @@ each CpG would have coverage of exactly 75.
 We allowed for +/-10 deviation, namely 
 we excluded all CpG with coverage below 65 or above 85, 
 which was about 2% of all CpGs for human genomes and 4% for mouse.
-The remaining CpGs formed the CpG sets in the "with\ QC" columns in the tables above.
+The remaining CpGs formed the CpG sets in 
+the "with\ QC" columns in the tables above.
 
 We used Bowtie 2 aligner version 2.2.9 with default settings.
 
@@ -78,9 +83,12 @@ We used Bowtie 2 aligner version 2.2.9 with default settings.
 
 ## Constructing a CpG set for a reference genome
 
-A CpG set can be constructed quickly from a reference genome with the `getCpGsetCG` function.
-The functions can use any genome available in Bioconductor as `BSGenome` class.
-Additional genomes can be loaded using `readDNAStringSet` function from .fa files.
+A CpG set can be constructed quickly from 
+a reference genome with the `getCpGsetCG` function.
+The functions can use any genome available 
+in Bioconductor as `BSGenome` class.
+Additional genomes can be loaded using 
+`readDNAStringSet` function from .fa files.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
 suppressPackageStartupMessages(library(ramwas))
@@ -95,9 +103,13 @@ cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
 print(cpgset$NC_008253[1:10])
 ```
 
-For a genome with injected SNPs, we provide the function `getCpGsetALL` for also finding CpGs that can be created by injected SNPs.
-The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome.
-We do NOT advice using all dbSNP144 SNPs, as it causes an large number of CpGs that almost never occur in the population.
+For a genome with injected SNPs, 
+we provide the function `getCpGsetALL` 
+for also finding CpGs that can be created by injected SNPs.
+The example below uses all SNPs from dbSNP144 for 
+selecting CpGs in human genome.
+We do NOT advice using all dbSNP144 SNPs, 
+as it causes an large number of CpGs that almost never occur in the population.
 
 ```{r getCpGsetALL1, eval=FALSE, warning=FALSE, message=FALSE}
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -127,7 +139,8 @@ command `--counts`, e.g.:
 
 > `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
 
-The generated allele count file can then be used to inject SNPs using the function `injectSNPsMAF`.
+The generated allele count file can then be used to 
+inject SNPs using the function `injectSNPsMAF`.
 
 ```{r getCpGsetALL2, eval=FALSE}
 # Do for all chromosomes
@@ -141,7 +154,8 @@ genome[['chr22']] =
 cpgset = getCpGsetALL(genome)
 ```
 
-Once a CpG set is generated, it can be saved with `saveRDS` function for use by RaMWAS.
+Once a CpG set is generated, it can be saved with 
+`saveRDS` function for use by RaMWAS.
 
 ```{r save1, eval=FALSE}
 saveRDS(file = 'My_cpgset.rds', object = cpgset)
@@ -170,9 +184,11 @@ insilicoFASTQ(
 The generated FASTQ files are then aligned to the reference genome.
 Taking Bowtie2 as an example:
 
-> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam`
+> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U 
+chr1.fastq.gz | samtools view -bS -o chr1.bam`
 
-The generated BAMs are then scanned with RaMWAS and the coverage for one sample combining all the BAMs is calculated:
+The generated BAMs are then scanned with RaMWAS and 
+the coverage for one sample combining all the BAMs is calculated:
 
 ```{r RaMWAS, eval=FALSE}
 library(ramwas)
@@ -225,7 +241,8 @@ for( i in seq_along(cpgset) ){
 }
 ```
 
-Once the desired CpG set is generated, it can be saved with `saveRDS` function for use by RaMWAS.
+Once the desired CpG set is generated, 
+it can be saved with `saveRDS` function for use by RaMWAS.
 
 ```{r save2, eval=FALSE}
 saveRDS(file = 'My_cpgset_QC.rds', object = cpgsetQC)

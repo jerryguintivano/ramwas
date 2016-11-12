@@ -4,15 +4,16 @@
 	Save Parameters in a Text File
 }
 \description{
-	Saves parameters in a text file, prioritizing those listed in \code{toplines}.
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+	Saves parameters in a text file, 
+	prioritizing those listed in \code{toplines}.
 }
 \usage{
 parameterDump(dir, param, toplines = NULL)
 }
 \arguments{
   \item{dir}{
-    Directory to save the parameters to. The file is named \code{"UsedSettings.txt"}.
+    Directory to save the parameters to. 
+    The file is named \code{"UsedSettings.txt"}.
   }
   \item{param}{
     A list with RaMWAS parameters. Or any list in general.
@@ -22,7 +23,8 @@ parameterDump(dir, param, toplines = NULL)
   }
 }
 \details{
-  This function is used internally by multiple pipeline function to record parameters used to run the analysis.
+  This function is used internally by multiple RaMWAS 
+  functions to record parameters used to run the analysis.
 }
 \author{
 	Andrey A Shabalin \email{ashabalin@vcu.edu}

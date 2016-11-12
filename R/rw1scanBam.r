@@ -30,7 +30,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
         
         ### Put tags in the main list
         bb = c(bb[names(bb) != "tag"], bb$tag);
-        # data.frame(lapply(bb,`[`, 1:60), check.rows = FALSE, stringsAsFactors = FALSE)
+        # data.frame(lapply(bb,`[`, 1:60), check.rows = FALSE)
         
         # stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
         
@@ -63,16 +63,22 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
         }
         
         if(length(bb[[1]])==0) {
-            message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
+            message(sprintf("Recorded %.f of %.f reads", 
+                            qc$reads.recorded,qc$reads.total));
             next;
         }
         
-        bb$matchedAlongQuerySpace = cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
+        bb$matchedAlongQuerySpace = 
+            cigarWidthAlongQuerySpace(bb$cigar,after.soft.clipping = TRUE);
         
-        qc$reads.aligned = qc$reads.aligned %add% length(bb[[1]]);
-        qc$bf.hist.score1 = qc$bf.hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
-        qc$bf.hist.edit.dist1 = qc$bf.hist.edit.dist1 %add% tabulate(bb$NM+1L);
-        qc$bf.hist.length.matched = qc$bf.hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
+        qc$reads.aligned = 
+            qc$reads.aligned %add% length(bb[[1]]);
+        qc$bf.hist.score1 = 
+            qc$bf.hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
+        qc$bf.hist.edit.dist1 = 
+            qc$bf.hist.edit.dist1 %add% tabulate(bb$NM+1L);
+        qc$bf.hist.length.matched = 
+            qc$bf.hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
         
         ### Keep score >= minscore
         if( !is.null(minscore) ) {
@@ -84,10 +90,14 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
             rm(keep);
         }
         
-        qc$reads.recorded = qc$reads.recorded %add% length(bb[[1]]);
-        qc$hist.score1 = qc$hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
-        qc$hist.edit.dist1 = qc$hist.edit.dist1 %add% tabulate(bb$NM+1L);
-        qc$hist.length.matched = qc$hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
+        qc$reads.recorded = 
+            qc$reads.recorded %add% length(bb[[1]]);
+        qc$hist.score1 = 
+            qc$hist.score1 %add% tabulate(pmax(bb[[scoretag]]+1L,1L));
+        qc$hist.edit.dist1 = 
+            qc$hist.edit.dist1 %add% tabulate(bb$NM+1L);
+        qc$hist.length.matched = 
+            qc$hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
         
         ### Forward vs. Reverse strand
         bb$isReverse = bitwAnd(bb$flag, 0x10) > 0;
@@ -106,21 +116,25 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
         {
             offset = length(startlistfwd);
             split.levels = as.integer(bb$rname) + offset*bb$isReverse;
-            levels(split.levels) = c(names(startlistfwd),paste0(names(startlistfwd),"-"));
+            levels(split.levels) = c(names(startlistfwd),
+                                     paste0(names(startlistfwd),"-"));
             class(split.levels) = "factor";
             splt = split( bb$startpos, split.levels, drop = FALSE);
             # print(sapply(splt,length))
             for( i in seq_along(startlistfwd) ) {
                 if( length(splt[i]) > 0 ) {
-                    startlistfwd[[i]][[length(startlistfwd[[i]])+1L]] = splt[[i]];
+                    startlistfwd[[i]][[length(startlistfwd[[i]])+1L]] = 
+                        splt[[i]];
                 }
                 if( length(splt[i+offset]) > 0 ) {
-                    startlistrev[[i]][[length(startlistrev[[i]])+1L]] = splt[[i+offset]];
+                    startlistrev[[i]][[length(startlistrev[[i]])+1L]] = 
+                        splt[[i+offset]];
                 }
             }
             rm(offset, split.levels, splt);
         } # startlistfwd, startlistrev	
-        message(sprintf("Recorded %.f of %.f reads", qc$reads.recorded,qc$reads.total));
+        message(sprintf("Recorded %.f of %.f reads", 
+                        qc$reads.recorded,qc$reads.total));
     }
     close(bf);
     rm(bf); # , oldtail
@@ -135,16 +149,29 @@ bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
     }		
     gc();
     
-    if( !is.null(qc$hist.score1))						class(qc$hist.score1) = "qcHistScore";
-    if( !is.null(qc$bf.hist.score1))			 		class(qc$bf.hist.score1) = "qcHistScoreBF";
-    if( !is.null(qc$hist.edit.dist1))					class(qc$hist.edit.dist1) = "qcEditDist";
-    if( !is.null(qc$bf.hist.edit.dist1))				class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
-    if( !is.null(qc$hist.length.matched))				class(qc$hist.length.matched) = "qcLengthMatched";
-    if( !is.null(qc$bf.hist.length.matched))			class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
-    if( !is.null(qc$frwrev) ) 							class(qc$frwrev) = "qcFrwrev";
+    if( !is.null(qc$hist.score1))						
+        class(qc$hist.score1) = "qcHistScore";
+    if( !is.null(qc$bf.hist.score1))			 		
+        class(qc$bf.hist.score1) = "qcHistScoreBF";
+    if( !is.null(qc$hist.edit.dist1))					
+        class(qc$hist.edit.dist1) = "qcEditDist";
+    if( !is.null(qc$bf.hist.edit.dist1))				
+        class(qc$bf.hist.edit.dist1) = "qcEditDistBF";
+    if( !is.null(qc$hist.length.matched))				
+        class(qc$hist.length.matched) = "qcLengthMatched";
+    if( !is.null(qc$bf.hist.length.matched))			
+        class(qc$bf.hist.length.matched) = "qcLengthMatchedBF";
+    if( !is.null(qc$frwrev) ) 							
+        class(qc$frwrev) = "qcFrwrev";
     
-    info = list(bamname = bamfilename, scoretag = scoretag, minscore = minscore, filesize = file.size(bamfilename));
-    rbam = list(startsfwd = startsfwd, startsrev = startsrev, qc = qc, info = info);
+    info = list(bamname = bamfilename, 
+                scoretag = scoretag, 
+                minscore = minscore, 
+                filesize = file.size(bamfilename));
+    rbam = list(startsfwd = startsfwd, 
+                startsrev = startsrev, 
+                qc = qc, 
+                info = info);
     return( rbam );
 }
 
@@ -179,7 +206,9 @@ pipelineProcessBam = function(bamname, param){
 	} else {
 		if( !file.exists( bamfullname ) )
 			return(paste0("Bam file does not exist: ",bamfullname));
-		rbam = bam.scanBamFile(bamfilename = bamfullname, scoretag = param$scoretag, minscore = param$minscore);
+		rbam = bam.scanBamFile(bamfilename = bamfullname, 
+		                       scoretag = param$scoretag, 
+		                       minscore = param$minscore);
 	}
 	
 	rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
@@ -189,11 +218,19 @@ pipelineProcessBam = function(bamname, param){
 	if( !is.null(param$filecpgset) ) {
 		cpgset = cachedRDSload(param$filecpgset);
 		noncpgset = cachedRDSload(param$filenoncpgset);
-		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, distance = param$maxfragmentsize);
-		rbam3 = bam.hist.isolated.distances(rbam = rbam2, isocpgset = isocpgset, distance = param$maxfragmentsize);
-		rbam4 = bam.coverage.by.density(rbam = rbam3, cpgset = cpgset, noncpgset = noncpgset,
-												  minfragmentsize = param$minfragmentsize, maxfragmentsize = param$maxfragmentsize);
-		rbam5 = bam.count.nonCpG.reads(rbam = rbam4, cpgset = cpgset, distance = param$maxfragmentsize);
+		isocpgset = isocpgSitesFromCpGset(cpgset = cpgset, 
+		                                  distance = param$maxfragmentsize);
+		rbam3 = bam.hist.isolated.distances(rbam = rbam2, 
+		                                    isocpgset = isocpgset, 
+		                                    distance = param$maxfragmentsize);
+		rbam4 = bam.coverage.by.density(rbam = rbam3, 
+		                                cpgset = cpgset, 
+		                                noncpgset = noncpgset,
+									    minfragmentsize = param$minfragmentsize, 
+									    maxfragmentsize = param$maxfragmentsize)
+		rbam5 = bam.count.nonCpG.reads(rbam = rbam4, 
+		                               cpgset = cpgset, 
+		                               distance = param$maxfragmentsize);
 		
 		### QC plots
 		pipelineSaveQCplots(param, rbam5, bamname);
@@ -201,7 +238,8 @@ pipelineProcessBam = function(bamname, param){
 	} else {
 		rbam5 = rbam2;
 	}
-	# .qc qcmean(rbam5$qc$chrX.count)  rbam5$qc$chrX.count[1]/rbam5$qc$chrX.count[2]
+	# .qc qcmean(rbam5$qc$chrX.count)  
+	# rbam5$qc$chrX.count[1]/rbam5$qc$chrX.count[2]
 	# message(.qcTextLine(rbam5$qc, bamname))
 	
 	if(savebam)
@@ -217,7 +255,9 @@ pipelineProcessBam = function(bamname, param){
 # Parallel job function
 .ramwas1scanBamJob = function(bamname, param){
 	cat(file = paste0(param$dirfilter,"/Log.txt"),
-		 date(), ", Process ", Sys.getpid(),", Processing BAM: ", bamname, "\n", sep = "", append = TRUE);
+		 date(), ", Process ", Sys.getpid(),
+		 ", Processing BAM: ", bamname, "\n", 
+		 sep = "", append = TRUE);
 	pipelineProcessBam(bamname = bamname, param = param);
 }
 
@@ -231,13 +271,17 @@ ramwas1scanBams = function( param ){
 		 date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
 	if( param$cputhreads > 1) {
 		cl = makeCluster(param$cputhreads);
-		z = clusterApplyLB(cl, param$bamnames, .ramwas1scanBamJob, param = param); #[1:64]
+		z = clusterApplyLB(cl, 
+		                   param$bamnames, 
+		                   .ramwas1scanBamJob, 
+		                   param = param); #[1:64]
 		stopCluster(cl);
 	} else {
 		z = character(length(param$bamnames));
 		names(z) = param$bamnames;
 		for(i in seq_along(param$bamnames)) { # i=1
-			z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i], param = param);
+			z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i], 
+			                          param = param);
 		}
 	}
 	cat(file = paste0(param$dirfilter,"/Log.txt"), 

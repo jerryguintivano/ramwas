@@ -55,15 +55,16 @@ parametersFromFile = function( .parameterfile ){
 
 # Transform bam2sample file into a list
 parseBam2sample = function( lines ){
-	# remove trailing commas, .bam at name ends, spaces around commas and "=", and trailing spaces
-	lines = gsub(pattern = ",$", replacement = "", lines);
-	lines = gsub(pattern = "\\.bam,", replacement = ",", lines, ignore.case = TRUE);
-	lines = gsub(pattern = "\\.bam$", replacement = "",  lines, ignore.case = TRUE);
-	lines = gsub(pattern = " $", replacement = "",  lines);
-	lines = gsub(pattern = " ,", replacement = ",", lines, ignore.case = TRUE);
-	lines = gsub(pattern = ", ", replacement = ",",  lines, ignore.case = TRUE);
-	lines = gsub(pattern = " =", replacement = "=", lines, ignore.case = TRUE);
-	lines = gsub(pattern = "= ", replacement = "=",  lines, ignore.case = TRUE);
+	# remove trailing commas, .bam at name ends, 
+    # spaces around commas and "=", and trailing spaces
+	lines = gsub(",$", "",       lines);
+	lines = gsub("\\.bam,", ",", lines, ignore.case = TRUE);
+	lines = gsub("\\.bam$", "",  lines, ignore.case = TRUE);
+	lines = gsub(" $", "",       lines);
+	lines = gsub(" ,", ",",      lines, ignore.case = TRUE);
+	lines = gsub(", ", ",",      lines, ignore.case = TRUE);
+	lines = gsub(" =", "=",      lines, ignore.case = TRUE);
+	lines = gsub("= ", "=",      lines, ignore.case = TRUE);
 	
 	split.eq = strsplit(lines, split = "=", fixed = TRUE);
 	samplenames = sapply(split.eq, `[`, 1);
@@ -78,7 +79,7 @@ parseBam2sample = function( lines ){
 processCommandLine = function(.arg = NULL){
 	if( is.null(.arg))
 		.arg=commandArgs(TRUE);
-	# .arg = c("fileparam=\"D:/RW/CELL/param_file.txt\"","extraparameter=123123123")
+	# .arg = c("fileparam=\"D:/RW/CELL/param_file.txt\"","ext=123123123")
 	if( length(.arg)==0 ) {
 		message("No arguments supplied"); 
 	} else {
@@ -105,14 +106,16 @@ parameterPreprocess = function( param ){
 	
 	# Set up directories 
 	if( is.null(param$dirproject) ) param$dirproject = getwd();
-	if(!is.null(param$dirbam)) param$dirbam = .makefullpath(param$dirproject, param$dirbam);
+	if(!is.null(param$dirbam)) 
+	    param$dirbam = .makefullpath(param$dirproject, param$dirbam);
 	
 	if( is.null(param$dirfilter) ) {
 		param$dirfilter = FALSE;
 	}
 	if( is.logical(param$dirfilter) ) {
 		if( param$dirfilter ) {
-			param$dirfilter = paste0( param$dirproject, "/Filter_", param$scoretag, "_", param$minscore);
+			param$dirfilter = paste0( param$dirproject, 
+			                "/Filter_", param$scoretag, "_", param$minscore);
 		} else {
 			param$dirfilter = param$dirproject;
 		}
@@ -134,14 +137,15 @@ parameterPreprocess = function( param ){
 	### More analysis parameters
 	if( is.null(param$maxrepeats) ) param$maxrepeats = 0;
 	if( is.null(param$cputhreads) ) param$cputhreads = detectCores();
-	if( is.null(param$diskthreads) ) param$diskthreads = min(param$cputhreads,2);
+	if( is.null(param$diskthreads)) param$diskthreads = min(param$cputhreads,2);
 	
 	### BAM list processing
 	if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
-		param$bamnames = readLines(.makefullpath(param$dirproject,param$filebamlist));
+	    param$filebamlist = .makefullpath(param$dirproject,param$filebamlist)
+		param$bamnames = readLines(param$filebamlist);
 	}
 	if( !is.null(param$bamnames)) {
-		param$bamnames = gsub(pattern = "\\.bam$", replacement = "", param$bamnames, ignore.case = TRUE);
+		param$bamnames = gsub("\\.bam$", "", param$bamnames, ignore.case = TRUE)
 	}
 	
 	### CV and MM
@@ -163,32 +167,41 @@ parameterPreprocess = function( param ){
 		if(grepl("\\.csv$",param$filecovariates)) 
 			sep = ",";
 		filename = .makefullpath(param$dirproject, param$filecovariates);
-		param$covariates = read.table(filename, header = TRUE, sep = sep, stringsAsFactors = FALSE, check.names = FALSE);
+		param$covariates = read.table(filename, header = TRUE, sep = sep, 
+		                      stringsAsFactors = FALSE, check.names = FALSE);
 		rm(filename);
 	}
 	if( !is.null(param$covariates)) {
-		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",nrow(param$covariates));
-		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
-		
+		if( is.null(param$dircoveragenorm) ) 
+		    param$dircoveragenorm = 
+		        paste0("coverage_norm_",nrow(param$covariates));
+		param$dircoveragenorm = 
+		    .makefullpath(param$dirfilter, param$dircoveragenorm);	
 
 		if( any(duplicated(param$covariates[[1]])) )
 			stop("Repeated samples in the covariate file");
 		
 		if( !all(param$modelcovariates %in% names(param$covariates) ) )
-			stop( paste("Covariates (modelcovariates) missing in covariates data frame:",
-			 param$modelcovariates[ !(param$modelcovariates %in% names(param$covariates)) ]));
+			stop( paste("Covariates (modelcovariates) missing in covariates",
+			 param$modelcovariates[ 
+			     !(param$modelcovariates %in% names(param$covariates)) ]));
 		if( is.null(param$modelPCs) ) 
 			param$modelPCs = 0;
 		if( !is.null(param$modeloutcome) )
 			if( !( param$modeloutcome %in% names(param$covariates)) )
-				stop( paste("Model outcome not present in covariate file:", param$modeloutcome));
+				stop( paste("Model outcome not present in covariate file:", 
+				            param$modeloutcome));
 		
 		
 		if( is.null(param$dirpca) ) {
 			if( length(param$modelcovariates) > 0 ) {
 				# library(digest);
-				hash = digest( object = paste(sort(param$modelcovariates), collapse = "\t"), algo = "crc32", serialize = FALSE);
-				param$dirpca = sprintf("PCA_%02d_cvrts_%s",length(param$modelcovariates), hash);
+				hash = digest( 
+				    object = paste(sort(param$modelcovariates), 
+				                   collapse = "\t"), 
+				    algo = "crc32", serialize = FALSE);
+				param$dirpca = sprintf("PCA_%02d_cvrts_%s",
+				                       length(param$modelcovariates), hash);
 			} else {
 				param$dirpca = "PCA_00_cvrts";
 			}
@@ -196,23 +209,35 @@ parameterPreprocess = function( param ){
 		param$dirpca = .makefullpath(param$dircoveragenorm, param$dirpca);
 		
 		if( is.null(param$dirmwas) ) 
-			param$dirmwas = paste0("Testing_",param$modeloutcome,"_",param$modelPCs,"_PCs");
+			param$dirmwas = paste0("Testing_",param$modeloutcome,
+			                       "_",param$modelPCs,"_PCs");
 		param$dirmwas = .makefullpath(param$dirpca, param$dirmwas);
 		
 		if( is.null(param$qqplottitle) ) {
-			qqplottitle = paste0("Testing ",param$modeloutcome,"\n",param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
+			qqplottitle = paste0("Testing ",param$modeloutcome,"\n",
+			             param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
 			if(length(param$modelcovariates)>0)
-				qqplottitle = paste0(qqplottitle, " and ",length(param$modelcovariates)," covariate",if(length(param$modelcovariates)!=1)"s:\n"else": ",paste0(param$modelcovariates,collapse = ", "))
+				qqplottitle = paste0(qqplottitle, " and ",
+				    length(param$modelcovariates)," covariate",
+				    if(length(param$modelcovariates)!=1)"s:\n"else": ",
+				    paste0(param$modelcovariates,collapse = ", "))
 			param$qqplottitle = qqplottitle;
 			rm(qqplottitle);
 		}
-		if( is.null(param$dircv) ) param$dircv = sprintf("%s/CV_%02d_folds", param$dirmwas, param$cvnfolds);
+		if( is.null(param$dircv) ) 
+		    param$dircv = sprintf("%s/CV_%02d_folds", 
+		                          param$dirmwas, param$cvnfolds);
 	} else if( !is.null(param$bam2sample) ) {
-		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = paste0("coverage_norm_",length(param$bam2sample));
-		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
+		if( is.null(param$dircoveragenorm) ) 
+		    param$dircoveragenorm = 
+		        paste0("coverage_norm_",length(param$bam2sample));
+		param$dircoveragenorm = 
+		    .makefullpath(param$dirfilter, param$dircoveragenorm);	
 	} else {
-		if( is.null(param$dircoveragenorm) ) param$dircoveragenorm = "coverage_norm";
-		param$dircoveragenorm = .makefullpath(param$dirfilter, param$dircoveragenorm);	
+		if( is.null(param$dircoveragenorm) ) 
+		    param$dircoveragenorm = "coverage_norm";
+		param$dircoveragenorm = 
+		    .makefullpath(param$dirfilter, param$dircoveragenorm);	
 	}
 
 	if( is.null(param$dirtemp) ) param$dirtemp = "temp";
@@ -220,11 +245,13 @@ parameterPreprocess = function( param ){
 
 	### CpG set should exist
 	if( !is.null(param$filecpgset) ) {
-	    param$filecpgset = .makefullpath(param$dirproject, param$filecpgset);
+	    param$filecpgset = 
+	        .makefullpath(param$dirproject, param$filecpgset);
 		stopifnot( file.exists(param$filecpgset) );
 	}
 	if( !is.null(param$filenoncpgset) ) {
-	    param$filenoncpgset = .makefullpath(param$dirproject, param$filenoncpgset);
+	    param$filenoncpgset = 
+	        .makefullpath(param$dirproject, param$filenoncpgset);
 		stopifnot( file.exists(param$filenoncpgset) );
     }
 	
@@ -237,7 +264,8 @@ parameterPreprocess = function( param ){
 
 	if( is.null(param$usefilelock) ) param$usefilelock = FALSE;
 	
-	if( is.null(param$randseed) ) param$randseed = 18090212; #Charles Darwin Date of birth: February 12, 1809
+	if( is.null(param$randseed) ) param$randseed = 18090212; 
+	# Famous person date of birth: February 12, 1809
 	
 	if( is.null(param$toppvthreshold) ) param$toppvthreshold = 1e-6;
 	
@@ -251,11 +279,14 @@ parameterPreprocess = function( param ){
 		param$bidataset = "hsapiens_gene_ensembl"; 
 	
 		# listAttributes(useMart(biomart=param$bimart, dataset=param$bidataset))
-		if( is.null(param$biattributes) ) param$biattributes = c("hgnc_symbol","entrezgene","strand");
+		if( is.null(param$biattributes) ) 
+		    param$biattributes = c("hgnc_symbol","entrezgene","strand");
 		
-		if( is.null(param$bifilters) ) param$bifilters = list(with_hgnc_transcript_name=TRUE);
+		if( is.null(param$bifilters) ) 
+		    param$bifilters = list(with_hgnc_transcript_name=TRUE);
 		
-		if( is.null(param$biflank) ) param$biflank = 0;
+		if( is.null(param$biflank) ) 
+		    param$biflank = 0;
 	}	
 	
 	return(param);
@@ -295,7 +326,8 @@ parameterDump = function(dir, param, toplines = NULL){
 	}
 	
 	fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
-	writeLines(con = fid, c("### Parameters used to create the files in this directory",""));
+	writeLines(con = fid, 
+	   text = c("## Parameters used to create the files in this directory",""));
 	if( !is.null(toplines)) {
 		.dump(fid, param[toplines[toplines %in% names(param)]]);
 		writeLines(con = fid, text = "");
@@ -330,43 +362,76 @@ parameterDump = function(dir, param, toplines = NULL){
 	axis(1,at = at+0.5-firstvalue, labels = at)
 }
 plot.qcHistScore = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+	              main2 = paste0("Distribution of read scores\n",samplename), 
+	              firstvalue=0, 
+	              xstep = xstep, 
+	              ...);
 }
 plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of read scores\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+	    main2 = paste0("Distribution of read scores\n",
+	                   "(including excluded reads)\n",samplename), 
+	    firstvalue=0, 
+	    xstep = xstep, 
+	    ...);
 }
 plot.qcEditDist = function(x, samplename="", xstep = 5, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+	   main2 = paste0("Distribution of edit distance\n",samplename), 
+	   firstvalue=0, 
+	   xstep = xstep, 
+	   ...);
 }
 plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...) {
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of edit distance\n(including excluded reads)\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+        main2 = paste0("Distribution of edit distance\n",
+                       "(including excluded reads)\n", samplename), 
+        firstvalue=0, 
+        xstep = xstep, 
+        ...);
 }
 plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of aligned length\n",samplename), firstvalue=1, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+        main2 = paste0("Distribution of aligned length\n", samplename),
+        firstvalue=1,
+        xstep = xstep,
+        ...);
 }
 plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distribution of aligned length\n(including excluded reads)\n",samplename), firstvalue=1, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x), 
+        main2 = paste0("Distribution of aligned length\n",
+                       "(including excluded reads)\n", samplename),
+        firstvalue=1,
+        xstep = xstep,
+        ...);
 }
 plot.qcIsoDist = function(x, samplename="", xstep = 25, ...){
-	.my.hist.plot(as.vector(x), main2 = paste0("Distances from read starts to isolated CpGs\n",samplename), firstvalue=0, xstep = xstep, ...);
+	.my.hist.plot(as.vector(x),
+        main2 = paste0("Distances from read starts to isolated CpGs\n", 
+                       samplename),
+        firstvalue=0,
+        xstep = xstep,
+        ...);
 }
 plot.qcCoverageByDensity = function(x, samplename="", ...){
 	# y = rbam$qc$avg.coverage.by.density
 	y = x;
 	x = (seq_along(y)-1)/100;
 	param = list(...);
-	plotparam = list(x = x, y = y, type = "l", col = "magenta", 
-						  lwd = 3, xaxs="i", yaxs="i", axes=FALSE,
-						  ylim = c(0, max(y, na.rm = TRUE)*1.1), xlim = range(x), 
-						  xlab = "CpG density", ylab = "Coverage", 
-						  main = paste0("Average coverage by CpG density\n",samplename));
+	plotparam = list(
+	    x = x, y = y, type = "l", col = "magenta", 
+        lwd = 3, xaxs="i", yaxs="i", axes=FALSE,
+        ylim = c(0, max(y, na.rm = TRUE)*1.1), xlim = range(x), 
+        xlab = "CpG density", ylab = "Coverage", 
+        main = paste0("Average coverage by CpG density\n", samplename));
 	plotparam[names(param)] = param;
 	do.call(plot, plotparam);
-	axis(1, at = seq(0,tail(x,1)+2,by = 1), labels = seq(0,tail(x,1)+2,by=1)^2)
+	axis(1, at = seq(0,tail(x,1)+2,by = 1), labels = seq(0,tail(x,1)+2,by=1)^2);
 	axis(2);
 }
 .histmean = function(x){
-	return( sum(x * seq_along(x)) / pmax(sum(x),.Machine$double.xmin) );
+	return( sum(x * seq_along(x)) / pmax(sum(x), .Machine$double.xmin) );
 }
 
 # QC single number summary functions
@@ -407,8 +472,12 @@ remove.repeats.over.maxrep = function(vec, maxrep){
 bam.removeRepeats = function(rbam, maxrep){
 	if(maxrep>0) {
 		newbam = list(
-			startsfwd = lapply( rbam$startsfwd, remove.repeats.over.maxrep, maxrep),
-			startsrev = lapply( rbam$startsrev, remove.repeats.over.maxrep, maxrep),
+			startsfwd = lapply( rbam$startsfwd, 
+			                    remove.repeats.over.maxrep, 
+			                    maxrep),
+			startsrev = lapply( rbam$startsrev, 
+			                    remove.repeats.over.maxrep, 
+			                    maxrep),
 			qc = rbam$qc);
 	} else {
 		newbam = rbam;
@@ -441,7 +510,10 @@ isocpgSitesFromCpGset = function(cpgset, distance){
 	names(isocpg) = names(cpgset);
 	for( i in seq_along(cpgset) ) {	
 		distbig = diff(cpgset[[i]]) >= distance;
-		isocpg[[i]] = cpgset[[i]][ which( c(distbig[1],distbig[-1] & distbig[-length(distbig)], distbig[length(distbig)]) ) ];
+		isocpg[[i]] = cpgset[[i]][ which( c(
+		    distbig[1],
+		    distbig[-1] & distbig[-length(distbig)],
+		    distbig[length(distbig)]) ) ];
 	}
 	return(isocpg);
 }
@@ -472,10 +544,12 @@ bam.count.nonCpG.reads = function(rbam, cpgset, distance){
 	for( chr in names(cpgset) ) { # chr = names(cpgset)[1]
 		frwstarts = rbam$startsfwd[[chr]];
 		if( length(frwstarts)>0 )
-			result = result + .count.nonCpG.reads.forward( starts = frwstarts, cpglocations = cpgset[[chr]], distance);
+			result = result + .count.nonCpG.reads.forward( 
+			    starts = frwstarts, cpglocations = cpgset[[chr]], distance);
 		revstarts = rbam$startsrev[[chr]];
 		if( length(revstarts)>0 )
-			result = result + .count.nonCpG.reads.reverse( starts = revstarts, cpglocations = cpgset[[chr]], distance);
+			result = result + .count.nonCpG.reads.reverse( 
+			    starts = revstarts, cpglocations = cpgset[[chr]], distance);
 	}
 	rbam$qc$cnt.nonCpG.reads = result;
 	class(rbam$qc$cnt.nonCpG.reads) = "qcNonCpGreads";
@@ -514,10 +588,12 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 	for( chr in names(isocpgset) ) { # chr = names(cpgset)[1]
 		frwstarts = rbam$startsfwd[[chr]];
 		if( length(frwstarts)>0 )
-			result = result + .hist.isodist.forward( starts = frwstarts, cpglocations = isocpgset[[chr]], distance);
+			result = result + .hist.isodist.forward( 
+			    starts = frwstarts, cpglocations = isocpgset[[chr]], distance);
 		revstarts = rbam$startsrev[[chr]];
 		if( length(revstarts)>0 )
-			result = result + .hist.isodist.reverse( starts = revstarts, cpglocations = isocpgset[[chr]], distance);
+			result = result + .hist.isodist.reverse( 
+			    starts = revstarts, cpglocations = isocpgset[[chr]], distance);
 	}
 	rbam$qc$hist.isolated.dist1 = result;
 	class(rbam$qc$hist.isolated.dist1) = "qcIsoDist";
@@ -525,13 +601,17 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 }
 
 # QC: Calculate average coverage vs. CpG density
-bam.coverage.by.density = function(rbam, cpgset, noncpgset, minfragmentsize, maxfragmentsize){
+bam.coverage.by.density = function(rbam, cpgset, noncpgset, 
+                                   minfragmentsize, maxfragmentsize){
 	
-	fragdistr = c(rep(1, minfragmentsize-1),seq(1,0,length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
+	fragdistr = c(
+	    rep(1, minfragmentsize-1),
+	    seq(1, 0, length.out = (maxfragmentsize-minfragmentsize)/1.5+1));
 	fragdistr = fragdistr[fragdistr>0];
 
 	if( is.null(noncpgset) ) {
-		noncpgset = noncpgSitesFromCpGset(cpgset = cpgset, distance = maxfragmentsize);
+		noncpgset = 
+		    noncpgSitesFromCpGset(cpgset = cpgset, distance = maxfragmentsize);
 	}
 	# sum(sapply(noncpgset,length))
 	# newcpgset = noncpgset;
@@ -540,18 +620,15 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset, minfragmentsize, max
 	# }
 	# rm(noncpgset);
 	
-	cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset), cpgset = cpgset, fragdistr = fragdistr);
-	cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)), cpgset = cpgset, fragdistr = fragdistr[-1]);
+	cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset), 
+	                            cpgset = cpgset, 
+	                            fragdistr = fragdistr);
+	cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)), 
+	                            cpgset = cpgset, 
+	                            fragdistr = fragdistr[-1]);
 	cpgdensity = unlist(cpgdensity1, recursive = FALSE, use.names = FALSE) + 
-					 unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
+				 unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
 	rm(cpgdensity1,cpgdensity2);
-	
-	### CpG density of Non-CpG is always zero, not needed
-	# noncpgdensity1 = calc.coverage(rbam = list(startsfwd = noncpgset), cpgset = cpgset, fragdistr = fragdistr);
-	# noncpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(noncpgset,`-`,1L)), cpgset = cpgset, fragdistr = fragdistr[-1]);
-	# noncpgdensity = unlist(noncpgdensity1, recursive = FALSE, use.names = FALSE) + 
-	# 					 unlist(noncpgdensity2, recursive = FALSE, use.names = FALSE);
-	# rm(noncpgdensity1,noncpgdensity2);
 	
 	cpgcoverage = calc.coverage(rbam, cpgset,    fragdistr);
 	cpgcoverage = unlist(cpgcoverage, recursive = FALSE, use.names = FALSE);
@@ -567,8 +644,10 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset, minfragmentsize, max
 
 	# library(KernSmooth);
 	z = locpoly(x = c(sqrtcpgdensity, double(length(noncoverage))),
-					y = c(cpgcoverage, noncoverage), 
-					bandwidth = 0.5, gridsize = axmax*100+1, range.x = c(0,axmax));
+				y = c(cpgcoverage, noncoverage), 
+				bandwidth = 0.5, 
+				gridsize = axmax*100+1, 
+				range.x = c(0,axmax));
 	z$y[is.na(z$y)] = 0;
 
 	rbam$qc$avg.coverage.by.density = z$y;
@@ -582,11 +661,13 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset, minfragmentsize, max
 # QC: Fraction of reads on ChrX/Y
 bam.chrXY.qc = function(rbam){
 	strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
-	rbam$qc$chrX.count =  strandfunX(rbam$startsfwd) + strandfunX(rbam$startsfwd);
+	rbam$qc$chrX.count = strandfunX(rbam$startsfwd) + 
+	                     strandfunX(rbam$startsfwd);
 	class(rbam$qc$chrX.count) = "qcChrX"
 	
 	strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
-	rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) + strandfunY(rbam$startsfwd);
+	rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) + 
+	                      strandfunY(rbam$startsfwd);
 	class(rbam$qc$chrY.count) = "qcChrY"
 	
 	return(rbam);
@@ -616,20 +697,28 @@ cachedRDSload = function(rdsfilename){
 	cover = double(length(cpgs));
 
 	if(length(startfrw) > 0) {
-		ind1 = findInterval(cpgs - maxfragmentsize, startfrw);  # CpGs left of start
-		ind2 = findInterval(cpgs,                   startfrw);  # CpGs left of start+250L
+	    # CpGs left of start
+		ind1 = findInterval(cpgs - maxfragmentsize, startfrw);
+		# CpGs left of start+250L
+		ind2 = findInterval(cpgs,                   startfrw);
 		# coverage of CpGs 
 		# which(ind2>ind1) 
-		# are covered by fragments ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
-		.Call("cover_frw_c", startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+		# are covered by fragments 
+		# ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+		.Call("cover_frw_c", 
+		      startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
 	}
 	if(length(startrev) > 0) {
-		ind1 = findInterval(cpgs - 1L,                 startrev);  # CpGs left of start
-		ind2 = findInterval(cpgs + maxfragmentsize-1L, startrev);  # CpGs left of start+250L
+	    # CpGs left of start
+		ind1 = findInterval(cpgs - 1L,                 startrev);
+		# CpGs left of start+250L
+		ind2 = findInterval(cpgs + maxfragmentsize-1L, startrev);
 		# coverage of CpGs 
 		# which(ind2>ind1) 
-		# are covered by fragments ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
-		.Call("cover_rev_c", startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+		# are covered by fragments 
+		# ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+		.Call("cover_rev_c", 
+		      startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
 	}
 	return(cover);
 }
@@ -640,7 +729,10 @@ calc.coverage = function(rbam, cpgset, fragdistr){
 	names(coveragelist) = names(cpgset);
 	for( chr in names(coveragelist) ) { # chr = names(coveragelist)[1]
 		coveragelist[[chr]] = 
-			.calc.coverage.chr(rbam$startsfwd[[chr]], rbam$startsrev[[chr]], cpgset[[chr]], fragdistr); 
+			.calc.coverage.chr(rbam$startsfwd[[chr]], 
+			                   rbam$startsrev[[chr]], 
+			                   cpgset[[chr]], 
+			                   fragdistr); 
 	}
 	return(coveragelist);
 }
@@ -680,7 +772,8 @@ pipelineSaveQCplots = function(param, rbam, bamname){
 		rm(filename);
 	}
 	if( !is.null(rbam$qc$avg.coverage.by.density) ) {
-		filename = paste0(param$dirqc,"/coverage_by_density/cbd_",bamname,".pdf");
+		filename = paste0(param$dirqc,
+		                  "/coverage_by_density/cbd_",bamname,".pdf");
 		dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
 		pdf(filename);
 		plot(rbam$qc$avg.coverage.by.density, samplename = bamname);
@@ -734,7 +827,12 @@ testPhenotype = function(phenotype, data, cvrtqr){
 	dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
 	if(nVarTested == 1) {
 		if(dfFull <= 0)
-			return(list(correlation = 0, tstat = 0, pvalue = 1, nVarTested = nVarTested, dfFull = dfFull, statname = ""));
+			return(list(correlation = 0, 
+			            tstat = 0, 
+			            pvalue = 1, 
+			            nVarTested = nVarTested, 
+			            dfFull = dfFull, 
+			            statname = ""));
 
 		# SST = rowSums(slice^2);
 		SST = colSumsSq(slice);
@@ -750,19 +848,34 @@ testPhenotype = function(phenotype, data, cvrtqr){
 		# SSR = colSums( cvD^2 );
 		cr = cvD / sqrt(pmax(SST - cvC2, 1e-50, SST/1e15));
 		
-		cor2tt = function(x) { return( x * sqrt( dfFull / (1 - pmin(x^2,1))));	}
-		tt2pv = function(x) { return( (pt(-abs(x),dfFull)*2)); }
+		cor2tt = function(x){ 
+		    return( x * sqrt( dfFull / (1 - pmin(x^2,1))));
+		}
+		tt2pv = function(x){ 
+		    return( (pt(-abs(x),dfFull)*2));
+		}
 		tt = cor2tt(cr);
 		pv = tt2pv(tt);
 		
 		### Check: 
 		# c(tt[1], pv[1])
-		# summary(lm( as.vector(covariate) ~ 0 + data[1,] + t(cvrtqr)))$coefficients[1,]
-		return( list(correlation = cr, tstat = tt, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = "") );
+		# summary(lm( as.vector(covariate) ~ 0 + data[1,] + 
+		#         t(cvrtqr)))$coefficients[1,]
+		return( list(correlation = cr, 
+		             tstat = tt, 
+		             pvalue = pv, 
+		             nVarTested = nVarTested, 
+		             dfFull = dfFull, 
+		             statname = "") );
 		
 	} else {
 		if(dfFull <= 0)
-			return( list(Rsquared = 0, Fstat = 0, pvalue = 1, nVarTested = nVarTested, dfFull = dfFull, statname = paste0("-F_",nVarTested)) );
+			return( list(Rsquared = 0, 
+			             Fstat = 0, 
+			             pvalue = 1, 
+			             nVarTested = nVarTested, 
+			             dfFull = dfFull, 
+			             statname = paste0("-F_",nVarTested)) );
 
 		# SST = rowSums(slice^2);
 		SST = colSumsSq(slice);
@@ -779,15 +892,25 @@ testPhenotype = function(phenotype, data, cvrtqr){
 		rsq = cvD2 / pmax(SST - cvC2, SST/1e16);
 		
 		# rsq = colSums(cr^2);
-		rsq2F = function(x) { return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) ); }
-		F2pv = function(x) { return( pf(x, nVarTested, dfFull, lower.tail = FALSE) ); }
+		rsq2F = function(x){ 
+		    return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) ); 
+		}
+		F2pv = function(x){
+		    return( pf(x, nVarTested, dfFull, lower.tail = FALSE) ); 
+		}
 		ff = rsq2F(rsq);
 		pv = F2pv(ff);
 		
 		### Check: 
 		# c(ff[1], pv[1])
-		# anova(lm( data[1,] ~ 0 + t(cvrtqr) + as.factor(as.vector(as.character(round(covariate))))))
-		return( list(Rsquared = rsq, Fstat = ff, pvalue = pv, nVarTested = nVarTested, dfFull = dfFull, statname = paste0("-F_",nVarTested)) );
+		# anova(lm( data[1,] ~ 0 + t(cvrtqr) + 
+		#     as.factor(as.vector(as.character(round(covariate))))))
+		return( list(Rsquared = rsq, 
+		             Fstat = ff, 
+		             pvalue = pv, 
+		             nVarTested = nVarTested, 
+		             dfFull = dfFull, 
+		             statname = paste0("-F_",nVarTested)) );
 	}
 }
 
@@ -819,7 +942,8 @@ orthonormalizeCovariates = function(covariates) {
 	
 	rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
 	if( any(rowsubset==0) )
-		stop( paste("Unknown samples in covariate file:", cvsamples[head(which(rowsubset==0))]) );
+		stop( paste("Unknown samples in covariate file:", 
+		            cvsamples[head(which(rowsubset==0))]) );
 	
 	if( length(cvsamples) == length(fmsamples) )
 	{

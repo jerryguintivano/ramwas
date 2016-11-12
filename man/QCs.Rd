@@ -25,9 +25,11 @@
 	Quality Control Measures
 }
 \description{
-	RaMWAS calculates a number of QC measures for each BAM and saves them in R .rds files.
+	RaMWAS calculates a number of QC measures for each 
+	BAM and saves them in R .rds files.
 	
-	For full description of the QC measures and the ploting options run\cr \code{vignette("RaMWAS_QCs")}
+	For full description of the QC measures and the ploting options 
+	run\cr \code{vignette("RW3_BAM_QCs")}
 }
 \usage{
 qcmean(x)
@@ -66,30 +68,22 @@ qcmean(x)
     The distance between x axis ticks.
   }
   \item{...}{
-    Parameters passed to the underlying \code{\link[graphics]{plot}} or \code{\link[graphics]{barplot}} function.
+    Parameters passed to the underlying 
+    \code{\link[graphics]{plot}} or \code{\link[graphics]{barplot}} function.
   }
 }
-%\details{
-%%  ~~ If necessary, more details than the description above ~~
-%}
+
 \value{
-	%Function \code{qcmean} returns:
-	%\item{qcChrX}{Fraction of reads on chrX.}
-	%\item{qcChrY}{Fraction of reads on chrY.}
 	Function \code{qcmean} returns one value summary of most QC measures.
-	Run \code{vignette("RaMWAS_QCs")} for description of values returned by it.
-	
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of "comp1"}
-%%  \item{comp2 }{Description of "comp2"}
-%% ...
+	Run \code{vignette("RW3_BAM_QCs")} for description of values returned by it.
+
 }
 \author{
 	Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    For full description of the QC measures and the ploting options run\cr \code{vignette("RaMWAS_QCs")}
+    For full description of the QC measures and 
+    the ploting options run\cr \code{vignette("RaMWAS_QCs")}
 }
 \examples{
 # Load QC data from a sample project 
@@ -106,16 +100,19 @@ cat("Reads total:", qc$reads.total)
 ## Number of reads aligned to the reference genome
 {
  cat("Reads aligned:", qc$reads.aligned, "\\n")
- cat("This is ", qc$reads.aligned / qc$reads.total * 100, "\% of all reads", sep="")
+ cat("This is ", qc$reads.aligned / qc$reads.total * 100, 
+     "\% of all reads", sep="")
 }
 
 ## Number of reads that passed minimum score filter and are recorded
 {
  cat("Reads recorded:",qc$reads.recorded,"\\n")
- cat("This is ", qc$reads.recorded / qc$reads.aligned * 100, "\% of aligned reads", sep="")
+ cat("This is ", qc$reads.recorded / qc$reads.aligned * 100, 
+     "\% of aligned reads", sep="")
 }
 
-## Number of recorded reads aligned to the forward and reverse strands respectively
+## Number of recorded reads aligned to 
+## the forward and reverse strands respectively
 {
  cat("Reads on forward strand:", qc$frwrev[1],"\\n")
  cat("Reads on reverse strand:", qc$frwrev[2],"\\n")
@@ -134,13 +131,15 @@ cat("Reads total:", qc$reads.total)
 ## Distribution of the length of the aligned part of the reads
 {
  cat("Average aligned length:", qcmean(qc$hist.length.matched), "\\n")
- cat("Average aligned length, no filter:", qcmean(qc$bf.hist.length.matched), "\\n")
+ cat("Average aligned length, no filter:", 
+     qcmean(qc$bf.hist.length.matched), "\\n")
  par(mfrow = c(1,2)) 
  plot(qc$hist.length.matched)
  plot(qc$bf.hist.length.matched)
 }
 
-## Distribution of edit distance between the aligned part of the read and the reference genome
+## Distribution of edit distance between 
+## the aligned part of the read and the reference genome
 {
  cat("Average edit distance:", qcmean(qc$hist.edit.dist1), "\\n")
  cat("Average edit distance, no filter:", qcmean(qc$bf.hist.edit.dist1), "\\n")
@@ -152,15 +151,19 @@ cat("Reads total:", qc$reads.total)
 ## Number of reads after removal of duplicate reads
 {
  cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\\n")
- cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100, "\% of aligned reads", "\\n", sep="")
- cat("Fraction of reads on forward strand (with    duplicates):", qcmean(qc$frwrev), "\\n")
- cat("Fraction of reads on forward strand (without duplicates):", qcmean(qc$frwrev.no.repeats), "\\n")
+ cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100, 
+     "\% of aligned reads", "\\n", sep="")
+ cat("Fraction of reads on forward strand (with    duplicates):",
+     qcmean(qc$frwrev), "\\n")
+ cat("Fraction of reads on forward strand (without duplicates):", 
+     qcmean(qc$frwrev.no.repeats), "\\n")
 }
 
 ## Number of reads away from CpGs
 {
  cat("Non-CpG reads:", qc$cnt.nonCpG.reads[1], "\\n")
- cat("This is ", qcmean(qc$cnt.nonCpG.reads)*100, "\% of recorded reads", sep="")
+ cat("This is ", qcmean(qc$cnt.nonCpG.reads)*100, "\% of recorded reads", 
+     sep="")
 }
 
 ## Average coverage of CpGs and non-CpGs
@@ -176,13 +179,16 @@ plot(qc$hist.isolated.dist1)
 
 ## Fraction of reads from chrX and chrY
 {
- cat("ChrX reads: ", qc$chrX.count[1], ", which is ", qcmean(qc$chrX.count)*100, "\% of total", sep="", "\\n")
- cat("ChrX reads: ", qc$chrY.count[1], ", which is ", qcmean(qc$chrY.count)*100, "\% of total", sep="", "\\n")
+ cat("ChrX reads: ", qc$chrX.count[1], ", which is ", 
+     qcmean(qc$chrX.count)*100, "\% of total", sep="", "\\n")
+ cat("ChrX reads: ", qc$chrY.count[1], ", which is ", 
+     qcmean(qc$chrY.count)*100, "\% of total", sep="", "\\n")
 }
 
 ## Coverage vs. CpG density
 {
-	cat("Highest coverage is observed at CpG density of", qcmean(qc$avg.coverage.by.density)^2);
+	cat("Highest coverage is observed at CpG density of", 
+	    qcmean(qc$avg.coverage.by.density)^2);
 	plot(qc$avg.coverage.by.density)
 }
 }
