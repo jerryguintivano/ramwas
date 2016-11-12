@@ -2,7 +2,7 @@
 \alias{getCpGsetCG}
 \alias{getCpGsetALL}
 \title{
-	Construct CpG set for a Reference Genome
+    Construct CpG set for a Reference Genome
 }
 \description{
 Finds all CpGs in a reference genome.
@@ -13,20 +13,20 @@ getCpGsetALL(genome)
 }
 \arguments{
   \item{genome}{
-    A \code{\link[BSgenome]{BSgenome}} object or a 
+    A \code{\link[BSgenome]{BSgenome}} object or a
     character vector with genome sequences.
   }
 }
 \details{
-  The \code{getCpGsetCG} function searches for all 
+  The \code{getCpGsetCG} function searches for all
     \code{CG} pairs in the genome. \cr
   The \code{getCpGsetALL} function also works for genomes with injected SNPs.
 }
 \value{
-	Returns a list with CpG coordinates for each genome sequence.
+    Returns a list with CpG coordinates for each genome sequence.
 }
 \author{
-	Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \examples{
 ### Using a BSGenome input

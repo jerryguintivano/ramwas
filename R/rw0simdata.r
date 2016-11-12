@@ -18,117 +18,117 @@ ramwas0createArtificialData = function(dir,
                                        randseed = 18090212,
                                        verbose = TRUE){
 
-	set.seed(randseed);
-	
-	# Create Directory
-	dir.create(paste0(dir,"/bams"), showWarnings = FALSE, recursive = TRUE);
-	
-	# CpG locations
-	{
-		# ncpgs = 500e3
-		chrlen = ncpgs*50
-		probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
-		locs = which(probs > runif(chrlen));
-		rm(probs);
+    set.seed(randseed);
 
-		cpgset = list( chr1 = locs );
-		saveRDS(object = cpgset, 
-		        file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
-	} # locs, cpgset, /Single_chromosome.rds
-	
-	# Fragment size distribution, with 150 median fragment size
-	{
-		x = 0:250;
-		fragdistr = pmin(1.01*plogis((150-x)/20),1);
-		# plot(x,fragdistr,pch=19)
-		rm(x)
-	} # fragdistr
+    # Create Directory
+    dir.create(paste0(dir,"/bams"), showWarnings = FALSE, recursive = TRUE);
 
-	# Exclude CpGs with density over 15
-	{
-		coverage = calc.coverage(
-		    rbam = list(startsfwd = cpgset, startsrev = cpgset), 
-		    cpgset = cpgset, 
-		    fragdistr = fragdistr);
-		locsgood = locs[ coverage[[1]] <= 15 ];
-		rm(coverage, cpgset, locs)
-	} # locsgood, -locs, -cpgset
-	
-	# Age covariate and effects
-	{
-		age = sample(20:80, size = nsamples, replace = TRUE)
-		cpgageset = groupSample( len = length(locsgood), 
-		                         size = length(locsgood)/100, 
-		                         gr = 6);
-		cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
-		cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
-		rm(cpgageset)
-	} # age, cpgage1, cpgage2
-	
-	# casecontrol
-	{
-		ccs = seq_len(nsamples) %% 2L;
-		cpgccset = groupSample( len = length(locsgood), size = 600, gr = 6);
-		cpgccc1 = cpgccset[  1:(length(cpgccset)/2) ];
-		cpgccc2 = cpgccset[-(1:(length(cpgccset)/2))];
-		rm(cpgccset)
-	} # ccs, cpgccc1, cpgccc2
-	
-	# Covariate file, bam list
-	{
-		cvrt = data.frame(
-			samples = sprintf("BAM%03d",1:nsamples),
-			age = age,
-			casecontrol = ccs,
-			stringsAsFactors = FALSE);
-		write.table(file = paste0(dir,"/covariates.txt"), 
-		            x = cvrt, 
-		            sep = "\t", 
-		            row.names = FALSE);
-		writeLines(con = paste0(dir,"/bam_list.txt"), 
-		           text = cvrt$samples);
-	} # cvrt, /covariates.txt, /bam_list.txt
-	
-	# Main loop
-	cpgprob = rep(1,length(locsgood));
-	for( bam in seq_len(nsamples)){ # bam = 1
-		
-		if(verbose)
-			message("Creating BAM ", bam, " of ", nsamples);
-		
-		# Change CpG probabilities
-		# by age and case-control status
-		cpgprob[cpgage1] =     age[bam]/100;
-		cpgprob[cpgage2] = 1 - age[bam]/100;
-		cpgprob[cpgccc1] =     ccs[bam];
-		cpgprob[cpgccc1] = 1 - ccs[bam];
-		
-		# Pick CpG locations by the probabilities above
-		cpglocs = sample(locsgood, prob = cpgprob,
-							  size = nreads, replace = TRUE);
-		# read strand (0 - forward, 1 - reverse)
-		readdir = sample(c(0L,1L), size = nreads, replace = TRUE);
-		# distance to the CpG of interest
-		roffset = sample(seq_along(fragdistr)-1L, prob = fragdistr,
-							  size = nreads, replace = TRUE);
-		# read start (and end) position, as reads are 1bp long
-		readpos = cpglocs - (1L - 2L*readdir)*roffset;
-		rm(roffset, cpglocs);
-		
-		# Sort reads by location
-		ord = sort.list(readpos);
-		readpos = readpos[ord];
-		readdir = readdir[ord];
-		rm(ord)
-		
-		# Write sam file
-		filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
-		fid = file(description = filesam, open = "wt")
-		writeLines(con = fid, 
-		           sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",
-		                   chrlen+1e4));
-		writeLines(con = fid, 
-            sprintf("%06d\t%d\tchr1\t%d\t65\t1M\t*\t0\t0\tA\t*", 
+    # CpG locations
+    {
+        # ncpgs = 500e3
+        chrlen = ncpgs*50
+        probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
+        locs = which(probs > runif(chrlen));
+        rm(probs);
+
+        cpgset = list( chr1 = locs );
+        saveRDS(object = cpgset,
+                file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
+    } # locs, cpgset, /Single_chromosome.rds
+
+    # Fragment size distribution, with 150 median fragment size
+    {
+        x = 0:250;
+        fragdistr = pmin(1.01*plogis((150-x)/20),1);
+        # plot(x,fragdistr,pch=19)
+        rm(x)
+    } # fragdistr
+
+    # Exclude CpGs with density over 15
+    {
+        coverage = calc.coverage(
+            rbam = list(startsfwd = cpgset, startsrev = cpgset),
+            cpgset = cpgset,
+            fragdistr = fragdistr);
+        locsgood = locs[ coverage[[1]] <= 15 ];
+        rm(coverage, cpgset, locs)
+    } # locsgood, -locs, -cpgset
+
+    # Age covariate and effects
+    {
+        age = sample(20:80, size = nsamples, replace = TRUE)
+        cpgageset = groupSample( len = length(locsgood),
+                                 size = length(locsgood)/100,
+                                 gr = 6);
+        cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
+        cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
+        rm(cpgageset)
+    } # age, cpgage1, cpgage2
+
+    # casecontrol
+    {
+        ccs = seq_len(nsamples) %% 2L;
+        cpgccset = groupSample( len = length(locsgood), size = 600, gr = 6);
+        cpgccc1 = cpgccset[  1:(length(cpgccset)/2) ];
+        cpgccc2 = cpgccset[-(1:(length(cpgccset)/2))];
+        rm(cpgccset)
+    } # ccs, cpgccc1, cpgccc2
+
+    # Covariate file, bam list
+    {
+        cvrt = data.frame(
+            samples = sprintf("BAM%03d",1:nsamples),
+            age = age,
+            casecontrol = ccs,
+            stringsAsFactors = FALSE);
+        write.table(file = paste0(dir,"/covariates.txt"),
+                    x = cvrt,
+                    sep = "\t",
+                    row.names = FALSE);
+        writeLines(con = paste0(dir,"/bam_list.txt"),
+                   text = cvrt$samples);
+    } # cvrt, /covariates.txt, /bam_list.txt
+
+    # Main loop
+    cpgprob = rep(1,length(locsgood));
+    for( bam in seq_len(nsamples)){ # bam = 1
+
+        if(verbose)
+            message("Creating BAM ", bam, " of ", nsamples);
+
+        # Change CpG probabilities
+        # by age and case-control status
+        cpgprob[cpgage1] =     age[bam]/100;
+        cpgprob[cpgage2] = 1 - age[bam]/100;
+        cpgprob[cpgccc1] =     ccs[bam];
+        cpgprob[cpgccc1] = 1 - ccs[bam];
+
+        # Pick CpG locations by the probabilities above
+        cpglocs = sample(locsgood, prob = cpgprob,
+                              size = nreads, replace = TRUE);
+        # read strand (0 - forward, 1 - reverse)
+        readdir = sample(c(0L,1L), size = nreads, replace = TRUE);
+        # distance to the CpG of interest
+        roffset = sample(seq_along(fragdistr)-1L, prob = fragdistr,
+                              size = nreads, replace = TRUE);
+        # read start (and end) position, as reads are 1bp long
+        readpos = cpglocs - (1L - 2L*readdir)*roffset;
+        rm(roffset, cpglocs);
+
+        # Sort reads by location
+        ord = sort.list(readpos);
+        readpos = readpos[ord];
+        readdir = readdir[ord];
+        rm(ord)
+
+        # Write sam file
+        filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
+        fid = file(description = filesam, open = "wt")
+        writeLines(con = fid,
+                   sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",
+                           chrlen+1e4));
+        writeLines(con = fid,
+            sprintf("%06d\t%d\tchr1\t%d\t65\t1M\t*\t0\t0\tA\t*",
                 1:nreads, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
                 readdir*16L, # FLAG Int [0,216-1] bitwise FLAG
                 # RNAME String \*|[!-()+-<>-~][!-~]* Reference sequence NAME
@@ -141,14 +141,14 @@ ramwas0createArtificialData = function(dir,
                 # 10 SEQ String \*|[A-Za-z=.]+ segment SEQuence
                 # 11 QUAL String [!-~]+ ASCII of Phred-scaled base QUALity+33
             ));
-		# flush(fid)
-		close(fid);
-		rm(readdir, readpos)
-		
-		asBam(file = filesam, 
+        # flush(fid)
+        close(fid);
+        rm(readdir, readpos)
+
+        asBam(file = filesam,
               destination = sprintf("%s/bams/BAM%03d", dir, bam),
               overwrite=TRUE, indexDestination=FALSE);
-		file.remove(filesam)
-	}
-	return(invisible(NULL));
+        file.remove(filesam)
+    }
+    return(invisible(NULL));
 }

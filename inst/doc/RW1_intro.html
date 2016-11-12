@@ -143,7 +143,7 @@ param$maxfragmentsize = 250</code></pre>
 <li><code>rds_qc</code> – directory with BAM quality control metrics, one R data file per BAM.</li>
 <li><code>qc/coverage_by_density</code> - plots showing average coverage at a function of CpG density, one plot per BAM.<br />
  These plots illustrate the performance of enrichment protocol. It is a sign of good quality data if the shape of these plots is the same across BAMs.</li>
-<li><code>qc/edit_distance</code> - plots showing distribution of edit distance, i.e. number of mismatches between the read and the reference genome, one plot per BAM.</li>
+<li><code>qc/edit_distance</code> - plots showing distribution of edit distance, i.e. number of mismatches between the read and the reference genome, one plot per BAM.</li>
 <li><code>qc/isolated_distance</code> - plots showing distribution of distances from read starts to isolated CpGs, one plot per BAM.<br />
 The CpGs are called isolated if they are located at least <code>maxfragmentsize</code> basepairs away from other CpGs. The distribution of reads around these CpGs is used later for estimation of fragment size distribution.</li>
 <li><code>qc/matched_length</code> - plots showing distribution of the length of the reads aligned to the reference genome, one plot per BAM.</li>
@@ -304,40 +304,53 @@ ramwas7multiMarker(param)</code></pre>
 ## [5] LC_TIME=English_United States.1252    
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+## [8] methods   base     
 ## 
 ## other attached packages:
-## [1] knitr_1.15       BiocStyle_2.3.6  devtools_1.12.0  ramwas_0.99.1   
-## [5] filematrix_1.1.0 RSQLite_1.0.0    DBI_0.5-1        BiocCheck_1.11.1
+##  [1] BSgenome.Ecoli.NCBI.20080805_1.3.1000
+##  [2] BSgenome_1.43.0                      
+##  [3] rtracklayer_1.35.1                   
+##  [4] Biostrings_2.43.0                    
+##  [5] XVector_0.15.0                       
+##  [6] GenomicRanges_1.27.5                 
+##  [7] GenomeInfoDb_1.11.3                  
+##  [8] IRanges_2.9.7                        
+##  [9] S4Vectors_0.13.2                     
+## [10] BiocGenerics_0.21.0                  
+## [11] knitr_1.15                           
+## [12] BiocStyle_2.3.6                      
+## [13] devtools_1.12.0                      
+## [14] ramwas_0.99.1                        
+## [15] filematrix_1.1.0                     
+## [16] RSQLite_1.0.0                        
+## [17] DBI_0.5-1                            
+## [18] BiocCheck_1.11.1                     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.7                BiocInstaller_1.25.2      
-##  [3] compiler_3.4.0             GenomeInfoDb_1.11.3       
-##  [5] XVector_0.15.0             bitops_1.0-6              
-##  [7] iterators_1.0.8            tools_3.4.0               
-##  [9] zlibbioc_1.21.0            biomaRt_2.31.1            
-## [11] digest_0.6.10              tibble_1.2                
-## [13] memoise_1.0.0              jsonlite_1.1              
-## [15] evaluate_0.10              lattice_0.20-34           
-## [17] Matrix_1.2-7.1             foreach_1.4.3             
-## [19] graph_1.53.0               yaml_2.1.13               
-## [21] curl_2.2                   parallel_3.4.0            
-## [23] withr_1.0.2                stringr_1.1.0             
-## [25] httr_1.2.1                 Biostrings_2.43.0         
-## [27] S4Vectors_0.13.2           IRanges_2.9.7             
-## [29] stats4_3.4.0               grid_3.4.0                
-## [31] glmnet_2.0-5               getopt_1.20.0             
-## [33] optparse_1.3.2             Biobase_2.35.0            
-## [35] R6_2.2.0                   AnnotationDbi_1.37.0      
-## [37] XML_3.98-1.4               RBGL_1.51.0               
-## [39] BiocParallel_1.9.1         rmarkdown_1.1             
-## [41] magrittr_1.5               htmltools_0.3.5           
-## [43] Rsamtools_1.27.2           codetools_0.2-15          
-## [45] biocViews_1.43.1           GenomicAlignments_1.11.0  
-## [47] BiocGenerics_0.21.0        GenomicRanges_1.27.5      
-## [49] assertthat_0.1             RUnit_0.4.31              
-## [51] SummarizedExperiment_1.5.2 KernSmooth_2.23-15        
-## [53] stringi_1.1.2              RCurl_1.95-4.8</code></pre>
+##  [1] SummarizedExperiment_1.5.2 lattice_0.20-34           
+##  [3] htmltools_0.3.5            getopt_1.20.0             
+##  [5] yaml_2.1.13                RBGL_1.51.0               
+##  [7] XML_3.98-1.4               optparse_1.3.2            
+##  [9] withr_1.0.2                BiocParallel_1.9.1        
+## [11] foreach_1.4.3              stringr_1.1.0             
+## [13] zlibbioc_1.21.0            biocViews_1.43.1          
+## [15] codetools_0.2-15           evaluate_0.10             
+## [17] memoise_1.0.0              Biobase_2.35.0            
+## [19] biomaRt_2.31.1             BiocInstaller_1.25.2      
+## [21] RUnit_0.4.31               curl_2.2                  
+## [23] AnnotationDbi_1.37.0       highr_0.6                 
+## [25] Rcpp_0.12.7                KernSmooth_2.23-15        
+## [27] graph_1.53.0               jsonlite_1.1              
+## [29] Rsamtools_1.27.2           digest_0.6.10             
+## [31] stringi_1.1.2              grid_3.4.0                
+## [33] tools_3.4.0                bitops_1.0-6              
+## [35] magrittr_1.5               RCurl_1.95-4.8            
+## [37] glmnet_2.0-5               tibble_1.2                
+## [39] Matrix_1.2-7.1             assertthat_0.1            
+## [41] rmarkdown_1.1              httr_1.2.1                
+## [43] iterators_1.0.8            R6_2.2.0                  
+## [45] GenomicAlignments_1.11.0   compiler_3.4.0</code></pre>
 </div>
 
 

@@ -1,18 +1,18 @@
 \name{parameterDump}
 \alias{parameterDump}
 \title{
-	Save Parameters in a Text File
+    Save Parameters in a Text File
 }
 \description{
-	Saves parameters in a text file, 
-	prioritizing those listed in \code{toplines}.
+    Saves parameters in a text file,
+    prioritizing those listed in \code{toplines}.
 }
 \usage{
 parameterDump(dir, param, toplines = NULL)
 }
 \arguments{
   \item{dir}{
-    Directory to save the parameters to. 
+    Directory to save the parameters to.
     The file is named \code{"UsedSettings.txt"}.
   }
   \item{param}{
@@ -23,17 +23,17 @@ parameterDump(dir, param, toplines = NULL)
   }
 }
 \details{
-  This function is used internally by multiple RaMWAS 
+  This function is used internally by multiple RaMWAS
   functions to record parameters used to run the analysis.
 }
 \author{
-	Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \note{
-	This function is not intended to be run by the user.
+    This function is not intended to be run by the user.
 }
 \seealso{
-	See \link{pipeline}.
+    See \link{pipeline}.
 }
 \examples{
 param = list(
@@ -43,7 +43,7 @@ param = list(
     characterVector = c("Hi","Hi again","Bye"),
     dataframe = data.frame(a = 1:12, b = 12:1)
     )
-    
+
 thedir = tempdir()
 
 parameterDump(thedir, param, c("integer","characterVector"))

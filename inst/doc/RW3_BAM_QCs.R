@@ -19,14 +19,14 @@ cat("Reads total:", qc$reads.total)
 ## ----reads.aligned-------------------------------------------------------
 {
  cat("Reads aligned:", qc$reads.aligned, "\n")
- cat("This is ", qc$reads.aligned / qc$reads.total * 100, 
+ cat("This is ", qc$reads.aligned / qc$reads.total * 100,
      "% of all reads", sep="")
 }
 
 ## ----reads.recorded------------------------------------------------------
 {
  cat("Reads recorded:",qc$reads.recorded,"\n")
- cat("This is ", qc$reads.recorded / qc$reads.aligned * 100, 
+ cat("This is ", qc$reads.recorded / qc$reads.aligned * 100,
      "% of aligned reads", sep="")
 }
 
@@ -41,7 +41,7 @@ cat("Reads total:", qc$reads.total)
 {
  cat("Average alignment score:", qcmean(qc$hist.score1), "\n")
  cat("Average alignment score, no filter:", qcmean(qc$bf.hist.score1), "\n")
- par(mfrow=c(1,2)) 
+ par(mfrow=c(1,2))
  plot(qc$hist.score1)
  plot(qc$bf.hist.score1)
 }
@@ -49,9 +49,9 @@ cat("Reads total:", qc$reads.total)
 ## ----hist.length.matched, fig.width=8------------------------------------
 {
  cat("Average aligned length:", qcmean(qc$hist.length.matched), "\n")
- cat("Average aligned length, no filter:", 
+ cat("Average aligned length, no filter:",
      qcmean(qc$bf.hist.length.matched), "\n")
- par(mfrow = c(1,2)) 
+ par(mfrow = c(1,2))
  plot(qc$hist.length.matched)
  plot(qc$bf.hist.length.matched)
 }
@@ -60,7 +60,7 @@ cat("Reads total:", qc$reads.total)
 {
  cat("Average edit distance:", qcmean(qc$hist.edit.dist1), "\n")
  cat("Average edit distance, no filter:", qcmean(qc$bf.hist.edit.dist1), "\n")
- par(mfrow = c(1,2)) 
+ par(mfrow = c(1,2))
  plot(qc$hist.edit.dist1)
  plot(qc$bf.hist.edit.dist1)
 }
@@ -68,11 +68,11 @@ cat("Reads total:", qc$reads.total)
 ## ----reads.recorded.no.repeats-------------------------------------------
 {
  cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
- cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100, 
+ cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
      "% of aligned reads", "\n", sep="")
- cat("Fraction of reads on forward strand (with    duplicates):", 
+ cat("Fraction of reads on forward strand (with    duplicates):",
      qcmean(qc$frwrev), "\n")
- cat("Fraction of reads on forward strand (without duplicates):", 
+ cat("Fraction of reads on forward strand (without duplicates):",
      qcmean(qc$frwrev.no.repeats), "\n")
 }
 
@@ -95,16 +95,16 @@ plot(qc$hist.isolated.dist1)
 
 ## ----chrXY---------------------------------------------------------------
 {
- cat("ChrX reads: ", qc$chrX.count[1], ", which is ", 
+ cat("ChrX reads: ", qc$chrX.count[1], ", which is ",
      qcmean(qc$chrX.count)*100, "% of total", sep="", "\n")
- cat("ChrX reads: ", qc$chrY.count[1], ", which is ", 
+ cat("ChrX reads: ", qc$chrY.count[1], ", which is ",
      qcmean(qc$chrY.count)*100, "% of total", sep="", "\n")
 }
 
 ## ----avg.coverage.by.density---------------------------------------------
 {
-	cat("Highest coverage is observed at CpG density of", 
-	    qcmean(qc$avg.coverage.by.density)^2);
-	plot(qc$avg.coverage.by.density)
+    cat("Highest coverage is observed at CpG density of",
+        qcmean(qc$avg.coverage.by.density)^2);
+    plot(qc$avg.coverage.by.density)
 }
 

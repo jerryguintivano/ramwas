@@ -1,38 +1,38 @@
 \name{parametersFromFile}
 \alias{parametersFromFile}
 \title{
-	Scan Parameters From a R Code File
+    Scan Parameters From a R Code File
 }
 \description{
-	The pipeline parameters can be stored in a simple file, 
-	formatted as R code. 
-	\code{parametersFromFile} transforms them into a parameter list 
-	used by the functions of this pipeline.
+    The pipeline parameters can be stored in a simple file,
+    formatted as R code.
+    \code{parametersFromFile} transforms them into a parameter list
+    used by the functions of this pipeline.
 }
 \usage{
 parametersFromFile(.parameterfile)
 }
 \arguments{
   \item{.parameterfile}{
-    Name of the file with the parameters set as R variables. 
+    Name of the file with the parameters set as R variables.
     See the example below.
   }
 }
 \details{
-	Variables with names starting with period (.) are ignored.
+    Variables with names starting with period (.) are ignored.
 }
 \note{
-	The file \code{.parameterfile} is executed as R code, 
-	so use only trusted parameter files.
+    The file \code{.parameterfile} is executed as R code,
+    so use only trusted parameter files.
 }
 \value{
     Returns the list with all the variables set in the file.
 }
 \author{
-	Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-	See \link{pipeline}.
+    See \link{pipeline}.
 }
 \examples{
 

@@ -214,7 +214,7 @@ sum(sapply(cpgset[1:22], length))</code></pre>
 </blockquote>
 <p>The generated allele count file can then be used to inject SNPs using the function <code>injectSNPsMAF</code>.</p>
 <pre class="r"><code># Do for all chromosomes
-genome[['chr22']] = 
+genome[['chr22']] =
     injectSNPsMAF(
         gensequence = BSGenome[['chr22']],
         frqcount = 'count_ALL_chr22.txt',
@@ -237,7 +237,7 @@ insilicoFASTQ(
     fraglength=75)</code></pre>
 <p>The generated FASTQ files are then aligned to the reference genome. Taking Bowtie2 as an example:</p>
 <blockquote>
-<p><code>bowtie2 --local --threads 14 --reorder -x bowtie2ind -U  chr1.fastq.gz | samtools view -bS -o chr1.bam</code></p>
+<p><code>bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam</code></p>
 </blockquote>
 <p>The generated BAMs are then scanned with RaMWAS and the coverage for one sample combining all the BAMs is calculated:</p>
 <pre class="r"><code>library(ramwas)
@@ -276,11 +276,11 @@ fac = rep(seq_along(cpgset), times = sapply(cpgset, length))
 levels(fac) = names(cpgset)
 class(fac) = 'factor'
 cover = split(cover, fac)
-    
+
 # filter CpGs on each chromosome by the coverage
 cpgsetQC = cpgset
 for( i in seq_along(cpgset) ){
-    keep = (cover[[i]] &gt;= (targetcov - covtolerance)) &amp; 
+    keep = (cover[[i]] &gt;= (targetcov - covtolerance)) &amp;
            (cover[[i]] &lt;= (targetcov + covtolerance))
     cpgsetQC[[i]] = cpgset[[i]][ keep ]
 }</code></pre>

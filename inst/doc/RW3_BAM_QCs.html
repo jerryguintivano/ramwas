@@ -107,7 +107,7 @@ qc = readRDS(filename)$qc;
 <p>The number of aligned reads is only 2% smaller, 2.42 billion.</p>
 <pre class="r"><code>{
  cat(&quot;Reads aligned:&quot;, qc$reads.aligned, &quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.aligned / qc$reads.total * 100, 
+ cat(&quot;This is &quot;, qc$reads.aligned / qc$reads.total * 100,
      &quot;% of all reads&quot;, sep=&quot;&quot;)
 }</code></pre>
 <pre><code>## Reads aligned: 2422356052 
@@ -118,7 +118,7 @@ qc = readRDS(filename)$qc;
 <p>Almost of 2.2 billion reads passed the score threshold.</p>
 <pre class="r"><code>{
  cat(&quot;Reads recorded:&quot;,qc$reads.recorded,&quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.recorded / qc$reads.aligned * 100, 
+ cat(&quot;This is &quot;, qc$reads.recorded / qc$reads.aligned * 100,
      &quot;% of aligned reads&quot;, sep=&quot;&quot;)
 }</code></pre>
 <pre><code>## Reads recorded: 2197642600 
@@ -142,7 +142,7 @@ qc = readRDS(filename)$qc;
 <pre class="r"><code>{
  cat(&quot;Average alignment score:&quot;, qcmean(qc$hist.score1), &quot;\n&quot;)
  cat(&quot;Average alignment score, no filter:&quot;, qcmean(qc$bf.hist.score1), &quot;\n&quot;)
- par(mfrow=c(1,2)) 
+ par(mfrow=c(1,2))
  plot(qc$hist.score1)
  plot(qc$bf.hist.score1)
 }</code></pre>
@@ -155,9 +155,9 @@ qc = readRDS(filename)$qc;
 <p>The length of the aligned part of a read is calculated from the CIGAR string in the BAM file using <code>cigarWidthAlongQuerySpace</code> function. As previously, <code>hist.length.matched</code> has the distribution for reads that passed the filter, <code>bf.hist.length.matched</code> - for all reads. The <code>qcmean</code> function for this QC measure returns the average value for the respective group. The first element of the vector contains the number of reads with 1 aligned basepair, the second with 2, and so on.</p>
 <pre class="r"><code>{
  cat(&quot;Average aligned length:&quot;, qcmean(qc$hist.length.matched), &quot;\n&quot;)
- cat(&quot;Average aligned length, no filter:&quot;, 
+ cat(&quot;Average aligned length, no filter:&quot;,
      qcmean(qc$bf.hist.length.matched), &quot;\n&quot;)
- par(mfrow = c(1,2)) 
+ par(mfrow = c(1,2))
  plot(qc$hist.length.matched)
  plot(qc$bf.hist.length.matched)
 }</code></pre>
@@ -172,7 +172,7 @@ qc = readRDS(filename)$qc;
 <pre class="r"><code>{
  cat(&quot;Average edit distance:&quot;, qcmean(qc$hist.edit.dist1), &quot;\n&quot;)
  cat(&quot;Average edit distance, no filter:&quot;, qcmean(qc$bf.hist.edit.dist1), &quot;\n&quot;)
- par(mfrow = c(1,2)) 
+ par(mfrow = c(1,2))
  plot(qc$hist.edit.dist1)
  plot(qc$bf.hist.edit.dist1)
 }</code></pre>
@@ -185,11 +185,11 @@ qc = readRDS(filename)$qc;
 <p>When there are mulptiple reads with the same start position, we suspect them to be falsely duplicated. In this case, reads in excess of 3 are removed (3 set by  parameter). Item <code>reads.recorded.no.repeats</code> records the total number of reads after removal of duplicates and <code>frwrev.no.repeats</code> show split between the forward and reverse strands. In our example, after removal of duplicates we are left with 90% of the reads. After removal of duplicate reads the fraction of reads on forward strand got even closer to 0.5.</p>
 <pre class="r"><code>{
  cat(&quot;Reads without duplicates:&quot;, qc$reads.recorded.no.repeats, &quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.recorded.no.repeats / qc$reads.recorded * 100, 
+ cat(&quot;This is &quot;, qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
      &quot;% of aligned reads&quot;, &quot;\n&quot;, sep=&quot;&quot;)
- cat(&quot;Fraction of reads on forward strand (with    duplicates):&quot;, 
+ cat(&quot;Fraction of reads on forward strand (with    duplicates):&quot;,
      qcmean(qc$frwrev), &quot;\n&quot;)
- cat(&quot;Fraction of reads on forward strand (without duplicates):&quot;, 
+ cat(&quot;Fraction of reads on forward strand (without duplicates):&quot;,
      qcmean(qc$frwrev.no.repeats), &quot;\n&quot;)
 }</code></pre>
 <pre><code>## Reads without duplicates: 1987137468 
@@ -232,9 +232,9 @@ qc = readRDS(filename)$qc;
 <h2><span class="header-section-number">2.13</span> Fraction of reads from chrX and chrY</h2>
 <p>The fractions of reads from chrX and chrY can be used to test whether the individuals have the same genetic gender as recorded in the records. Mismatches often indicate swapped or mislabeled samples. The first element of <code>qc$chrX.count</code> contains the number of chrX reads, while <code>qcmean(qc$chrX.count)</code> gives the fraction of total. Same for chrY.</p>
 <pre class="r"><code>{
- cat(&quot;ChrX reads: &quot;, qc$chrX.count[1], &quot;, which is &quot;, 
+ cat(&quot;ChrX reads: &quot;, qc$chrX.count[1], &quot;, which is &quot;,
      qcmean(qc$chrX.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
- cat(&quot;ChrX reads: &quot;, qc$chrY.count[1], &quot;, which is &quot;, 
+ cat(&quot;ChrX reads: &quot;, qc$chrY.count[1], &quot;, which is &quot;,
      qcmean(qc$chrY.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
 }</code></pre>
 <pre><code>## ChrX reads: 58392794, which is 2.939042% of total
@@ -245,7 +245,7 @@ qc = readRDS(filename)$qc;
 <p>For most of CpGs, the higher the density of CpGs, the higher is the amount of methylation in the neighborhood, and thus higher the coverage. The CpG densities over 10 are observed in CpG islands, where methylation usually does not change. We do not aim to cover those regions, thus it is ok, and even preferable that the average coverage is lower in highly CpG dense regions.,</p>
 <p>The QC measure <code>avg.coverage.by.density</code> allows us to inspect the changes in average coverage with respect to CpG density. The <code>qcmean</code> function returns the square root of the CpG density where maximum average coverage is achieved.</p>
 <pre class="r"><code>{
-    cat(&quot;Highest coverage is observed at CpG density of&quot;, 
+    cat(&quot;Highest coverage is observed at CpG density of&quot;,
         qcmean(qc$avg.coverage.by.density)^2);
     plot(qc$avg.coverage.by.density)
 }</code></pre>

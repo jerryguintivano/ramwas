@@ -61,9 +61,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#project-directory-structure"><span class="toc-section-number">2</span> Project directory structure</a></li>
 <li><a href="#pipeline-parameters"><span class="toc-section-number">3</span> Pipeline parameters</a></li>
 <li><a href="#pipeline-6-major-parts"><span class="toc-section-number">4</span> Pipeline, 6 major parts</a><ul>
-<li><a href="#scan-bam-files-filtering-reads-calculation-of-qc-measures-saving-the-read-start-positions."><span class="toc-section-number">4.1</span> Scan BAM files, filtering reads, calculation of QC measures, saving the read start positions.</a></li>
-<li><a href="#collect-qc-measures-from-individual-bams-summarizing-by-samples-recording-summary-and-plots."><span class="toc-section-number">4.2</span> Collect QC measures from individual BAMs, summarizing by samples, recording summary and plots.</a></li>
-<li><a href="#calculate-coverage-matrix-for-all-cpgs-across-all-samples-filter-cpgs-by-coverage-normalize-samples-to-the-same-sample-average."><span class="toc-section-number">4.3</span> Calculate coverage matrix for all CpGs across all samples, filter CpGs by coverage, normalize samples to the same sample average.</a></li>
+<li><a href="#scan-bam-files-filtering-reads-calculation-of-qc-measures"><span class="toc-section-number">4.1</span> Scan BAM files, filtering reads, calculation of QC measures,</a></li>
+<li><a href="#collect-qc-measures-from-individual-bams-summarizing-by-samples"><span class="toc-section-number">4.2</span> Collect QC measures from individual BAMs, summarizing by samples,</a></li>
+<li><a href="#calculate-coverage-matrix-for-all-cpgs-across-all-samples"><span class="toc-section-number">4.3</span> Calculate coverage matrix for all CpGs across all samples,</a></li>
 <li><a href="#principal-component-analysis"><span class="toc-section-number">4.4</span> Principal Component Analysis</a></li>
 <li><a href="#methylome-wide-association-study-mwas"><span class="toc-section-number">4.5</span> Methylome-wide association study (MWAS)</a></li>
 <li><a href="#cross-validation-with-multi-marker-elastic-net-model."><span class="toc-section-number">4.6</span> Cross Validation with multi-marker elastic net model.</a></li>
@@ -126,8 +126,9 @@ document.addEventListener("DOMContentLoaded", function() {
 </div>
 <div id="pipeline-6-major-parts" class="section level1">
 <h1><span class="header-section-number">4</span> Pipeline, 6 major parts</h1>
-<div id="scan-bam-files-filtering-reads-calculation-of-qc-measures-saving-the-read-start-positions." class="section level2">
-<h2><span class="header-section-number">4.1</span> Scan BAM files, filtering reads, calculation of QC measures, saving the read start positions.</h2>
+<div id="scan-bam-files-filtering-reads-calculation-of-qc-measures" class="section level2">
+<h2><span class="header-section-number">4.1</span> Scan BAM files, filtering reads, calculation of QC measures,</h2>
+<p>saving the read start positions.</p>
 <p>The BAM files must be located in <code>dirbam</code> and listed in <code>filebamlist</code>. The reads are filtered out if they have tag <code>scoretag</code> value less than <code>minscore</code>. The the read start information and other QC measures is then recorded. The scanning is done in parallel using at most <code>cputhreads</code> threads.</p>
 <pre class="r"><code>{
     suppressMessages({
@@ -156,8 +157,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <li>See <code>vignette(&quot;RaMWAS_param&quot;)</code> for information about the QC measures.</li>
 </ul>
 </div>
-<div id="collect-qc-measures-from-individual-bams-summarizing-by-samples-recording-summary-and-plots." class="section level2">
-<h2><span class="header-section-number">4.2</span> Collect QC measures from individual BAMs, summarizing by samples, recording summary and plots.</h2>
+<div id="collect-qc-measures-from-individual-bams-summarizing-by-samples" class="section level2">
+<h2><span class="header-section-number">4.2</span> Collect QC measures from individual BAMs, summarizing by samples,</h2>
+<p>recording summary and plots.</p>
 <p>Next we collect QC information across BAMs, collect it by samples (if multiple BAMs correspond to one sample), and estimate fragment size distribution from the read start locations around isolated CpGs.</p>
 <pre class="r"><code>{
     suppressMessages({
@@ -177,8 +179,9 @@ document.addEventListener("DOMContentLoaded", function() {
 <li>The fragment size distribution is estimated using all BAMs in <code>bam2sample</code> parameter (if defined) and saved in “Fragment_size_distribution.txt” file in the project directory.</li>
 </ul>
 </div>
-<div id="calculate-coverage-matrix-for-all-cpgs-across-all-samples-filter-cpgs-by-coverage-normalize-samples-to-the-same-sample-average." class="section level2">
-<h2><span class="header-section-number">4.3</span> Calculate coverage matrix for all CpGs across all samples, filter CpGs by coverage, normalize samples to the same sample average.</h2>
+<div id="calculate-coverage-matrix-for-all-cpgs-across-all-samples" class="section level2">
+<h2><span class="header-section-number">4.3</span> Calculate coverage matrix for all CpGs across all samples,</h2>
+<p>filter CpGs by coverage, normalize samples to the same sample average.</p>
 <p>Next, we create a coverage matrix, normalized to have the same average for each sample. The coverage matrix is stored in big file as a <code>filematrix</code> object. See <code>filematrix</code> package for format details. Again, the task is parallelized across <code>cputhreads</code> threads.</p>
 <pre class="r"><code>{
     suppressMessages({
@@ -215,11 +218,17 @@ document.addEventListener("DOMContentLoaded", function() {
     ramwas4PCA(param)
     })
     message(&quot;The generated files and directories in PCA directory are:&quot;)
-    message(paste(list.files(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts&quot;)), collate=&quot;\n&quot;))
+    message(paste(list.files(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts&quot;)),
+                  collate=&quot;\n&quot;))
     message(&quot;Correlation of top PCs with covariates are:&quot;);
-    show(head( read.table(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt&quot;), sep = &quot;\t&quot;, header = TRUE)))
+    show(head( read.table(
+        paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt&quot;),
+        sep = &quot;\t&quot;, header = TRUE)))
     message(&quot;P-values for the associuation of top PCs with covariates are:&quot;);
-    show(head( read.table(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt&quot;), sep = &quot;\t&quot;, header = TRUE)))
+    show(head( read.table(
+        paste0(dir,
+               &quot;/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt&quot;),
+        sep = &quot;\t&quot;, header = TRUE)))
 }</code></pre>
 <p><strong>Parameters</strong></p>
 <ul>
@@ -247,10 +256,16 @@ document.addEventListener("DOMContentLoaded", function() {
     ramwas5MWAS(param)
     })
     message(&quot;The generated files and directories in MWAS directories are:&quot;);
-    message(paste(list.files(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs&quot;)), collate=&quot;\n&quot;))
+    message(paste(list.files(
+        paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs&quot;)),
+        collate=&quot;\n&quot;))
     message(&quot;The top MWAS findings are:&quot;);
-    show(head( read.table(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt&quot;), sep = &quot;\t&quot;, header = TRUE)))
-    qqPlotFast(fm.load(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Stats_and_pvalues&quot;))[,3])
+    show(head( read.table(paste0(dir,
+      &quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt&quot;),
+      sep = &quot;\t&quot;, header = TRUE)))
+    qqPlotFast(fm.load(paste0(dir,
+       &quot;/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs&quot;,
+       &quot;/Stats_and_pvalues&quot;))[,3])
     title(&quot;Case-control status vs. methylation coverage&quot;)
 }</code></pre>
 <p>The testing can easily be repeated for another outcome variable (age):</p>
@@ -260,10 +275,14 @@ document.addEventListener("DOMContentLoaded", function() {
     ramwas5MWAS(param)
     })
     message(&quot;The generated files and directories in MWAS directories are:&quot;);
-    message(paste(list.files(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs&quot;)), collate=&quot;\n&quot;))
+    message(paste(list.files(paste0(dir,
+       &quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs&quot;)), collate=&quot;\n&quot;))
     message(&quot;The top MWAS findings are:&quot;);
-    show(head( read.table(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt&quot;), sep = &quot;\t&quot;, header = TRUE)))
-    qqPlotFast(fm.load(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Stats_and_pvalues&quot;))[,3])
+    show(head( read.table(paste0(dir,
+           &quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt&quot;),
+           sep = &quot;\t&quot;, header = TRUE)))
+    qqPlotFast(fm.load(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/&quot;,
+                              &quot;Testing_age_0_PCs/Stats_and_pvalues&quot;))[,3])
     title(&quot;Age vs. methylation coverage&quot;)
 }</code></pre>
 <p><strong>Parameters</strong></p>
@@ -298,8 +317,10 @@ document.addEventListener("DOMContentLoaded", function() {
     ramwas7multiMarker(param)
     })
     })
-    message(&quot;The generated files and directories in Multi-marker directory are:&quot;);
-    message(paste(list.files(paste0(dir,&quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds&quot;)), collate=&quot;\n&quot;))
+    message(&quot;The generated files and directories in Multi-marker directory:&quot;);
+    message(paste(list.files(paste0(dir,
+       &quot;/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds&quot;)),
+       collate=&quot;\n&quot;))
 }</code></pre>
 <p><strong>R functions.</strong> RaMWAS pipeline can estimate predictive power of elastic net applied to top CpGs from MWAS. To have an unbiased estimate of predictive power we use cross validation approach. First, <code>ramwas6crossValidation</code> runs MWAS 10 times, each time excluding different 10% of the data. Then, <code>ramwas7multiMarker</code> trains elastic net on the top CpGs from each of 10 MWASes and predicts the phenotype of interest for the remaing 10%. This procedure is then applied 10 times to have a prediction for all samples.</p>
 <p><strong>Parameters</strong></p>

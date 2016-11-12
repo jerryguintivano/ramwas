@@ -1,7 +1,7 @@
 \name{injectSNPsMAF}
 \alias{injectSNPsMAF}
 \title{
-	Inject SNPs from VCF Count File into a DNA Sequence
+    Inject SNPs from VCF Count File into a DNA Sequence
 }
 \description{
   Injects SNPs from a VCF count file into a DNA sequence.
@@ -11,12 +11,12 @@ injectSNPsMAF(gensequence, frqcount, MAF = 0.01)
 }
 \arguments{
   \item{gensequence}{
-    A string or \code{\linkS4class{DNAString}} of the DNA sequence. 
+    A string or \code{\linkS4class{DNAString}} of the DNA sequence.
   }
   \item{frqcount}{
-    File name of the allele count file produced by 
+    File name of the allele count file produced by
       \code{vcftools} with \code{--counts} parameter.
-    Alternatively, the file content can be provided as a 
+    Alternatively, the file content can be provided as a
       character vector (see \code{\link[base]{readLines}}).
   }
   \item{MAF}{
@@ -24,13 +24,13 @@ injectSNPsMAF(gensequence, frqcount, MAF = 0.01)
   }
 }
 \value{
-	Returns a string with the genome sequence with SNPs injected.
+    Returns a string with the genome sequence with SNPs injected.
 }
 \author{
-	Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-  See \code{\link[BSgenome]{injectSNPs}} for the standard analog 
+  See \code{\link[BSgenome]{injectSNPs}} for the standard analog
   function without MAF filtering.
 }
 \examples{

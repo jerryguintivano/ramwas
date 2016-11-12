@@ -2,37 +2,37 @@
 \alias{cachedRDSload}
 \title{Cached loading of an .rds file.}
 \description{
-Loads an .rds file \code{rdsfilename} using \code{\link[base]{readRDS}} 
+Loads an .rds file \code{rdsfilename} using \code{\link[base]{readRDS}}
 and returns the loaded object.
-The object is also saved in a cache so that repeated calls of the 
+The object is also saved in a cache so that repeated calls of the
 function with the same filename return the same object instanteneously.
 }
 \usage{
 cachedRDSload(rdsfilename)
 }
 \arguments{
-	\item{rdsfilename}{
-		Name of the R-formatted file with all the parameters.
-	}
+    \item{rdsfilename}{
+        Name of the R-formatted file with all the parameters.
+    }
 }
 \details{
-	The cached object is stored in a private package environment.
+    The cached object is stored in a private package environment.
 }
 \value{
-	Returns the object loaded with \code{\link[base]{readRDS}} from 
-	\code{rdsfilename} at this or a previous call of the function.
+    Returns the object loaded with \code{\link[base]{readRDS}} from
+    \code{rdsfilename} at this or a previous call of the function.
 }
 \references{
-	.
+    .
 }
 \seealso{
-	.
+    .
 }
 \note{
-	.
+    .
 }
 \author{
-	Andrey Shabalin \email{ashabalin@vcu.edu}
+    Andrey Shabalin \email{ashabalin@vcu.edu}
 }
 \examples{
 ### Change filename to hg19 CpGset

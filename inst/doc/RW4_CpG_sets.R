@@ -48,19 +48,19 @@ print(cpgset$NC_008253[1:10])
 #  covtolerance = 10
 #  
 #  param = list(
-#  	dirproject = '.',
-#  	dirbam = './bams',
-#  	dirfilter = TRUE,
-#  	bamnames = chrset,
-#  	bam2sample = list(all_samples = chrset),
-#  	scoretag = "AS",
-#  	minscore = 100,
-#  	minfragmentsize = targetcov,
-#  	maxfragmentsize = targetcov,
-#  	minavgcpgcoverage = 0,
-#  	minnonzerosamples = 0,
-#  	# filecpgset - file with the CpG set being QC-ed
-#  	filecpgset = filecpgset
+#      dirproject = '.',
+#      dirbam = './bams',
+#      dirfilter = TRUE,
+#      bamnames = chrset,
+#      bam2sample = list(all_samples = chrset),
+#      scoretag = "AS",
+#      minscore = 100,
+#      minfragmentsize = targetcov,
+#      maxfragmentsize = targetcov,
+#      minavgcpgcoverage = 0,
+#      minnonzerosamples = 0,
+#      # filecpgset - file with the CpG set being QC-ed
+#      filecpgset = filecpgset
 #  )
 #  param1 = parameterPreprocess(param)
 #  ramwas1scanBams(param)
@@ -79,7 +79,7 @@ print(cpgset$NC_008253[1:10])
 #  levels(fac) = names(cpgset)
 #  class(fac) = 'factor'
 #  cover = split(cover, fac)
-#  	
+#  
 #  # filter CpGs on each chromosome by the coverage
 #  cpgsetQC = cpgset
 #  for( i in seq_along(cpgset) ){
