@@ -10,7 +10,7 @@
 
 <meta name="author" content="Andrey A Shabalin" />
 
-<meta name="date" content="2016-10-25" />
+<meta name="date" content="2016-11-11" />
 
 <title>RaMWAS QC Measures</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title">RaMWAS QC Measures</h1>
 <h4 class="author"><em>Andrey A Shabalin</em></h4>
-<h4 class="date"><em>2016-10-25</em></h4>
+<h4 class="date"><em>2016-11-11</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -63,10 +63,10 @@ document.addEventListener("DOMContentLoaded", function() {
 <li><a href="#total-number-of-reads-in-the-bam-files"><span class="toc-section-number">2.2</span> Total number of reads in the BAM file(s)</a></li>
 <li><a href="#number-of-reads-aligned-to-the-reference-genome"><span class="toc-section-number">2.3</span> Number of reads aligned to the reference genome</a></li>
 <li><a href="#number-of-reads-that-passed-minimum-score-filter-and-are-recorded"><span class="toc-section-number">2.4</span> Number of reads that passed minimum score filter and are recorded</a></li>
-<li><a href="#number-of-recorded-reads-aligned-to-the-forward-and-reverse-strands-respectively"><span class="toc-section-number">2.5</span> Number of recorded reads aligned to the forward and reverse strands respectively</a></li>
+<li><a href="#number-of-recorded-reads-aligned-to-each-strand"><span class="toc-section-number">2.5</span> Number of recorded reads aligned to each strand</a></li>
 <li><a href="#distribution-of-the-read-scores"><span class="toc-section-number">2.6</span> Distribution of the read scores</a></li>
 <li><a href="#distribution-of-the-length-of-the-aligned-part-of-the-reads"><span class="toc-section-number">2.7</span> Distribution of the length of the aligned part of the reads</a></li>
-<li><a href="#distribution-of-edit-distance-between-the-aligned-part-of-the-read-and-the-reference-genome"><span class="toc-section-number">2.8</span> Distribution of edit distance between the aligned part of the read and the reference genome</a></li>
+<li><a href="#distribution-of-edit-distance"><span class="toc-section-number">2.8</span> Distribution of edit distance</a></li>
 <li><a href="#number-of-reads-after-removal-of-duplicate-reads"><span class="toc-section-number">2.9</span> Number of reads after removal of duplicate reads</a></li>
 <li><a href="#number-of-reads-away-from-cpgs"><span class="toc-section-number">2.10</span> Number of reads away from CpGs</a></li>
 <li><a href="#average-coverage-of-cpgs-and-non-cpgs"><span class="toc-section-number">2.11</span> Average coverage of CpGs and non-CpGs</a></li>
@@ -107,7 +107,8 @@ qc = readRDS(filename)$qc;
 <p>The number of aligned reads is only 2% smaller, 2.42 billion.</p>
 <pre class="r"><code>{
  cat(&quot;Reads aligned:&quot;, qc$reads.aligned, &quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.aligned / qc$reads.total * 100, &quot;% of all reads&quot;, sep=&quot;&quot;)
+ cat(&quot;This is &quot;, qc$reads.aligned / qc$reads.total * 100, 
+     &quot;% of all reads&quot;, sep=&quot;&quot;)
 }</code></pre>
 <pre><code>## Reads aligned: 2422356052 
 ## This is 98.2923% of all reads</code></pre>
@@ -117,13 +118,14 @@ qc = readRDS(filename)$qc;
 <p>Almost of 2.2 billion reads passed the score threshold.</p>
 <pre class="r"><code>{
  cat(&quot;Reads recorded:&quot;,qc$reads.recorded,&quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.recorded / qc$reads.aligned * 100, &quot;% of aligned reads&quot;, sep=&quot;&quot;)
+ cat(&quot;This is &quot;, qc$reads.recorded / qc$reads.aligned * 100, 
+     &quot;% of aligned reads&quot;, sep=&quot;&quot;)
 }</code></pre>
 <pre><code>## Reads recorded: 2197642600 
 ## This is 90.72335% of aligned reads</code></pre>
 </div>
-<div id="number-of-recorded-reads-aligned-to-the-forward-and-reverse-strands-respectively" class="section level2">
-<h2><span class="header-section-number">2.5</span> Number of recorded reads aligned to the forward and reverse strands respectively</h2>
+<div id="number-of-recorded-reads-aligned-to-each-strand" class="section level2">
+<h2><span class="header-section-number">2.5</span> Number of recorded reads aligned to each strand</h2>
 <p>For this measure, <code>qcmean</code> returns the fraction of reads on forward strand. Normally, the number of reads on forward and reverse strands is very close, so <code>qcmean</code> should give a number close to <code>0.5</code>.</p>
 <pre class="r"><code>{
  cat(&quot;Reads on forward strand:&quot;, qc$frwrev[1],&quot;\n&quot;)
@@ -153,7 +155,8 @@ qc = readRDS(filename)$qc;
 <p>The length of the aligned part of a read is calculated from the CIGAR string in the BAM file using <code>cigarWidthAlongQuerySpace</code> function. As previously, <code>hist.length.matched</code> has the distribution for reads that passed the filter, <code>bf.hist.length.matched</code> - for all reads. The <code>qcmean</code> function for this QC measure returns the average value for the respective group. The first element of the vector contains the number of reads with 1 aligned basepair, the second with 2, and so on.</p>
 <pre class="r"><code>{
  cat(&quot;Average aligned length:&quot;, qcmean(qc$hist.length.matched), &quot;\n&quot;)
- cat(&quot;Average aligned length, no filter:&quot;, qcmean(qc$bf.hist.length.matched), &quot;\n&quot;)
+ cat(&quot;Average aligned length, no filter:&quot;, 
+     qcmean(qc$bf.hist.length.matched), &quot;\n&quot;)
  par(mfrow = c(1,2)) 
  plot(qc$hist.length.matched)
  plot(qc$bf.hist.length.matched)
@@ -162,8 +165,9 @@ qc = readRDS(filename)$qc;
 ## Average aligned length, no filter: 72.60318</code></pre>
 <p><img src="data:image/png;base64,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" alt /></p>
 </div>
-<div id="distribution-of-edit-distance-between-the-aligned-part-of-the-read-and-the-reference-genome" class="section level2">
-<h2><span class="header-section-number">2.8</span> Distribution of edit distance between the aligned part of the read and the reference genome</h2>
+<div id="distribution-of-edit-distance" class="section level2">
+<h2><span class="header-section-number">2.8</span> Distribution of edit distance</h2>
+<p>(between the aligned part of the read and the reference genome)</p>
 <p>This QC measure is recorded from NM tag in BAM files. As previously, <code>hist.edit.dist1</code> has the distribution for reads that passed the filter, <code>bf.hist.edit.dist1</code> - for all reads. The <code>qcmean</code> function for this QC measure returns the average value for the respective group. The first element of the vector contains the number of reads with 0 edit distance (perfect match), the second with edit distance 1, and so on.</p>
 <pre class="r"><code>{
  cat(&quot;Average edit distance:&quot;, qcmean(qc$hist.edit.dist1), &quot;\n&quot;)
@@ -181,9 +185,12 @@ qc = readRDS(filename)$qc;
 <p>When there are mulptiple reads with the same start position, we suspect them to be falsely duplicated. In this case, reads in excess of 3 are removed (3 set by  parameter). Item <code>reads.recorded.no.repeats</code> records the total number of reads after removal of duplicates and <code>frwrev.no.repeats</code> show split between the forward and reverse strands. In our example, after removal of duplicates we are left with 90% of the reads. After removal of duplicate reads the fraction of reads on forward strand got even closer to 0.5.</p>
 <pre class="r"><code>{
  cat(&quot;Reads without duplicates:&quot;, qc$reads.recorded.no.repeats, &quot;\n&quot;)
- cat(&quot;This is &quot;, qc$reads.recorded.no.repeats / qc$reads.recorded * 100, &quot;% of aligned reads&quot;, &quot;\n&quot;, sep=&quot;&quot;)
- cat(&quot;Fraction of reads on forward strand (with    duplicates):&quot;, qcmean(qc$frwrev), &quot;\n&quot;)
- cat(&quot;Fraction of reads on forward strand (without duplicates):&quot;, qcmean(qc$frwrev.no.repeats), &quot;\n&quot;)
+ cat(&quot;This is &quot;, qc$reads.recorded.no.repeats / qc$reads.recorded * 100, 
+     &quot;% of aligned reads&quot;, &quot;\n&quot;, sep=&quot;&quot;)
+ cat(&quot;Fraction of reads on forward strand (with    duplicates):&quot;, 
+     qcmean(qc$frwrev), &quot;\n&quot;)
+ cat(&quot;Fraction of reads on forward strand (without duplicates):&quot;, 
+     qcmean(qc$frwrev.no.repeats), &quot;\n&quot;)
 }</code></pre>
 <pre><code>## Reads without duplicates: 1987137468 
 ## This is 90.42132% of aligned reads
@@ -225,8 +232,10 @@ qc = readRDS(filename)$qc;
 <h2><span class="header-section-number">2.13</span> Fraction of reads from chrX and chrY</h2>
 <p>The fractions of reads from chrX and chrY can be used to test whether the individuals have the same genetic gender as recorded in the records. Mismatches often indicate swapped or mislabeled samples. The first element of <code>qc$chrX.count</code> contains the number of chrX reads, while <code>qcmean(qc$chrX.count)</code> gives the fraction of total. Same for chrY.</p>
 <pre class="r"><code>{
- cat(&quot;ChrX reads: &quot;, qc$chrX.count[1], &quot;, which is &quot;, qcmean(qc$chrX.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
- cat(&quot;ChrX reads: &quot;, qc$chrY.count[1], &quot;, which is &quot;, qcmean(qc$chrY.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
+ cat(&quot;ChrX reads: &quot;, qc$chrX.count[1], &quot;, which is &quot;, 
+     qcmean(qc$chrX.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
+ cat(&quot;ChrX reads: &quot;, qc$chrY.count[1], &quot;, which is &quot;, 
+     qcmean(qc$chrY.count)*100, &quot;% of total&quot;, sep=&quot;&quot;, &quot;\n&quot;)
 }</code></pre>
 <pre><code>## ChrX reads: 58392794, which is 2.939042% of total
 ## ChrX reads: 15592584, which is 0.7848102% of total</code></pre>
@@ -236,7 +245,8 @@ qc = readRDS(filename)$qc;
 <p>For most of CpGs, the higher the density of CpGs, the higher is the amount of methylation in the neighborhood, and thus higher the coverage. The CpG densities over 10 are observed in CpG islands, where methylation usually does not change. We do not aim to cover those regions, thus it is ok, and even preferable that the average coverage is lower in highly CpG dense regions.,</p>
 <p>The QC measure <code>avg.coverage.by.density</code> allows us to inspect the changes in average coverage with respect to CpG density. The <code>qcmean</code> function returns the square root of the CpG density where maximum average coverage is achieved.</p>
 <pre class="r"><code>{
-    cat(&quot;Highest coverage is observed at CpG density of&quot;, qcmean(qc$avg.coverage.by.density)^2);
+    cat(&quot;Highest coverage is observed at CpG density of&quot;, 
+        qcmean(qc$avg.coverage.by.density)^2);
     plot(qc$avg.coverage.by.density)
 }</code></pre>
 <pre><code>## Highest coverage is observed at CpG density of 8.4681</code></pre>

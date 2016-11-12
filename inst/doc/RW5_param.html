@@ -10,7 +10,7 @@
 
 <meta name="author" content="Andrey A Shabalin" />
 
-<meta name="date" content="2016-10-25" />
+<meta name="date" content="2016-11-11" />
 
 <title>RaMWAS parameters</title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="header">
 <h1 class="title">RaMWAS parameters</h1>
 <h4 class="author"><em>Andrey A Shabalin</em></h4>
-<h4 class="date"><em>2016-10-25</em></h4>
+<h4 class="date"><em>2016-11-11</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -131,7 +131,7 @@ batch2/sample2.bam</code></pre>
 <pre class="r"><code>cpgset = list( chr1 = c(12L, 57L, 123L),
                chr2 = c(45L, 95L, 99L, 111L),
                chr3 = c(22L, 40L, 199L, 211L) );</code></pre>
-<p>Parameter <code>filecpgset</code> must be a file storing a set of CpG, in the format described above, saved using <code>saveRDS</code> function. Similarly, parameter <code>filenoncpgset</code>, if defined, must point to a file storing ‘good’ locations away from any CpGs. Here, good means not heaving major alignment issues (like a middle of centromere.</p>
+<p>Parameter <code>filecpgset</code> must be a file storing a set of CpG, in the format described above, saved using <code>saveRDS</code> function. Similarly, parameter <code>filenoncpgset</code>, if defined, must point to a file storing ‘good’ locations away from any CpGs. Here, good means not heaving major alignment issues (like a middle of centromere).</p>
 </div>
 <div id="file-with-bam-2-sample-matching-information" class="section level3">
 <h3><span class="header-section-number">2.1.3</span> File with bam 2 sample matching information</h3>

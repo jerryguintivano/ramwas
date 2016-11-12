@@ -12,19 +12,24 @@ vignette: >
 
 # CpG sets
 
-One the of the required inputs for RaMWAS pipeline is 
-the set of CpGs at which RaMWAS calculates methylation coverage
+One of the required inputs is 
+the set of CpGs at which RaMWAS 
+calculates fragment coverage
 (step 3 of the pipeline). 
-The set of CpGs has to be provided in a form of .rds file (`filecpgset` parameter).
-Here we present several prepared CpGs sets for human and mouse genomes.
-We also provide detailed instructions for preparing a custom CpG set.
+This set has to be provided 
+in a form of a .rds file (`filecpgset` parameter).
+We prepared several CpGs sets for 
+human and mouse genomes and also 
+provide instructions and code for creating custom CpG sets.
 
 # Downloadable CpG sets
 
-Although it is common to use only CpGs found in the reference genome
-we chose to also incorporate SNP information as SNPs can often create or destroy CpGs.
-We also exclude CpGs with unreliable coverage estimates due to poor alignment
-as indicated by our in-silico experiment (details below).
+Our CpG sets include all common CpGs that are identified by combining
+reference genome sequence data with SNP information 
+as SNPs can often create or destroy CpGs in the reference. 
+Our sets exclude CpGs with unreliable coverage estimates due to 
+poor alignment (e.g. CpG in repetitive elements) 
+as indicated by our in-silico experiment ([details below](#insilico)).
 
 Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
 :---:|:---|:---:|:---:|:---:|:---:
@@ -38,6 +43,7 @@ SAS | South Asian | [28.0M](http://shabal.in/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr
 
 Table: CpG sets for human genome (autosomes only).
 
+
 Genome | No\ QC | With\ QC
 :---:|:---:|:---:
 GRCm38.p4 | [22.6M](http://shabal.in/RaMWAS/cpgset_GRCm38.p4.rds "22,607,414 CpGs, 26.1 MB file") | [21.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p4_bowtie2_75bp.rds "21,689,478 CpGs, 25.1 MB file") 
@@ -45,13 +51,15 @@ GRCm38.p5 | [22.7M](http://shabal.in/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpG
 
 Table: CpG sets for mouse genome.
 
-The human CpG sets provided in the table above
-account for SNPs which can create and destroy CpGs.
-The SNPs are derived from the 1000 Genomes super populations 
-([more info](http://www.internationalgenome.org/category/population/)). 
-Only SNPs with minor allele frequency above 1% are included.
+Note: SNPs were obtained from the 1000 Genomes super populations 
+(Phase 3 data, 
+[more info](http://www.internationalgenome.org/category/population/)). 
+Only SNPs with minor allele frequency above 1% are included. 
+In silico alignment experiments assumed 75 bp single-end reads and 
+alignment with 
+[Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
 
-## CpG filtering by in-silico alignment experiment
+## CpG filtering by in-silico alignment experiment {#insilico}
 
 We conducted an in-silico experiment to find and exclude 
 CpGs located in regions with alignment problems.
@@ -66,7 +74,8 @@ each CpG would have coverage of exactly 75.
 We allowed for +/-10 deviation, namely 
 we excluded all CpG with coverage below 65 or above 85, 
 which was about 2% of all CpGs for human genomes and 4% for mouse.
-The remaining CpGs formed the CpG sets in the "with\ QC" columns in the tables above.
+The remaining CpGs formed the CpG sets in 
+the "with\ QC" columns in the tables above.
 
 We used Bowtie 2 aligner version 2.2.9 with default settings.
 
@@ -74,9 +83,12 @@ We used Bowtie 2 aligner version 2.2.9 with default settings.
 
 ## Constructing a CpG set for a reference genome
 
-A CpG set can be constructed quickly from a reference genome with the `getCpGsetCG` function.
-The functions can use any genome available in Bioconductor as `BSGenome` class.
-Additional genomes can be loaded using `readDNAStringSet` function from .fa files.
+A CpG set can be constructed quickly from 
+a reference genome with the `getCpGsetCG` function.
+The functions can use any genome available 
+in Bioconductor as `BSGenome` class.
+Additional genomes can be loaded using 
+`readDNAStringSet` function from .fa files.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
 suppressPackageStartupMessages(library(ramwas))
@@ -91,9 +103,13 @@ cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
 print(cpgset$NC_008253[1:10])
 ```
 
-For a genome with injected SNPs, we provide the function `getCpGsetALL` for also finding CpGs that can be created by injected SNPs.
-The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome.
-We do NOT advice using all dbSNP144 SNPs, as it causes an abundance of CpGs that almost never occur in the population.
+For a genome with injected SNPs, 
+we provide the function `getCpGsetALL` 
+for also finding CpGs that can be created by injected SNPs.
+The example below uses all SNPs from dbSNP144 for 
+selecting CpGs in human genome.
+We do NOT advice using all dbSNP144 SNPs, 
+as it causes an large number of CpGs that almost never occur in the population.
 
 ```{r getCpGsetALL1, eval=FALSE, warning=FALSE, message=FALSE}
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -111,17 +127,20 @@ The code above shows that using all dbSNP144 SNPs
 we get over 42 million CpGs instead of 
 about 29 million when using only 
 SNPs with minor allele frequency above 1%.
-Unfortunately, Bioconductor packages with SNP information 
+Unfortunately, (to our knowledge) Bioconductor packages with SNP information 
 do not provide any data on SNP allele frequency.
 To alleviate this problem, we provide a way 
 to inject SNP information from 1000 Genomes data or any other VCF.
 
-First, the VCf files, obtained from 1000 Genomes project or otherwise, 
-need to be processed by `vcftools` command `--counts`, like this one:
+First, the VCF files, obtained from 1000 Genomes project or otherwise, 
+need to be processed by 
+[`vcftools`](https://vcftools.github.io/man_latest.html)
+command `--counts`, e.g.:
 
-> vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt
+> `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
 
-The generated allele count file can then be used to inject SNPs using the function `injectSNPsMAF`.
+The generated allele count file can then be used to 
+inject SNPs using the function `injectSNPsMAF`.
 
 ```{r getCpGsetALL2, eval=FALSE}
 # Do for all chromosomes
@@ -135,7 +154,8 @@ genome[['chr22']] =
 cpgset = getCpGsetALL(genome)
 ```
 
-Once a CpG set is generated, it can be saves with `saveRDS` function for use by RaMWAS.
+Once a CpG set is generated, it can be saved with 
+`saveRDS` function for use by RaMWAS.
 
 ```{r save1, eval=FALSE}
 saveRDS(file = 'My_cpgset.rds', object = cpgset)
@@ -143,7 +163,7 @@ saveRDS(file = 'My_cpgset.rds', object = cpgset)
 
 ## In-silico alignment experiment
 
-For a typical animal genome
+For a typical mammalian genome
 the in-silico experiment is rather computationally intensive, 
 as it requires alignment of billions of artificially created reads.
 
@@ -161,11 +181,14 @@ insilicoFASTQ(
     fraglength=75)
 ```
 
-The generated FASTQ files are then aligned to the reference genome with commands like this
+The generated FASTQ files are then aligned to the reference genome.
+Taking Bowtie2 as an example:
 
-> bowtie2 --local --threads 14 --reorder -x bowtie2ind -U chr1.fastq.gz | samtools view -bS -o chr1.bam
+> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U 
+chr1.fastq.gz | samtools view -bS -o chr1.bam`
 
-The generated BAMs are then scanned with RaMWAS and the coverage for one sample combining all the BAMs is calculated:
+The generated BAMs are then scanned with RaMWAS and 
+the coverage for one sample combining all the BAMs is calculated:
 
 ```{r RaMWAS, eval=FALSE}
 library(ramwas)
@@ -218,7 +241,8 @@ for( i in seq_along(cpgset) ){
 }
 ```
 
-Once the desired CpG set is generated, it can be saves with `saveRDS` function for use by RaMWAS.
+Once the desired CpG set is generated, 
+it can be saved with `saveRDS` function for use by RaMWAS.
 
 ```{r save2, eval=FALSE}
 saveRDS(file = 'My_cpgset_QC.rds', object = cpgsetQC)
