@@ -32,7 +32,8 @@ ramwas0createArtificialData = function(dir,
 		rm(probs);
 
 		cpgset = list( chr1 = locs );
-		saveRDS(object = cpgset, file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
+		saveRDS(object = cpgset, 
+		        file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
 	} # locs, cpgset, /Single_chromosome.rds
 	
 	# Fragment size distribution, with 150 median fragment size
@@ -45,9 +46,10 @@ ramwas0createArtificialData = function(dir,
 
 	# Exclude CpGs with density over 15
 	{
-		coverage = calc.coverage(rbam = list(startsfwd = cpgset, startsrev = cpgset), 
-										 cpgset = cpgset, 
-										 fragdistr = fragdistr);
+		coverage = calc.coverage(
+		    rbam = list(startsfwd = cpgset, startsrev = cpgset), 
+		    cpgset = cpgset, 
+		    fragdistr = fragdistr);
 		locsgood = locs[ coverage[[1]] <= 15 ];
 		rm(coverage, cpgset, locs)
 	} # locsgood, -locs, -cpgset
@@ -55,7 +57,9 @@ ramwas0createArtificialData = function(dir,
 	# Age covariate and effects
 	{
 		age = sample(20:80, size = nsamples, replace = TRUE)
-		cpgageset = groupSample( len = length(locsgood), size = length(locsgood)/100, gr = 6);
+		cpgageset = groupSample( len = length(locsgood), 
+		                         size = length(locsgood)/100, 
+		                         gr = 6);
 		cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
 		cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
 		rm(cpgageset)
@@ -77,8 +81,12 @@ ramwas0createArtificialData = function(dir,
 			age = age,
 			casecontrol = ccs,
 			stringsAsFactors = FALSE);
-		write.table(file = paste0(dir,"/covariates.txt"), x = cvrt, sep = "\t", row.names = FALSE);
-		writeLines(con = paste0(dir,"/bam_list.txt"), text = cvrt$samples);
+		write.table(file = paste0(dir,"/covariates.txt"), 
+		            x = cvrt, 
+		            sep = "\t", 
+		            row.names = FALSE);
+		writeLines(con = paste0(dir,"/bam_list.txt"), 
+		           text = cvrt$samples);
 	} # cvrt, /covariates.txt, /bam_list.txt
 	
 	# Main loop
@@ -116,27 +124,30 @@ ramwas0createArtificialData = function(dir,
 		# Write sam file
 		filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
 		fid = file(description = filesam, open = "wt")
-		writeLines(con = fid, sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",chrlen+1e4));
 		writeLines(con = fid, 
-					  sprintf("%06d\t%d\tchr1\t%d\t65\t1M\t*\t0\t0\tA\t*", 
-					  		  1:nreads, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
-					  		  readdir*16L, # FLAG Int [0,216-1] bitwise FLAG
-					  		  # RNAME String \*|[!-()+-<>-~][!-~]* Reference sequence NAME
-					  		  readpos # POS Int [0,231-1] 1-based leftmost mapping POSition
-					  		  # mqscore #MAPQ Int [0,2^8-1] MAPping Quality
-					  		  # 6 CIGAR String \*|([0-9]+[MIDNSHPX=])+ CIGAR string
-					  		  # 7 RNEXT String \*|=|[!-()+-<>-~][!-~]* Ref. name of the mate/next read
-					  		  # 8 PNEXT Int [0,231-1] Position of the mate/next read
-					  		  # 9 TLEN Int [-231+1,231-1] observed Template LENgth
-					  		  # 10 SEQ String \*|[A-Za-z=.]+ segment SEQuence
-					  		  # 11 QUAL String [!-~]+ ASCII of Phred-scaled base QUALity+33
-					  ));
+		           sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",
+		                   chrlen+1e4));
+		writeLines(con = fid, 
+            sprintf("%06d\t%d\tchr1\t%d\t65\t1M\t*\t0\t0\tA\t*", 
+                1:nreads, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
+                readdir*16L, # FLAG Int [0,216-1] bitwise FLAG
+                # RNAME String \*|[!-()+-<>-~][!-~]* Reference sequence NAME
+                readpos # POS Int [0,231-1] 1-based leftmost mapping POSition
+                # mqscore #MAPQ Int [0,2^8-1] MAPping Quality
+                # 6 CIGAR String  CIGAR string
+                # 7 RNEXT String  Ref. name of the mate/next read
+                # 8 PNEXT Int [0,231-1] Position of the mate/next read
+                # 9 TLEN Int [-231+1,231-1] observed Template LENgth
+                # 10 SEQ String \*|[A-Za-z=.]+ segment SEQuence
+                # 11 QUAL String [!-~]+ ASCII of Phred-scaled base QUALity+33
+            ));
 		# flush(fid)
 		close(fid);
 		rm(readdir, readpos)
 		
-		asBam(file = filesam, destination = sprintf("%s/bams/BAM%03d", dir, bam),
-				overwrite=TRUE, indexDestination=FALSE);
+		asBam(file = filesam, 
+              destination = sprintf("%s/bams/BAM%03d", dir, bam),
+              overwrite=TRUE, indexDestination=FALSE);
 		file.remove(filesam)
 	}
 	return(invisible(NULL));
