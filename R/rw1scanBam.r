@@ -1,15 +1,17 @@
 # Scan a BAM file into Rbam object
-bam.scanBamFile = function(bamfilename, scoretag = "mapq", minscore = 4){
+bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
     fields = c("qname","rname","pos","cigar","flag")
     # "qname" is read name, "rname" is chromosome
     tags = "NM";# character();
 
     # Open the BAM file
     {
-        if(scoretag == "mapq") {
-            fields = c(fields,scoretag);
-        } else {
+        if(nchar(scoretag) == 2) {
+            scoretag = toupper(scoretag);
             tags = c(tags, scoretag);
+        } else {
+            scoretag = tolower(scoretag);
+            fields = c(fields,scoretag);
         }
 
         flag = scanBamFlag(isUnmappedQuery=NA, isSecondMateRead=FALSE);
