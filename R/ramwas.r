@@ -2,18 +2,24 @@
 .ramwasEnv = new.env()
 
 # Replace 'x' with 'replacement' if x is NULL
-.notnull = function(x,replacement){if(is.null(x)){replacement}else{x}}
+.notnull = function(x, replacement){
+    if(is.null(x)){ replacement }else{ x }
+}
 
 # addition of vectors of mismatching length
 `%add%` = function(x, y){
-    if(is.null(x)) return(y);
-    if(is.null(y)) return(x);
-    l = max(length(x), length(y))
-    length(x) = l
-    length(y) = l
-    x[is.na(x)] = 0
-    y[is.na(y)] = 0
-    return(x + y)
+    if(is.null(x)) 
+        return(y);
+    if(is.null(y)) 
+        return(x);
+    if( length(x) > length(y) ) {
+        length(y) = length(x);
+        y[is.na(y)] = 0;
+    } else {
+        length(x) = length(y);
+        x[is.na(x)] = 0;
+    }
+    return(x + y);
 }
 
 # chech if path is absolute
@@ -945,10 +951,8 @@ orthonormalizeCovariates = function(covariates) {
         stop( paste("Unknown samples in covariate file:",
                     cvsamples[head(which(rowsubset==0))]) );
 
-    if( length(cvsamples) == length(fmsamples) )
-    {
-        if( all(rowsubset == seq_along(rowsubset)) )
-        {
+    if( length(cvsamples) == length(fmsamples) ){ 
+        if( all(rowsubset == seq_along(rowsubset)) ){
             rowsubset = NULL;
         }
     }
