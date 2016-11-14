@@ -12,7 +12,7 @@ vignette: >
 
 ```{r switcher, echo=FALSE}
 library('knitr')
-opts_chunk$set(eval=FALSE)
+# opts_chunk$set(eval=FALSE)
 ```
 
 # Introduction
@@ -75,13 +75,10 @@ suppressPackageStartupMessages(library(ramwas))
 
 ```{r generateData, warning=FALSE}
 library(ramwas)
-dr = paste0(tempdir(), "/simulated_project");
+# dr = paste0(tempdir(), "/simulated_project");
+dr = 'D:/temp'
 
-ramwas0createArtificialData(dir = dr,
-                            nsamples = 20,
-                            nreads = 1e6,
-                            ncpgs = 250e3,
-                            verbose=FALSE)
+ramwas0createArtificialData(dir = dr, verbose = FALSE)
 # This is the project directory
 cat(dr)
 ```
@@ -129,7 +126,7 @@ The `minscore` parameter sets the minimum admissible score,
 reads with scores below that are excluded.
 
 ```{r parameters1}
-param$scoretag = "AS"
+param$scoretag = "MAPQ"
 param$minscore = 4
 ```
 
@@ -211,7 +208,7 @@ Thus, the file used for the `filebamlist` parameter can be used also for
 the `filebam2sample` parameter.
 
 ```{r parameters3}
-param$filebam2sample = "bam_list.txt"
+# param$filebam2sample = "bam_list.txt"
 ```
 
 Now we run step 2 of RaMWAS.
@@ -363,7 +360,7 @@ parameter and top `modelPCs` principal components.
 The testing is performed using linear regression model.
 
 ```{r parameters6}
-param$modeloutcome = "casecontrol"
+param$modeloutcome = "sex"
 param$modelPCs = 0
 ```
 
@@ -457,7 +454,7 @@ For the simulated data we get good prediction power even with only 10 top CpGs.
 
 Here we remove all the files created by the code above.
 ```{r clean}
-unlink(dr, recursive=TRUE)
+# unlink(paste0(dr,"/*"), recursive=TRUE)
 ```
 
 # Version information
