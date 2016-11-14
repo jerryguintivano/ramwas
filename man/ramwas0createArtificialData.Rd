@@ -18,37 +18,47 @@ ramwas0createArtificialData(dir,
                             verbose = TRUE)
 }
 \arguments{
-  \item{dir}{
+    \item{dir}{
     Directory for generated RaMWAS project files and BAMs.
-  }
-  \item{nsamples}{
-    Number of sample/BAMs to create.
-  }
-  \item{nreads}{
+    }
+    \item{nsamples}{
+    Number of samples/BAMs to create.
+    }
+    \item{nreads}{
     Number of reads in each BAM file.
-  }
-  \item{ncpgs}{
+    }
+    \item{ncpgs}{
     Number of CpGs in the generated genome (with a single chromosome).
-  }
-  \item{randseed}{
+    }
+    \item{randseed}{
     Random number generator seed for consistency of the output.
-  }
-  \item{verbose}{
+    }
+    \item{verbose}{
     If TRUE, produce a message for each BAM file.
-  }
+    }
 }
 \details{
-  The function generates a number of files within \code{dir} directory.
-  \enumerate{
-     \item \code{bam_list.txt} - list of created BAM files.
-     To be used in \code{filebamlist} and
-     \code{filebam2sample} parameters in the pipeline.
-     \item \code{covariates.txt} - table with age and sex status covariates.
-     For use in \code{filecovariates} parameter in the pipeline.
-     \item \code{Single_chromosome.rds} - CpG location file
-     with the selected chromosome only.
-     \item \code{bams} - directory with all the BAM files.
-  }
+    The function generates a number of files within \code{dir} directory.
+    \enumerate{
+        \item \code{bam_list.txt} - list of created BAM files.
+        To be used in \code{filebamlist} and
+        \code{filebam2sample} parameters in the pipeline.
+        \item \code{covariates.txt} - table with age and sex status covariates.
+        For use in \code{filecovariates} parameter in the pipeline.
+        \item \code{Single_chromosome.rds} - CpG location file
+        with the selected chromosome only.
+        \item \code{bams} - directory with all the BAM files.
+    }
+    
+    The generated BAMs have 600 CpGs affected by \code{sex},
+    namely fully methylated or not methylated at all, depending on \code{sex}.
+    The methylation level of 1\% of all CpGs is affected by age.
+    The methylation of those CpGs is 
+    equal to \code{age/100} or \code{1-age/100}.
+    The age is generated randomly in the range from 20 to 80.
+}
+\value{
+The function creates multiple files but returns no value.
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
@@ -75,5 +85,5 @@ message("The generated files are:");
 message(paste(list.files(dir, recursive=TRUE), collate="\n"))
 
 ### Clean up
-unlink(dir, recursive=TRUE)
+unlink(paste0(dr,'/*'), recursive=TRUE)
 }
