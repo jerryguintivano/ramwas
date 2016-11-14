@@ -7,7 +7,7 @@
 \alias{ramwas4PCA}
 \alias{ramwas5MWAS}
 \alias{ramwas7ArunMWAS}
-\alias{ramwas7multiMarker}
+\alias{ramwas7BrunElasticNet}
 
 \title{
     RaMWAS: High Level Pipeline Functions
@@ -29,7 +29,7 @@ ramwas5MWAS(param)
 
 ramwas7ArunMWAS(param)
 
-ramwas7multiMarker(param)
+ramwas7BrunElasticNet(param)
 }
 \arguments{
   \item{param}{
@@ -199,7 +199,7 @@ ramwas7multiMarker(param)
         cross validation technique. \cr
         First, \code{ramwas7ArunMWAS} runs MWAS 10 times,
         each time excluding different 10\% of the data. \cr
-        Then, \code{ramwas7multiMarker} trains elastic net on the top CpGs
+        Then, \code{ramwas7BrunElasticNet} trains elastic net on the top CpGs
         from each of 10 MWASes and uses it to predict
         the phenotype of interest on the remaing 10\%.
 
@@ -280,5 +280,5 @@ ramwas5MWAS(param)
 
 ramwas7ArunMWAS(param)
 
-ramwas7multiMarker(param)}
+ramwas7BrunElasticNet(param)}
 }

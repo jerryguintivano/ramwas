@@ -13,7 +13,7 @@ export(
     "ramwas4PCA",
     "ramwas5MWAS",
     "ramwas7ArunMWAS",
-    "ramwas7multiMarker",
+    "ramwas7BrunElasticNet",
     "processCommandLine",
     "qcmean",
     "qqPlotFast",

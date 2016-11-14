@@ -420,14 +420,14 @@ This creates `CV_10_folds` subdirectory in MWAS directory.
 It contains 10 MWAS folders, each with different 10% of the samples
 excluded from the analysis.
 
-Then, `ramwas7multiMarker` trains elastic net on the top CpGs from each of
+Then, `ramwas7BrunElasticNet` trains elastic net on the top CpGs from each of
 10 MWASes and predicts the outcome variable for the remaing 10\% of the samples.
 This procedure is then applied 10 times to have a prediction for every sample.
 
 ```{r cv1, warning=FALSE, message=FALSE}
 param$mmalpha = 0;
 param$mmncpgs = 50;
-ramwas7multiMarker(param)
+ramwas7BrunElasticNet(param)
 ```
 
 This creates two files in the cross validation directory
@@ -444,7 +444,7 @@ scatterplot of true outcome vs. cross-validation prediction.
 ```{r cv2, warning=FALSE, message=FALSE}
 param$mmalpha = 0;
 param$mmncpgs = 10
-ramwas7multiMarker(param)
+ramwas7BrunElasticNet(param)
 ```
 
 For the simulated data we get good prediction power even with only 10 top CpGs.

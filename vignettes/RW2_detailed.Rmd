@@ -354,9 +354,9 @@ performance of elastic net applied to the top MWAS sites.
     param$modeloutcomes = "age"
     ramwas7ArunMWAS(param)
     param$mmncpgs = 10
-    ramwas7multiMarker(param)
+    ramwas7BrunElasticNet(param)
     param$mmncpgs = 100
-    ramwas7multiMarker(param)
+    ramwas7BrunElasticNet(param)
     })
     })
     message("The generated files and directories in Multi-marker directory:");
@@ -372,7 +372,7 @@ To have an unbiased estimate of predictive power
 we use cross validation approach.
 First, `ramwas7ArunMWAS` runs MWAS 10 times,
 each time excluding different 10\% of the data. \cr
-Then, `ramwas7multiMarker` trains elastic net on the
+Then, `ramwas7BrunElasticNet` trains elastic net on the
 top CpGs from each of 10 MWASes and predicts the
 phenotype of interest for the remaing 10\%.
 This procedure is then applied 10 times to have a prediction for all samples.

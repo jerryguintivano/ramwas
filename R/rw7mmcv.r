@@ -92,7 +92,7 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
 
 # Apply Elastic Net 10 times and collect
 # out of sample predictions
-ramwas7multiMarker = function(param){
+ramwas7BrunElasticNet = function(param){
     # library(glmnet);library(filematrix)
     # library(ramwas);
     param = parameterPreprocess(param);
