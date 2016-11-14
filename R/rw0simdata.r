@@ -105,10 +105,10 @@ ramwas0createArtificialData = function(dir,
         # Pick CpG locations by the probabilities above
         cpglocs = sample(locsgood, prob = cpgprob,
                               size = nreads, replace = TRUE);
-        
+
         # Add non-CpG reads
         cpglocs[1:(length(cpglocs)/100)] = 900e3 + (1:(length(cpglocs)/100));
-        
+
         # read strand (0 - forward, 1 - reverse)
         readdir = sample(c(0L,1L), size = nreads, replace = TRUE);
         readlen = sample(75:70, size = nreads, prob = (6:1)^4, replace = TRUE);

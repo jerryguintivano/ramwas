@@ -8,9 +8,9 @@
 
 # addition of vectors of mismatching length
 `%add%` = function(x, y){
-    if(is.null(x)) 
+    if(is.null(x))
         return(y);
-    if(is.null(y)) 
+    if(is.null(y))
         return(x);
     if( length(x) > length(y) ) {
         length(y) = length(x);
@@ -146,7 +146,7 @@ parameterPreprocess = function( param ){
     if( is.null(param$diskthreads)) param$diskthreads = min(param$cputhreads,2);
 
     ### BAM list processing
-    if( is.null(param$bamnames) & !is.null(param$filebamlist)) {
+    if( is.null(param$bamnames) & !is.null(param$filebamlist)){
         param$filebamlist = .makefullpath(param$dirproject,param$filebamlist)
         param$bamnames = readLines(param$filebamlist);
     }
@@ -161,7 +161,7 @@ parameterPreprocess = function( param ){
     stopifnot( param$mmncpgs > 1)
 
     ### BAM2sample processing
-    if( !is.null(param$filebam2sample) & is.null(param$bam2sample)) {
+    if( !is.null(param$filebam2sample) & is.null(param$bam2sample)){
         filename = .makefullpath(param$dirproject, param$filebam2sample);
         param$bam2sample = parseBam2sample( readLines(filename) );
         rm(filename);
@@ -171,7 +171,7 @@ parameterPreprocess = function( param ){
         names(param$bam2sample) = param$bamnames;
     }
     ### Covariate file
-    if( !is.null(param$filecovariates) & is.null(param$covariates)) {
+    if( !is.null(param$filecovariates) & is.null(param$covariates)){
 
         sep = "\t";
         if(grepl("\\.csv$",param$filecovariates))
@@ -204,7 +204,7 @@ parameterPreprocess = function( param ){
 
 
         if( is.null(param$dirpca) ) {
-            if( length(param$modelcovariates) > 0 ) {
+            if( length(param$modelcovariates) > 0 ){
                 # library(digest);
                 hash = digest(
                     object = paste(sort(param$modelcovariates),
@@ -955,7 +955,7 @@ orthonormalizeCovariates = function(covariates) {
         stop( paste("Unknown samples in covariate file:",
                     cvsamples[head(which(rowsubset==0))]) );
 
-    if( length(cvsamples) == length(fmsamples) ){ 
+    if( length(cvsamples) == length(fmsamples) ){
         if( all(rowsubset == seq_along(rowsubset)) ){
             rowsubset = NULL;
         }

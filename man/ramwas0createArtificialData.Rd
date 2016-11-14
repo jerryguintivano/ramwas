@@ -49,11 +49,11 @@ ramwas0createArtificialData(dir,
         with the selected chromosome only.
         \item \code{bams} - directory with all the BAM files.
     }
-    
+
     The generated BAMs have 600 CpGs affected by \code{sex},
     namely fully methylated or not methylated at all, depending on \code{sex}.
     The methylation level of 1\% of all CpGs is affected by age.
-    The methylation of those CpGs is 
+    The methylation of those CpGs is
     equal to \code{age/100} or \code{1-age/100}.
     The age is generated randomly in the range from 20 to 80.
 }

@@ -6,9 +6,9 @@
     Fast Methylome-wide Association Study Pipeline for Enrichment Platforms
 }
 \description{
-RaMWAS provides a complete toolset for 
+RaMWAS provides a complete toolset for
     methylome-wide association studies (MWAS).
-    It is specifically designed for data from 
+    It is specifically designed for data from
     enrichment based methylation assays,
     but can be applied to other methylomic data as well.
     The analysis pipeline includes seven steps:
