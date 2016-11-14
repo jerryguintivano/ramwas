@@ -50,7 +50,7 @@ scoretag = "AS"
 minscore = 100
 
 ### platform dependent part
-if(.Platform$OS.type == "windows") {
+if(.Platform$OS.type == "windows"){
     filecpgset='C:/RaMWAS/CpG_set/cpgset_hg19_SNPS_at_MAF_0.05.rds'
 } else {
     filecpgset='/computing_cluster/ramwas/cpgset_hg19_SNPS_at_MAF_0.05.rds'

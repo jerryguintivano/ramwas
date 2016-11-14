@@ -1,6 +1,6 @@
 # Run 10 (cvnfolds) MWASes
 # each on 90% of the data.
-ramwas6crossValidation = function(param) {
+ramwas6crossValidation = function(param){
     param = parameterPreprocess(param);
     param$toppvthreshold = 1e-300;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
@@ -28,7 +28,7 @@ ramwas6crossValidation = function(param) {
     starts = floor(seq(1, nsamples+1, length.out = param$cvnfolds+1));
 
 
-    for( fold in seq_len(param$cvnfolds) ) { # fold = 9
+    for( fold in seq_len(param$cvnfolds) ){ # fold = 9
 
         message("Running MWAS for fold ",fold," of ",param$cvnfolds);
 
@@ -58,8 +58,8 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
     c2p = max(c2, 0);
     if( is.null(dfFull) )
         dfFull = length(forecast) - 1 - 1;
-    cor2tt = function(x) { return( x * sqrt( dfFull / (1 - pmin(x^2,1))));    }
-    tt2pv = function(x) { return( (pt(-x,dfFull))); }
+    cor2tt = function(x){ return( x * sqrt( dfFull / (1 - pmin(x^2,1))));    }
+    tt2pv = function(x){ return( (pt(-x,dfFull))); }
 
     MSE = sqrt(mean( (outcome - forecast)^2 ))
     MAD = median( abs(outcome - forecast) )
@@ -116,12 +116,12 @@ ramwas7multiMarker = function(param){
         outcome = param$covariates[[ param$modeloutcome ]];
     } # outcome
     forecast0 = NULL;
-    for( fold in seq_len(param$cvnfolds) ) { # fold = 1
+    for( fold in seq_len(param$cvnfolds) ){ # fold = 1
         message("Processing fold ", fold, " of ", param$cvnfolds);
         {
             dircvmwas = sprintf("%s/fold_%02d", param$dircv, fold);
             rdsfile = paste0(dircvmwas, "/exclude.rds");
-            if( !file.exists( rdsfile ) ) {
+            if( !file.exists( rdsfile ) ){
                 message("Missing CV MWAS: ", rdsfile);
                 stop("Missing CV MWAS: ", rdsfile);
                 next;
@@ -130,7 +130,7 @@ ramwas7multiMarker = function(param){
             rm(rdsfile);
         } # dircvmwas, exclude
         {
-            if( is.null(forecast0) ) {
+            if( is.null(forecast0) ){
                 forecast0 = double(length(exclude)*2);
                 dim(forecast0) = c(2, length(exclude));
                 colnames(forecast0) = names(exclude);

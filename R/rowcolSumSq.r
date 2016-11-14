@@ -1,5 +1,5 @@
 # Same as rowSums(x^2), but faster with C/C++
-rowSumsSq = function(x) {
+rowSumsSq = function(x){
     stopifnot( is.numeric(x) );
     output = double(NROW(x));
     .Call("CrowSumsSq", x, output);
@@ -7,7 +7,7 @@ rowSumsSq = function(x) {
 }
 
 # Same as colSums(x^2), but faster with C/C++
-colSumsSq = function(x) {
+colSumsSq = function(x){
     stopifnot( is.numeric(x) );
     output = double(NCOL(x));
     .Call("CcolSumsSq", x, output);

@@ -46,7 +46,7 @@
     name = qc$name;
     if( is.null(qc) )
         return(paste0(name,paste0(rep("\tNA",.qccols-1), collapse = "")));
-    afracb = function(a,b) { sprintf("%s\t%.1f%%",s(a),100*a/b) };
+    afracb = function(a,b){ sprintf("%s\t%.1f%%",s(a),100*a/b) };
     perc = function(x){ sprintf("%.2f%%",100*x) };
     twodig = function(x){ sprintf("%.2f",x) };
     s = function(x){
@@ -100,7 +100,7 @@
     name = qc$name;
     if( is.null(qc) )
         return(paste0(name,paste0(rep("\tNA",.qccols-1), collapse = "")));
-    afracb = function(a,b) { paste0(a, "\t", a/b) };
+    afracb = function(a,b){ paste0(a, "\t", a/b) };
     perc = identity;
     twodig = identity;
     s = identity;
@@ -158,7 +158,7 @@
     bigqc = vector("list", length(qcnames));
     names(bigqc) = qcnames;
 
-    for( nm in qcnames) { # nm = qcnames[1]
+    for( nm in qcnames){ # nm = qcnames[1]
         bigqc[[nm]] = Reduce(`%add%`, lapply(qclist, `[[`, nm));
     }
     return(list(qc = bigqc));
@@ -168,9 +168,9 @@
 loadBamQC = function(param, bams){
     rbamlist = vector("list", length(bams));
     names(rbamlist) = bams;
-    for( bamname in bams) { # bamname = bams[1]
+    for( bamname in bams){ # bamname = bams[1]
         rdsqcfile = paste0( param$dirrqc, "/", bamname, ".qc.rds" );
-        if(file.exists(rdsqcfile)) {
+        if(file.exists(rdsqcfile)){
             rbamlist[[bamname]] = readRDS(rdsqcfile);
         } else {
             message("QC file not found: ",rdsqcfile)
@@ -183,10 +183,10 @@ loadBamQC = function(param, bams){
 combineBamQcIntoSamples = function(rbamlist, bamset){
     bigqc = vector("list", length(bamset));
     names(bigqc) = names(bamset);
-    for( ibam in seq_along(bamset) ) { # ibam=1
+    for( ibam in seq_along(bamset) ){ # ibam=1
         curbams = rbamlist[bamset[[ibam]]];
         qc = .combine.bams.qc(curbams)$qc;
-        if( length(qc) > 0 ) {
+        if( length(qc) > 0 ){
             bigqc[[ibam]] = qc;
         } else {
             bigqc[[ibam]] = list();
@@ -225,7 +225,7 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
                       ymultiplier = yrange,
                       ymean = ybottom);
 
-    fsPredict = function( x, param) {
+    fsPredict = function( x, param){
         (plogis((param[1]-x)/param[2]))*param[3]+param[4]
     }
 
@@ -234,7 +234,7 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
     # plot( x, hist.isolated.distances)
     # lines( x, fsPredict(x, initparam), col="blue", lwd = 3)
 
-    fmin = function(param) {
+    fmin = function(param){
         fit2 = fsPredict(x, param);
         # (plogis((param[1]-x)/param[2]))*param[3]+param[4];
         error = hist.isolated.distances - fit2;
@@ -288,7 +288,7 @@ ramwas2collectqc = function( param ){
         rbamlist = loadBamQC(param, bams);
     }
 
-    collect.qc.summary = function(bamset, dirname) {
+    collect.qc.summary = function(bamset, dirname){
         dirloc = paste0(param$dirqc, "/", dirname);
         dir.create(dirloc, showWarnings = FALSE, recursive = TRUE);
 
@@ -316,10 +316,10 @@ ramwas2collectqc = function( param ){
             dev.off()
         }
 
-        figfun = function(qcname, plotname) {
+        figfun = function(qcname, plotname){
             message("Saving plots ", plotname);
             pdf(paste0(dirloc,"/Fig_",plotname,".pdf"));
-            for( ibam in seq_along(bamset) ) {
+            for( ibam in seq_along(bamset) ){
                 plotinfo = bigqc[[ibam]][[qcname]];
                 if( !is.null(bigqc[[ibam]][[qcname]]))
                     plot(plotinfo, samplename = names(bamset)[ibam]);
@@ -345,7 +345,7 @@ ramwas2collectqc = function( param ){
         figfun(qcname = "avg.coverage.by.density",
                plotname = "coverage_by_density");
         # bigqc[[1]]$cnt.nonCpG.reads
-        if(length(bigqc) >= 10) {
+        if(length(bigqc) >= 10){
             histqc(
                 qcfun = function(x){x$avg.cpg.coverage /
                         max(x$avg.noncpg.coverage,.Machine$double.eps)},
@@ -383,7 +383,7 @@ ramwas2collectqc = function( param ){
     collect.qc.summary(bamset, dirname);
     rm(bamset, dirname);
 
-    if( !is.null(param$bam2sample) ) {
+    if( !is.null(param$bam2sample) ){
         # by sample
         message("Saving QC info by BAMs in bam2sample");
         collect.qc.summary(bamset = unlist(param$bam2sample),

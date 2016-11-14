@@ -6,7 +6,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
 
     # Open the BAM file
     {
-        if(nchar(scoretag) == 2) {
+        if(nchar(scoretag) == 2){
             scoretag = toupper(scoretag);
             tags = c(tags, scoretag);
         } else {
@@ -37,7 +37,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
         # stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
 
         ### Create output lists
-        if(is.null(startlistfwd)) {
+        if(is.null(startlistfwd)){
             startlistfwd = vector("list",length(levels(bb$rname)));
             startlistrev = vector("list",length(levels(bb$rname)));
             names(startlistfwd) = levels(bb$rname);
@@ -64,7 +64,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
             rm(keep);
         }
 
-        if(length(bb[[1]])==0) {
+        if(length(bb[[1]])==0){
             message(sprintf("Recorded %.f of %.f reads",
                             qc$reads.recorded,qc$reads.total));
             next;
@@ -83,7 +83,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
             qc$bf.hist.length.matched %add% tabulate(bb$matchedAlongQuerySpace);
 
         ### Keep score >= minscore
-        if( !is.null(minscore) ) {
+        if( !is.null(minscore) ){
             score = bb[[scoretag]];
             keep = score >= minscore;
             keep[is.na(keep)] = FALSE;
@@ -123,12 +123,12 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
             class(split.levels) = "factor";
             splt = split( bb$startpos, split.levels, drop = FALSE);
             # print(sapply(splt,length))
-            for( i in seq_along(startlistfwd) ) {
-                if( length(splt[i]) > 0 ) {
+            for( i in seq_along(startlistfwd) ){
+                if( length(splt[i]) > 0 ){
                     startlistfwd[[i]][[length(startlistfwd[[i]])+1L]] =
                         splt[[i]];
                 }
-                if( length(splt[i+offset]) > 0 ) {
+                if( length(splt[i+offset]) > 0 ){
                     startlistrev[[i]][[length(startlistrev[[i]])+1L]] =
                         splt[[i+offset]];
                 }
@@ -145,7 +145,7 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
     startsrev = startlistrev;
 
     ### combine and sort lists in "outlist"
-    for( i in seq_along(startlistfwd) ) {
+    for( i in seq_along(startlistfwd) ){
         startsfwd[[i]] = sort.int(unlist(startlistfwd[[i]]));
         startsrev[[i]] = sort.int(unlist(startlistrev[[i]]));
     }
@@ -196,8 +196,8 @@ pipelineProcessBam = function(bamname, param){
     rdsqcfile = paste0( param$dirrqc, "/", basename(bamname), ".qc.rds" );
 
     savebam = TRUE;
-    if( file.exists( rdsbmfile ) ) {
-        if( param$recalculate.QCs ) {
+    if( file.exists( rdsbmfile ) ){
+        if( param$recalculate.QCs ){
             ### Precache the input rds file
             {invisible(readBin( rdsbmfile, "raw", file.size(rdsbmfile)));}
             rbam = readRDS(rdsbmfile);
@@ -217,7 +217,7 @@ pipelineProcessBam = function(bamname, param){
     rbam2 = bam.chrXY.qc(rbam2);
     rbam2$qc$nbams = 1L;
 
-    if( !is.null(param$filecpgset) ) {
+    if( !is.null(param$filecpgset) ){
         cpgset = cachedRDSload(param$filecpgset);
         noncpgset = cachedRDSload(param$filenoncpgset);
         isocpgset = isocpgSitesFromCpGset(cpgset = cpgset,
@@ -271,7 +271,7 @@ ramwas1scanBams = function( param ){
     dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE)
     cat(file = paste0(param$dirfilter,"/Log.txt"),
          date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
-    if( param$cputhreads > 1) {
+    if( param$cputhreads > 1){
         cl = makeCluster(param$cputhreads);
         z = clusterApplyLB(cl,
                            param$bamnames,
@@ -281,7 +281,7 @@ ramwas1scanBams = function( param ){
     } else {
         z = character(length(param$bamnames));
         names(z) = param$bamnames;
-        for(i in seq_along(param$bamnames)) { # i=1
+        for(i in seq_along(param$bamnames)){ # i=1
             z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i],
                                       param = param);
         }

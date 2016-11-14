@@ -12,7 +12,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
     ypvs = -log10(pvalues);
     xpvs = -log10(seq_along(ypvs) / ntests);
 
-    if(length(ypvs) > 1000) {
+    if(length(ypvs) > 1000){
         # need to filter a bit, make the plotting faster
         levels = as.integer( (xpvs - xpvs[1])/(tail(xpvs,1) - xpvs[1]) * 2000);
         keep = c(TRUE, diff(levels)!=0);
@@ -35,8 +35,8 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
     lines(c(0,mx),c(0,mx),col="grey")
     points(xpvs, ypvs, col = "red", pch = 19, cex = 0.25);
 
-    if(!is.null(ci.level)) {
-        if((ci.level>0)&(ci.level<1)) {
+    if(!is.null(ci.level)){
+        if((ci.level>0)&(ci.level<1)){
             quantiles = qbeta(p = rep(c(ci.level/2,1-ci.level/2),
                                       each=length(xpvs)),
                               shape1 = keep,
@@ -53,7 +53,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
            pch = c(19,NA_integer_),
            lty = c(0,1),
            col=c("red","cyan4"))
-    if(length(pvalues)*2>ntests) {
+    if(length(pvalues)*2>ntests){
         lambda = sprintf("%.3f",
                          qchisq(pvalues[ntests/2],1,lower.tail = FALSE) /
                          qchisq(0.5,1,lower.tail = FALSE));
@@ -94,7 +94,7 @@ ramwas5saveTopFindings = function(param){
 
     # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 
-    if( !is.null(param$biattributes) && (nrow(toptable)>0L) ) {
+    if( !is.null(param$biattributes) && (nrow(toptable)>0L) ){
         message('Annotating top MWAS hits');
         bio = ramwasAnnotateLocations(param,
                                       chr = toptable$chr,
@@ -125,7 +125,7 @@ ramwas5saveTopFindings = function(param){
     step1 = ceiling( 512*1024*1024 / nrow(fm) / 8);
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ) { # part = 1
+    for( part in 1:nsteps ){ # part = 1
         cat( part, "of", nsteps, "\n");
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
@@ -150,7 +150,7 @@ ramwas5saveTopFindings = function(param){
     }
     close(fm)
 
-    if(rng[1]==1) {
+    if(rng[1]==1){
         writeLines( con = paste0(param$dirmwas, "/DegreesOfFreedom.txt"),
                         text = as.character(c(rez$nVarTested, rez$dfFull)))
     }
@@ -213,7 +213,7 @@ ramwas5MWAS = function( param ){
         fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"),
                         nrow = ncpgs,
                         ncol = 4);
-        if( !is.character( param$covariates[[param$modeloutcome]] ) ) {
+        if( !is.character( param$covariates[[param$modeloutcome]] ) ){
             colnames(fm) = c("cor","t-test","p-value","q-value");
         } else {
             colnames(fm) = c("R-squared","F-test","p-value","q-value");
@@ -227,7 +227,7 @@ ramwas5MWAS = function( param ){
         cat(file = paste0(param$dirmwas,"/Log.txt"),
              date(), ", Running methylome-wide association study.", "\n",
              sep = "", append = FALSE);
-        if( param$diskthreads > 1 ) {
+        if( param$diskthreads > 1 ){
             rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
             rangeset = rbind( rng[-length(rng)],
                               rng[-1]-1,

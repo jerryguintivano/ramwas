@@ -5,14 +5,14 @@ pipelineCoverage1Sample = function(colnum, param){
 
     bams = param$bam2sample[[colnum]];
 
-    if( param$maxrepeats == 0 ) {
+    if( param$maxrepeats == 0 ){
         coverage = NULL;
-        for( j in seq_along(bams)) { # j=1
+        for( j in seq_along(bams)){ # j=1
             rbam = readRDS(paste0(param$dirrbam, "/", bams[j], ".rbam.rds"));
             cov = calc.coverage(rbam = rbam,
                                 cpgset = cpgset,
                                 fragdistr = param$fragdistr)
-            if(is.null(coverage)) {
+            if(is.null(coverage)){
                 coverage = cov;
             } else {
                 for( i in seq_along(coverage) )
@@ -22,13 +22,13 @@ pipelineCoverage1Sample = function(colnum, param){
         }
     } else {
         rbams = vector("list",length(bams));
-        for( j in seq_along(bams)) { # j=1
+        for( j in seq_along(bams)){ # j=1
             rbams[[j]] =
                 readRDS(paste0( param$dirrbam,"/",bams[j],".rbam.rds"));
         }
-        if(length(bams) > 1) {
+        if(length(bams) > 1){
             rbam = list(startsfwd = list(), startsrev = list());
-            for( i in seq_along(cpgset) ) { # i=1
+            for( i in seq_along(cpgset) ){ # i=1
                 nm = names(cpgset)[i];
 
                 fwd = lapply(rbams, function(x,y){x$startsfwd[[y]]}, nm);
@@ -62,7 +62,7 @@ pipelineCoverage1Sample = function(colnum, param){
     coverage = unlist(coverage, use.names = FALSE);
 
     start = 1;
-    for( part in seq_len(nslices) ) {
+    for( part in seq_len(nslices) ){
         message("colnum =",colnum,"part =", part);
         fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
         fm = fm.open(fmname, lockfile = param$lockfile);
@@ -115,7 +115,7 @@ pipelineCoverage1Sample = function(colnum, param){
     step1 = max(floor(32*1024*1024 / 8 / ncol(mat)),1);
     mm = nrow(mat);
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ) { # part = 1
+    for( part in 1:nsteps ){ # part = 1
         message(part, " of ", nsteps);
         fr = (part-1)*step1 + 1;
         to = min(part*step1, mm);
@@ -132,7 +132,7 @@ pipelineCoverage1Sample = function(colnum, param){
 
         slloc = fr:to;
 
-        if( !all(keep) ) {
+        if( !all(keep) ){
             keep = which(keep);
             subslice = subslice[keep,,drop=FALSE];
             slloc = slloc[keep];
@@ -230,9 +230,9 @@ ramwas3NormalizedCoverage = function( param ){
     {
         message("Checking if all required Rbam files present");
         bams = unlist(param$bam2sample);
-        for( bname in bams) {
+        for( bname in bams){
             filename = paste0( param$dirrbam, "/", bname);
-            if( file.exists(filename) ) {
+            if( file.exists(filename) ){
                 stop(paste0("Rbam file from bam2sample not found: ", filename));
             }
         }
@@ -249,7 +249,7 @@ ramwas3NormalizedCoverage = function( param ){
         nslices = ceiling(mm/step1);
         message("Creating ", nslices, " file matrices for raw scores at: ",
                 param$dirtemp);
-        for( part in 1:nslices ) { # part = 1
+        for( part in 1:nslices ){ # part = 1
             # cat("Creating raw  matrix slices", part, "of", nslices, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
@@ -271,7 +271,7 @@ ramwas3NormalizedCoverage = function( param ){
              date(), ", Calculating raw coverage.", "\n",
              sep = "", append = FALSE);
         # library(parallel)
-        if( param$cputhreads > 1) {
+        if( param$cputhreads > 1){
             cl = makeCluster(param$cputhreads);
             z = clusterApplyLB(cl,
                                seq_len(nsamples),
@@ -282,7 +282,7 @@ ramwas3NormalizedCoverage = function( param ){
         } else {
             z = character(nsamples);
             names(z) = names(param$bam2sample);
-            for(i in seq_along(param$bam2sample)) { # i=1
+            for(i in seq_along(param$bam2sample)){ # i=1
                 z[i] = .ramwas3coverageJob(colnum = i,
                                            param = param,
                                            nslices = nslices);
@@ -307,7 +307,7 @@ ramwas3NormalizedCoverage = function( param ){
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
              date(), ", Transposing coverage matrix, filtering CpGs.", "\n",
              sep = "", append = TRUE);
-        if( param$diskthreads > 1 ) {
+        if( param$diskthreads > 1 ){
             if(param$usefilelock) param$lockfile2 = tempfile();
             # library(parallel);
             cl = makeCluster(param$diskthreads);
@@ -319,7 +319,7 @@ ramwas3NormalizedCoverage = function( param ){
             stopCluster(cl);
             .file.remove(param$lockfile2);
         } else {
-            for( fmpart in seq_len(nslices) ) { # fmpart = 5
+            for( fmpart in seq_len(nslices) ){ # fmpart = 5
                 .ramwas3transposeFilterJob( fmpart, param);
             }
         }
@@ -333,7 +333,7 @@ ramwas3NormalizedCoverage = function( param ){
         message("Saving locations for CpGs which passed the filter");
 
         cpgsloc1e9 = cpgset;
-        for( i in seq_along(cpgsloc1e9) ) {
+        for( i in seq_along(cpgsloc1e9) ){
             cpgsloc1e9[[i]] = cpgset[[i]] + i*1e9;
         }
         cpgsloc1e9 = unlist(cpgsloc1e9, recursive = FALSE, use.names = FALSE);
@@ -343,7 +343,7 @@ ramwas3NormalizedCoverage = function( param ){
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
         cpgsloclist = vector("list",nsteps);
-        for( part in 1:nsteps ) { # part = 1
+        for( part in 1:nsteps ){ # part = 1
             # cat( part, "of", nsteps, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
@@ -402,7 +402,7 @@ ramwas3NormalizedCoverage = function( param ){
              date(), ", Normalizing coverage matrix.", "\n",
              sep = "", append = TRUE);
         ### normalize and fill in
-        if( param$diskthreads > 1 ) {
+        if( param$diskthreads > 1 ){
 
             if(param$usefilelock) param$lockfile1 = tempfile();
             if(param$usefilelock) param$lockfile2 = tempfile();
@@ -419,7 +419,7 @@ ramwas3NormalizedCoverage = function( param ){
             .file.remove(param$lockfile2);
 
         } else {
-            for( fmpart in seq_len(nslices) ) { # fmpart = 5
+            for( fmpart in seq_len(nslices) ){ # fmpart = 5
                 .ramwas3normalizeJob( fmpart_offset_list[[fmpart]],
                                       param,
                                       samplesums);
@@ -434,7 +434,7 @@ ramwas3NormalizedCoverage = function( param ){
     ### Cleanup
     {
         message("Removing temporary files");
-        for( part in 1:nslices ) {
+        for( part in 1:nslices ){
             fm = fm.open( paste0(param$dirtemp,"/TrCoverage_loc",part) );
             closeAndDeleteFiles(fm);
             fm = fm.open( paste0(param$dirtemp,"/TrCoverage_part",part) );

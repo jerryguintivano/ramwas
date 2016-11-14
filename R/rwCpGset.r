@@ -21,7 +21,7 @@ getCpGsetALL = function( genome ){
     Cint = logical(256); Cint[as.integer(Craw)] = TRUE;
     Gint = logical(256); Gint[as.integer(Graw)] = TRUE;
 
-    starts_fun = function(chrom) {
+    starts_fun = function(chrom){
         which( Cint[as.integer(chrom[-length(chrom)])] &
                Gint[as.integer(chrom[-1])] )
     }
@@ -41,9 +41,9 @@ insilicoFASTQ = function(con, gensequence, fraglength){
     # con=""; gensequence = "ABCDEFG"; fraglength=4;
     # con="D:/fastq.gz"; gensequence = "ABCDEFG"; fraglength=4;
 
-    if (is.character(con)) {
-        if(nchar(con) > 0) {
-            if(grepl('\\.gz$',con)) {
+    if (is.character(con)){
+        if(nchar(con) > 0){
+            if(grepl('\\.gz$',con)){
                 con = gzfile(con, open = 'wb')
             } else {
                 con = file(con, open = 'wb')
@@ -69,12 +69,12 @@ insilicoFASTQ = function(con, gensequence, fraglength){
     step1 = 102400;
     mm = len - fraglength+1;
     nsteps = ceiling(mm/step1);
-    for( part in seq_len(nsteps) ) { # part=1
+    for( part in seq_len(nsteps) ){ # part=1
         if(!is.null(con))
             message('step ', part, ' of ', nsteps);
         fr = (part-1)*step1 + 1;
         to = min(part*step1, mm);
-        if( NCOL(mat) != (to-fr+1) ) {
+        if( NCOL(mat) != (to-fr+1) ){
             mat = vector('list',3*(to-fr+1));
             dim(mat) = c(3,to-fr+1);
             mat[3,] = list(qual);
@@ -82,11 +82,11 @@ insilicoFASTQ = function(con, gensequence, fraglength){
         mat[1,] = lapply(paste0('@',formatC(fr:to, width = 9, flag = "0"),'\n'),
                          charToRaw);
         mat[2,] = lapply(fr:to,
-                         function(a) { y[a:(a+fraglength-1)] } );
+                         function(a){ y[a:(a+fraglength-1)] } );
 
         keep = (y[fr:to]!=0x4e) & (y[(fr:to)+fraglength-1]!=0x4e);
-        if(any(keep)) {
-            if(is.null(con)) {
+        if(any(keep)){
+            if(is.null(con)){
                 cat(rawToChar(unlist(mat[,keep])));
             } else {
                 writeBin(con = con, object = unlist(mat[,keep]));
@@ -133,7 +133,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
         names(ACGT) = ACGTnames
     }
     # chrom = charToRaw( readRDS(filechr) );
-    if( length(frqcount)==1 ) {
+    if( length(frqcount)==1 ){
         frqcount = readLines(con = frqcount);
     }
     if(grepl('^CHROM\t',frqcount[1]))
@@ -158,7 +158,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
         names(count) = allele;
         countACGT = count[ACGTnames];
         countACGT[is.na(countACGT)] = 0;
-        if(sum(countACGT) > 0 ) {
+        if(sum(countACGT) > 0 ){
             countACGT = countACGT / sum(countACGT);
             index = (countACGT >= MAF)+1L;
             dim(index) = c(1,4);

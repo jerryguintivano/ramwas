@@ -5,11 +5,11 @@
     crF = vector("list", length(covariates1));
     pv  = vector("list", length(covariates1));
     nms = character(length(covariates1));
-    for( i in seq_along(covariates1) ) { # i=1
+    for( i in seq_along(covariates1) ){ # i=1
         rez = testPhenotype(covariates1[[i]], data, cvrtqr);
         pv[[i]] = as.vector(rez[[3]]);
         nms[i] = rez$statname;
-        if(nchar(rez$statname)==0) {
+        if(nchar(rez$statname)==0){
             crF[[i]] = as.vector(rez$correlation);
         } else {
             crF[[i]] = as.vector(rez$Fstat);
@@ -37,7 +37,7 @@
     step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ) { # part = 1
+    for( part in 1:nsteps ){ # part = 1
         cat( part, "of", nsteps, "\n");
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
@@ -103,7 +103,7 @@ ramwas4PCA = function( param ){
                  date(), ", Running Principal Component Analysis.", "\n",
                  sep = "", append = FALSE);
 
-            if( param$diskthreads > 1 ) {
+            if( param$diskthreads > 1 ){
                 rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
                 rangeset = rbind( rng[-length(rng)],
                                   rng[-1]-1,
@@ -162,7 +162,7 @@ ramwas4PCA = function( param ){
                   xlab = "PCs", ylab = "Variation Explained (%)",
                   yaxs = "i", ylim = c(0,pc100[1]*1.05),
                   xaxs = "i", xlim = c(0, length(pc100)+0.5))
-            for( i in 1:min(20,nonzeroPCs) ) { # i=1
+            for( i in 1:min(20,nonzeroPCs) ){ # i=1
                 plot(e$vectors[,i],
                      main=paste("PC",i),
                      xlab = "Samples",
@@ -197,7 +197,7 @@ ramwas4PCA = function( param ){
         }
 
         # Saving PC vs. covariates association
-        if(ncol(param$covariates) > 1) {
+        if(ncol(param$covariates) > 1){
             message("Saving PC vs. covariates associations");
             testcov = .testCovariates(covariates1 = param$covariates[-1],
                                       data = e$vectors[,seq_len(nonzeroPCs)],
@@ -254,7 +254,7 @@ ramwasPCsCovariateSelection = function(param){
 
         ### First PC
         testslist = vector('list', param$covselpcs);
-        for( i in seq_len(param$covselpcs) ) { # i=1
+        for( i in seq_len(param$covselpcs) ){ # i=1
             pc = e$vectors[,i, drop=FALSE];
 
             message("Testing PC",i," vs. covariates");
@@ -289,9 +289,9 @@ ramwasPCsCovariateSelection = function(param){
 
         cat("\n");
         cat("Enter the line number for the new covariate, (0 to stop):","\n");
-        if(interactive()) {
+        if(interactive()){
             newcov = readline();
-            if(nchar(newcov) == 0) {
+            if(nchar(newcov) == 0){
                 newcov = 0;
             } else {
                 newcov = as.integer(newcov);
