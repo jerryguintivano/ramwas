@@ -21,15 +21,18 @@ opts_chunk$set(eval=FALSE)
 provides a complete toolset for methylome-wide association studies (MWAS).
 It is specifically designed for data from enrichment based methylation assays,
 but can be applied to other methylomic data as well.
-The analysis pipeline includes six steps:
-1) scanning aligned reads from BAM files,
-2) calculation of quality control measures,
-3) creation of methylation coverage matrix,
-4) principal component analysis for capturing batch effects and
-identify outliers,
-5) association analysis with respect to phenotypes of interest
-while correctingfor top PCs and known covariates, and
-6) multi-marker analysis using elastic net.
+
+The analysis pipeline includes seven steps:
+
+1. Scanning aligned reads from BAM files
+2. Calculation of quality control measures
+3. Creation of methylation score (coverage) matrix
+4. Principal component analysis for capturing batch effects and
+   dentify outliers
+5. Association analysis with respect to phenotypes of interest
+   while correcting for top PCs and known covariates
+6. Annotation of significant findings
+7. Multi-marker analysis (methylation risk score) using elastic net
 
 Most steps of RaMWAS are internally parallelized.
 This is made possible, in part, by the use of

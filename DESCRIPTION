@@ -5,16 +5,21 @@ Version: 0.99.1
 Date: 2016-09-26
 Author: Andrey A Shabalin
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
-Description: RaMWAS provides a full set of tools for 
-    methylome-wide association studies for enrichment technologies.
-    The steps of the pipeline include scanning aligned reads from BAM files,
-    calculation of multiple quality control measures,
-    creation of coverage matrix,
-    principal component analysis for capturing batch effects and 
-    accounting for cell composition differences, 
-    association analysis with respect to phenotypes of 
-    interest correcting for PCs and known covariates,
-    and multi-marker analysis using elastic net.
+Description: RaMWAS provides a complete toolset for 
+    methylome-wide association studies (MWAS).
+    It is specifically designed for data from 
+    enrichment based methylation assays,
+    but can be applied to other methylomic data as well.
+    The analysis pipeline includes seven steps:
+    (1) scanning aligned reads from BAM files,
+    (2) calculation of quality control measures,
+    (3) creation of methylation score (coverage) matrix,
+    (4) principal component analysis for capturing batch effects and
+    identify outliers,
+    (5) association analysis with respect to phenotypes of interest
+    while correcting for top PCs and known covariates,
+    (6) annotation of significant findings, and
+    (7) multi-marker analysis (methylation risk score) using elastic net.
 BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
 LazyLoad: yes

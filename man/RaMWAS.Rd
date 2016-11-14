@@ -6,15 +6,22 @@
     Fast Methylome-wide Association Study Pipeline for Enrichment Platforms
 }
 \description{
-Ramwas provides a full set of tools for
- methylome-wide association studies for enrichment technologies.
- The steps of the pipeline include scanning aligned reads from BAM files,
- calculation of multiple quality control measures,
- creation of coverage for each sample,
- principal component analysis for capturing batch effects and accounting for
- cell composition differences, and, finally, association analysis
- with respect to phenotypes of interest correcting for PCs and known covariates.
- }
+RaMWAS provides a complete toolset for 
+    methylome-wide association studies (MWAS).
+    It is specifically designed for data from 
+    enrichment based methylation assays,
+    but can be applied to other methylomic data as well.
+    The analysis pipeline includes seven steps:
+    (1) scanning aligned reads from BAM files,
+    (2) calculation of quality control measures,
+    (3) creation of methylation score (coverage) matrix,
+    (4) principal component analysis for capturing batch effects and
+    identify outliers,
+    (5) association analysis with respect to phenotypes of interest
+    while correctingfor top PCs and known covariates,
+    (6) annotation of significant findings, and
+    (7) multi-marker analysis (methylation risk score) using elastic net.
+}
 \details{
     \tabular{ll}{
         Package: \tab ramwas\cr
