@@ -413,7 +413,7 @@ First, we run MWAS 10 times as part of the 10-fold cross validation.
 param$modeloutcome = "age"
 param$modelPCs = 0
 param$cvnfolds = 10;
-ramwas6crossValidation(param)
+ramwas7ArunMWAS(param)
 ```
 
 This creates `CV_10_folds` subdirectory in MWAS directory.

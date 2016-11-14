@@ -1,6 +1,6 @@
 # Run 10 (cvnfolds) MWASes
 # each on 90% of the data.
-ramwas6crossValidation = function(param){
+ramwas7ArunMWAS = function(param){
     param = parameterPreprocess(param);
     param$toppvthreshold = 1e-300;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);

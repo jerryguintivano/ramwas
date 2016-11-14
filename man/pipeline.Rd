@@ -6,7 +6,7 @@
 \alias{ramwas3NormalizedCoverage}
 \alias{ramwas4PCA}
 \alias{ramwas5MWAS}
-\alias{ramwas6crossValidation}
+\alias{ramwas7ArunMWAS}
 \alias{ramwas7multiMarker}
 
 \title{
@@ -27,7 +27,7 @@ ramwas4PCA(param)
 
 ramwas5MWAS(param)
 
-ramwas6crossValidation(param)
+ramwas7ArunMWAS(param)
 
 ramwas7multiMarker(param)
 }
@@ -197,7 +197,7 @@ ramwas7multiMarker(param)
         applied to top CpGs from MWAS. \cr
         To have an unbiased estimate of predictive power we use
         cross validation technique. \cr
-        First, \code{ramwas6crossValidation} runs MWAS 10 times,
+        First, \code{ramwas7ArunMWAS} runs MWAS 10 times,
         each time excluding different 10\% of the data. \cr
         Then, \code{ramwas7multiMarker} trains elastic net on the top CpGs
         from each of 10 MWASes and uses it to predict
@@ -278,7 +278,7 @@ ramwas4PCA(param)
 
 ramwas5MWAS(param)
 
-ramwas6crossValidation(param)
+ramwas7ArunMWAS(param)
 
 ramwas7multiMarker(param)}
 }

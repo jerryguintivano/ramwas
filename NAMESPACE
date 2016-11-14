@@ -12,7 +12,7 @@ export(
     "ramwas3NormalizedCoverage",
     "ramwas4PCA",
     "ramwas5MWAS",
-    "ramwas6crossValidation",
+    "ramwas7ArunMWAS",
     "ramwas7multiMarker",
     "processCommandLine",
     "qcmean",
