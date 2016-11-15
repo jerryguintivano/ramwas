@@ -46,6 +46,7 @@ ramwas7ArunMWASes = function(param){
         saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"),
                  object = exclude);
     }
+    return( invisible(NULL) );
 }
 
 predictionStats = function(outcome, forecast, dfFull = NULL){
@@ -241,7 +242,7 @@ ramwas7BrunElasticNet = function(param){
             dev.off();
         } # pdf()
     }
-    return( invisible(rez) );
+    return( invisible(NULL) );
 }
 
 ramwas7CplotByNCpGs = function(param){
@@ -286,6 +287,7 @@ ramwas7CplotByNCpGs = function(param){
            col=c("red","red","cyan4"));
     title("Prediction Success of Elastic Net");
     dev.off();
+    return( invisible(NULL) );
 }
 
 ramwas7riskScoreCV = function(param){
