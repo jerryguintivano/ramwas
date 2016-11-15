@@ -50,8 +50,8 @@ filename = tempfile()
 # modelcovariates=c("Age","Sex")
 
 arg = c(
-    "dirproject = "."",
-    "modelcovariates = c("Age","Sex")")
+    "dirproject = \".\"",
+    "modelcovariates = c(\"Age\",\"Sex\")")
 
 # Process the command line
 param = processCommandLine(arg)
