@@ -118,6 +118,8 @@ param = list(
     modeloutcome = "age",
     modelPCs = 0,
     toppvthreshold = 1e-5,
+    bihost = "grch37.ensembl.org",
+    bimart = "ENSEMBL_MART_ENSEMBL",
     bidataset = "hsapiens_gene_ensembl",
     biattributes = c("hgnc_symbol","entrezgene","strand"),
     bifilters = list(with_hgnc_transcript_name=TRUE),
@@ -298,7 +300,7 @@ tab-separated table format, with sample names in the first column.
 The artificial data set includes covariate file *covariates.txt*.
 
 The parameter `modelcovariates` names 
-the covariates to regress out for before PCA.
+the covariates regressed out for before PCA.
 
 ```{r pca99, warning=FALSE, message=FALSE}
 ramwas4PCA(param)
@@ -383,10 +385,14 @@ there is weak signal in 1\% of CpGs.
 RaMWAS can annotate top findings using data from
 [`biomaRt`](https://bioconductor.org/packages/release/bioc/html/biomaRt.html).
 
-The biomaRt dataset is defined by `bidataset` parameter,
-`biattributes` -- are attributes of interest, 
-`bifilters` -- lists filters (if any), and
-`biflank` -- indicates the maximum allowed distance from the 
+The parameters include:
+
+* `bihost` -- biomart host site.
+* `bimart` -- BioMart database name, see listMarts().
+* `bidataset` -- data set, see listDatasets().
+* `biattributes` -- are attributes of interest, see listAttributes(). 
+* `bifilters` -- lists filters (if any), see listFilters().
+* `biflank` -- indicates the maximum allowed distance from the 
 CpG to the annotation element.
 
 ere we annotate top findings with human gene symbols, gene ids, and 
