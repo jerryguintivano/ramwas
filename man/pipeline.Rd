@@ -6,9 +6,11 @@
 \alias{ramwas3normalizedCoverage}
 \alias{ramwas4PCA}
 \alias{ramwas5MWAS}
+\alias{ramwas6annotateTopFindings}
 \alias{ramwas7ArunMWASes}
 \alias{ramwas7BrunElasticNet}
-
+\alias{ramwas7CplotByNCpGs}
+\alias{ramwas7riskScoreCV}
 \title{
     RaMWAS: High Level Pipeline Functions
 }
@@ -44,8 +46,9 @@ ramwas7riskScoreCV(param)
     \code{vignette("RaMWAS_param")}.
   }
   \item{bamname}{
-    Name of the BAM file to process. Can be absolute or relative to
-    \code{dirbam} parameter.
+    Name of the BAM file to process. 
+    Can be absolute or relative to \code{dirbam} parameter 
+    (in \code{param} list).
   }
 }
 \details{

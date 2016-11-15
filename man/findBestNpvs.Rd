@@ -1,4 +1,5 @@
 \name{findBestNpvs}
+\alias{findBestNpvs}
 \title{
 Quickly Find N Best p-values in a Long Vector
 }
