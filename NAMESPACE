@@ -14,6 +14,8 @@ export(
     "ramwas5MWAS",
     "ramwas7ArunMWASes",
     "ramwas7BrunElasticNet",
+    "ramwas7CplotByNCpGs",
+    "ramwas7RiskScoreCV",
     "processCommandLine",
     "qcmean",
     "qqPlotFast",

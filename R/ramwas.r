@@ -158,7 +158,7 @@ parameterPreprocess = function( param ){
     if( is.null(param$cvnfolds) ) param$cvnfolds = 10;
     if( is.null(param$mmalpha) ) param$mmalpha = 0;
     if( is.null(param$mmncpgs) ) param$mmncpgs = 1000;
-    stopifnot( param$mmncpgs > 1)
+    stopifnot(all( param$mmncpgs > 1 ))
 
     ### BAM2sample processing
     if( !is.null(param$filebam2sample) & is.null(param$bam2sample)){

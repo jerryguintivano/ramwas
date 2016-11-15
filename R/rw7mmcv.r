@@ -48,46 +48,67 @@ ramwas7ArunMWASes = function(param){
     }
 }
 
+predictionStats = function(outcome, forecast, dfFull = NULL){
+    if( is.null(dfFull) )
+        dfFull = length(forecast) - 1 - 1;
+    cor2tt = function(x){ return( x * sqrt(dfFull / (1 - pmin(x^2,1)))) }
+    tt2pv = function(x){ return( (pt(-x,dfFull))) }
+    corp = cor(outcome, forecast, use = "complete.obs", method = "pearson");
+    cors = cor(outcome, forecast, use = "complete.obs", method = "spearman");
+    MSE = sqrt(mean( (outcome - forecast)^2 ));
+    MAD = median( abs(outcome - forecast) );
+    R2p = max(corp, 0)^2;
+    R2s = max(cors, 0)^2;
+    tp = cor2tt(corp);
+    ts = cor2tt(cors);
+    pvp = tt2pv(max(tp,0));
+    pvs = tt2pv(max(ts,0));
+    return(list(
+        outcome = outcome,
+        forecast = forecast, 
+        dfFull = dfFull,
+        corp = corp, 
+        cors = cors,
+        MSE = MSE,
+        MAD = MAD,
+        R2p = R2p,
+        R2s = R2s,
+        tp = tp,
+        ts = ts,
+        pvp = pvp, 
+        pvs = pvs));
+}
+
 # Plot true outcome vs. prediction
 # with correlations and p-value in the title
 plotPrediction = function(param, outcome, forecast, cpgs2use, main, dfFull = NULL){
     rng = range(c(outcome, forecast));
-    c1 = cor(outcome, forecast, use = "complete.obs", method = "pearson");
-    c2 = cor(outcome, forecast, use = "complete.obs", method = "spearman");
-    c1p = max(c1, 0);
-    c2p = max(c2, 0);
-    if( is.null(dfFull) )
-        dfFull = length(forecast) - 1 - 1;
-    cor2tt = function(x){ return( x * sqrt( dfFull / (1 - pmin(x^2,1))));    }
-    tt2pv = function(x){ return( (pt(-x,dfFull))); }
+    stats = predictionStats(outcome, forecast, dfFull);
 
-    MSE = sqrt(mean( (outcome - forecast)^2 ))
-    MAD = median( abs(outcome - forecast) )
-    # z = summary(lm(outcome ~ forecast)); z$coefficients[2,4]
-
-    plot( outcome,
-          forecast,
-          pch = 19,
-          col = "blue",
-          xlab = param$modeloutcome,
-          ylab = "CV prediction",
-          xlim = rng,
-          ylim = rng,
-          main = sprintf(paste0(
-              "%s\n",
-              "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
-              "R2 = %.3f / %.3f, p-value = %.1e / %.1e"),
-            main, MSE, MAD,
-            c1, c2, c1p^2,
-            c2p^2,
-            tt2pv(cor2tt(c1p)),
-            tt2pv(cor2tt(c2p)))
-    );
-    legend(x = "bottomright",
-           legend = c(paste0("# CpGs = ",   cpgs2use),
-                      paste0("EN alpha = ", param$mmalpha))
-    );
-    abline(a = 0, b = 1, col = "gray")
+    with(stats,{
+        plot( outcome,
+              forecast,
+              pch = 19,
+              col = "blue",
+              xlab = param$modeloutcome,
+              ylab = "CV prediction",
+              xlim = rng,
+              ylim = rng,
+              main = sprintf(paste0(
+                  "%s\n",
+                  "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
+                  "R2 = %.3f / %.3f, p-value = %.1e / %.1e"),
+                main, MSE, MAD,
+                corp, cors,
+                R2p, R2s,
+                pvp, pvs)
+        );
+        legend(x = "bottomright",
+               legend = c(paste0("# CpGs = ",   cpgs2use),
+                          paste0("EN alpha = ", param$mmalpha))
+        );
+        abline(a = 0, b = 1, col = "gray")
+    })
 }
 
 # Apply Elastic Net 10 times and collect
@@ -206,16 +227,24 @@ ramwas7BrunElasticNet = function(param){
                              forecast = forecast0[1,]/forecast0[2,]
             )
             write.table( file = sprintf(
-                "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt",
+                "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.txt",
                 param$dircv,
                 param$cvnfolds,
                 cpgs2use,
                 param$mmalpha),
                          x = rez,
                          sep = "\t", row.names = FALSE);
+            dirr = paste0(param$dircv,"/rds");
+            dir.create(dirr, showWarnings = FALSE);
+            saveRDS(file = sprintf(
+                "%s/CpGs=%06d_alpha=%f.rds",
+                dirr,
+                cpgs2use,
+                param$mmalpha),
+                object = list(outcome = outcome, forecast = forecast0[1,]/forecast0[2,]));
         } # rez
         {
-            pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf",
+            pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
                          param$dircv,
                          param$cvnfolds,
                          cpgs2use,
@@ -229,4 +258,51 @@ ramwas7BrunElasticNet = function(param){
 }
 
 ramwas7CplotByNCpGs = function(param){
+    param = parameterPreprocess(param);
+    if(length(param$mmncpgs)<=1)
+        return();
+    message("Working in: ",param$dircv);
+    cors = double(length( param$mmncpgs ));
+    corp = double(length( param$mmncpgs ));
+    for( i in seq_along(param$mmncpgs) ){ # i = 1
+        cpgs2use = param$mmncpgs[i];
+        data = readRDS(sprintf(
+            "%s/rds/CpGs=%06d_alpha=%f.rds",
+            param$dircv,
+            cpgs2use,
+            param$mmalpha));
+        stats = predictionStats(outcome = data$outcome, 
+                                forecast = data$forecast);
+        cors[i] = stats$cors;
+        corp[i] = stats$corp;
+    }
+    
+    pdf( sprintf("%s/Prediction_alpha=%f.pdf",
+                 param$dircv,
+                 param$mmalpha) );
+    
+    aymax = max(abs(cors),abs(corp));
+    plot( x = param$mmncpgs, 
+          y = cors, 
+          col = 'red', 
+          pch = 19, 
+          ylim = c(-1,1)*aymax, 
+          log = 'x', 
+          xlab = "Number of markers", 
+          ylab = "Correlation")
+    points( param$mmncpgs, corp, col = 'cyan4', pch = 17)
+    abline(h=0, col = 'grey')
+    legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
+    legend("bottomright",
+           legend = c("Correlations:","Pearson", "Spearman"),
+           pch = c(NA_integer_,19,17),
+           col=c("red","red","cyan4"));
+    title("Prediction Success of Elastic Net");
+    dev.off();
+}
+
+ramwas7RiskScoreCV = function(param){
+    ramwas7ArunMWASes(param);
+    ramwas7BrunElasticNet(param);
+    ramwas7CplotByNCpGs(param);
 }
