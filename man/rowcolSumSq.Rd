@@ -1,4 +1,4 @@
-\name{qqplotFast}
+\name{rowcolSumSq}
 \alias{rowSumsSq}
 \alias{colSumsSq}
 \title{
