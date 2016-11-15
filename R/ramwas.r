@@ -137,7 +137,7 @@ parameterPreprocess = function( param ){
     if( is.null(param$scoretag) ) param$scoretag = "mapq";
     if( is.null(param$minscore) ) param$minscore = 4;
     if( is.null(param$maxrepeats) ) param$maxrepeats = 3;
-    
+
     ### More analysis parameters
     if( is.null(param$cputhreads) ) param$cputhreads = detectCores();
     if( is.null(param$diskthreads)) param$diskthreads = min(param$cputhreads,2);

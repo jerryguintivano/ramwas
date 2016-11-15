@@ -1,8 +1,8 @@
 Package: ramwas
 Type: Package
 Title: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
-Version: 0.99.1
-Date: 2016-09-26
+Version: 0.99.3
+Date: 2016-11-15
 Author: Andrey A Shabalin
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
 Description: RaMWAS provides a complete toolset for 
@@ -23,7 +23,7 @@ Description: RaMWAS provides a complete toolset for
 BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
 LazyLoad: yes
-Depends: R (>= 3.2.0), methods, filematrix
+Depends: R (>= 3.4.0), methods, filematrix
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, BiocStyle, 
         BSgenome.Hsapiens.UCSC.hg19,

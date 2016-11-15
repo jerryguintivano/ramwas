@@ -4,7 +4,7 @@
 Calculate Benjamini-Hochberg q-values
 }
 \description{
-Calculate Benjamini-Hochberg q-values for a vector of p-values.
+    Calculate Benjamini-Hochberg q-values for a vector of p-values.
 }
 \usage{
 pvalue2qvalue(pv, n = length(pv))

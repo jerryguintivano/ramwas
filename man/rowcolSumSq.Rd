@@ -2,19 +2,20 @@
 \alias{rowSumsSq}
 \alias{colSumsSq}
 \title{
-Form Row and Column Sums of Squares
+    Form Row and Column Sums of Squares
 }
 \description{
-Form row and column sums of squares for numeric matrices.
-The functions are introduced as faster analogs of
-\code{rowSums(x^2)} and \code{colSums(x^2)} calls.
+    Form row and column sums of squares for numeric matrices.
+    The functions are introduced as faster analogs of
+    \code{rowSums(x^2)} and \code{colSums(x^2)} calls.
 }
 \usage{
 rowSumsSq(x)
 colSumsSq(x)
 }
 \arguments{
-  \item{x}{Numeric matrix.
+    \item{x}{
+        Numeric matrix.
     }
 }
 \details{

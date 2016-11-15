@@ -6,7 +6,7 @@
 \description{
     The pipeline parameters can be provided via command line.
 
-    For example: \cr 
+    For example: \cr
     \code{R pipeline.r dirproject="/project" maxrepeats=0 modeloutcome="Age"}
 
     Each command line argument is treated as an R statement.
@@ -17,10 +17,10 @@
 processCommandLine(.arg = NULL)
 }
 \arguments{
-  \item{.arg}{
-    Vector of command line parameters. Obtained from
-    \code{\link[base]{commandArgs}} if omitted.
-  }
+    \item{.arg}{
+        Vector of command line parameters. Obtained from
+        \code{\link[base]{commandArgs}} if omitted.
+    }
 }
 \details{
     If a command line argument defines variable \code{"fileparam"},

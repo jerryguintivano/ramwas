@@ -19,22 +19,22 @@ ramwas0createArtificialData(dir,
 }
 \arguments{
     \item{dir}{
-    Directory for generated RaMWAS project files and BAMs.
+        Directory for generated RaMWAS project files and BAMs.
     }
     \item{nsamples}{
-    Number of samples/BAMs to create.
+        Number of samples/BAMs to create.
     }
     \item{nreads}{
-    Number of reads in each BAM file.
+        Number of reads in each BAM file.
     }
     \item{ncpgs}{
-    Number of CpGs in the generated genome (with a single chromosome).
+        Number of CpGs in the generated genome (with a single chromosome).
     }
     \item{randseed}{
-    Random number generator seed for consistency of the output.
+        Random number generator seed for consistency of the output.
     }
     \item{verbose}{
-    If TRUE, produce a message for each BAM file.
+        If TRUE, produce a message for each BAM file.
     }
 }
 \details{
@@ -58,7 +58,7 @@ ramwas0createArtificialData(dir,
     The age is generated randomly in the range from 20 to 80.
 }
 \value{
-The function creates multiple files but returns no value.
+    The function creates multiple files but returns no value.
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
@@ -70,10 +70,11 @@ The function creates multiple files but returns no value.
 ### Location for the artificial project
 dr = paste0(tempdir(), "/simulated_project")
 
-ramwas0createArtificialData(dr,
-                            nsamples = 4,
-                            nreads = 10e3,
-                            ncpgs = 1e3)
+ramwas0createArtificialData(
+    dr,
+    nsamples = 4,
+    nreads = 10e3,
+    ncpgs = 1e3)
 
 # Artificial project files created in:
 dr

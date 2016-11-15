@@ -11,20 +11,23 @@
 parameterDump(dir, param, toplines = NULL)
 }
 \arguments{
-  \item{dir}{
-    Directory to save the parameters to.
-    The file is named \code{"UsedSettings.txt"}.
-  }
-  \item{param}{
-    A list with RaMWAS parameters. Or any list in general.
-  }
-  \item{toplines}{
-    Names of the elements in \code{param} to save first (top of the file).
-  }
+    \item{dir}{
+        Directory to save the parameters to.
+        The file is named \code{"UsedSettings.txt"}.
+    }
+    \item{param}{
+        A list with RaMWAS parameters. Or any list in general.
+    }
+    \item{toplines}{
+        Names of the elements in \code{param} to save first (top of the file).
+    }
 }
 \details{
-  This function is used internally by multiple RaMWAS
-  functions to record parameters used to run the analysis.
+    This function is used internally by multiple RaMWAS
+    functions to record parameters used to run the analysis.
+}
+\value{
+    The function creates a file and returns nothing.
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}

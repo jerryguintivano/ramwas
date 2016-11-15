@@ -11,24 +11,24 @@
 orthonormalizeCovariates(covariates)
 }
 \arguments{
-  \item{covariates}{
-  A matrix or data frame with covariates.
-}
+    \item{covariates}{
+        A matrix or data frame with covariates.
+    }
 }
 \details{
     Factor variables are split into dummy variables before orthonormalization.
-    
+
     The operation is performed via QR decomposition (\link[base]{qr}).
 }
 \value{
-A matrix with orthogonal columns with unit length,
-whose columns spans the same space as the covariates plus a constant.
+    A matrix with orthogonal columns with unit length,
+    whose columns spans the same space as the covariates plus a constant.
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \note{
-  This function is used in several parts of the pipeline.
+    This function is used in several parts of the pipeline.
 }
 \examples{
 # Sample matrix of covariates

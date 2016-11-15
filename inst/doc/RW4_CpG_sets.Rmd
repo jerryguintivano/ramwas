@@ -144,10 +144,10 @@ inject SNPs using the function `injectSNPsMAF`.
 
 ```{r getCpGsetALL2, eval=FALSE}
 # Do for all chromosomes
-genome[['chr22']] =
+genome[["chr22"]] =
     injectSNPsMAF(
-        gensequence = BSGenome[['chr22']],
-        frqcount = 'count_ALL_chr22.txt',
+        gensequence = BSGenome[["chr22"]],
+        frqcount = "count_ALL_chr22.txt",
         MAF = 0.01)
 
 # Find the CpGs
@@ -158,7 +158,7 @@ Once a CpG set is generated, it can be saved with
 `saveRDS` function for use by RaMWAS.
 
 ```{r save1, eval=FALSE}
-saveRDS(file = 'My_cpgset.rds', object = cpgset)
+saveRDS(file = "My_cpgset.rds", object = cpgset)
 ```
 
 ## In-silico alignment experiment
@@ -177,7 +177,7 @@ Here is an example for the `insilicoFASTQ` function
 # Do for all chromosomes
 insilicoFASTQ(
     con="chr1.fastq.gz",
-    gensequence = BSGenome[['chr1']],
+    gensequence = BSGenome[["chr1"]],
     fraglength=75)
 ```
 
@@ -192,13 +192,13 @@ the coverage for one sample combining all the BAMs is calculated:
 
 ```{r RaMWAS, eval=FALSE}
 library(ramwas)
-chrset = paste0('chr',1:22)
+chrset = paste0("chr",1:22)
 targetcov = 75
 covtolerance = 10
 
 param = list(
-    dirproject = '.',
-    dirbam = './bams',
+    dirproject = ".",
+    dirbam = "./bams",
     dirfilter = TRUE,
     bamnames = chrset,
     bam2sample = list(all_samples = chrset),
@@ -213,7 +213,7 @@ param = list(
 )
 param1 = parameterPreprocess(param)
 ramwas1scanBams(param)
-ramwas3NormalizedCoverage(param)
+ramwas3normalizedCoverage(param)
 ```
 
 The following code then filters CpGs by the in-silico coverage
@@ -223,13 +223,13 @@ The following code then filters CpGs by the in-silico coverage
 param1 = parameterPreprocess(param)
 
 # Load the coverage matrix (vector)
-cover = fm.load( paste0(param1$dircoveragenorm, '/Coverage'))
+cover = fm.load( paste0(param1$dircoveragenorm, "/Coverage"))
 
 # split the coverage by chromosomes
 # `cpgset` - the CpG set being QC-ed
 fac = rep(seq_along(cpgset), times = sapply(cpgset, length))
 levels(fac) = names(cpgset)
-class(fac) = 'factor'
+class(fac) = "factor"
 cover = split(cover, fac)
 
 # filter CpGs on each chromosome by the coverage
@@ -245,6 +245,6 @@ Once the desired CpG set is generated,
 it can be saved with `saveRDS` function for use by RaMWAS.
 
 ```{r save2, eval=FALSE}
-saveRDS(file = 'My_cpgset_QC.rds', object = cpgsetQC)
+saveRDS(file = "My_cpgset_QC.rds", object = cpgsetQC)
 ```
 

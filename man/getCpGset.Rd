@@ -5,22 +5,22 @@
     Construct CpG set for a Reference Genome
 }
 \description{
-Finds all CpGs in a reference genome.
+    Finds all CpGs in a reference genome.
 }
 \usage{
 getCpGsetCG(genome)
 getCpGsetALL(genome)
 }
 \arguments{
-  \item{genome}{
-    A \code{\link[BSgenome]{BSgenome}} object or a
-    character vector with genome sequences.
-  }
+    \item{genome}{
+        A \code{\link[BSgenome]{BSgenome}} object or a
+        character vector with genome sequences.
+    }
 }
 \details{
-  The \code{getCpGsetCG} function searches for all
+    The \code{getCpGsetCG} function searches for all
     \code{CG} pairs in the genome. \cr
-  The \code{getCpGsetALL} function also works for genomes with injected SNPs.
+    The \code{getCpGsetALL} function also works for genomes with injected SNPs.
 }
 \value{
     Returns a list with CpG coordinates for each genome sequence.
@@ -41,8 +41,8 @@ print(cpgset$NC_008253[1:10])
 ### Using a character vector input
 
 genome = list(
-  chr1 = "AGCGTTTTCATTCTGACTGCAACGGGCYR",
-  chr2 = "AAAAAACGCCTTAGTAAGTGATTTTCGYR")
+    chr1 = "AGCGTTTTCATTCTGACTGCAACGGGCYR",
+    chr2 = "AAAAAACGCCTTAGTAAGTGATTTTCGYR")
 cpgset1 = getCpGsetCG(genome)
 cpgset2 = getCpGsetALL(genome)
 

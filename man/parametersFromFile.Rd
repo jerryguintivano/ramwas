@@ -6,17 +6,17 @@
 \description{
     The pipeline parameters can be stored in a simple file,
     formatted as R code.
-    The \code{parametersFromFile} function transforms them into 
+    The \code{parametersFromFile} function transforms them into
     a parameter list used by RaMWAS steps.
 }
 \usage{
 parametersFromFile(.parameterfile)
 }
 \arguments{
-  \item{.parameterfile}{
-    Name of the file with the parameters set as R variables.
-    See the example below.
-  }
+    \item{.parameterfile}{
+        Name of the file with the parameters set as R variables.
+        See the example below.
+    }
 }
 \details{
     Variables with names starting with period (.) are ignored.

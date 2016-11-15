@@ -22,34 +22,34 @@ print(cpgset$NC_008253[1:10])
 
 ## ----getCpGsetALL2, eval=FALSE-------------------------------------------
 #  # Do for all chromosomes
-#  genome[['chr22']] =
+#  genome[["chr22"]] =
 #      injectSNPsMAF(
-#          gensequence = BSGenome[['chr22']],
-#          frqcount = 'count_ALL_chr22.txt',
+#          gensequence = BSGenome[["chr22"]],
+#          frqcount = "count_ALL_chr22.txt",
 #          MAF = 0.01)
 #  
 #  # Find the CpGs
 #  cpgset = getCpGsetALL(genome)
 
 ## ----save1, eval=FALSE---------------------------------------------------
-#  saveRDS(file = 'My_cpgset.rds', object = cpgset)
+#  saveRDS(file = "My_cpgset.rds", object = cpgset)
 
 ## ----insilicoFASTQ, eval=FALSE-------------------------------------------
 #  # Do for all chromosomes
 #  insilicoFASTQ(
 #      con="chr1.fastq.gz",
-#      gensequence = BSGenome[['chr1']],
+#      gensequence = BSGenome[["chr1"]],
 #      fraglength=75)
 
 ## ----RaMWAS, eval=FALSE--------------------------------------------------
 #  library(ramwas)
-#  chrset = paste0('chr',1:22)
+#  chrset = paste0("chr",1:22)
 #  targetcov = 75
 #  covtolerance = 10
 #  
 #  param = list(
-#      dirproject = '.',
-#      dirbam = './bams',
+#      dirproject = ".",
+#      dirbam = "./bams",
 #      dirfilter = TRUE,
 #      bamnames = chrset,
 #      bam2sample = list(all_samples = chrset),
@@ -64,20 +64,20 @@ print(cpgset$NC_008253[1:10])
 #  )
 #  param1 = parameterPreprocess(param)
 #  ramwas1scanBams(param)
-#  ramwas3NormalizedCoverage(param)
+#  ramwas3normalizedCoverage(param)
 
 ## ----filter, eval=FALSE--------------------------------------------------
 #  # Preprocess parameters to learn the location of coverage matrix
 #  param1 = parameterPreprocess(param)
 #  
 #  # Load the coverage matrix (vector)
-#  cover = fm.load( paste0(param1$dircoveragenorm, '/Coverage'))
+#  cover = fm.load( paste0(param1$dircoveragenorm, "/Coverage"))
 #  
 #  # split the coverage by chromosomes
 #  # `cpgset` - the CpG set being QC-ed
 #  fac = rep(seq_along(cpgset), times = sapply(cpgset, length))
 #  levels(fac) = names(cpgset)
-#  class(fac) = 'factor'
+#  class(fac) = "factor"
 #  cover = split(cover, fac)
 #  
 #  # filter CpGs on each chromosome by the coverage
@@ -89,5 +89,5 @@ print(cpgset$NC_008253[1:10])
 #  }
 
 ## ----save2, eval=FALSE---------------------------------------------------
-#  saveRDS(file = 'My_cpgset_QC.rds', object = cpgsetQC)
+#  saveRDS(file = "My_cpgset_QC.rds", object = cpgsetQC)
 

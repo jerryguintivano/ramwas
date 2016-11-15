@@ -60,6 +60,7 @@ qqPlotFast = function(pvalues, ntests=NULL, ci.level=0.05){
         legend("bottom", legend = bquote(lambda == .(lambda)), bty = "n")
         #         text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
     }
+    return(invisible(NULL));
 }
 
 

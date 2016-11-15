@@ -12,16 +12,16 @@
 testPhenotype(phenotype, data, cvrtqr)
 }
 \arguments{
-  \item{phenotype}{
-    Vector with phenotype. Can be numerical or character/factor variable.
-}
-  \item{data}{
-      Matrix with normalized coverage, one CpG per column.
-}
-  \item{cvrtqr}{
-    Orthonormalized covariates (transposed).
-    See \code{\link{orthonormalizeCovariates}}.
-}
+    \item{phenotype}{
+        Vector with phenotype. Can be numerical or character/factor variable.
+    }
+    \item{data}{
+        Matrix with normalized coverage, one CpG per column.
+    }
+    \item{cvrtqr}{
+        Orthonormalized covariates (transposed).
+        See \code{\link{orthonormalizeCovariates}}.
+    }
 }
 \details{
     The testing is performed in a fast way,
@@ -30,7 +30,7 @@ testPhenotype(phenotype, data, cvrtqr)
 \value{
     If the phenotype is numerical, the output is a list with
     \item{correlation}{Correlations between residualized phenotype and
-      data columns.}
+    data columns.}
     \item{tstat}{Corresponding T-statistics}
     \item{pvalue}{Corresponding P-values}
     \item{nVarTested}{Always 1}
@@ -41,22 +41,21 @@ testPhenotype(phenotype, data, cvrtqr)
     \item{Fstat}{Corresponding F-test}
     \item{pvalue}{Corresponding P-values}
     \item{nVarTested}{First number of degrees of freedom of the F-test.
-      Equal to the number of factor levels reduced by 1}
+    Equal to the number of factor levels reduced by 1}
     \item{dfFull}{Second number of degrees of freedom of the F-test.}
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \note{
-  This function is used in several parts of the pipeline.
+    This function is used in several parts of the pipeline.
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.
-    
+
     Also check \code{\link{orthonormalizeCovariates}}.
 }
 \examples{
-
 # Random data with signal in the first column
 data = matrix( runif(30*3), 30, 3)
 data[,1] = data[,1] + rep(0:2, each = 10)

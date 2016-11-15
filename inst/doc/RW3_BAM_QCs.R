@@ -5,8 +5,8 @@ knitr::opts_chunk$set(fig.retina=1)
 library(ramwas)
 
 ## ----loadCgGset----------------------------------------------------------
-filename = system.file("extdata", "bigQC.rds", package = "ramwas");
-qc = readRDS(filename)$qc;
+filename = system.file("extdata", "bigQC.rds", package = "ramwas")
+qc = readRDS(filename)$qc
 # show(names(qc))
 
 
@@ -104,7 +104,7 @@ plot(qc$hist.isolated.dist1)
 ## ----avg.coverage.by.density---------------------------------------------
 {
     cat("Highest coverage is observed at CpG density of",
-        qcmean(qc$avg.coverage.by.density)^2);
+        qcmean(qc$avg.coverage.by.density)^2)
     plot(qc$avg.coverage.by.density)
 }
 

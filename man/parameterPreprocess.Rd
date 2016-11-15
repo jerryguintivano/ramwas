@@ -12,9 +12,9 @@
 parameterPreprocess(param)
 }
 \arguments{
-  \item{param}{
-    List with RaMWAS parameters.
-}
+    \item{param}{
+        List with RaMWAS parameters.
+    }
 }
 \details{
     A number of common preprocessing steps necessary for parameters of
@@ -23,16 +23,16 @@ parameterPreprocess(param)
     \itemize{
         \item Fill in default values for all missing parameters.
         \item Set \var{bamnames} parameter to the content
-         \var{filebamlist} file (if \var{bamnames} was not set).
+        \var{filebamlist} file (if \var{bamnames} was not set).
         \item Set \var{bam2sample} parameter to processed content of
-         \var{filebam2sample} file (if \var{bam2sample} was not set).
+        \var{filebam2sample} file (if \var{bam2sample} was not set).
         \item Set \var{covariates} parameter to the data frame from
-         \var{filecovariates} file (if \var{covariates} was not set).
+        \var{filecovariates} file (if \var{covariates} was not set).
         \item Check parameters for consistency, i.e. that
-         \var{modelcovariates} include only names of columns in
-         \var{covariates}.
+        \var{modelcovariates} include only names of columns in
+        \var{covariates}.
         \item Check that files \var{filecpgset} and
-         \var{filenoncpgset} exist if the parameters are set.
+        \var{filenoncpgset} exist if the parameters are set.
     }
 }
 \value{
@@ -50,7 +50,7 @@ parameterPreprocess(param)
 \examples{
 param = list(
     dirproject = "."
-    )
+)
 
 param2 = parameterPreprocess(param)
 

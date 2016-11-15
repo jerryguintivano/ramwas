@@ -86,30 +86,28 @@ plotPrediction = function(param, outcome, forecast, cpgs2use, main, dfFull = NUL
     rng = range(c(outcome, forecast));
     stats = predictionStats(outcome, forecast, dfFull);
 
-    with(stats,{
-        plot( outcome,
-              forecast,
-              pch = 19,
-              col = "blue",
-              xlab = param$modeloutcome,
-              ylab = "CV prediction",
-              xlim = rng,
-              ylim = rng,
-              main = sprintf(paste0(
-                  "%s\n",
-                  "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
-                  "R2 = %.3f / %.3f, p-value = %.1e / %.1e"),
-                main, MSE, MAD,
-                corp, cors,
-                R2p, R2s,
-                pvp, pvs)
-        );
-        legend(x = "bottomright",
-               legend = c(paste0("# CpGs = ",   cpgs2use),
-                          paste0("EN alpha = ", param$mmalpha))
-        );
-        abline(a = 0, b = 1, col = "gray")
-    })
+    plot( outcome,
+          forecast,
+          pch = 19,
+          col = "blue",
+          xlab = param$modeloutcome,
+          ylab = "CV prediction",
+          xlim = rng,
+          ylim = rng,
+          main = sprintf(paste0(
+              "%s\n",
+              "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
+              "R2 = %.3f / %.3f, p-value = %.1e / %.1e"),
+            main, stats$MSE, stats$MAD,
+            stats$corp, stats$cors,
+            stats$R2p, stats$R2s,
+            stats$pvp, stats$pvs)
+    );
+    legend(x = "bottomright",
+           legend = c(paste0("# CpGs = ",   cpgs2use),
+                      paste0("EN alpha = ", param$mmalpha))
+    );
+    abline(a = 0, b = 1, col = "gray")
 }
 
 # Apply Elastic Net 10 times and collect
