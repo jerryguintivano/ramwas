@@ -196,7 +196,7 @@ pipelineCoverage1Sample = function(colnum, param){
 }
 
 # Step 3 of RaMWAS
-ramwas3NormalizedCoverage = function( param ){
+ramwas3normalizedCoverage = function( param ){
     # Prepare
     param = parameterPreprocess(param);
     if( param$minfragmentsize < param$maxfragmentsize ){

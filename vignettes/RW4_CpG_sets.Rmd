@@ -213,7 +213,7 @@ param = list(
 )
 param1 = parameterPreprocess(param)
 ramwas1scanBams(param)
-ramwas3NormalizedCoverage(param)
+ramwas3normalizedCoverage(param)
 ```
 
 The following code then filters CpGs by the in-silico coverage

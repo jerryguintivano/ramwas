@@ -117,12 +117,13 @@ param = list(
     minnonzerosamples = 0.3,
     filecovariates = "covariates.txt",
     modelcovariates = NULL,
-    modeloutcome = "sex",
+    modeloutcome = "age",
     modelPCs = 0,
     cvnfolds = 10,
     mmalpha = 0,
-    mmncpgs = c(10,50,100,500,1000)
+    mmncpgs = c(5,10,50,100,500,1000,10000)
 )
+ramwas7riskScoreCV(param)
 ```
 
 ```{r parameters0}
@@ -300,7 +301,7 @@ package for format details.
 Now we run step 3 of RaMWAS.
 
 ```{r normCoverage99, warning=FALSE, message=FALSE}
-ramwas3NormalizedCoverage(param)
+ramwas3normalizedCoverage(param)
 ```
 
 This step creates directory `coverage_norm_20` in the project directory

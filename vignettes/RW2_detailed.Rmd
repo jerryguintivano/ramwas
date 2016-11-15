@@ -173,7 +173,7 @@ Again, the task is parallelized across `cputhreads` threads.
 ```{r normCoverage}
 {
     suppressMessages({
-    ramwas3NormalizedCoverage(param)
+    ramwas3normalizedCoverage(param)
     })
     message("The generated files and directories in coverage directory are:");
     message(paste(list.files(paste0(dir,"/coverage_norm_20")), collate="\n"))

@@ -3,7 +3,7 @@
 \alias{ramwas1scanBams}
 \alias{pipelineProcessBam}
 \alias{ramwas2collectqc}
-\alias{ramwas3NormalizedCoverage}
+\alias{ramwas3normalizedCoverage}
 \alias{ramwas4PCA}
 \alias{ramwas5MWAS}
 \alias{ramwas7ArunMWASes}
@@ -21,7 +21,7 @@ pipelineProcessBam(bamname, param)
 
 ramwas2collectqc(param)
 
-ramwas3NormalizedCoverage(param)
+ramwas3normalizedCoverage(param)
 
 ramwas4PCA(param)
 
@@ -98,7 +98,7 @@ ramwas7BrunElasticNet(param)
         \item \bold{Calculate coverage matrix for all CpGs across all samples,
           filter CpGs by coverage, normalize samples to the
           same sample average.} \cr
-        Function \code{ramwas3NormalizedCoverage} performs this part.
+        Function \code{ramwas3normalizedCoverage} performs this part.
         \itemize{
             \item The coverage matrix is calculated for the samples listed in
               \var{bam2sample}. If \var{filecovariates} or \var{covariates} is
@@ -272,7 +272,7 @@ ramwas1scanBams( param )
 
 ramwas2collectqc( param )
 
-ramwas3NormalizedCoverage(param)
+ramwas3normalizedCoverage(param)
 
 ramwas4PCA(param)
 

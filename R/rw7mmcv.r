@@ -301,7 +301,7 @@ ramwas7CplotByNCpGs = function(param){
     dev.off();
 }
 
-ramwas7RiskScoreCV = function(param){
+ramwas7riskScoreCV = function(param){
     ramwas7ArunMWASes(param);
     ramwas7BrunElasticNet(param);
     ramwas7CplotByNCpGs(param);
