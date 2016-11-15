@@ -7,13 +7,13 @@ Finding top, say, 100 p-values out of millions can be slow.
 This function does it much faster than the usual application of \code{order(pv)[1:N]}.
 }
 \usage{
-findBestNpvs(pv, N)
+findBestNpvs(pv, n)
 }
 \arguments{
     \item{pv}{
         Vector of p-values.
     }
-    \item{N}{
+    \item{n}{
         Number of best p-values to select.
     }
 }
@@ -31,13 +31,13 @@ findBestNpvs(pv, N)
 }
 \examples{
 pv = runif(2e7)^10
-N = 10000
+n = 10000
 
 # Faster version
-topSites1 = findBestNpvs(pv, N)
+topSites1 = findBestNpvs(pv, n)
 
 # Slow alternative
-topSites2 = sort(order(pv)[1:N])
+topSites2 = sort(order(pv)[1:n])
 
 # The results must match
 stopifnot(all( topSites1 == topSites2 ))
