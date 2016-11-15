@@ -988,16 +988,16 @@ orthonormalizeCovariates = function(covariates){
 }
 
 # Find best N p-values, in unsorted vector
-findBestNpvs = function(pv, N){
-    if(N < 1)
-        return(which(pv <= N));
+findBestNpvs = function(pv, n){
+    if(n < 1)
+        return(which(pv <= n));
     
     pvthr = 10^((-100):0);
     fi = findInterval(pv, pvthr);
     tab = cumsum(tabulate(fi));
-    upperfi = which(tab > N)[1];
+    upperfi = which(tab > n)[1];
     set1 = which(fi <= upperfi);
-    cpgsetraw = set1[sort.list(pv[set1])[seq_len(N)]];
+    cpgsetraw = set1[sort.list(pv[set1])[seq_len(n)]];
     cpgset = sort.int(cpgsetraw);
     return(cpgset);
 }
