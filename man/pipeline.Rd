@@ -1,4 +1,4 @@
-\name{ramwas1scanBams}
+\name{pipeline}
 \alias{pipeline}
 \alias{ramwas1scanBams}
 \alias{pipelineProcessBam}
@@ -27,9 +27,15 @@ ramwas4PCA(param)
 
 ramwas5MWAS(param)
 
+ramwas6annotateTopFindings(param)
+
 ramwas7ArunMWASes(param)
 
 ramwas7BrunElasticNet(param)
+
+ramwas7CplotByNCpGs(param)
+
+ramwas7riskScoreCV(param)
 }
 \arguments{
   \item{param}{
