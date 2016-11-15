@@ -12,7 +12,7 @@ vignette: >
 
 ```{r switcher, echo=FALSE}
 library('knitr')
-# opts_chunk$set(eval=FALSE)
+opts_chunk$set(eval=FALSE)
 ```
 
 # Introduction
