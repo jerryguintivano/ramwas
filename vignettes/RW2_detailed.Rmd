@@ -352,7 +352,7 @@ performance of elastic net applied to the top MWAS sites.
     suppressMessages({
     suppressWarnings({
     param$modeloutcomes = "age"
-    ramwas7ArunMWAS(param)
+    ramwas7ArunMWASes(param)
     param$mmncpgs = 10
     ramwas7BrunElasticNet(param)
     param$mmncpgs = 100
@@ -370,7 +370,7 @@ performance of elastic net applied to the top MWAS sites.
 power of elastic net applied to top CpGs from MWAS.
 To have an unbiased estimate of predictive power
 we use cross validation approach.
-First, `ramwas7ArunMWAS` runs MWAS 10 times,
+First, `ramwas7ArunMWASes` runs MWAS 10 times,
 each time excluding different 10\% of the data. \cr
 Then, `ramwas7BrunElasticNet` trains elastic net on the
 top CpGs from each of 10 MWASes and predicts the

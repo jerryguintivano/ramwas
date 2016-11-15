@@ -12,7 +12,7 @@ export(
     "ramwas3NormalizedCoverage",
     "ramwas4PCA",
     "ramwas5MWAS",
-    "ramwas7ArunMWAS",
+    "ramwas7ArunMWASes",
     "ramwas7BrunElasticNet",
     "processCommandLine",
     "qcmean",

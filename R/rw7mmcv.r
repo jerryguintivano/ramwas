@@ -1,6 +1,6 @@
 # Run 10 (cvnfolds) MWASes
 # each on 90% of the data.
-ramwas7ArunMWAS = function(param){
+ramwas7ArunMWASes = function(param){
     param = parameterPreprocess(param);
     param$toppvthreshold = 1e-300;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
@@ -50,7 +50,7 @@ ramwas7ArunMWAS = function(param){
 
 # Plot true outcome vs. prediction
 # with correlations and p-value in the title
-plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
+plotPrediction = function(param, outcome, forecast, cpgs2use, main, dfFull = NULL){
     rng = range(c(outcome, forecast));
     c1 = cor(outcome, forecast, use = "complete.obs", method = "pearson");
     c2 = cor(outcome, forecast, use = "complete.obs", method = "spearman");
@@ -84,7 +84,7 @@ plotPrediction = function(param, outcome, forecast, main, dfFull = NULL){
             tt2pv(cor2tt(c2p)))
     );
     legend(x = "bottomright",
-           legend = c(paste0("# CpGs = ",   param$mmncpgs),
+           legend = c(paste0("# CpGs = ",   cpgs2use),
                       paste0("EN alpha = ", param$mmalpha))
     );
     abline(a = 0, b = 1, col = "gray")
@@ -115,109 +115,118 @@ ramwas7BrunElasticNet = function(param){
     {
         outcome = param$covariates[[ param$modeloutcome ]];
     } # outcome
-    forecast0 = NULL;
-    for( fold in seq_len(param$cvnfolds) ){ # fold = 1
-        message("Processing fold ", fold, " of ", param$cvnfolds);
+    
+    for( cpgs2use in param$mmncpgs ){
+        message('Applying Elasting Net to ',cpgs2use,' top CpGs');
+        
+    
+        forecast0 = NULL;
+        for( fold in seq_len(param$cvnfolds) ){ # fold = 1
+            message("Processing fold ", fold, " of ", param$cvnfolds);
+            {
+                dircvmwas = sprintf("%s/fold_%02d", param$dircv, fold);
+                rdsfile = paste0(dircvmwas, "/exclude.rds");
+                if( !file.exists( rdsfile ) ){
+                    message("Missing CV MWAS: ", rdsfile);
+                    stop("Missing CV MWAS: ", rdsfile);
+                    next;
+                }
+                exclude = readRDS( rdsfile );
+                rm(rdsfile);
+            } # dircvmwas, exclude
+            {
+                if( is.null(forecast0) ){
+                    forecast0 = double(length(exclude)*2);
+                    dim(forecast0) = c(2, length(exclude));
+                    colnames(forecast0) = names(exclude);
+                }
+            } # forecast0
+            {
+                # get p-values
+                fm = fm.open(paste0(dircvmwas, "/Stats_and_pvalues"))
+                # colnames(fm)
+                pv = fm[,3];
+                close(fm);
+                rm(fm);
+            } # pv
+            {
+                # Find top cpgs2use CpGs
+                # Faster than:
+                #     cpgset = sort.list(pv)[seq_len(cpgs2use)];
+                #     cpgset = sort.int(cpgset);
+                # tic = proc.time();
+                pvthr = 10^((-100):0);
+                fi = findInterval( pv, pvthr);
+                tab = cumsum(tabulate(fi));
+                upperfi = which(tab > cpgs2use)[1];
+                set1 = which(fi <= upperfi);
+                cpgsetraw = set1[sort.list(pv[set1])[seq_len(cpgs2use)]];
+                cpgset = sort.int(cpgsetraw);
+                rm(pvthr, fi, tab, upperfi, set1, cpgsetraw, pv);
+                # toc = proc.time();
+                # show(toc-tic);
+            } # cpgset, -pv
+            {
+                # get raw coverage
+                fm = fm.open( paste0(param$dircoveragenorm,"/Coverage") );
+                coverage = fm[, cpgset];
+                # rownames(coverage) = rownames(fm);
+                if( !is.null(rowsubset) )
+                    coverage = coverage[rowsubset,];
+                close(fm);
+                rm(fm);
+            } # coverage
+            {
+                coverageTRAIN = coverage[!exclude,];
+                coverageTEST  = coverage[ exclude,];
+                rm(coverage);
+                gc();
+            } # coverageTRAIN, coverageTEST, -coverage
+            {
+                z1 = cv.glmnet(x = coverageTRAIN,
+                               y = as.vector(outcome[!exclude]),
+                               nfolds = param$cvnfolds,
+                               # keep = TRUE,
+                               parallel = FALSE,
+                               alpha = param$mmalpha);
+                z2 = predict.cv.glmnet(object = z1,
+                                       newx = coverageTEST,
+                                       type = "response",
+                                       s = "lambda.min",
+                                       alpha = param$mmalpha);
+                forecast0[1,exclude] = forecast0[1,exclude] + z2;
+                forecast0[2,exclude] = forecast0[2,exclude] + 1;
+                rm(z1, z2);
+            } # forecast0
+            rm(cpgset, coverageTRAIN, coverageTEST);
+        }
         {
-            dircvmwas = sprintf("%s/fold_%02d", param$dircv, fold);
-            rdsfile = paste0(dircvmwas, "/exclude.rds");
-            if( !file.exists( rdsfile ) ){
-                message("Missing CV MWAS: ", rdsfile);
-                stop("Missing CV MWAS: ", rdsfile);
-                next;
-            }
-            exclude = readRDS( rdsfile );
-            rm(rdsfile);
-        } # dircvmwas, exclude
+            rez = data.frame(samples = colnames(forecast0),
+                             outcome = outcome,
+                             forecast = forecast0[1,]/forecast0[2,]
+            )
+            write.table( file = sprintf(
+                "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt",
+                param$dircv,
+                param$cvnfolds,
+                cpgs2use,
+                param$mmalpha),
+                         x = rez,
+                         sep = "\t", row.names = FALSE);
+        } # rez
         {
-            if( is.null(forecast0) ){
-                forecast0 = double(length(exclude)*2);
-                dim(forecast0) = c(2, length(exclude));
-                colnames(forecast0) = names(exclude);
-            }
-        } # forecast0
-        {
-            # get p-values
-            fm = fm.open(paste0(dircvmwas, "/Stats_and_pvalues"))
-            # colnames(fm)
-            pv = fm[,3];
-            close(fm);
-            rm(fm);
-        } # pv
-        {
-            # Find top param$mmncpgs CpGs
-            # Faster than:
-            #     cpgset = sort.list(pv)[seq_len(param$mmncpgs)];
-            #     cpgset = sort.int(cpgset);
-            # tic = proc.time();
-            pvthr = 10^((-100):0);
-            fi = findInterval( pv, pvthr);
-            tab = cumsum(tabulate(fi));
-            upperfi = which(tab > param$mmncpgs)[1];
-            set1 = which(fi <= upperfi);
-            cpgsetraw = set1[sort.list(pv[set1])[seq_len(param$mmncpgs)]];
-            cpgset = sort.int(cpgsetraw);
-            rm(pvthr, fi, tab, upperfi, set1, cpgsetraw, pv);
-            # toc = proc.time();
-            # show(toc-tic);
-        } # cpgset, -pv
-        {
-            # get raw coverage
-            fm = fm.open( paste0(param$dircoveragenorm,"/Coverage") );
-            coverage = fm[, cpgset];
-            # rownames(coverage) = rownames(fm);
-            if( !is.null(rowsubset) )
-                coverage = coverage[rowsubset,];
-            close(fm);
-            rm(fm);
-        } # coverage
-        {
-            coverageTRAIN = coverage[!exclude,];
-            coverageTEST  = coverage[ exclude,];
-            rm(coverage);
-            gc();
-        } # coverageTRAIN, coverageTEST, -coverage
-        {
-            z1 = cv.glmnet(x = coverageTRAIN,
-                           y = as.vector(outcome[!exclude]),
-                           nfolds = param$cvnfolds,
-                           # keep = TRUE,
-                           parallel = FALSE,
-                           alpha = param$mmalpha);
-            z2 = predict.cv.glmnet(object = z1,
-                                   newx = coverageTEST,
-                                   type = "response",
-                                   s = "lambda.min",
-                                   alpha = param$mmalpha);
-            forecast0[1,exclude] = forecast0[1,exclude] + z2;
-            forecast0[2,exclude] = forecast0[2,exclude] + 1;
-            rm(z1, z2);
-        } # forecast0
-        rm(cpgset, coverageTRAIN, coverageTEST);
+            pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf",
+                         param$dircv,
+                         param$cvnfolds,
+                         cpgs2use,
+                         param$mmalpha) );
+            plotPrediction(param, outcome, rez$forecast, cpgs2use,
+                           main = "Prediction success (EN on coverage)");
+            dev.off();
+        } # pdf()
     }
-    {
-        rez = data.frame(samples = colnames(forecast0),
-                         outcome = outcome,
-                         forecast = forecast0[1,]/forecast0[2,]
-        )
-        write.table( file = sprintf(
-            "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.txt",
-            param$dircv,
-            param$cvnfolds,
-            param$mmncpgs,
-            param$mmalpha),
-                     x = rez,
-                     sep = "\t", row.names = FALSE);
-    } # rez
-    {
-        pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%s.pdf",
-                     param$dircv,
-                     param$cvnfolds,
-                     param$mmncpgs,
-                     param$mmalpha) );
-        plotPrediction(param, outcome, rez$forecast,
-                       main = "Prediction success (EN on coverage)");
-        dev.off();
-    } # pdf()
     return( invisible(rez) );
+}
+
+ramwas7CplotByNCpGs = function(param){
 }

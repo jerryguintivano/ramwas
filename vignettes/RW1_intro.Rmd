@@ -102,6 +102,29 @@ with named elements.
 A minimal parameter list below points RaMWAS to
 the directories and files created above.
 
+```{r parameters11}
+param = list(
+    dirproject = dr,
+    dirbam = "bams",
+    filebamlist = "bam_list.txt",
+    filecpgset = "Simulated_chromosome.rds",
+    cputhreads = 2,
+    scoretag = "MAPQ",
+    minscore = 4,
+    minfragmentsize = 50,
+    maxfragmentsize = 250,
+    minavgcpgcoverage = 0.3,
+    minnonzerosamples = 0.3,
+    filecovariates = "covariates.txt",
+    modelcovariates = NULL,
+    modeloutcome = "sex",
+    modelPCs = 0,
+    cvnfolds = 10,
+    mmalpha = 0,
+    mmncpgs = c(10,50,100,500,1000)
+)
+```
+
 ```{r parameters0}
 param = list(
     dirproject = dr,
@@ -413,7 +436,7 @@ First, we run MWAS 10 times as part of the 10-fold cross validation.
 param$modeloutcome = "age"
 param$modelPCs = 0
 param$cvnfolds = 10;
-ramwas7ArunMWAS(param)
+ramwas7ArunMWASes(param)
 ```
 
 This creates `CV_10_folds` subdirectory in MWAS directory.
@@ -425,8 +448,8 @@ Then, `ramwas7BrunElasticNet` trains elastic net on the top CpGs from each of
 This procedure is then applied 10 times to have a prediction for every sample.
 
 ```{r cv1, warning=FALSE, message=FALSE}
-param$mmalpha = 0;
-param$mmncpgs = 50;
+param$mmalpha = 0
+param$mmncpgs = c(10,50,100,500,1000)
 ramwas7BrunElasticNet(param)
 ```
 
@@ -442,7 +465,7 @@ scatterplot of true outcome vs. cross-validation prediction.
 
 
 ```{r cv2, warning=FALSE, message=FALSE}
-param$mmalpha = 0;
+param$mmalpha = 0
 param$mmncpgs = 10
 ramwas7BrunElasticNet(param)
 ```
