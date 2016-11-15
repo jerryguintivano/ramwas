@@ -1,6 +1,3 @@
-### Caching environment
-.ramwasEnv = new.env()
-
 # Replace "x" with "replacement" if x is NULL
 .notnull = function(x, replacement){
     if(is.null(x)){ replacement }else{ x }
@@ -682,6 +679,9 @@ bam.chrXY.qc = function(rbam){
 
     return(rbam);
 }
+
+# Caching environment
+.ramwasEnv = new.env()
 
 # Load an RDS file and cache it
 # or load from cache
