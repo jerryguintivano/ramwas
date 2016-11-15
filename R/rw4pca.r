@@ -253,7 +253,7 @@ ramwasPCsCovariateSelection = function(param){
         e = eigen(covmat1, symmetric=TRUE);
 
         ### First PC
-        testslist = vector('list', param$covselpcs);
+        testslist = vector("list", param$covselpcs);
         for( i in seq_len(param$covselpcs) ){ # i=1
             pc = e$vectors[,i, drop=FALSE];
 

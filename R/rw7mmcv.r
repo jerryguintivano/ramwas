@@ -125,7 +125,7 @@ ramwas7BrunElasticNet = function(param){
                 `[`,
                 !is.na(param$covariates[[ param$modeloutcome ]])));
         }
-    } # remove samples with NA's in outcome
+    } # remove samples with NAs in outcome
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
@@ -138,7 +138,7 @@ ramwas7BrunElasticNet = function(param){
     } # outcome
 
     for( cpgs2use in param$mmncpgs ){
-        message('Applying Elasting Net to ',cpgs2use,' top CpGs');
+        message("Applying Elasting Net to ",cpgs2use," top CpGs");
 
 
         forecast0 = NULL;
@@ -271,14 +271,14 @@ ramwas7CplotByNCpGs = function(param){
     aymax = max(abs(cors),abs(corp));
     plot( x = param$mmncpgs,
           y = cors,
-          col = 'red',
+          col = "red",
           pch = 19,
           ylim = c(-1,1)*aymax,
-          log = 'x',
+          log = "x",
           xlab = "Number of markers",
           ylab = "Correlation")
-    points( param$mmncpgs, corp, col = 'cyan4', pch = 17)
-    abline(h=0, col = 'grey')
+    points( param$mmncpgs, corp, col = "cyan4", pch = 17)
+    abline(h=0, col = "grey")
     legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
     legend("bottomright",
            legend = c("Correlations:","Pearson", "Spearman"),

@@ -144,7 +144,7 @@
     return(rez);
 }
 
-# combine QC metrics of multiple Rbam's
+# combine QC metrics of multiple Rbam objects
 .combine.bams.qc = function( bamlist ){
     if(length(bamlist)==1)
         return(bamlist[[1]]);
@@ -310,9 +310,9 @@ ramwas2collectqc = function( param ){
             hist(vec,
                  breaks = 3*round(sqrt(length(vec))),
                  main = plottitle,
-                 col = 'lightblue',
-                 xlab = 'value',
-                 yaxs = 'i')
+                 col = "lightblue",
+                 xlab = "value",
+                 yaxs = "i")
             dev.off()
         }
 

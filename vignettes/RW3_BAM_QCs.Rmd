@@ -27,8 +27,8 @@ library(ramwas)
 ```
 
 ```{r loadCgGset}
-filename = system.file("extdata", "bigQC.rds", package = "ramwas");
-qc = readRDS(filename)$qc;
+filename = system.file("extdata", "bigQC.rds", package = "ramwas")
+qc = readRDS(filename)$qc
 # show(names(qc))
 
 ```
@@ -276,7 +276,7 @@ density where maximum average coverage is achieved.
 ```{r avg.coverage.by.density}
 {
     cat("Highest coverage is observed at CpG density of",
-        qcmean(qc$avg.coverage.by.density)^2);
+        qcmean(qc$avg.coverage.by.density)^2)
     plot(qc$avg.coverage.by.density)
 }
 ```

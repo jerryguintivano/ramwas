@@ -97,7 +97,7 @@ ramwas5saveTopFindings = function(param){
     message("Saving top MWAS hits");
     write.table(
         file = paste0(param$dirmwas,"/Top_tests.txt"),
-        sep = '\t', quote = FALSE, row.names = FALSE,
+        sep = "\t", quote = FALSE, row.names = FALSE,
         x = toptable
     );
     return(invisible(NULL));

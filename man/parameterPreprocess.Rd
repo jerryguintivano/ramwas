@@ -51,7 +51,7 @@ parameterPreprocess(param)
 }
 \examples{
 param = list(
-    dirproject = '.'
+    dirproject = "."
     )
 
 param2 = parameterPreprocess(param)

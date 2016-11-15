@@ -2,7 +2,7 @@
 ramwasAnnotateLocations = function(param, chr, pos){
     # Sanity check
     if(any(pos > 1e9L))
-        stop('Annotation error: chromosome positions must be <= 1e9')
+        stop("Annotation error: chromosome positions must be <= 1e9")
 
     # BiomaRt likes 1-22,X,Y, not chr1-chr22,chrX,chrY
     nochr = gsub("^chr","",chr);
@@ -16,12 +16,12 @@ ramwasAnnotateLocations = function(param, chr, pos){
         bioresp = getBM(mart = gene_ensembl,
                         attributes = unique(c(
                             param$biattributes,
-                            'chromosome_name',
-                            'start_position',
-                            'end_position')),
+                            "chromosome_name",
+                            "start_position",
+                            "end_position")),
                         filters = c(list(
                             chromosomal_region =
-                                paste0(nochr,':',pos,':',pos+1L)),
+                                paste0(nochr,":",pos,":",pos+1L)),
                             param$bifilters)
         )
     }
@@ -52,23 +52,23 @@ ramwasAnnotateLocations = function(param, chr, pos){
         fi2 = findInterval( resppos2, tablepos[ord])
 
         ## Enumerate all CpG-gene pairs
-        ## xx - CpG index (among sorted), factored for 'split' call
+        ## xx - CpG index (among sorted), factored for "split" call
         ## yy - Gene index (within biomart response)
         xx = unlist(lapply(which(fi1<fi2),
                            FUN=function(x){((fi1[x]+1):(fi2[x]))}));
         levels(xx) = paste0(seq_along(tablepos));
-        class(xx) = 'factor';
+        class(xx) = "factor";
         yy = rep(seq_along(fi1), times = fi2-fi1)
 
         spl = split(yy, xx)
 
-        result = vector('list',length(param$biattributes));
+        result = vector("list",length(param$biattributes));
         names(result) = param$biattributes;
 
         for( attr in param$biattributes){ # attr = param$biattributes[1]
             z = bioresp[[attr]]
             result[[attr]] =
-                sapply(spl, function(x){ paste0(z[x], collapse = '/') })
+                sapply(spl, function(x){ paste0(z[x], collapse = "/") })
         }
 
         ord1 = seq_along(ord);
@@ -110,7 +110,7 @@ ramwas6annotateTopFindings = function(param){
     # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 
     if( !is.null(param$biattributes) && (nrow(toptable)>0L) ){
-        message('Annotating top MWAS hits');
+        message("Annotating top MWAS hits");
         bio = ramwasAnnotateLocations(param,
                                       chr = toptable$chr,
                                       pos = toptable$position);
@@ -120,7 +120,7 @@ ramwas6annotateTopFindings = function(param){
     message("Saving top MWAS hits");
     write.table(
         file = paste0(param$dirmwas,"/Top_tests.txt"),
-        sep = '\t',
+        sep = "\t",
         quote = FALSE,
         row.names = FALSE,
         x = toptable

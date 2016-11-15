@@ -43,15 +43,15 @@ processCommandLine(.arg = NULL)
 }
 \examples{
 
-filename = tempfile();
+filename = tempfile()
 
 # Assume command line with two components:
-# dirproject='.'
-# modelcovariates=c('Age','Sex')
+# dirproject="."
+# modelcovariates=c("Age","Sex")
 
 arg = c(
-    "dirproject = '.'",
-    "modelcovariates = c('Age','Sex')")
+    "dirproject = "."",
+    "modelcovariates = c("Age","Sex")")
 
 # Process the command line
 param = processCommandLine(arg)

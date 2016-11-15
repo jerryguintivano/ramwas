@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r switcher, echo=FALSE}
-library('knitr')
+library("knitr")
 # opts_chunk$set(eval=FALSE)
 ```
 
@@ -59,7 +59,7 @@ and with following commands:
 
 ```{r loadIt, eval=FALSE}
 library(ramwas) # Loads the package
-browseVignettes('ramwas') # Opens vignettes
+browseVignettes("ramwas") # Opens vignettes
 help(package="ramwas") # Lists package functions
 ```
 
@@ -75,8 +75,8 @@ suppressPackageStartupMessages(library(ramwas))
 
 ```{r generateData, warning=FALSE}
 library(ramwas)
-# dr = paste0(tempdir(), "/simulated_project");
-dr = 'D:/temp'
+# dr = paste0(tempdir(), "/simulated_project")
+dr = "D:/temp"
 
 ramwas0createArtificialData(dir = dr, verbose = FALSE)
 # This is the project directory
@@ -436,7 +436,7 @@ First, we run MWAS 10 times as part of the 10-fold cross validation.
 ```{r parameters7, warning=FALSE, message=FALSE}
 param$modeloutcome = "age"
 param$modelPCs = 0
-param$cvnfolds = 10;
+param$cvnfolds = 10
 ramwas7ArunMWASes(param)
 ```
 

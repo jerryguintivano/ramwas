@@ -34,7 +34,7 @@ param = list(
     minnonzerosamples = 0.3,
     covfile = "cov.txt",
     chrkeep = 1:22
-);
+)
 ```
 
 Alternatively, the parameters can be set in a separate R code file,
@@ -51,9 +51,9 @@ minscore = 100
 
 ### platform dependent part
 if(.Platform$OS.type == "windows"){
-    filecpgset='C:/RaMWAS/CpG_set/cpgset_hg19_SNPS_at_MAF_0.05.rds'
+    filecpgset="C:/RaMWAS/CpG_set/cpgset_hg19_SNPS_at_MAF_0.05.rds"
 } else {
-    filecpgset='/computing_cluster/ramwas/cpgset_hg19_SNPS_at_MAF_0.05.rds'
+    filecpgset="/computing_cluster/ramwas/cpgset_hg19_SNPS_at_MAF_0.05.rds"
 }
 
 
@@ -65,7 +65,7 @@ if(.Platform$OS.type == "windows"){
 
 ### File with BAM names
 
-Parameter 'filebamlist', if defined, must point to a text file
+Parameter "filebamlist", if defined, must point to a text file
 with one BAM file name per line. BAM file names can contain path,
 relative or absolute.
 Such file may looks like this.
@@ -100,13 +100,13 @@ one sorted vector of CpG locations per chromosome.
 ```{r CpGsetExample}
 cpgset = list( chr1 = c(12L, 57L, 123L),
                chr2 = c(45L, 95L, 99L, 111L),
-               chr3 = c(22L, 40L, 199L, 211L) );
+               chr3 = c(22L, 40L, 199L, 211L) )
 ```
 
 Parameter `filecpgset` must be a file storing a set of CpG,
 in the format described above, saved using `saveRDS` function.
 Similarly, parameter `filenoncpgset`, if defined,
-must point to a file storing 'good' locations away from any CpGs.
+must point to a file storing "good" locations away from any CpGs.
 Here, good means not heaving major alignment issues
 (like a middle of centromere).
 

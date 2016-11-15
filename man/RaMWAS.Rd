@@ -40,5 +40,5 @@ RaMWAS provides a complete toolset for
 \keyword{ ramwas }
 \keyword{ RaMWAS }
 \seealso{
-    Run \code{browseVignettes('ramwas')} for the vignettes.
+    Run \code{browseVignettes("ramwas")} for the vignettes.
 }

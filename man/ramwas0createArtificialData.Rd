@@ -72,7 +72,7 @@ The function creates multiple files but returns no value.
 }
 \examples{
 ### Location for the artificial project
-dir = paste0(tempdir(), '/simulated_project');
+dir = paste0(tempdir(), "/simulated_project")
 
 ramwas0createArtificialData(dir,
                             nsamples = 4,
@@ -81,9 +81,9 @@ ramwas0createArtificialData(dir,
 
 message("Artificial project files created in:")
 message(dir)
-message("The generated files are:");
+message("The generated files are:")
 message(paste(list.files(dir, recursive=TRUE), collate="\n"))
 
 ### Clean up
-unlink(paste0(dr,'/*'), recursive=TRUE)
+unlink(paste0(dr,"/*"), recursive=TRUE)
 }

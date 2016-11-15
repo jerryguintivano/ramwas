@@ -87,8 +87,8 @@ qcmean(x)
 }
 \examples{
 # Load QC data from a sample project
-filename = system.file("extdata", "bigQC.rds", package = "ramwas");
-qc = readRDS(filename)$qc;
+filename = system.file("extdata", "bigQC.rds", package = "ramwas")
+qc = readRDS(filename)$qc
 
 
 ## The number of BAM files
@@ -188,7 +188,7 @@ plot(qc$hist.isolated.dist1)
 ## Coverage vs. CpG density
 {
     cat("Highest coverage is observed at CpG density of",
-        qcmean(qc$avg.coverage.by.density)^2);
+        qcmean(qc$avg.coverage.by.density)^2)
     plot(qc$avg.coverage.by.density)
 }
 }

@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r switcher, echo=FALSE}
-library('knitr')
+library("knitr")
 opts_chunk$set(eval=FALSE)
 ```
 
@@ -23,10 +23,10 @@ which would be useful for illustrating the steps of RaMWAS pipeline.
 ```{r generateData}
 {
     suppressPackageStartupMessages(library(ramwas))
-    dir = paste0(tempdir(), '/simulated_project');
+    dir = paste0(tempdir(), "/simulated_project")
     ramwas0createArtificialData(dir, nsamples = 20, nreads = 1e6, verbose=FALSE)
     cat("Artificial project files created in:", "\n", dir, "\n")
-    message("The generated files and directories are:");
+    message("The generated files and directories are:")
     message(paste(list.files(dir), collate="\n"))
 }
 ```
@@ -36,11 +36,11 @@ which would be useful for illustrating the steps of RaMWAS pipeline.
 Typically RaMWAS pipeline creates the following directory structure.
 
 * Project directory (`dirproject` parameter, current directory by default)
-    * Rbam files (`dirrbam` parameter or 'rds_rbam' by default)
-    * R QC files (`dirrqc` paramter or 'rds_qc' by default)
-    * QC plots and figures ('dirqc' parameter or 'qc' by default)
+    * Rbam files (`dirrbam` parameter or "rds_rbam" by default)
+    * R QC files (`dirrqc` paramter or "rds_qc" by default)
+    * QC plots and figures ("dirqc" parameter or "qc" by default)
     * Normalized coverage, 1 CpG per column (`dircoveragenorm` paramteter or
-      'coverage_norm_123' by default, where 123 is the number of samples)
+      "coverage_norm_123" by default, where 123 is the number of samples)
         * MWAS subdirectory, named based on the phenotype,
           number of PCs and covariates used in analysis
             * 10-fold cross-validation and multi-marker
@@ -88,7 +88,7 @@ The scanning is done in parallel using at most `cputhreads` threads.
     suppressMessages({
     ramwas1scanBams(param)
     })
-    message("The generated files and directories are:");
+    message("The generated files and directories are:")
     message(paste(list.files(dir), collate="\n"))
 }
 ```
@@ -139,7 +139,7 @@ size distribution from the read start locations around isolated CpGs.
     suppressMessages({
     ramwas2collectqc(param)
     })
-    message("The generated files and directories in QC directory are:");
+    message("The generated files and directories in QC directory are:")
     message(paste(list.files(paste0(dir,"/qc")), collate="\n"))
 }
 ```
@@ -175,7 +175,7 @@ Again, the task is parallelized across `cputhreads` threads.
     suppressMessages({
     ramwas3normalizedCoverage(param)
     })
-    message("The generated files and directories in coverage directory are:");
+    message("The generated files and directories in coverage directory are:")
     message(paste(list.files(paste0(dir,"/coverage_norm_20")), collate="\n"))
 }
 ```
@@ -229,11 +229,11 @@ irregular samples which should be excluded.
     message("The generated files and directories in PCA directory are:")
     message(paste(list.files(paste0(dir,"/coverage_norm_20/PCA_00_cvrts")),
                   collate="\n"))
-    message("Correlation of top PCs with covariates are:");
+    message("Correlation of top PCs with covariates are:")
     show(head( read.table(
         paste0(dir,"/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_corr.txt"),
         sep = "\t", header = TRUE)))
-    message("P-values for the associuation of top PCs with covariates are:");
+    message("P-values for the associuation of top PCs with covariates are:")
     show(head( read.table(
         paste0(dir,
                "/coverage_norm_20/PCA_00_cvrts/PC_vs_covariates_pvalue.txt"),
@@ -283,11 +283,11 @@ The testing accounts for the set of covariates and top principal components.
     param$modeloutcome = "casecontrol"
     ramwas5MWAS(param)
     })
-    message("The generated files and directories in MWAS directories are:");
+    message("The generated files and directories in MWAS directories are:")
     message(paste(list.files(
         paste0(dir,"/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs")),
         collate="\n"))
-    message("The top MWAS findings are:");
+    message("The top MWAS findings are:")
     show(head( read.table(paste0(dir,
       "/coverage_norm_20/PCA_00_cvrts/Testing_casecontrol_0_PCs/Top_tests.txt"),
       sep = "\t", header = TRUE)))
@@ -305,10 +305,10 @@ The testing can easily be repeated for another outcome variable (age):
     param$modeloutcome = "age"
     ramwas5MWAS(param)
     })
-    message("The generated files and directories in MWAS directories are:");
+    message("The generated files and directories in MWAS directories are:")
     message(paste(list.files(paste0(dir,
        "/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs")), collate="\n"))
-    message("The top MWAS findings are:");
+    message("The top MWAS findings are:")
     show(head( read.table(paste0(dir,
            "/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/Top_tests.txt"),
            sep = "\t", header = TRUE)))
@@ -359,7 +359,7 @@ performance of elastic net applied to the top MWAS sites.
     ramwas7BrunElasticNet(param)
     })
     })
-    message("The generated files and directories in Multi-marker directory:");
+    message("The generated files and directories in Multi-marker directory:")
     message(paste(list.files(paste0(dir,
        "/coverage_norm_20/PCA_00_cvrts/Testing_age_0_PCs/CV_10_folds")),
        collate="\n"))

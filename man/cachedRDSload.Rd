@@ -37,7 +37,7 @@ cachedRDSload(rdsfilename)
 \examples{
 ### Change filename to hg19 CpGset
 
-filename = system.file("extdata", "qc_sample.rds", package = "ramwas");
+filename = system.file("extdata", "qc_sample.rds", package = "ramwas")
 
 time1 = system.time( {obj1 = cachedRDSload(filename)} )
 time2 = system.time( {obj1 = cachedRDSload(filename)} )

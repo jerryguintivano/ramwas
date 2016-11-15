@@ -56,7 +56,7 @@ See \code{\link{orthonormalizeCovariates}}
 \examples{
 
 # Random data with signal in the first column
-data = matrix( runif(30*3), 30, 3);
+data = matrix( runif(30*3), 30, 3)
 data[,1] = data[,1] + rep(0:2, each = 10)
 
 # Random covariate
@@ -64,7 +64,7 @@ cvrtqr = orthonormalizeCovariates(matrix(runif(30),ncol=1))
 
 
 # Categorical, 3 group phenotype
-phenotype = rep(c("Normal","Sick","Dead"), each = 10);
+phenotype = rep(c("Normal","Sick","Dead"), each = 10)
 
 # Test for association
 output = testPhenotype(phenotype, data, t(cvrtqr))
@@ -72,7 +72,7 @@ output = testPhenotype(phenotype, data, t(cvrtqr))
 print(output)
 
 # Numerical, 3 value phenotype
-phenotype = rep(1:3, each = 10);
+phenotype = rep(1:3, each = 10)
 
 # Test for association
 output = testPhenotype(phenotype, data, t(cvrtqr))

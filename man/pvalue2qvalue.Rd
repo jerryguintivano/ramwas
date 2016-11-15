@@ -13,12 +13,12 @@ pvalue2qvalue(pv, n = length(pv))
         Vector of p-values.
     }
     \item{n}{
-        If \code{pv} has only best p-values from a bigger set, 
+        If \code{pv} has only best p-values from a bigger set,
         \code{n} should indicate the number of tests performed.
     }
 }
 \details{
-    The q-values can be slightly conservative compared to 
+    The q-values can be slightly conservative compared to
     other popular q-value calculation methods.
 }
 \value{

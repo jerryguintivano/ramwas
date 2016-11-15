@@ -1,7 +1,7 @@
 ### Caching environment
 .ramwasEnv = new.env()
 
-# Replace 'x' with 'replacement' if x is NULL
+# Replace "x" with "replacement" if x is NULL
 .notnull = function(x, replacement){
     if(is.null(x)){ replacement }else{ x }
 }
@@ -34,7 +34,7 @@
     return(FALSE);
 }
 
-# Get full path to the 'filename' assuming current directory is 'path'
+# Get full path to the "filename" assuming current directory is "path"
 .makefullpath = function(path, filename){
     if( is.null(path) )
         return(filename);
@@ -81,7 +81,7 @@ parseBam2sample = function( lines ){
 }
 
 # Get parameters from command line, return them in a list
-# For 'fileparam' parameter - source the file
+# For "fileparam" parameter - source the file
 processCommandLine = function(.arg = NULL){
     if( is.null(.arg))
         .arg=commandArgs(TRUE);
@@ -302,9 +302,9 @@ parameterPreprocess = function( param ){
     return(param);
 }
 
-# Save parameters 'param' to a file in the 'dir' directory
-# Save 'toplines' first, other parameters next
-# Lists and 'bamnames' are skipped
+# Save parameters "param" to a file in the "dir" directory
+# Save "toplines" first, other parameters next
+# Lists and "bamnames" are skipped
 parameterDump = function(dir, param, toplines = NULL){
     message("Working in: ",dir);
     .dump = function(fid, param){
@@ -460,8 +460,8 @@ qcmean.qcChrX = function(x){ x[1]/x[2] }
 qcmean.qcChrY = function(x){ x[1]/x[2] }
 qcmean.NULL = function(x){ NA }
 
-# Take a sorted vector 'vec', remove repeated values
-# repeating over 'maxrep' times (keep first 'maxrep')
+# Take a sorted vector "vec", remove repeated values
+# repeating over "maxrep" times (keep first "maxrep")
 remove.repeats.over.maxrep = function(vec, maxrep){
     if( is.unsorted(vec) )
         vec = sort.int(vec);
@@ -477,7 +477,7 @@ remove.repeats.over.maxrep = function(vec, maxrep){
 
 # Remove reads starting from the same position,
 # on the same strand, and
-# repeating over 'maxrep' times (keep first 'maxrep')
+# repeating over "maxrep" times (keep first "maxrep")
 # Calculate some QC
 bam.removeRepeats = function(rbam, maxrep){
     if(maxrep>0){
@@ -940,7 +940,7 @@ orthonormalizeCovariates = function(covariates){
 }
 
 # find how samples in CpG score matrix
-# match those in 'covariates' parameter
+# match those in "covariates" parameter
 # get the total number of CpGs along the way
 .matchCovmatCovar = function( param ){
     cvsamples = param$covariates[[1]];
@@ -991,7 +991,7 @@ orthonormalizeCovariates = function(covariates){
 findBestNpvs = function(pv, n){
     if(n < 1)
         return(which(pv <= n));
-    
+
     pvthr = 10^((-100):0);
     fi = findInterval(pv, pvthr);
     tab = cumsum(tabulate(fi));
