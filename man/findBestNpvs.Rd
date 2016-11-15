@@ -1,0 +1,44 @@
+\name{findBestNpvs}
+\title{
+Quickly Find N Best p-values in a Long Vector
+}
+\description{
+Finding top, say, 100 p-values out of millions can be slow.
+This function does it much faster than the usual application of \code{order(pv)[1:N]}.
+}
+\usage{
+findBestNpvs(pv, N)
+}
+\arguments{
+    \item{pv}{
+        Vector of p-values.
+    }
+    \item{N}{
+        Number of best p-values to select.
+    }
+}
+\details{
+    The function is a faster analog of \code{sort(order(pv)[1:N])}
+}
+\value{
+    Return a vector of positions of the smallest \code{N} p-values in \code{pv}.
+}
+\author{
+    Andrey A Shabalin \email{ashabalin@vcu.edu}
+}
+\seealso{
+    See \code{\link[base]{order}}.
+}
+\examples{
+pv = runif(2e7)^10
+N = 10000
+
+# Faster version
+topSites1 = findBestNpvs(pv, N)
+
+# Slow alternative
+topSites2 = sort(order(pv)[1:N])
+
+# The results must match
+stopifnot(all( topSites1 == topSites2 ))
+}

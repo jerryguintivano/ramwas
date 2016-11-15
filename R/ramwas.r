@@ -987,6 +987,21 @@ orthonormalizeCovariates = function(covariates){
     return(rez);
 }
 
+# Find best N p-values, in unsorted vector
+findBestNpvs = function(pv, N){
+    if(N < 1)
+        return(which(pv <= N));
+    
+    pvthr = 10^((-100):0);
+    fi = findInterval(pv, pvthr);
+    tab = cumsum(tabulate(fi));
+    upperfi = which(tab > N)[1];
+    set1 = which(fi <= upperfi);
+    cpgsetraw = set1[sort.list(pv[set1])[seq_len(N)]];
+    cpgset = sort.int(cpgsetraw);
+    return(cpgset);
+}
+
 # Standard BH p-value to q-value calculation
 pvalue2qvalue = function(pv, n = length(pv)){
     ord = sort.list(pv);

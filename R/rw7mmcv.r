@@ -171,21 +171,8 @@ ramwas7BrunElasticNet = function(param){
                 rm(fm);
             } # pv
             {
-                # Find top cpgs2use CpGs
-                # Faster than:
-                #     cpgset = sort.list(pv)[seq_len(cpgs2use)];
-                #     cpgset = sort.int(cpgset);
-                # tic = proc.time();
-                pvthr = 10^((-100):0);
-                fi = findInterval( pv, pvthr);
-                tab = cumsum(tabulate(fi));
-                upperfi = which(tab > cpgs2use)[1];
-                set1 = which(fi <= upperfi);
-                cpgsetraw = set1[sort.list(pv[set1])[seq_len(cpgs2use)]];
-                cpgset = sort.int(cpgsetraw);
-                rm(pvthr, fi, tab, upperfi, set1, cpgsetraw, pv);
-                # toc = proc.time();
-                # show(toc-tic);
+                cpgset = findBestNpvs(pv, cpgs2use);
+                rm(pv);
             } # cpgset, -pv
             {
                 # get raw coverage

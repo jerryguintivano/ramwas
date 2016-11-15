@@ -81,52 +81,6 @@ ramwasAnnotateLocations = function(param, chr, pos){
     return(genes);
 }
 
-ramwas5saveTopFindings = function(param){
-    # library(filematrix)
-    param = parameterPreprocess(param);
-
-    message("Working in: ", param$dirmwas);
-
-    message("Loading MWAS results");
-    mwas = fm.load( paste0(param$dirmwas, "/Stats_and_pvalues") );
-
-    message("Loading CpG locations");
-    cpgloc = fm.load(
-        filenamebase = paste0(param$dircoveragenorm, "/CpG_locations") );
-    chrnames = readLines(
-        con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
-
-    message("Finding top MWAS hits");
-    keep = which(mwas[,3] < param$toppvthreshold);
-    ord = keep[sort.list(abs(mwas[keep,2]),decreasing = TRUE)];
-    # mwas[ord,3]
-    # mwas[ord[1],]
-
-    toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
-                           position =     cpgloc[ord,2],
-                           tstat  = mwas[ord,2],
-                           pvalue = mwas[ord,3],
-                           qvalue = mwas[ord,4]);
-
-    # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
-
-    if( !is.null(param$biattributes) && (nrow(toptable)>0L) ){
-        message('Annotating top MWAS hits');
-        bio = ramwasAnnotateLocations(param,
-                                      chr = toptable$chr,
-                                      pos = toptable$position);
-        toptable = data.frame(toptable, bio);
-    }
-
-    message("Saving top MWAS hits");
-    write.table(
-        file = paste0(param$dirmwas,"/Top_tests.txt"),
-        sep = '\t', quote = FALSE, row.names = FALSE,
-        x = toptable
-    );
-    return(invisible(NULL));
-}
-
 ramwas6annotateTopFindings = function(param){
     # library(filematrix)
     param = parameterPreprocess(param);
@@ -143,10 +97,9 @@ ramwas6annotateTopFindings = function(param){
         con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
 
     message("Finding top MWAS hits");
-    keep = which(mwas[,3] < param$toppvthreshold);
+    keep = findBestNpvs(mwas[,3], param$toppvthreshold);
+    # keep = which(mwas[,3] < param$toppvthreshold);
     ord = keep[sort.list(abs(mwas[keep,2]),decreasing = TRUE)];
-    # mwas[ord,3]
-    # mwas[ord[1],]
 
     toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
                            position =     cpgloc[ord,2],
@@ -167,7 +120,9 @@ ramwas6annotateTopFindings = function(param){
     message("Saving top MWAS hits");
     write.table(
         file = paste0(param$dirmwas,"/Top_tests.txt"),
-        sep = '\t', quote = FALSE, row.names = FALSE,
+        sep = '\t',
+        quote = FALSE,
+        row.names = FALSE,
         x = toptable
     );
     return(invisible(NULL));

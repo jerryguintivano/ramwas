@@ -1,6 +1,7 @@
 useDynLib(ramwas, .registration = TRUE)
 export(
     "cachedRDSload",
+    "findBestNpvs",
     "orthonormalizeCovariates",
     "parameterDump",
     "parameterPreprocess",
