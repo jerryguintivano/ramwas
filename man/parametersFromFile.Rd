@@ -45,8 +45,8 @@ filename = tempfile()
 writeLines(
     con = filename,
     text = c(
-        "dirproject = "."",
-        "modelcovariates = c("Age","Sex")")
+        "dirproject = \".\"",
+        "modelcovariates = c(\"Age\",\"Sex\")")
     )
 
 # Scan the file into a list
