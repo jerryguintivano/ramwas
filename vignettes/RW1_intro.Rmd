@@ -454,10 +454,6 @@ top CpGs in elastic net.
 
 The names of coverage/PCA/MWAS/MMCV directories can be recovered by first calling `parameterPreprocess` function.
 
-```{r reduceParam, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
-param[grepl('^file',names(param))] = NULL;
-```
-
 ```{r dirlocations, eval=TRUE}
 fullparam = parameterPreprocess(param);
 # Here lies coverage matrix
