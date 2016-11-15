@@ -67,10 +67,10 @@ parseBam2sample = function( lines ){
     lines = gsub("\\.bam,", ",", lines, ignore.case = TRUE);
     lines = gsub("\\.bam$", "",  lines, ignore.case = TRUE);
     lines = gsub(" $", "",       lines);
-    lines = gsub(" ,", ",",      lines, ignore.case = TRUE);
-    lines = gsub(", ", ",",      lines, ignore.case = TRUE);
-    lines = gsub(" =", "=",      lines, ignore.case = TRUE);
-    lines = gsub("= ", "=",      lines, ignore.case = TRUE);
+    lines = gsub(" ,", ",",      lines, fixed = TRUE);
+    lines = gsub(", ", ",",      lines, fixed = TRUE);
+    lines = gsub(" =", "=",      lines, fixed = TRUE);
+    lines = gsub("= ", "=",      lines, fixed = TRUE);
 
     split.eq = strsplit(lines, split = "=", fixed = TRUE);
     samplenames = sapply(split.eq, `[`, 1);
