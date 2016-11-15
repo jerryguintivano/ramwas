@@ -1,9 +1,10 @@
 \name{pvalue2qvalue}
+\alias{pvalue2qvalue}
 \title{
-Calculate Benjamini–Hochberg q-values
+Calculate Benjamini-Hochberg q-values
 }
 \description{
-Calculate Benjamini–Hochberg q-values for a vector of p-values.
+Calculate Benjamini-Hochberg q-values for a vector of p-values.
 }
 \usage{
 pvalue2qvalue(pv, n = length(pv))
