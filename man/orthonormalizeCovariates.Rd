@@ -16,6 +16,8 @@ orthonormalizeCovariates(covariates)
 }
 }
 \details{
+    Factor variables are split into dummy variables before orthonormalization.
+    
     The operation is performed via QR decomposition (\link[base]{qr}).
 }
 \value{

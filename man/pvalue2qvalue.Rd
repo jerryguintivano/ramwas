@@ -14,7 +14,7 @@ pvalue2qvalue(pv, n = length(pv))
         Vector of p-values.
     }
     \item{n}{
-        If \code{pv} has only best p-values from a bigger set,
+        If \code{pv} has only top p-values from a bigger set,
         \code{n} should indicate the number of tests performed.
     }
 }

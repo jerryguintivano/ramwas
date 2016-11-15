@@ -33,7 +33,7 @@ parameterDump(dir, param, toplines = NULL)
     This function is not intended to be run by the user.
 }
 \seealso{
-    See \link{pipeline}.
+    See vignettes: \code{browseVignettes("ramwas")}
 }
 \examples{
 param = list(

@@ -51,7 +51,9 @@ testPhenotype(phenotype, data, cvrtqr)
   This function is used in several parts of the pipeline.
 }
 \seealso{
-See \code{\link{orthonormalizeCovariates}}
+    See vignettes: \code{browseVignettes("ramwas")}.
+    
+    Also check \code{\link{orthonormalizeCovariates}}.
 }
 \examples{
 

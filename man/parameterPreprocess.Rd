@@ -32,7 +32,7 @@ parameterPreprocess(param)
          \var{modelcovariates} include only names of columns in
          \var{covariates}.
         \item Check that files \var{filecpgset} and
-         \var{filenoncpgset} exist if these parameters are not \code{NULL}.
+         \var{filenoncpgset} exist if the parameters are set.
     }
 }
 \value{
@@ -45,9 +45,7 @@ parameterPreprocess(param)
     This function is not intended to be run by the user.
 }
 \seealso{
-    See \link{pipeline}. \cr
-    For detailed description of all available parameters run:\cr
-    \code{vignette("RW5_param")}.
+    See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
 param = list(

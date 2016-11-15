@@ -82,8 +82,7 @@ qcmean(x)
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    For full description of the QC measures and
-    the ploting options run\cr \code{vignette("RaMWAS_QCs")}
+    See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
 # Load QC data from a sample project

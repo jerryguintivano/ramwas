@@ -1,7 +1,7 @@
 \name{findBestNpvs}
 \alias{findBestNpvs}
 \title{
-Quickly Find N Best p-values in a Long Vector
+Quickly Find N Smallest P-values in a Long Vector
 }
 \description{
 Finding top, say, 100 p-values out of millions can be slow.

@@ -33,6 +33,9 @@ qqPlotFast(pvalues, ntests = NULL, ci.level = 0.05)
 \note{
     The function works faster if the p-values are sorted.
 }
+\seealso{
+    See vignettes: \code{browseVignettes("ramwas")}.
+}
 \examples{
 # Million p-values
 n = 1e6

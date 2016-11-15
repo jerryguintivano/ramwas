@@ -6,8 +6,8 @@
 \description{
     The pipeline parameters can be stored in a simple file,
     formatted as R code.
-    \code{parametersFromFile} transforms them into a parameter list
-    used by the functions of this pipeline.
+    The \code{parametersFromFile} function transforms them into 
+    a parameter list used by RaMWAS steps.
 }
 \usage{
 parametersFromFile(.parameterfile)
@@ -32,7 +32,7 @@ parametersFromFile(.parameterfile)
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    See \link{pipeline}.
+    See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
 

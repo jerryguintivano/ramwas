@@ -6,8 +6,8 @@
 \description{
     The pipeline parameters can be provided via command line.
 
-    For example: \cr \code{R pipeline.r dirproject="/project"
-    maxrepeats=0 modeloutcome="Age"}
+    For example: \cr 
+    \code{R pipeline.r dirproject="/project" maxrepeats=0 modeloutcome="Age"}
 
     Each command line argument is treated as an R statement.
 
@@ -39,7 +39,7 @@ processCommandLine(.arg = NULL)
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    See \link{pipeline}.
+    See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
 

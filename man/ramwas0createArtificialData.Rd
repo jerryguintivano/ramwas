@@ -64,11 +64,7 @@ The function creates multiple files but returns no value.
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    For detailed description of all available parameters run:\cr
-    \code{vignette("RW5_param")}.
-
-    For full description of the QC measures and the ploting options run\cr
-    \code{vignette("RW3_BAM_QCs")}
+    See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
 ### Location for the artificial project
