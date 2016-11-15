@@ -16,7 +16,7 @@ RaMWAS provides a complete toolset for
     (2) calculation of quality control measures,
     (3) creation of methylation score (coverage) matrix,
     (4) principal component analysis for capturing batch effects and
-    identify outliers,
+    detection of outliers,
     (5) association analysis with respect to phenotypes of interest
     while correctingfor top PCs and known covariates,
     (6) annotation of significant findings, and

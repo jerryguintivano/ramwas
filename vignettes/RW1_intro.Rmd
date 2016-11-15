@@ -28,7 +28,7 @@ The analysis pipeline includes seven steps:
 2. Calculation of quality control measures
 3. Creation of methylation score (coverage) matrix
 4. Principal component analysis for capturing batch effects and
-   dentify outliers
+   detection of outliers
 5. Association analysis with respect to phenotypes of interest
    while correcting for top PCs and known covariates
 6. Annotation of significant findings
