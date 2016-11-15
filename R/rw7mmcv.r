@@ -65,9 +65,9 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
     pvs = tt2pv(max(ts,0));
     return(list(
         outcome = outcome,
-        forecast = forecast, 
+        forecast = forecast,
         dfFull = dfFull,
-        corp = corp, 
+        corp = corp,
         cors = cors,
         MSE = MSE,
         MAD = MAD,
@@ -75,7 +75,7 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
         R2s = R2s,
         tp = tp,
         ts = ts,
-        pvp = pvp, 
+        pvp = pvp,
         pvs = pvs));
 }
 
@@ -136,11 +136,11 @@ ramwas7BrunElasticNet = function(param){
     {
         outcome = param$covariates[[ param$modeloutcome ]];
     } # outcome
-    
+
     for( cpgs2use in param$mmncpgs ){
         message('Applying Elasting Net to ',cpgs2use,' top CpGs');
-        
-    
+
+
         forecast0 = NULL;
         for( fold in seq_len(param$cvnfolds) ){ # fold = 1
             message("Processing fold ", fold, " of ", param$cvnfolds);
@@ -271,24 +271,24 @@ ramwas7CplotByNCpGs = function(param){
             param$dircv,
             cpgs2use,
             param$mmalpha));
-        stats = predictionStats(outcome = data$outcome, 
+        stats = predictionStats(outcome = data$outcome,
                                 forecast = data$forecast);
         cors[i] = stats$cors;
         corp[i] = stats$corp;
     }
-    
+
     pdf( sprintf("%s/Prediction_alpha=%f.pdf",
                  param$dircv,
                  param$mmalpha) );
-    
+
     aymax = max(abs(cors),abs(corp));
-    plot( x = param$mmncpgs, 
-          y = cors, 
-          col = 'red', 
-          pch = 19, 
-          ylim = c(-1,1)*aymax, 
-          log = 'x', 
-          xlab = "Number of markers", 
+    plot( x = param$mmncpgs,
+          y = cors,
+          col = 'red',
+          pch = 19,
+          ylim = c(-1,1)*aymax,
+          log = 'x',
+          xlab = "Number of markers",
           ylab = "Correlation")
     points( param$mmncpgs, corp, col = 'cyan4', pch = 17)
     abline(h=0, col = 'grey')
