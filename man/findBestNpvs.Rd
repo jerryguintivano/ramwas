@@ -32,8 +32,8 @@ findBestNpvs(pv, n)
     See \code{\link[base]{order}}.
 }
 \examples{
-pv = runif(2e7)^10
-n = 10000
+pv = runif(1000)^10
+n = 100
 
 # Faster version
 topSites1 = findBestNpvs(pv, n)
