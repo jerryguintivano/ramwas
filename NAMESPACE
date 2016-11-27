@@ -27,6 +27,7 @@ export(
     "testPhenotype",
     "getCpGsetALL",
     "getCpGsetCG",
+    "getTestsByLocation",
     "insilicoFASTQ",
     "injectSNPsMAF"
 )
