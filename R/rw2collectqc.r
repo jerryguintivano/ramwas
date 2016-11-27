@@ -306,6 +306,7 @@ ramwas2collectqc = function( param ){
 
         histqc = function(qcfun, plottitle, filename){
             vec = unlist(lapply(bigqc, qcfun));
+            vec = vec[vec<1e6];
             pdf(paste0(dirloc,"/Fig_hist_",filename,".pdf"));
             hist(vec,
                  breaks = 3*round(sqrt(length(vec))),
