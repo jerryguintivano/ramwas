@@ -164,8 +164,8 @@ parameterPreprocess = function( param ){
         rm(filename);
     }
     if( is.null(param$bam2sample) & !is.null(param$bamnames) ){
-        param$bam2sample = param$bamnames;
-        names(param$bam2sample) = param$bamnames;
+        param$bam2sample = basename(param$bamnames);
+        names(param$bam2sample) = basename(param$bamnames);
     }
     ### Covariate file
     if( !is.null(param$filecovariates) & is.null(param$covariates)){

@@ -235,7 +235,7 @@ pipelineProcessBam = function(bamname, param){
                                        distance = param$maxfragmentsize);
 
         ### QC plots
-        pipelineSaveQCplots(param, rbam5, bamname);
+        pipelineSaveQCplots(param, rbam5, basename(bamname));
 
     } else {
         rbam5 = rbam2;
