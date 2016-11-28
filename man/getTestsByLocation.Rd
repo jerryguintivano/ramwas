@@ -1,4 +1,4 @@
-\name{getByLocation}
+\name{getTestsByLocation}
 \alias{getTestsByLocation}
 \title{
 Extract MWAS Test Results by Genomic Location
@@ -11,13 +11,13 @@ getTestsByLocation(x, chr, position)
 }
 \arguments{
     \item{x}{
-        Either the parameter list or the MWAS directory.
+        Parameter list or MWAS directory.
     }
     \item{chr}{
-        Chromosome number(s) or name.
+        Chromosome name or number.
     }
     \item{position}{
-        Position(s) of tested sites.
+        Position(s) on the chromosome.
     }
 }
 \details{
