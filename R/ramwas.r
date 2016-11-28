@@ -274,7 +274,7 @@ parameterPreprocess = function( param ){
     if( is.null(param$randseed) ) param$randseed = 18090212;
     # Famous person date of birth: February 12, 1809
 
-    if( is.null(param$toppvthreshold) ) param$toppvthreshold = 1e-6;
+    if( is.null(param$toppvthreshold) ) param$toppvthreshold = 50;
 
     # BioInformatics paramters
 
