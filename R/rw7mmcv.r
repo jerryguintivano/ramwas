@@ -289,6 +289,7 @@ ramwas7CplotByNCpGs = function(param){
 }
 
 ramwas7riskScoreCV = function(param){
+    param = parameterPreprocess(param);
     ramwas7ArunMWASes(param);
     ramwas7BrunElasticNet(param);
     ramwas7CplotByNCpGs(param);
