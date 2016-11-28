@@ -73,8 +73,6 @@ so we create an artificial data with this simple call.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
 suppressPackageStartupMessages(library(ramwas))
-dr = paste0(tempdir(), "/simulated_project")
-# dr = "D:/temp"; unlink(paste0(dr,"/*"), recursive=TRUE)
 ```
 
 ```{r generateData, warning=FALSE}
@@ -461,7 +459,7 @@ The names of coverage/PCA/MWAS/MMCV directories can be recovered
 by first calling `parameterPreprocess` function.
 
 ```{r dirlocations, eval=TRUE}
-fullparam = parameterPreprocess(param);
+fullparam = parameterPreprocess(param)
 # Here lies coverage matrix
 fullparam$dircoveragenorm
 # Here are PCA files
