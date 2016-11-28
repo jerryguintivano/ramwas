@@ -28,6 +28,7 @@ export(
     "getCpGsetALL",
     "getCpGsetCG",
     "getTestsByLocation",
+    "getDataByLocation",
     "insilicoFASTQ",
     "injectSNPsMAF"
 )
