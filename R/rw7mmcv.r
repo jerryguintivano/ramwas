@@ -283,7 +283,7 @@ ramwas7CplotByNCpGs = function(param){
            legend = c("Correlations:","Pearson", "Spearman"),
            pch = c(NA_integer_,19,17),
            col=c("red","red","cyan4"));
-    title("Prediction Success of Elastic Net");
+    title(paste0("Prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
     dev.off();
     return( invisible(NULL) );
 }
