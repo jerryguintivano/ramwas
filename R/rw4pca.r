@@ -246,7 +246,7 @@ ramwasPCsCovariateSelection = function(param){
 
         message("Removing covariates from covariance matrix");
 
-        cvtrqr = orthonormalizeCovariates(covariates = ann[covset]);
+        cvtrqr = orthonormalizeCovariates(cvrt = ann[covset]);
         covmat1 = covmat;
         covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr)
         covmat1 = covmat1 - cvtrqr %*% crossprod(cvtrqr, covmat1);

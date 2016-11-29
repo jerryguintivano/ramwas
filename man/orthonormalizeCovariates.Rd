@@ -8,10 +8,10 @@
     orthonormalizes the set.
 }
 \usage{
-orthonormalizeCovariates(covariates)
+orthonormalizeCovariates(cvrt)
 }
 \arguments{
-    \item{covariates}{
+    \item{cvrt}{
         A matrix or data frame with covariates.
     }
 }
