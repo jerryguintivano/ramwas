@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r switcher, echo=FALSE}
-library('knitr')
+library("knitr")
 # opts_chunk$set(eval=FALSE)
 ```
 
@@ -62,7 +62,7 @@ and with following commands.
 
 ```{r loadIt, eval=FALSE}
 library(ramwas) # Loads the package
-browseVignettes('ramwas') # Opens vignettes
+browseVignettes("ramwas") # Opens vignettes
 help(package="ramwas") # Lists package functions
 ```
 
@@ -73,8 +73,6 @@ so we create an artificial data with this simple call.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
 suppressPackageStartupMessages(library(ramwas))
-dr = paste0(tempdir(), "/simulated_project")
-# dr = 'D:/temp'; unlink(paste0(dr,"/*"), recursive=TRUE)
 ```
 
 ```{r generateData, warning=FALSE}
@@ -90,9 +88,9 @@ a more convenient location when running this code.
 
 Now the project directory `dr` contains
 
-* `bams` - directory with the 20 simulated BAM files
-* `bam_list.txt` - file with names of all the BAM files
-* `covariates.txt` - file with age and sex variables for the samples.\
+* `bams` -- directory with the 20 simulated BAM files
+* `bam_list.txt` -- file with names of all the BAM files
+* `covariates.txt` -- file with age and sex variables for the samples.\
 The methylation level of some CpGs
 is generated to depend on the covariates.
 * `Simulated_chromosome.rds` - file with locations of all CpGs.
@@ -183,7 +181,7 @@ This creates the following subdirectories in the project directory:
 (BAM read start locations) and BAM quality control metrics,
 one RDS file per BAM.
 
-**Note.** For the full information on BAM-wise QC, see 
+**Note.** For the full information on BAM-wise QC, see
 [RW3_BAM_QCs.html](BAM QC vignette).
 
 Here is a sample `coverage_by_density` plot for the simulated data.\
@@ -202,7 +200,7 @@ produces a number of summary plots, and estimates fragment size distribution.
 
 In this example, each BAM corresponds to one sample with the same name.
 When multiple BAMs contain data from a single sample,
-`filebam2sample` parameter is used to instruct RaMWAS 
+`filebam2sample` parameter is used to instruct RaMWAS
 about the bam to sample matching.
 
 ```{r collectQC1, warning=FALSE, message=FALSE}
@@ -211,25 +209,26 @@ ramwas2collectqc(param)
 
 The following files and directories are created in the project directory:
 
-* `Fragment_size_distribution.txt` - text file with estimated
+* `Fragment_size_distribution.txt` -- text file with estimated
 fragment size distribution.
-* `qc/Fragment_size_distribution_estimate.pdf` - plot showing both
+* `qc/Fragment_size_distribution_estimate.pdf` -- plot showing both
 estimated fragment size distribution and the distribution of distances
 from read starts to isolated CpGs.\
 * Four sub-directories in the "qc" directory
-    + `summary_bams` - by BAMs
-    + `summary_bams_in_bam2sample` - by BAMs,
+    + `summary_bams` -- by BAMs
+    + `summary_bams_in_bam2sample` -- by BAMs,
     but only those listed in `filebam2sample` parameter
-    + `summary_by_sample` - by sample
-    + `summary_total` - total across all BAMs.
+    + `summary_by_sample` -- by sample
+    + `summary_total` -- total across all BAMs.
 * The directories listed above contain
-    - `Summary_QC.txt` - table with a number of numerical QC measures,
+    - `Summary_QC.txt` -- table with a number of numerical QC measures,
     in an Excel friendly format.
-    - `Summary_QC_R.txt` - table with a number of numerical QC measures,
+    - `Summary_QC_R.txt` -- table with a number of numerical QC measures,
     in an R friendly format.
-    - `qclist.rds` - an R file with list of QC objects.
-    - `Fig_hist_*.pdf` - histograms of several QC measures across samples.
-    - `Fig_*.pdf` - PDF files with various QC plots, one page per BAM or sample,
+    - `qclist.rds` -- an R file with list of QC objects.
+    - `Fig_hist_*.pdf` -- histograms of several QC measures across samples.
+    - `Fig_*.pdf` -- PDF files with various QC plots,
+    one page per BAM or sample,
     depending on the directory.
 
 Here is an example of a good fit of estimated fragment size distribution.
@@ -299,7 +298,7 @@ The covariates can be stored as a file `filecovariates` in a
 tab-separated table format, with sample names in the first column.
 The artificial data set includes covariate file *covariates.txt*.
 
-The parameter `modelcovariates` names 
+The parameter `modelcovariates` names
 the covariates regressed out for before PCA.
 
 ```{r pca99, warning=FALSE, message=FALSE}
@@ -308,7 +307,8 @@ ramwas4PCA(param)
 
 This step creates sub-directory `PCA_00_cvrts` in the directory with
 score matrix.\
-The name of the sub-directory depends on the covariates (see [Directory names][]).
+The name of the sub-directory depends on the covariates
+(see [Directory names][]).
 The sub-directory includes:
 
 * `covmat.rds` and `eigen.rds` - RDS files with covariance matrix and
@@ -346,8 +346,8 @@ Table: Significance\ in\ `PC_vs_covariates_pvalue.txt`\ file.
 
 ## Methylome-wide Association Study (MWAS)
 
-This step performs tests for association 
-between normalized coverage and the 
+This step performs tests for association
+between normalized coverage and the
 outcome variable named by `modeloutcome` parameter.
 The analysis corrects for covariates listed in `modelcovariates`
 parameter and top `modelPCs` principal components.
@@ -361,7 +361,8 @@ ramwas5MWAS(param)
 ```
 
 This step creates a sub-directory in the PCA directory named
-`Testing_casecontrol_0_PCs`. The name depends on `modeloutcome` and `modelPCs` (see [Directory names][]).
+`Testing_casecontrol_0_PCs`. The name depends on `modeloutcome` and `modelPCs`
+(see [Directory names][]).
 The sub-directory includes:
 
 * `QQ_plot.pdf` -- QQ-plot with confidence band and inflation factor.
@@ -377,9 +378,6 @@ diagonal for many CpGs. This is consistent with how the data was generated --
 there is weak signal in 1\% of CpGs.
 ![plot](qqplot_age.png)
 
-<!-- **Note.** The title of the QQ-plot can be set with the parameter `qqplottitle`. -->
-
-
 ## Annotation of top results
 
 RaMWAS can annotate top findings using data from
@@ -390,12 +388,12 @@ The parameters include:
 * `bihost` -- biomart host site.
 * `bimart` -- BioMart database name, see listMarts().
 * `bidataset` -- data set, see listDatasets().
-* `biattributes` -- are attributes of interest, see listAttributes(). 
+* `biattributes` -- are attributes of interest, see listAttributes().
 * `bifilters` -- lists filters (if any), see listFilters().
-* `biflank` -- indicates the maximum allowed distance from the 
+* `biflank` -- indicates the maximum allowed distance from the
 CpG to the annotation element.
 
-ere we annotate top findings with human gene symbols, gene ids, and 
+ere we annotate top findings with human gene symbols, gene ids, and
 strand information.
 
 ```{r anno, warning=FALSE, message=FALSE}
@@ -431,7 +429,7 @@ The number of folds `cvnfolds` in the N-fold cross validation is 10 by default.
 ramwas7riskScoreCV(param)
 ```
 
-This creates `CV_10_folds` sub-directory in MWAS directory 
+This creates `CV_10_folds` sub-directory in MWAS directory
 (see [Directory names][]).
 It contains:
 
@@ -441,16 +439,16 @@ each with different 10% of the samples excluded from the analysis.
 the table with true outcome and cross-validation prediction.
 * `MMCVN_prediction_folds=10_CpGs=*.pdf` -
 scatter-plot of true outcome vs. cross-validation prediction.
-* `Prediction_alpha=0.000000.pdf` -- scatter plot of 
-outcome-prediction correlations as a function of the 
+* `Prediction_alpha=0.000000.pdf` -- scatter plot of
+outcome-prediction correlations as a function of the
 number of CpGs used for prediction.
 
-For the simulated data 
+For the simulated data
 we get moderately good prediction
 using just 10 top CpGs.
 ![plot](mm10.png)
 
-The correlation of prediction with 
+The correlation of prediction with
 actual age is maximal when we use 1,000
 top CpGs in elastic net.
 ![plot](mmAll.png)
@@ -458,10 +456,11 @@ top CpGs in elastic net.
 
 # Directory names
 
-The names of coverage/PCA/MWAS/MMCV directories can be recovered by first calling `parameterPreprocess` function.
+The names of coverage/PCA/MWAS/MMCV directories can be recovered
+by first calling `parameterPreprocess` function.
 
 ```{r dirlocations, eval=TRUE}
-fullparam = parameterPreprocess(param);
+fullparam = parameterPreprocess(param)
 # Here lies coverage matrix
 fullparam$dircoveragenorm
 # Here are PCA files

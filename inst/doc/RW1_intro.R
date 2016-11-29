@@ -1,5 +1,5 @@
 ## ----switcher, echo=FALSE------------------------------------------------
-library('knitr')
+library("knitr")
 # opts_chunk$set(eval=FALSE)
 
 ## ----install, eval=FALSE-------------------------------------------------
@@ -9,13 +9,11 @@ library('knitr')
 
 ## ----loadIt, eval=FALSE--------------------------------------------------
 #  library(ramwas) # Loads the package
-#  browseVignettes('ramwas') # Opens vignettes
+#  browseVignettes("ramwas") # Opens vignettes
 #  help(package="ramwas") # Lists package functions
 
 ## ----loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE----
 suppressPackageStartupMessages(library(ramwas))
-dr = paste0(tempdir(), "/simulated_project")
-# dr = 'D:/temp'; unlink(paste0(dr,"/*"), recursive=TRUE)
 
 ## ----generateData, warning=FALSE-----------------------------------------
 library(ramwas)
@@ -75,7 +73,7 @@ ramwas6annotateTopFindings(param)
 ramwas7riskScoreCV(param)
 
 ## ----dirlocations, eval=TRUE---------------------------------------------
-fullparam = parameterPreprocess(param);
+fullparam = parameterPreprocess(param)
 # Here lies coverage matrix
 fullparam$dircoveragenorm
 # Here are PCA files
