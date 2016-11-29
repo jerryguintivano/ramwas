@@ -83,6 +83,7 @@ ramwas4PCA = function( param ){
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
+        # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         cvsamples = param$covariates[[1]];
@@ -92,7 +93,7 @@ ramwas4PCA = function( param ){
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrtqr = t(orthonormalizeCovariates(
+        cvrtqr = t(orthonormalizeCovariates(cvrt = 
                         param$covariates[ param$modelcovariates ] ));
     } # cvrtqr
 

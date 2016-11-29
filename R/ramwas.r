@@ -925,16 +925,17 @@ testPhenotype = function(phenotype, data, cvrtqr){
 }
 
 # Orthonormalize a set of covariates
-orthonormalizeCovariates = function(covariates){
-    if(any(sapply(lapply(covariates, is.na), any)))
+orthonormalizeCovariates = function(cvrt){
+    if(any(sapply(lapply(cvrt, is.na), any)))
         stop("Missing values are not allowed in the covariates")
-    cvrtset = c(const = list(rep(1, nrow(covariates))), covariates);
-    for( ind in which(sapply(cvrtset, typeof)=="character")){ # ind = 3
+    cvrtset = c(const = list(rep(1, nrow(cvrt))), cvrt);
+    factorset = which(sapply(cvrtset, typeof) %in% c("character","factor"));
+    for( ind in factorset ){ # ind = 3
         fctr = factor(cvrtset[[ind]]);
         cvrtset[[ind]] = model.matrix(~fctr)[,-1];
         rm(fctr);
     }
-    cvrtmat = matrix(unlist(cvrtset), nrow(covariates));
+    cvrtmat = matrix(unlist(cvrtset), nrow(cvrt));
     cvrtqr = qr.Q(qr(cvrtmat));  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
     return(cvrtqr)
 }
