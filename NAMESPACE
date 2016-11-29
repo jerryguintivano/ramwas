@@ -39,7 +39,7 @@ importFrom("graphics", "abline", "legend", "lines", "par", "plot",
             "points", "title", "axis", "barplot", "hist")
 importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim",
             "model.matrix", "quantile", "median", "qlogis",
-            "plogis", "qbeta", "cor", "lm", "qchisq", "runif")
+            "plogis", "qbeta", "cor", "lm", "qchisq", "runif", "sd")
 importFrom("utils", "flush.console", "head", "tail",
             "tail.matrix", "read.table", "write.table")
 importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace",
