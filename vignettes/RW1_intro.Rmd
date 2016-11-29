@@ -88,9 +88,9 @@ a more convenient location when running this code.
 
 Now the project directory `dr` contains
 
-* `bams` - directory with the 20 simulated BAM files
-* `bam_list.txt` - file with names of all the BAM files
-* `covariates.txt` - file with age and sex variables for the samples.\
+* `bams` -- directory with the 20 simulated BAM files
+* `bam_list.txt` -- file with names of all the BAM files
+* `covariates.txt` -- file with age and sex variables for the samples.\
 The methylation level of some CpGs
 is generated to depend on the covariates.
 * `Simulated_chromosome.rds` - file with locations of all CpGs.
@@ -209,25 +209,25 @@ ramwas2collectqc(param)
 
 The following files and directories are created in the project directory:
 
-* `Fragment_size_distribution.txt` - text file with estimated
+* `Fragment_size_distribution.txt` -- text file with estimated
 fragment size distribution.
-* `qc/Fragment_size_distribution_estimate.pdf` - plot showing both
+* `qc/Fragment_size_distribution_estimate.pdf` -- plot showing both
 estimated fragment size distribution and the distribution of distances
 from read starts to isolated CpGs.\
 * Four sub-directories in the "qc" directory
-    + `summary_bams` - by BAMs
-    + `summary_bams_in_bam2sample` - by BAMs,
+    + `summary_bams` -- by BAMs
+    + `summary_bams_in_bam2sample` -- by BAMs,
     but only those listed in `filebam2sample` parameter
-    + `summary_by_sample` - by sample
-    + `summary_total` - total across all BAMs.
+    + `summary_by_sample` -- by sample
+    + `summary_total` -- total across all BAMs.
 * The directories listed above contain
-    - `Summary_QC.txt` - table with a number of numerical QC measures,
+    - `Summary_QC.txt` -- table with a number of numerical QC measures,
     in an Excel friendly format.
-    - `Summary_QC_R.txt` - table with a number of numerical QC measures,
+    - `Summary_QC_R.txt` -- table with a number of numerical QC measures,
     in an R friendly format.
-    - `qclist.rds` - an R file with list of QC objects.
-    - `Fig_hist_*.pdf` - histograms of several QC measures across samples.
-    - `Fig_*.pdf` - PDF files with various QC plots, one page per BAM or sample,
+    - `qclist.rds` -- an R file with list of QC objects.
+    - `Fig_hist_*.pdf` -- histograms of several QC measures across samples.
+    - `Fig_*.pdf` -- PDF files with various QC plots, one page per BAM or sample,
     depending on the directory.
 
 Here is an example of a good fit of estimated fragment size distribution.
