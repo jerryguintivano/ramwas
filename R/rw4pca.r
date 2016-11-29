@@ -8,11 +8,13 @@
     for( i in seq_along(covariates1) ){ # i=1
         rez = testPhenotype(covariates1[[i]], data, cvrtqr);
         pv[[i]] = as.vector(rez[[3]]);
-        nms[i] = rez$statname;
+        # nms[i] = rez$statname;
         if(nchar(rez$statname)==0){
+            nms[i] = '';
             crF[[i]] = as.vector(rez$correlation);
         } else {
-            crF[[i]] = as.vector(rez$Fstat);
+            nms[i] = '_R2';
+            crF[[i]] = as.vector(rez$Rsquared);
         }
     }
     crF = data.frame(crF);
