@@ -1,5 +1,5 @@
 ---
-title: "RaMWAS parameters"
+title: "RaMWAS Parameters"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
