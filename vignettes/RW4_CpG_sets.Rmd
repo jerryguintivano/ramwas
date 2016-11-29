@@ -1,12 +1,12 @@
 ---
-title: "RaMWAS CpG sets"
+title: "4. CpG sets for RaMWAS"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{CpG sets}
+  %\VignetteIndexEntry{4. CpG sets}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

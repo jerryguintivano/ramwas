@@ -1,12 +1,12 @@
 ---
-title: "RaMWAS Parameters"
+title: "5. RaMWAS Parameters"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{RaMWAS parameters}
+  %\VignetteIndexEntry{5. RaMWAS parameters}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

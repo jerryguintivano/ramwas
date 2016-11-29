@@ -1,12 +1,12 @@
 ---
-title: "RaMWAS BAM QC Measures"
+title: "3. RaMWAS QC Measures for BAM files"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{BAM QC Meansures}
+  %\VignetteIndexEntry{3. QC Meansures for BAM files}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 

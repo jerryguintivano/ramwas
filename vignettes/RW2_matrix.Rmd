@@ -1,12 +1,12 @@
 ---
-title: "Analyzing Data from Other Sources"
+title: "2. Analyzing Data from Other Sources"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{Analyzing data from other sources}
+  %\VignetteIndexEntry{2. Analyzing data from other sources}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -45,7 +45,7 @@ These files include
 
 * `CpG_locations.*` -- filematrix with the location of the CpGs
 that passed the threshold.\
-It must have two columns indicating chromosome number and location
+It must have two columns with integer values -- chromosome number and location
 (`chr` and `position`).
 * `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
 for the integer column `chr` in the location filematrix.
@@ -104,11 +104,8 @@ pander(head(locmat))
 ```
 
 
-Save locations in a filematrix along with text file with chromosome names.\
-The filematrix `CpG_locations` must contain two columns -
-chromosome and position, both with integer values.
-The chromosome names in `CpG_chromosome_names.txt` are the factor levels
-for the chromosome column in the location filematrix.
+Now we save locations in a filematrix 
+and create a text file with chromosome names.\
 ```{r locSave}
 fmloc = fm.create.from.matrix(
             filenamebase = paste0(dr,"/CpG_locations"),
@@ -217,7 +214,7 @@ the corresponding p-values all equal to 1.
 
 ## Association testing
 
-Let"s test for association between
+Let us test for association between
 variables in the data matrix and the sex covariate
 (`modeloutcome` parameter)
 correcting for batch effects (`modelcovariates` parameter).
@@ -284,12 +281,11 @@ Steps 6 and 7 of RaMWAS pipeline can also be applied
 to the data matrix exactly as described in the
 [overview vignette](RW1_intro.html#annotation-of-top-results).
 
-
 ## Cleanup
 
 Here we remove all the files created by the code above.
 ```{r clean}
-# unlink(paste0(dr,"/*"), recursive=TRUE)
+unlink(paste0(dr,"/*"), recursive=TRUE)
 ```
 
 # Version information
