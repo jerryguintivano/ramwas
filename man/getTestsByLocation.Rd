@@ -32,9 +32,9 @@ getTestsByLocation(x, chr, position)
     \item{t.test}{t-statistic}
     \item{p.value}{p-value}
     \item{q.value}{q-value (FDR)}
-    
-    If the outcome variable was categorical, 
-    columns \code{R.squared} and \code{F-test} are present 
+
+    If the outcome variable was categorical,
+    columns \code{R.squared} and \code{F-test} are present
     in place of \code{cor} and \code{t.test}.
 }
 \author{
@@ -49,13 +49,13 @@ getTestsByLocation(x, chr, position)
 getTestsByLocation(param, 1, 123321)
 
 # Chromosome can be character
-getTestsByLocation(param, 'chr1', 123321)
+getTestsByLocation(param, "chr1", 123321)
 
-# Extract multiple locations 
+# Extract multiple locations
 # on the same chromosome
 getTestsByLocation(param, 1, c(123123,123321))
 
 # on different chromosomes
-getTestsByLocation(param, c('chr1','chr2'), c(123123,123321))
+getTestsByLocation(param, c("chr1","chr2"), c(123123,123321))
 }
 }

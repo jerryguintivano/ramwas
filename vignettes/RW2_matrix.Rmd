@@ -18,13 +18,13 @@ library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
-# dr = 'D:/temp/simulated_matrix_data'
+# dr = "D:/temp/simulated_matrix_data"
 ```
 
 # Applying RaMWAS for other data types
 
 [RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
-is initially designed for studies on methylation measurements 
+is initially designed for studies on methylation measurements
 from enrichment platforms.
 
 RaMWAS can also be useful for analysis of data from other sources,
@@ -38,14 +38,14 @@ and multi-variable elastic net with cross validation.
 
 Here we illustrate how RaMWAS can be applied to external data.
 For that we manually create data files
-in the same format as produced by 
+in the same format as produced by
 [Step 3](RW1_intro.html#calculate-methylation-score-coverage-matrix) of RaMWAS.
 
 These files include
 
 * `CpG_locations.*` -- filematrix with the location of the CpGs
 that passed the threshold.\
-It must have two columns indicating chromosome number and location 
+It must have two columns indicating chromosome number and location
 (`chr` and `position`).
 * `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
 for the integer column `chr` in the location filematrix.
@@ -55,16 +55,16 @@ for the integer column `chr` in the location filematrix.
   Each column has data for a single location.
   Columns must match rows of the location filematrix.\
 
-First, we load the package and set up a working directory. 
+First, we load the package and set up a working directory.
 One may choose to set the project directory `dr` to
 a more convenient location when running this code.
 ```{r generateData}
 library(ramwas)
 
 # work in a temporary directory
-dr = paste0(tempdir(), '/simulated_matrix_data')
+dr = paste0(tempdir(), "/simulated_matrix_data")
 dir.create(dr, showWarnings = FALSE)
-cat(dr,'\n')
+cat(dr,"\n")
 ```
 
 
@@ -81,10 +81,10 @@ set.seed(18090212)
 ```
 ```{r genCovar}
 covariates = data.frame(
-	sample = paste0('Sample_',seq_len(nsamples)),
-	sex = seq_len(nsamples) %% 2,
-	age = runif(nsamples, min = 20, max = 80),
-	batch = paste0("batch",(seq_len(nsamples) %% 3))
+    sample = paste0("Sample_",seq_len(nsamples)),
+    sex = seq_len(nsamples) %% 2,
+    age = runif(nsamples, min = 20, max = 80),
+    batch = paste0("batch",(seq_len(nsamples) %% 3))
 )
 pander(head(covariates))
 ```
@@ -99,42 +99,42 @@ chr      = as.integer(temp %/% 1e7) + 1L
 position = as.integer(temp %% 1e7)
 
 locmat = cbind(chr = chr, position = position)
-chrnames = paste0('chr', 1:22)
+chrnames = paste0("chr", 1:22)
 pander(head(locmat))
 ```
 
 
 Save locations in a filematrix along with text file with chromosome names.\
-The filematrix `CpG_locations` must contain two columns - 
+The filematrix `CpG_locations` must contain two columns -
 chromosome and position, both with integer values.
 The chromosome names in `CpG_chromosome_names.txt` are the factor levels
 for the chromosome column in the location filematrix.
 ```{r locSave}
 fmloc = fm.create.from.matrix(
-            filenamebase = paste0(dr,'/CpG_locations'), 
+            filenamebase = paste0(dr,"/CpG_locations"),
             mat = locmat)
 close(fmloc)
-writeLines(con = paste0(dr,'/CpG_chromosome_names.txt'), text = chrnames)
+writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), text = chrnames)
 ```
 
-Finally, we create data matrix and populate it with 
+Finally, we create data matrix and populate it with
 a combination of signal, noise, and batch effects.
 ```{r setseed3, echo=FALSE}
 set.seed(18090212)
 ```
 ```{r fillDataMat}
-fm = fm.create(paste0(dr,'/Coverage'), nrow = nsamples, ncol = nvariables)
+fm = fm.create(paste0(dr,"/Coverage"), nrow = nsamples, ncol = nvariables)
 # Row names of the matrix are set to sample names
 rownames(fm) = as.character(covariates$sample)
 
 # The matrix is filled, 2000 variables at a time
 byrows = 2000
 for( i in seq_len(nvariables/byrows) ){ # i=1
-	slice = matrix(runif(nsamples*byrows), nrow = nsamples, ncol = byrows)
-	slice[,  1:225] = slice[,  1:225] + covariates$sex / 75 / sd(covariates$sex)
-	slice[,101:116] = slice[,101:116] + covariates$age / 24 / sd(covariates$age)
-	slice = slice + ((as.integer(factor(covariates$batch))+i) %% 3) / 200
-	fm[,(1:byrows) + byrows*(i-1)] = slice
+    slice = matrix(runif(nsamples*byrows), nrow = nsamples, ncol = byrows)
+    slice[,  1:225] = slice[,  1:225] + covariates$sex / 75 / sd(covariates$sex)
+    slice[,101:116] = slice[,101:116] + covariates$age / 24 / sd(covariates$age)
+    slice = slice + ((as.integer(factor(covariates$batch))+i) %% 3) / 200
+    fm[,(1:byrows) + byrows*(i-1)] = slice
 }
 close(fm)
 ```
@@ -148,14 +148,14 @@ the data frame with covariates `covariates`, and
 the names of covariates to regress out `modelcovariates`.
 ```{r param1}
 param = list(
-	dircoveragenorm = dr,
-	covariates = covariates,
-	modelcovariates = NULL
+    dircoveragenorm = dr,
+    covariates = covariates,
+    modelcovariates = NULL
 )
 ```
 
 ```{r threads, echo=FALSE}
-# Bioconductor requires limit of 2 parallel jobs 
+# Bioconductor requires limit of 2 parallel jobs
 param$cputhreads = 2
 ```
 
@@ -168,7 +168,7 @@ ramwas4PCA(param)
 The top several PCs are marginally distinct from the rest.
 ![pca_null](rw2_pcanull.png)
 
-There are strong correlations between top PCs with 
+There are strong correlations between top PCs with
 sex, age, and batch covariates.\
 Note, for the categorical covariate (batch)
 the table shows R^2^ instead of correlations.
@@ -176,16 +176,17 @@ the table shows R^2^ instead of correlations.
 ```{r topCorNULL}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-cortbl = read.table(paste0(pfull$dirpca,'/PC_vs_covs_corr.txt'), 
-                    header = TRUE, sep = '\t')
+cortbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_corr.txt"),
+                    header = TRUE, sep = "\t")
 pander(head(cortbl,10))
 ```
 
-The p-values for these correlations and R^2^ show top two PCs are correlated with
+The p-values for these correlations and R^2^
+show top two PCs are correlated with
 sex and age while a number of others are affected by batch effects.
 ```{r topPvNULL}
-pvtbl = read.table(paste0(pfull$dirpca,'/PC_vs_covs_pvalue.txt'), 
-                    header = TRUE, sep = '\t')
+pvtbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_pvalue.txt"),
+                    header = TRUE, sep = "\t")
 pander(head(pvtbl,10))
 ```
 
@@ -195,10 +196,10 @@ pander(head(pvtbl,10))
 It is common to regress batch and laboratory effects
 from the data in the analysis, including the PCA.
 
-Let's regress out batch effect in our example 
+Let"s regress out batch effect in our example
 by changing `modelcovariates` parameter.
 ```{r pcaBatch, warning=FALSE, message=FALSE}
-param$modelcovariates = 'batch'
+param$modelcovariates = "batch"
 
 ramwas4PCA(param)
 ```
@@ -207,8 +208,8 @@ The p-values for association between PCs and covariates changed slightly:
 ```{r topPvBatch}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-pvtbl = read.table(paste0(pfull$dirpca,'/PC_vs_covs_pvalue.txt'), 
-                    header = TRUE, sep = '\t')
+pvtbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_pvalue.txt"),
+                    header = TRUE, sep = "\t")
 pander(head(pvtbl,10))
 ```
 Note that the PCs are now orthogonal to the batch effects and thus
@@ -216,15 +217,15 @@ the corresponding p-values all equal to 1.
 
 ## Association testing
 
-Let's test for association between
+Let"s test for association between
 variables in the data matrix and the sex covariate
 (`modeloutcome` parameter)
 correcting for batch effects (`modelcovariates` parameter).
 Save top 20 results (`toppvthreshold` parameter) in a text file.
 
 ```{r paramGWAS, warning=FALSE, message=FALSE}
-param$modelcovariates = 'batch'
-param$modeloutcome = 'sex'
+param$modelcovariates = "batch"
+param$modeloutcome = "sex"
 param$toppvthreshold = 20
 
 ramwas5MWAS(param)
@@ -239,22 +240,23 @@ The top finding saved in the text file are:
 ```{r topPvMWAS}
 # Get the directory with testing results
 pfull = parameterPreprocess(param)
-toptbl = read.table(paste0(pfull$dirmwas,'/Top_tests.txt'), 
-                    header = TRUE, sep = '\t',
-                    stringsAsFactors = FALSE)
+toptbl = read.table(
+                paste0(pfull$dirmwas,"/Top_tests.txt"),
+                header = TRUE, sep = "\t",
+                stringsAsFactors = FALSE)
 pander(head(toptbl,10))
 ```
 
 ### Confirming the results match those by `lm` function in R
 
-Let's check that the regular linear regression function in R
+Let"s check that the regular linear regression function in R
 gives the same results for the top finding.
 
 First, we extract the location of the top finding.
 ```{r getLocation}
 chr = toptbl$chr[1]
 position = toptbl$position[1]
-cat('Top Finding is at:', chr, '-', position, "\n")
+cat("Top Finding is at:", chr, "-", position, "\n")
 ```
 
 Next, we extract data matrix values and test results for this location.
@@ -279,7 +281,7 @@ produced by RaMWAS and by `lm` function match perfectly.
 ## Further steps of RaMWAS pipeline
 
 Steps 6 and 7 of RaMWAS pipeline can also be applied
-to the data matrix exactly as described in the 
+to the data matrix exactly as described in the
 [overview vignette](RW1_intro.html#annotation-of-top-results).
 
 

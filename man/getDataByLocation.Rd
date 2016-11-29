@@ -42,13 +42,13 @@ getDataByLocation(x, chr, position)
 getDataByLocation(param, 1, 123321)
 
 # Chromosome can be character
-getDataByLocation(param, 'chr1', 123321)
+getDataByLocation(param, "chr1", 123321)
 
-# Extract multiple locations 
+# Extract multiple locations
 # on the same chromosome
 getDataByLocation(param, 1, c(123123,123321))
 
 # on different chromosomes
-getDataByLocation(param, c('chr1','chr2'), c(123123,123321))
+getDataByLocation(param, c("chr1","chr2"), c(123123,123321))
 }
 }

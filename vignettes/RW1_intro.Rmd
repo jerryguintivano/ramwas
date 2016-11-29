@@ -227,7 +227,8 @@ from read starts to isolated CpGs.\
     in an R friendly format.
     - `qclist.rds` -- an R file with list of QC objects.
     - `Fig_hist_*.pdf` -- histograms of several QC measures across samples.
-    - `Fig_*.pdf` -- PDF files with various QC plots, one page per BAM or sample,
+    - `Fig_*.pdf` -- PDF files with various QC plots,
+    one page per BAM or sample,
     depending on the directory.
 
 Here is an example of a good fit of estimated fragment size distribution.

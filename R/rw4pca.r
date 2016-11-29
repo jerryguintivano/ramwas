@@ -10,10 +10,10 @@
         pv[[i]] = as.vector(rez[[3]]);
         # nms[i] = rez$statname;
         if(nchar(rez$statname)==0){
-            nms[i] = '';
+            nms[i] = "";
             crF[[i]] = as.vector(rez$correlation);
         } else {
-            nms[i] = '_R2';
+            nms[i] = "_R2";
             crF[[i]] = as.vector(rez$Rsquared);
         }
     }
@@ -93,7 +93,7 @@ ramwas4PCA = function( param ){
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrtqr = t(orthonormalizeCovariates(cvrt = 
+        cvrtqr = t(orthonormalizeCovariates(cvrt =
                         param$covariates[ param$modelcovariates ] ));
     } # cvrtqr
 

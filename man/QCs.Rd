@@ -68,7 +68,7 @@ qcmean(x)
     }
     \item{...}{
         Parameters passed to the underlying
-        \code{\link[graphics]{plot}} or 
+        \code{\link[graphics]{plot}} or
         \code{\link[graphics]{barplot}} function.
     }
 }
