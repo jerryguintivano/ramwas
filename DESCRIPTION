@@ -25,7 +25,7 @@ License: LGPL-3
 LazyLoad: yes
 Depends: R (>= 3.3.0), methods, filematrix
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, BiocStyle, 
+Suggests: knitr, rmarkdown, pander, BiocStyle, 
         BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP144.GRCh37,
         BSgenome.Ecoli.NCBI.20080805
