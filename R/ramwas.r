@@ -179,6 +179,7 @@ parameterPreprocess = function( param ){
         rm(filename);
     }
     if( !is.null(param$covariates)){
+        param$covariates[[1]] = as.character(param$covariates[[1]]);
         if( is.null(param$dircoveragenorm) )
             param$dircoveragenorm =
                 paste0("coverage_norm_",nrow(param$covariates));
@@ -929,7 +930,7 @@ orthonormalizeCovariates = function(cvrt){
     if(any(sapply(lapply(cvrt, is.na), any)))
         stop("Missing values are not allowed in the covariates")
     cvrtset = c(const = list(rep(1, nrow(cvrt))), cvrt);
-    factorset = which(sapply(cvrtset, typeof) %in% c("character","factor"));
+    factorset = which(sapply(cvrtset, class) %in% c("character","factor"));
     for( ind in factorset ){ # ind = 3
         fctr = factor(cvrtset[[ind]]);
         cvrtset[[ind]] = model.matrix(~fctr)[,-1];
