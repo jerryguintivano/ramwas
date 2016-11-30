@@ -1,0 +1,250 @@
+---
+title: "4. CpG sets for RaMWAS"
+author: "Andrey A Shabalin"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true # table of content true
+vignette: >
+  %\VignetteIndexEntry{4. CpG sets}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+# CpG sets
+
+One of the required inputs is
+the set of CpGs at which RaMWAS
+calculates fragment coverage
+(step 3 of the pipeline).
+This set has to be provided
+in a form of a .rds file (`filecpgset` parameter).
+We prepared several CpGs sets for
+human and mouse genomes and also
+provide instructions and code for creating custom CpG sets.
+
+# Downloadable CpG sets
+
+Our CpG sets include all common CpGs that are identified by combining
+reference genome sequence data with SNP information
+as SNPs can often create or destroy CpGs in the reference.
+Our sets exclude CpGs with unreliable coverage estimates due to
+poor alignment (e.g. CpG in repetitive elements)
+as indicated by our in-silico experiment ([details below](#insilico)).
+
+Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
+:---:|:---|:---:|:---:|:---:|:---:
+ALL | All samples | [28.4M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22.rds "28,368,579 CpGs, 31.1 MB file") | [28.0M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ALL_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,985,891 CpGs, 30.8 MB file") | [29.5M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22.rds "29,469,696 CpGs, 32.3 MB file") | [27.8M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ALL_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,789,753 CpGs, 30.7 MB file")
+AFR | African | [28.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22.rds "28,697,922 CpGs, 31.5 MB file") | [28.3M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AFR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "28,312,550 CpGs, 31.1 MB file") | [29.8M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22.rds "29,797,951 CpGs, 32.6 MB file") | [28.1M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AFR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "28,108,517 CpGs, 31.0 MB file")
+AMR | Ad\ Mixed\ American | [28.1M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22.rds "28,083,940 CpGs, 30.9 MB file") | [27.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AMR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,703,792 CpGs, 30.5 MB file") | [29.2M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22.rds "29,185,829 CpGs, 32.0 MB file") | [27.5M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_AMR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,515,085 CpGs, 30.4 MB file")
+EAS | East Asian | [27.8M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22.rds "27,806,911 CpGs, 30.6 MB file") | [27.4M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,429,290 CpGs, 30.2 MB file") | [28.9M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22.rds "28,909,399 CpGs, 31.8 MB file") | [27.2M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,248,407 CpGs, 30.1 MB file")
+EUR | European | [27.9M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22.rds "27,924,665 CpGs, 30.7 MB file") | [27.5M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EUR_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,546,110 CpGs, 30.4 MB file") | [29.0M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22.rds "29,027,050 CpGs, 31.9 MB file") | [27.4M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_EUR_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,361,657 CpGs, 30.2 MB file")
+SAS | South Asian | [28.0M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22.rds "27,979,088 CpGs, 30.8 MB file") | [27.6M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_SAS_hg19_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,599,943 CpGs, 30.4 MB file") | [29.1M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22.rds "29,081,038 CpGs, 31.9 MB file") | [27.4M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_SAS_hg38_MAF_0.01_chr1-22_bowtie2_75bp.rds "27,413,926 CpGs, 30.3 MB file")
+--- | Reference\ Genome | [26.8M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ref_hg19_chr1-22.rds "26,752,702 CpGs, 29.6 MB file") | [26.4M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ref_hg19_chr1-22_bowtie2_75bp.rds "26,396,375 CpGs, 29.2 MB file") | [27.9M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ref_hg38_chr1-22.rds "27,852,739 CpGs, 30.7 MB file") | [27.1M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_ref_hg38_chr1-22_bowtie2_75bp.rds "27,083,315 CpGs, 30.0 MB file")
+
+Table: CpG sets for human genome (autosomes only).
+
+
+Genome | No\ QC | With\ QC
+:---:|:---:|:---:
+GRCm38.p4 | [22.6M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p4.rds "22,607,414 CpGs, 26.1 MB file") | [21.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p4_bowtie2_75bp.rds "21,689,478 CpGs, 25.1 MB file")
+GRCm38.p5 | [22.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpGs, 26.1 MB file") | [21.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p5_bowtie2_75bp.rds "21,726,529 CpGs, 25.2 MB file")
+
+Table: CpG sets for mouse genome.
+
+Note: SNPs were obtained from the 1000 Genomes super populations
+(Phase 3 data,
+[more info](http://www.internationalgenome.org/category/population/)).
+Only SNPs with minor allele frequency above 1% are included.
+In silico alignment experiments assumed 75 bp single-end reads and
+alignment with
+[Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
+
+## CpG filtering by in-silico alignment experiment {#insilico}
+
+We conducted an in-silico experiment to find and exclude
+CpGs located in regions with alignment problems.
+The experiment was conducted as follows.
+First, we created an artificial set of reads
+with all possible 75 bp genomic fragments
+from the referene genome.
+Then, these fragments were aligned to the same reference genome.
+Next, we calculated read coverage for all candidate CpGs.
+If the alignment were perfect,
+each CpG would have coverage of exactly 75.
+We allowed for +/-10 deviation, namely
+we excluded all CpG with coverage below 65 or above 85,
+which was about 2% of all CpGs for human genomes and 4% for mouse.
+The remaining CpGs formed the CpG sets in
+the "with\ QC" columns in the tables above.
+
+We used Bowtie 2 aligner version 2.2.9 with default settings.
+
+# Constructing a custom CpG set
+
+## Constructing a CpG set for a reference genome
+
+A CpG set can be constructed quickly from
+a reference genome with the `getCpGsetCG` function.
+The functions can use any genome available
+in Bioconductor as `BSGenome` class.
+Additional genomes can be loaded using
+`readDNAStringSet` function from .fa files.
+
+```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
+suppressPackageStartupMessages(library(ramwas))
+suppressPackageStartupMessages(library(BSgenome.Ecoli.NCBI.20080805))
+```
+
+```{r cpgsFromGenome, warning=FALSE, message=FALSE}
+library(ramwas)
+library(BSgenome.Ecoli.NCBI.20080805)
+cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
+# First 10 CpGs in NC_008253:
+print(cpgset$NC_008253[1:10])
+```
+
+For a genome with injected SNPs,
+we provide the function `getCpGsetALL`
+for also finding CpGs that can be created by injected SNPs.
+The example below uses all SNPs from dbSNP144 for
+selecting CpGs in human genome.
+We do NOT advice using all dbSNP144 SNPs,
+as it causes an large number of CpGs that almost never occur in the population.
+
+```{r getCpGsetALL1, eval=FALSE, warning=FALSE, message=FALSE}
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
+genome = injectSNPs(Hsapiens, "SNPlocs.Hsapiens.dbSNP144.GRCh37")
+cpgset = getCpGsetALL(genome)
+# Number of CpGs with all SNPs injected in autosomes
+sum(sapply(cpgset[1:22], length))
+```{r echo=FALSE}
+42841152
+```
+
+
+The code above shows that using all dbSNP144 SNPs
+we get over 42 million CpGs instead of
+about 29 million when using only
+SNPs with minor allele frequency above 1%.
+Unfortunately, (to our knowledge) Bioconductor packages with SNP information
+do not provide any data on SNP allele frequency.
+To alleviate this problem, we provide a way
+to inject SNP information from 1000 Genomes data or any other VCF.
+
+First, the VCF files, obtained from 1000 Genomes project or otherwise,
+need to be processed by
+[`vcftools`](https://vcftools.github.io/man_latest.html)
+command `--counts`, e.g.:
+
+> `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
+
+The generated allele count file can then be used to
+inject SNPs using the function `injectSNPsMAF`.
+
+```{r getCpGsetALL2, eval=FALSE}
+# Do for all chromosomes
+genome[["chr22"]] =
+    injectSNPsMAF(
+        gensequence = BSGenome[["chr22"]],
+        frqcount = "count_ALL_chr22.txt",
+        MAF = 0.01)
+
+# Find the CpGs
+cpgset = getCpGsetALL(genome)
+```
+
+Once a CpG set is generated, it can be saved with
+`saveRDS` function for use by RaMWAS.
+
+```{r save1, eval=FALSE}
+saveRDS(file = "My_cpgset.rds", object = cpgset)
+```
+
+## In-silico alignment experiment
+
+For a typical mammalian genome
+the in-silico experiment is rather computationally intensive,
+as it requires alignment of billions of artificially created reads.
+
+The files with artificial reads can be created with function `insilicoFASTQ`.
+It supports gz compression of the output files,
+decreasing disk space requirements from about 500 GB to 17 GB for human genome.
+
+Here is an example for the `insilicoFASTQ` function
+
+```{r insilicoFASTQ, eval=FALSE}
+# Do for all chromosomes
+insilicoFASTQ(
+    con="chr1.fastq.gz",
+    gensequence = BSGenome[["chr1"]],
+    fraglength=75)
+```
+
+The generated FASTQ files are then aligned to the reference genome.
+Taking Bowtie2 as an example:
+
+> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U
+chr1.fastq.gz | samtools view -bS -o chr1.bam`
+
+The generated BAMs are then scanned with RaMWAS and
+the coverage for one sample combining all the BAMs is calculated:
+
+```{r RaMWAS, eval=FALSE}
+library(ramwas)
+chrset = paste0("chr",1:22)
+targetcov = 75
+covtolerance = 10
+
+param = list(
+    dirproject = ".",
+    dirbam = "./bams",
+    dirfilter = TRUE,
+    bamnames = chrset,
+    bam2sample = list(all_samples = chrset),
+    scoretag = "AS",
+    minscore = 100,
+    minfragmentsize = targetcov,
+    maxfragmentsize = targetcov,
+    minavgcpgcoverage = 0,
+    minnonzerosamples = 0,
+    # filecpgset - file with the CpG set being QC-ed
+    filecpgset = filecpgset
+)
+param1 = parameterPreprocess(param)
+ramwas1scanBams(param)
+ramwas3normalizedCoverage(param)
+```
+
+The following code then filters CpGs by the in-silico coverage
+
+```{r filter, eval=FALSE}
+# Preprocess parameters to learn the location of coverage matrix
+param1 = parameterPreprocess(param)
+
+# Load the coverage matrix (vector)
+cover = fm.load( paste0(param1$dircoveragenorm, "/Coverage"))
+
+# split the coverage by chromosomes
+# `cpgset` - the CpG set being QC-ed
+fac = rep(seq_along(cpgset), times = sapply(cpgset, length))
+levels(fac) = names(cpgset)
+class(fac) = "factor"
+cover = split(cover, fac)
+
+# filter CpGs on each chromosome by the coverage
+cpgsetQC = cpgset
+for( i in seq_along(cpgset) ){
+    keep = (cover[[i]] >= (targetcov - covtolerance)) &
+           (cover[[i]] <= (targetcov + covtolerance))
+    cpgsetQC[[i]] = cpgset[[i]][ keep ]
+}
+```
+
+Once the desired CpG set is generated,
+it can be saved with `saveRDS` function for use by RaMWAS.
+
+```{r save2, eval=FALSE}
+saveRDS(file = "My_cpgset_QC.rds", object = cpgsetQC)
+```
+

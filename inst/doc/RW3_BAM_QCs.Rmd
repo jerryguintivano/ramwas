@@ -1,0 +1,284 @@
+---
+title: "3. RaMWAS QC Measures for BAM files"
+author: "Andrey A Shabalin"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true # table of content true
+vignette: >
+  %\VignetteIndexEntry{3. QC Meansures for BAM files}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+# Loading and Saving RaMWAS objects
+
+All RaMWAS objects are saved as text files,
+filematrices, or .rds files.
+The .rds files are operated with `saveRDS` and `readRDS` functions.
+
+Below we load a sample QC file, which contains accumulated
+QC measures from BAM files of a small project.
+
+```{r global_options, include=FALSE}
+#getwd()
+#knitr::opts_chunk$set(fig.align="center", fig.retina=1)
+knitr::opts_chunk$set(fig.retina=1)
+library(ramwas)
+```
+
+```{r loadCgGset}
+filename = system.file("extdata", "bigQC.rds", package = "ramwas")
+qc = readRDS(filename)$qc
+# show(names(qc))
+
+```
+
+# Quality control measures
+
+All QC measures are designed to be additive, in the sence that any QC
+measure calculated for a concatination of two BAM files is equal to the
+sum of the respective measure calculated for those BAMs separately.
+
+Many QC measures can be visualized by calling `plot` function on them.
+For some, single number summary is available via `qcmean` function.
+
+The currently supported QC measures include the following:
+
+## The number of BAM files
+
+There sample QC file accumulates information from 42 BAMs.
+
+```{r nbams}
+cat("N BAMs:", qc$nbams)
+```
+
+## Total number of reads in the BAM file(s)
+
+The 42 BAMs contain 2.46 billion reads.
+
+```{r reads.total}
+cat("Reads total:", qc$reads.total)
+```
+
+## Number of reads aligned to the reference genome
+
+The number of aligned reads is only 2\% smaller, 2.42 billion.
+
+```{r reads.aligned}
+{
+ cat("Reads aligned:", qc$reads.aligned, "\n")
+ cat("This is ", qc$reads.aligned / qc$reads.total * 100,
+     "% of all reads", sep="")
+}
+```
+
+## Number of reads that passed minimum score filter and are recorded
+
+Almost of 2.2 billion reads passed the score threshold.
+
+```{r reads.recorded}
+{
+ cat("Reads recorded:",qc$reads.recorded,"\n")
+ cat("This is ", qc$reads.recorded / qc$reads.aligned * 100,
+     "% of aligned reads", sep="")
+}
+```
+
+## Number of recorded reads aligned to each strand
+
+For this measure, `qcmean` returns the fraction of reads on forward strand.
+Normally, the number of reads on forward and reverse strands is very close,
+so `qcmean` should give a number close to `0.5`.
+
+```{r frwrev}
+{
+ cat("Reads on forward strand:", qc$frwrev[1],"\n")
+ cat("Reads on reverse strand:", qc$frwrev[2],"\n")
+ cat("Fraction of reads on forward strand:", qcmean(qc$frwrev), "\n")
+}
+```
+
+
+## Distribution of the read scores
+
+The QC measures `bf.hist.score1` and `hist.score1` record the distribution of
+the alignment scores before and after the filter.
+The score is defined by the `scoretag` parameter.
+While `hist.score1` contain the distribution for reads that passed the filter,
+`bf.hist.score1` has the distribution for all reads.
+The `qcmean` function for this QC measure returns
+the average score for the respective group.
+The first element of the vector `qc$hist.score1` contains the number of
+reads with score of 0, the second with score of 1,
+and so on. Negative scores (if any) are ignored.
+
+```{r hist.score1, fig.width=8}
+{
+ cat("Average alignment score:", qcmean(qc$hist.score1), "\n")
+ cat("Average alignment score, no filter:", qcmean(qc$bf.hist.score1), "\n")
+ par(mfrow=c(1,2))
+ plot(qc$hist.score1)
+ plot(qc$bf.hist.score1)
+}
+```
+
+
+## Distribution of the length of the aligned part of the reads
+
+The length of the aligned part of a read is calculated from
+the CIGAR string in the BAM file using `cigarWidthAlongQuerySpace` function.
+As previously, `hist.length.matched` has the distribution
+for reads that passed the filter, `bf.hist.length.matched` - for all reads.
+The `qcmean` function for this QC measure returns the
+average value for the respective group.
+The first element of the vector contains the number of
+reads with 1 aligned basepair, the second with 2, and so on.
+
+```{r hist.length.matched, fig.width=8}
+{
+ cat("Average aligned length:", qcmean(qc$hist.length.matched), "\n")
+ cat("Average aligned length, no filter:",
+     qcmean(qc$bf.hist.length.matched), "\n")
+ par(mfrow = c(1,2))
+ plot(qc$hist.length.matched)
+ plot(qc$bf.hist.length.matched)
+}
+```
+
+
+## Distribution of edit distance
+(between the aligned part of the read and the reference genome)
+
+This QC measure is recorded from NM tag in BAM files.
+As previously, `hist.edit.dist1` has the distribution for
+reads that passed the filter, `bf.hist.edit.dist1` - for all reads.
+The `qcmean` function for this QC measure returns
+the average value for the respective group.
+The first element of the vector contains the number of reads
+with 0 edit distance (perfect match), the second with edit distance 1,
+and so on.
+
+```{r hist.edit.dist1}
+{
+ cat("Average edit distance:", qcmean(qc$hist.edit.dist1), "\n")
+ cat("Average edit distance, no filter:", qcmean(qc$bf.hist.edit.dist1), "\n")
+ par(mfrow = c(1,2))
+ plot(qc$hist.edit.dist1)
+ plot(qc$bf.hist.edit.dist1)
+}
+```
+
+## Number of reads after removal of duplicate reads
+
+When there are mulptiple reads with the same start
+position, we suspect them to be falsely duplicated.
+In this case, reads in excess of 3 are removed
+(3 set by \var{maxrepeats} parameter).
+Item `reads.recorded.no.repeats` records the
+total number of reads after removal of duplicates and
+`frwrev.no.repeats` show split between the forward and reverse strands.
+In our example, after removal of duplicates we are left with 90\% of the reads.
+After removal of duplicate reads the fraction of reads on
+forward strand got even closer to 0.5.
+
+```{r reads.recorded.no.repeats}
+{
+ cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
+ cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
+     "% of aligned reads", "\n", sep="")
+ cat("Fraction of reads on forward strand (with    duplicates):",
+     qcmean(qc$frwrev), "\n")
+ cat("Fraction of reads on forward strand (without duplicates):",
+     qcmean(qc$frwrev.no.repeats), "\n")
+}
+```
+
+## Number of reads away from CpGs
+
+Reads starting at least \var{maxfragmentsize} away from
+any CpG is likely to be part of noise, not signal.
+High fraction of such reads usually indicate high noise
+levels and poor sample quality.
+The QC measure `cnt.nonCpG.reads` contains the number of
+non-CpG reads in it"s first element.
+
+Is our example the are less than 1\% of non-CpG reads,
+which is consistent with low level of noise.
+
+```{r cnt.nonCpG.reads}
+{
+ cat("Non-CpG reads:", qc$cnt.nonCpG.reads[1], "\n")
+ cat("This is ", qcmean(qc$cnt.nonCpG.reads)*100, "% of recorded reads", sep="")
+}
+```
+
+## Average coverage of CpGs and non-CpGs
+
+Another measure of success of enrichment is calculated as follows.
+We calculate average coverage of all CpGs and the
+average coverage at a set of locations away from CpGs (so-called non-CpGs).
+The ratio gives us a lower bound on the enrichment level of the samples.
+
+```{r avg.cpg.coverage}
+{
+ cat("Summed across", qc$nbams, "bams", "\n")
+ cat("Average     CpG coverage:", qc$avg.cpg.coverage,   "\n")
+ cat("Average non-CpG coverage:", qc$avg.noncpg.coverage,"\n")
+ cat("Enrichment ratio:", qc$avg.cpg.coverage / qc$avg.noncpg.coverage)
+}
+```
+
+## Coverage around isolated CpGs
+
+Isolated CpGs have weak ability for enrichment.
+Nontheless, we expect there to be more read start sites closer to
+isolated CpGs, rather than couple hundred basepairs away.
+The QC measure `hist.isolated.dist1` records the distribution of
+distances from read start sites to isolated CpGs.
+In our example, as we expected,
+there are more reads starting closer to isolated CpGs.
+
+```{r hist.isolated.dist1}
+plot(qc$hist.isolated.dist1)
+```
+
+## Fraction of reads from chrX and chrY
+
+The fractions of reads from chrX and chrY can be used to test whether
+the individuals have the same genetic gender as recorded in the records.
+Mismatches often indicate swapped or mislabeled samples.
+The first element of `qc$chrX.count` contains the number of chrX reads,
+while `qcmean(qc$chrX.count)` gives the fraction of total. Same for chrY.
+
+
+```{r chrXY}
+{
+ cat("ChrX reads: ", qc$chrX.count[1], ", which is ",
+     qcmean(qc$chrX.count)*100, "% of total", sep="", "\n")
+ cat("ChrX reads: ", qc$chrY.count[1], ", which is ",
+     qcmean(qc$chrY.count)*100, "% of total", sep="", "\n")
+}
+```
+
+## Coverage vs. CpG density
+
+For most of CpGs, the higher the density of CpGs, the higher is
+the amount of methylation in the neighborhood, and thus higher the coverage.
+The CpG densities over 10 are observed in CpG islands,
+where methylation usually does not change. We do not aim to cover those regions,
+thus it is ok, and even preferable that the average coverage is
+lower in highly CpG dense regions.,
+
+The QC measure `avg.coverage.by.density` allows us to inspect
+the changes in average coverage with respect to CpG density.
+The `qcmean` function returns the square root of the CpG
+density where maximum average coverage is achieved.
+```{r avg.coverage.by.density}
+{
+    cat("Highest coverage is observed at CpG density of",
+        qcmean(qc$avg.coverage.by.density)^2)
+    plot(qc$avg.coverage.by.density)
+}
+```
+
+
