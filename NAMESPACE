@@ -22,6 +22,7 @@ export(
     "processCommandLine",
     "qcmean",
     "qqPlotFast",
+    "plotROC",
     "rowSumsSq",
     "colSumsSq",
     "testPhenotype",

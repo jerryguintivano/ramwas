@@ -1,3 +1,24 @@
+# Ploc ROC curve for an outcome/forecast pair
+plotROC = function(outcome, forecast){
+    b = outcome[order(forecast)];
+    b = (b == max(b));
+    
+    countLeftOf = 0:length(b);
+    countHereOrRight = length(b) - countLeftOf;
+    onesLeftOf = c(0L,cumsum(b));
+    totalOnes = tail(onesLeftOf,1);
+    
+    onesHereOrRight = totalOnes - onesLeftOf
+    zeroesHereOrRight = countHereOrRight - onesHereOrRight;
+    
+    fpr = zeroesHereOrRight / zeroesHereOrRight[1]
+    tpr = onesHereOrRight / onesHereOrRight[1]
+    
+    plot(fpr, tpr, xlim = c(0,1), ylim = c(0,1), xaxs = 'i', yaxs = 'i', type = 'l', col = 'blue', lwd = 2,
+         xlab = 'False positive rate', ylab = 'True positive rate');
+    abline(a = 0, b = 1);
+}
+
 # Run 10 (cvnfolds) MWASes
 # each on 90% of the data.
 ramwas7ArunMWASes = function(param){
@@ -128,6 +149,7 @@ ramwas7BrunElasticNet = function(param){
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
+    	  # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         rm(rez);
@@ -136,7 +158,7 @@ ramwas7BrunElasticNet = function(param){
         outcome = param$covariates[[ param$modeloutcome ]];
     } # outcome
 
-    for( cpgs2use in param$mmncpgs ){
+    for( cpgs2use in param$mmncpgs ){ # cpgs2use = param$mmncpgs[1]
         message("Applying Elasting Net to ",cpgs2use," top CpGs");
 
 
@@ -190,6 +212,7 @@ ramwas7BrunElasticNet = function(param){
                 gc();
             } # coverageTRAIN, coverageTEST, -coverage
             {
+                # library(glmnet)
                 z1 = cv.glmnet(x = coverageTRAIN,
                                y = as.vector(outcome[!exclude]),
                                nfolds = param$cvnfolds,
@@ -201,16 +224,31 @@ ramwas7BrunElasticNet = function(param){
                                        type = "response",
                                        s = "lambda.min",
                                        alpha = param$mmalpha);
+            	# 
+            	# z1a = cv.glmnet(x = coverageTRAIN,
+            	# 					y = factor(as.vector(outcome[!exclude])),
+            	# 					nfolds = param$cvnfolds,
+            	# 					# keep = TRUE,
+            	# 					parallel = FALSE,
+            	# 					alpha = param$mmalpha,
+            	# 					family = "binomial");
+            	# z2a = predict.cv.glmnet(object = z1a,
+            	# 							  newx = coverageTEST,
+            	# 							  type = "response",
+            	# 							  s = "lambda.min",
+            	# 							  alpha = param$mmalpha);
+            	
                 forecast0[1,exclude] = forecast0[1,exclude] + z2;
                 forecast0[2,exclude] = forecast0[2,exclude] + 1;
                 rm(z1, z2);
             } # forecast0
             rm(cpgset, coverageTRAIN, coverageTEST);
         }
+        forecast = forecast0[1,]/forecast0[2,];
         {
             rez = data.frame(samples = colnames(forecast0),
                              outcome = outcome,
-                             forecast = forecast0[1,]/forecast0[2,]
+                             forecast = forecast
             )
             write.table( file = sprintf(
                 "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.txt",
@@ -227,7 +265,7 @@ ramwas7BrunElasticNet = function(param){
                 dirr,
                 cpgs2use,
                 param$mmalpha),
-                object = list(outcome = outcome, forecast = forecast0[1,]/forecast0[2,]));
+                object = list(outcome = outcome, forecast = forecast));
         } # rez
         {
             pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
@@ -238,6 +276,20 @@ ramwas7BrunElasticNet = function(param){
             plotPrediction(param, outcome, rez$forecast, cpgs2use,
                            main = "Prediction success (EN on coverage)");
             dev.off();
+            if( length(unique(outcome)) == 2 ){
+                pdf( sprintf("%s/ROC_CpGs=%06d_alpha=%f.pdf",
+                             param$dircv,
+                             cpgs2use,
+                             param$mmalpha) );
+                plotROC(outcome = outcome,
+                        forecast = forecast)
+                legend(x = "bottomright",
+                       legend = c(paste0("# CpGs = ",   cpgs2use),
+                                  paste0("EN alpha = ", param$mmalpha)))
+                title(paste0("ROC curve for prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
+                dev.off();
+            }
+            return( invisible(NULL) );
         } # pdf()
     }
     return( invisible(NULL) );
@@ -245,11 +297,12 @@ ramwas7BrunElasticNet = function(param){
 
 ramwas7CplotByNCpGs = function(param){
     param = parameterPreprocess(param);
-    if(length(param$mmncpgs)<=1)
+    if( length(param$mmncpgs) <= 1 )
         return();
     message("Working in: ",param$dircv);
     cors = double(length( param$mmncpgs ));
     corp = double(length( param$mmncpgs ));
+    datalist = vector('list', length(param$mmncpgs));
     for( i in seq_along(param$mmncpgs) ){ # i = 1
         cpgs2use = param$mmncpgs[i];
         data = readRDS(sprintf(
@@ -257,6 +310,7 @@ ramwas7CplotByNCpGs = function(param){
             param$dircv,
             cpgs2use,
             param$mmalpha));
+        datalist[[i]] = data;
         stats = predictionStats(outcome = data$outcome,
                                 forecast = data$forecast);
         cors[i] = stats$cors;
@@ -285,6 +339,22 @@ ramwas7CplotByNCpGs = function(param){
            col=c("red","red","cyan4"));
     title(paste0("Prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
     dev.off();
+    
+    if( length(unique(datalist[[1]]$outcome)) == 2 ){
+        pdf( sprintf("%s/ROC_alpha=%f.pdf",
+                     param$dircv,
+                     param$mmalpha) );
+        for( i in seq_along(param$mmncpgs) ){ # i = 1
+            cpgs2use = param$mmncpgs[i];
+            plotROC(outcome = datalist[[i]]$outcome,
+                    forecast = datalist[[i]]$forecast)
+            legend(x = "bottomright",
+                   legend = c(paste0("# CpGs = ",   cpgs2use),
+                              paste0("EN alpha = ", param$mmalpha)))
+            title(paste0("ROC curve for prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
+        }
+        dev.off();
+    }
     return( invisible(NULL) );
 }
 
