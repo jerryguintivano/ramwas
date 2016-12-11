@@ -6,7 +6,7 @@ output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{1. RaMWAS Overview}
+  %\VignetteIndexEntry{1. Overview}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -14,9 +14,6 @@ vignette: >
 library("knitr")
 # opts_chunk$set(eval=FALSE)
 ```
-
-<!-- **Note.** This is a brief overview of RaMWAS pipeline. -->
-<!-- Detailed walkthrough is available [here](RW2_detailed.html). -->
 
 # Introduction
 
