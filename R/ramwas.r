@@ -178,6 +178,8 @@ parameterPreprocess = function( param ){
                               stringsAsFactors = FALSE, check.names = FALSE);
         rm(filename);
     }
+    if( is.null(param$modelPCs) )
+        param$modelPCs = 0;
     if( !is.null(param$covariates)){
         param$covariates[[1]] = as.character(param$covariates[[1]]);
         if( is.null(param$dircoveragenorm) )
@@ -193,48 +195,11 @@ parameterPreprocess = function( param ){
             stop( paste("Covariates (modelcovariates) missing in covariates",
              param$modelcovariates[
                  !(param$modelcovariates %in% names(param$covariates)) ]));
-        if( is.null(param$modelPCs) )
-            param$modelPCs = 0;
+
         if( !is.null(param$modeloutcome) )
             if( !( param$modeloutcome %in% names(param$covariates)) )
                 stop( paste("Model outcome not present in covariate file:",
                             param$modeloutcome));
-
-
-        if( is.null(param$dirpca) ){
-            if( length(param$modelcovariates) > 0 ){
-                # library(digest);
-                hash = digest(
-                    object = paste(sort(param$modelcovariates),
-                                   collapse = "\t"),
-                    algo = "crc32", serialize = FALSE);
-                param$dirpca = sprintf("PCA_%02d_cvrts_%s",
-                                       length(param$modelcovariates), hash);
-            } else {
-                param$dirpca = "PCA_00_cvrts";
-            }
-        }
-        param$dirpca = .makefullpath(param$dircoveragenorm, param$dirpca);
-
-        if( is.null(param$dirmwas) )
-            param$dirmwas = paste0("Testing_",param$modeloutcome,
-                                   "_",param$modelPCs,"_PCs");
-        param$dirmwas = .makefullpath(param$dirpca, param$dirmwas);
-
-        if( is.null(param$qqplottitle) ){
-            qqplottitle = paste0("Testing ",param$modeloutcome,"\n",
-                         param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
-            if(length(param$modelcovariates)>0)
-                qqplottitle = paste0(qqplottitle, " and ",
-                    length(param$modelcovariates)," covariate",
-                    if(length(param$modelcovariates)!=1)"s:\n"else": ",
-                    paste0(param$modelcovariates,collapse = ", "))
-            param$qqplottitle = qqplottitle;
-            rm(qqplottitle);
-        }
-        if( is.null(param$dircv) )
-            param$dircv = sprintf("%s/CV_%02d_folds",
-                                  param$dirmwas, param$cvnfolds);
     } else if( !is.null(param$bam2sample) ){
         if( is.null(param$dircoveragenorm) )
             param$dircoveragenorm =
@@ -248,6 +213,41 @@ parameterPreprocess = function( param ){
             .makefullpath(param$dirfilter, param$dircoveragenorm);
     }
 
+    if( is.null(param$dirpca) ){
+        if( length(param$modelcovariates) > 0 ){
+            # library(digest);
+            hash = digest(
+                object = paste(sort(param$modelcovariates),
+                               collapse = "\t"),
+                algo = "crc32", serialize = FALSE);
+            param$dirpca = sprintf("PCA_%02d_cvrts_%s",
+                                   length(param$modelcovariates), hash);
+        } else {
+            param$dirpca = "PCA_00_cvrts";
+        }
+    }
+    param$dirpca = .makefullpath(param$dircoveragenorm, param$dirpca);
+    
+    if( is.null(param$dirmwas) )
+        param$dirmwas = paste0("Testing_",param$modeloutcome,
+                               "_",param$modelPCs,"_PCs");
+    param$dirmwas = .makefullpath(param$dirpca, param$dirmwas);
+    
+    if( is.null(param$qqplottitle) ){
+        qqplottitle = paste0("Testing ",param$modeloutcome,"\n",
+                             param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
+        if(length(param$modelcovariates)>0)
+            qqplottitle = paste0(qqplottitle, " and ",
+                                 length(param$modelcovariates)," covariate",
+                                 if(length(param$modelcovariates)!=1)"s:\n"else": ",
+                                 paste0(param$modelcovariates,collapse = ", "))
+        param$qqplottitle = qqplottitle;
+        rm(qqplottitle);
+    }
+    if( is.null(param$dircv) )
+        param$dircv = sprintf("%s/CV_%02d_folds",
+                              param$dirmwas, param$cvnfolds);
+    
     if( is.null(param$dirtemp) ) param$dirtemp = "temp";
     param$dirtemp = .makefullpath(param$dircoveragenorm, param$dirtemp );
 
@@ -952,6 +952,9 @@ orthonormalizeCovariates = function(cvrt){
     ncpgs = ncol(fm);
     close(fm);
 
+    if(is.null(cvsamples))
+        cvsamples = fmsamples;
+    
     rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
     if( any(rowsubset==0) )
         stop( paste("Unknown samples in covariate file:",
@@ -962,7 +965,7 @@ orthonormalizeCovariates = function(cvrt){
             rowsubset = NULL;
         }
     }
-    return(list(rowsubset = rowsubset, ncpgs = ncpgs));
+    return(list(rowsubset = rowsubset, ncpgs = ncpgs, samplenames = fmsamples));
 }
 
 # Get covariates + PCs matrix for analysis

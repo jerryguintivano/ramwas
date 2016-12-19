@@ -87,14 +87,19 @@ ramwas4PCA = function( param ){
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         cvsamples = param$covariates[[1]];
+        if( is.null(cvsamples))
+            cvsamples = rez$samplenames;
         rm(rez);
     } # rowsubset, ncpgs, cvsamples
 
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrtqr = t(orthonormalizeCovariates(cvrt =
-                        param$covariates[ param$modelcovariates ] ));
+        cvrt = param$covariates[ param$modelcovariates ];
+        if(is.null(cvrt))
+            cvrt = matrix(nrow = length(cvsamples), ncol = 0);
+        cvrtqr = t(orthonormalizeCovariates(cvrt));
+        rm(cvrt);
     } # cvrtqr
 
     ### PCA part
@@ -200,7 +205,7 @@ ramwas4PCA = function( param ){
         }
 
         # Saving PC vs. covariates association
-        if(ncol(param$covariates) > 1){
+        if(NCOL(param$covariates) > 1){
             message("Saving PC vs. covariates associations");
             testcov = .testCovariates(covariates1 = param$covariates[-1],
                                       data = e$vectors[,seq_len(nonzeroPCs)],
