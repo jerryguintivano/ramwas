@@ -289,7 +289,6 @@ ramwas7BrunElasticNet = function(param){
                 title(paste0("ROC curve for prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
                 dev.off();
             }
-            return( invisible(NULL) );
         } # pdf()
     }
     return( invisible(NULL) );
