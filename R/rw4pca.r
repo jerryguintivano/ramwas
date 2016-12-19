@@ -67,6 +67,105 @@
     return(covmat);
 }
 
+postPCAprocessing = function(param, e = NULL){
+    param = parameterPreprocess(param);
+    
+    ### Get and match sample names
+    {
+        message("Matching samples in covariates and data matrix");
+        rez = .matchCovmatCovar( param );
+        # rez = ramwas:::.matchCovmatCovar( param );
+        rowsubset = rez$rowsubset;
+        ncpgs     = rez$ncpgs;
+        cvsamples = param$covariates[[1]];
+        if( is.null(cvsamples))
+            cvsamples = rez$samplenames;
+        rm(rez);
+    } # rowsubset, ncpgs, cvsamples
+    
+    ### Prepare covariates, defactor,
+    {
+        message("Preparing covariates (splitting dummies, orthonormalizing)");
+        cvrt = param$covariates[ param$modelcovariates ];
+        if(is.null(cvrt))
+            cvrt = matrix(nrow = length(cvsamples), ncol = 0);
+        cvrtqr = t(orthonormalizeCovariates(cvrt));
+        rm(cvrt);
+    } # cvrtqr
+    
+    if(is.null(e))
+        e = readRDS(file = paste0(param$dirpca,"/eigen.rds"))
+    
+    {
+    nonzeroPCs = sum(   abs(e$values/e$values[1]) >
+                        length(e$values)*.Machine$double.eps );
+    } # nonzeroPCs
+    
+    # PCA plots
+    {
+        message("Saving PCA plots");
+        pdf(paste0(param$dirpca, "/PC_plot_covariates_removed.pdf"),7,7);
+        pc100 = head(e$values,40)/sum(e$values)*100;
+        plot(pc100, pch = 19, col="blue", main = "Principal components",
+             xlab = "PCs", ylab = "Variation Explained (%)",
+             yaxs = "i", ylim = c(0,pc100[1]*1.05),
+             xaxs = "i", xlim = c(0, length(pc100)+0.5));
+        for( i in 1:min(20,nonzeroPCs) ){ # i=1
+            plot(e$vectors[,i],
+                 main=paste("PC",i),
+                 xlab = "Samples",
+                 ylab = "PC components",
+                 pch=19,
+                 col="blue1",
+                 xlim = c(0, length(e$values)+0.5),
+                 xaxs="i");
+            abline(h = 0, col = "grey");
+        }
+        dev.off();
+    }
+    
+    # Save PCs and loadings
+    {
+        message("Saving PC values and vectors");
+        PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
+        rownames(PC_loads) = cvsamples;
+        colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
+        write.table(file = paste0(param$dirpca, "/PC_loadings.txt"),
+                    x = data.frame(name=rownames(PC_loads),PC_loads),
+                    sep="\t",
+                    row.names = FALSE);
+        PC_values = data.frame(
+            PC_num = paste0("PC",seq_len(length(e$values))),
+            e$values/sum(e$values));
+        write.table(file = paste0(param$dirpca, "/PC_values.txt"),
+                    x = PC_values,
+                    sep = "\t",
+                    row.names = FALSE,
+                    quote = FALSE);
+    }
+    
+    # Saving PC vs. covariates association
+    if(NCOL(param$covariates) > 1){
+        message("Saving PC vs. covariates associations");
+        testcov = .testCovariates(covariates1 = param$covariates[-1],
+                                  data = e$vectors[,seq_len(nonzeroPCs)],
+                                  cvrtqr = cvrtqr);
+
+        write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
+                    x = data.frame(
+                        name=paste0("PC",seq_len(nonzeroPCs)),
+                        testcov$crF,
+                        check.names = FALSE),
+                    sep="\t", row.names = FALSE);
+        write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"),
+                    x = data.frame(
+                        name=paste0("PC",seq_len(nonzeroPCs)),
+                        testcov$pv,
+                        check.names = FALSE),
+                    sep="\t", row.names = FALSE);
+    }
+}
+
 # Step 4 of RaMWAS
 ramwas4PCA = function( param ){
     # library(filematrix)
@@ -153,77 +252,14 @@ ramwas4PCA = function( param ){
         {
             message("Performing Eigenvalue Decomposition");
             e = eigen(covmat, symmetric=TRUE);
-            nonzeroPCs = sum(abs(e$values/e$values[1]) >
-                                 length(e$values)*.Machine$double.eps);
             saveRDS(file = paste0(param$dirpca,"/eigen.rds"),
                     object = e,
                     compress = FALSE);
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         } # e, nonzeroPCs
-
-        # PCA plots
-        {
-            message("Saving PCA plots");
-            pdf(paste0(param$dirpca, "/PC_plot_covariates_removed.pdf"),7,7);
-            pc100 = head(e$values,40)/sum(e$values)*100;
-            plot(pc100, pch = 19, col="blue", main = "Principal components",
-                  xlab = "PCs", ylab = "Variation Explained (%)",
-                  yaxs = "i", ylim = c(0,pc100[1]*1.05),
-                  xaxs = "i", xlim = c(0, length(pc100)+0.5))
-            for( i in 1:min(20,nonzeroPCs) ){ # i=1
-                plot(e$vectors[,i],
-                     main=paste("PC",i),
-                     xlab = "Samples",
-                     ylab = "PC components",
-                     pch=19,
-                     col="blue1",
-                     xlim = c(0, length(e$values)+0.5),
-                     xaxs="i");
-                abline(h = 0, col = "grey")
-            }
-            dev.off();
-        }
-
-        # Save PCs and loadings
-        {
-            message("Saving PC values and vectors");
-            PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
-            rownames(PC_loads) = cvsamples;
-            colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
-            write.table(file = paste0(param$dirpca, "/PC_loadings.txt"),
-                        x = data.frame(name=rownames(PC_loads),PC_loads),
-                        sep="\t",
-                        row.names = FALSE);
-            PC_values = data.frame(
-                    PC_num = paste0("PC",seq_len(length(e$values))),
-                    e$values/sum(e$values));
-            write.table(file = paste0(param$dirpca, "/PC_values.txt"),
-                        x = PC_values,
-                        sep="\t",
-                        row.names = FALSE,
-                        quote = FALSE);
-        }
-
-        # Saving PC vs. covariates association
-        if(NCOL(param$covariates) > 1){
-            message("Saving PC vs. covariates associations");
-            testcov = .testCovariates(covariates1 = param$covariates[-1],
-                                      data = e$vectors[,seq_len(nonzeroPCs)],
-                                      cvrtqr = cvrtqr);
-            write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
-                            x = data.frame(
-                                name=paste0("PC",seq_len(nonzeroPCs)),
-                                testcov$crF,
-                                check.names = FALSE),
-                            sep="\t", row.names = FALSE);
-            write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"),
-                            x = data.frame(
-                                name=paste0("PC",seq_len(nonzeroPCs)),
-                                testcov$pv,
-                                check.names = FALSE),
-                            sep="\t", row.names = FALSE);
-        }
     }
+    
+    postPCAprocessing(param, e);
 }
 
 # Interactive covariate selection via

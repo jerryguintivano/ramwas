@@ -13,6 +13,7 @@ export(
     "ramwas2collectqc",
     "ramwas3normalizedCoverage",
     "ramwas4PCA",
+    "postPCAprocessing",
     "ramwas5MWAS",
     "ramwas6annotateTopFindings",
     "ramwas7ArunMWASes",
