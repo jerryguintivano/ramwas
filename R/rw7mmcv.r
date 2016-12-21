@@ -23,17 +23,18 @@ plotROC = function(outcome, forecast){
 # each on 90% of the data.
 ramwas7ArunMWASes = function(param){
     param = parameterPreprocess(param);
-    param$toppvthreshold = 1e-300;
+    if( param$toppvthreshold < 1 )
+    	param$toppvthreshold = 50;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
     parameterDump(dir = param$dircv, param = param,
-                      toplines = c("dircv", "mmncpgs", "mmalpha",
-                                   "cvnfolds","randseed",
-                                      "dirmwas", "dirpca", "dircoveragenorm",
-                                      "filecovariates", "covariates",
-                                      "modeloutcome", "modelcovariates",
-                                      "modelPCs",
-                                      "qqplottitle",
-                                      "cputhreads"));
+                    toplines = c("dircv", "mmncpgs", "mmalpha",
+                                "cvnfolds","randseed",
+                                "dirmwas", "dirpca", "dircoveragenorm",
+                                "filecovariates", "covariates",
+                                "modeloutcome", "modelcovariates",
+                                "modelPCs",
+                                "qqplottitle",
+                                "cputhreads"));
 
     if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
         param$covariates = data.frame(lapply(
