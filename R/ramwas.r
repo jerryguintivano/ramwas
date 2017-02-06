@@ -970,7 +970,7 @@ orthonormalizeCovariates = function(cvrt){
 
 # Get covariates + PCs matrix for analysis
 # orthonormalized unless normalize == FALSE
-.getCovariates = function(param, rowsubset, normalize = TRUE){
+.getCovariates = function(param, rowsubset = NULL, normalize = TRUE){
     cvrtqr = param$covariates[ param$modelcovariates ];
     ### Reading PCs, add as coveriates
     if( param$modelPCs > 0 ){
