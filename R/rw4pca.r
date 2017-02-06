@@ -67,7 +67,7 @@
     return(covmat);
 }
 
-postPCAprocessing = function(param, e = NULL){
+postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     param = parameterPreprocess(param);
     
     ### Get and match sample names
@@ -110,7 +110,7 @@ postPCAprocessing = function(param, e = NULL){
              xlab = "PCs", ylab = "Variation Explained (%)",
              yaxs = "i", ylim = c(0,pc100[1]*1.05),
              xaxs = "i", xlim = c(0, length(pc100)+0.5));
-        for( i in 1:min(20,nonzeroPCs) ){ # i=1
+        for( i in seq_len(min(plotPCs,nonzeroPCs)) ){ # i=1
             plot(e$vectors[,i],
                  main=paste("PC",i),
                  xlab = "Samples",
