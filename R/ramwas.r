@@ -213,6 +213,14 @@ parameterPreprocess = function( param ){
             .makefullpath(param$dirfilter, param$dircoveragenorm);
     }
 
+    if(is.null(param$dirSNPs))
+        param$dirSNPs = paste0("Testing_wSNPs_",
+                               param$modeloutcome, '_',
+                               length(param$modelcovariates), 'cvrts_',
+                               param$modelPCs, "PCs");
+    param$dirSNPs = .makefullpath( param$dircoveragenorm, param$dirSNPs);
+    # param$dirSNPs = ramwas:::.makefullpath( param$dircoveragenorm, param$dirSNPs);
+
     if( is.null(param$dirpca) ){
         if( length(param$modelcovariates) > 0 ){
             # library(digest);

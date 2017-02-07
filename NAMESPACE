@@ -32,7 +32,9 @@ export(
     "getTestsByLocation",
     "getDataByLocation",
     "insilicoFASTQ",
-    "injectSNPsMAF"
+    "injectSNPsMAF",
+    "ramwasSNPs",
+    "testPhenotypeSNPs"
 )
 
 importFrom("methods", "setRefClass", "new")

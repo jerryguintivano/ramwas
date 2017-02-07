@@ -196,7 +196,7 @@ ramwas5MWAS = function( param ){
         message("Preparing covariates (splitting dummies, orthonormalizing)");
         mwascvrtqr = .getCovariates(param, rowsubset);
         # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
-    } # cvrtqr
+    } # mwascvrtqr
 
 
     ### Outpout matrix. Cor / t-test / p-value / q-value
