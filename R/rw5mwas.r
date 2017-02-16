@@ -166,7 +166,7 @@ ramwas5MWAS = function( param ){
                       toplines = c("dirmwas", "dirpca", "dircoveragenorm",
                                        "filecovariates", "covariates",
                                        "modeloutcome", "modelcovariates",
-                                       "modelPCs",
+                                       "modelPCs", "modelhasconstant",
                                        "qqplottitle",
                                        "diskthreads"));
 
@@ -194,8 +194,10 @@ ramwas5MWAS = function( param ){
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        mwascvrtqr = .getCovariates(param, rowsubset);
-        # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
+        mwascvrtqr = .getCovariates(param = param, 
+                                    rowsubset = rowsubset, 
+                                    modelhasconstant = param$modelhasconstant);
+        # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset, TRUE, param$modelhasconstant);
     } # mwascvrtqr
 
 

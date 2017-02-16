@@ -107,6 +107,8 @@ parameterPreprocess = function( param ){
         param = parametersFromFile(param);
     }
 
+    if(is.null(param$modelhasconstant)) param$modelhasconstant = TRUE;
+    
     # Set up directories
     if( is.null(param$dirproject) ) param$dirproject = getwd();
     if(!is.null(param$dirbam))
@@ -934,17 +936,25 @@ testPhenotype = function(phenotype, data, cvrtqr){
 }
 
 # Orthonormalize a set of covariates
-orthonormalizeCovariates = function(cvrt){
+orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     if(any(sapply(lapply(cvrt, is.na), any)))
         stop("Missing values are not allowed in the covariates")
-    cvrtset = c(const = list(rep(1, nrow(cvrt))), cvrt);
-    factorset = which(sapply(cvrtset, class) %in% c("character","factor"));
-    for( ind in factorset ){ # ind = 3
-        fctr = factor(cvrtset[[ind]]);
-        cvrtset[[ind]] = model.matrix(~fctr)[,-1];
-        rm(fctr);
+    if(modelhasconstant) {
+        cvrtset = c(const = list(rep(1, nrow(cvrt))), cvrt);
+    } else {
+        cvrtset = cvrt;
     }
-    cvrtmat = matrix(unlist(cvrtset), nrow(cvrt));
+    if("data.frame" %in% class(cvrtset)) {
+        factorset = which(sapply(cvrtset, class) %in% c("character","factor"));
+        for( ind in factorset ){ # ind = 3
+            fctr = factor(cvrtset[[ind]]);
+            cvrtset[[ind]] = model.matrix(~fctr)[,-1];
+            rm(fctr);
+        }
+        cvrtmat = matrix(unlist(cvrtset), nrow = nrow(cvrt));
+    } else {
+        cvrtmat = cvrtset;
+    }
     cvrtqr = qr.Q(qr(cvrtmat));  ### tcrossprod(cvrtqr) - diag(nrow(cvrtqr))
     return(cvrtqr)
 }
@@ -978,7 +988,7 @@ orthonormalizeCovariates = function(cvrt){
 
 # Get covariates + PCs matrix for analysis
 # orthonormalized unless normalize == FALSE
-.getCovariates = function(param, rowsubset = NULL, normalize = TRUE){
+.getCovariates = function(param, rowsubset = NULL, normalize = TRUE, modelhasconstant = TRUE){
     cvrtqr = param$covariates[ param$modelcovariates ];
     ### Reading PCs, add as coveriates
     if( param$modelPCs > 0 ){
@@ -993,9 +1003,13 @@ orthonormalizeCovariates = function(cvrt){
     }
     # stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
     if(normalize){
-        rez = t(orthonormalizeCovariates(mwascvrtqr));
+        rez = t(orthonormalizeCovariates(mwascvrtqr, modelhasconstant));
     } else {
-        rez = t(mwascvrtqr); #t(cbind(rep(1, nrow(mwascvrtqr)),mwascvrtqr));
+        if(modelhasconstant) {
+            rez = t(cbind(rep(1, nrow(mwascvrtqr)),mwascvrtqr));
+        } else {
+            rez = t(mwascvrtqr); #;
+        }
     }
     return(rez);
 }
