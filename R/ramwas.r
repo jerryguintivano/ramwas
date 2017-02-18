@@ -944,7 +944,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     } else {
         cvrtset = cvrt;
     }
-    if("data.frame" %in% class(cvrtset)) {
+    if(is.list(cvrtset)) {
         factorset = which(sapply(cvrtset, class) %in% c("character","factor"));
         for( ind in factorset ){ # ind = 3
             fctr = factor(cvrtset[[ind]]);
