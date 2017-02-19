@@ -193,7 +193,7 @@ ramwas7BrunElasticNet = function(param){
                 rm(fm);
             } # pv
             {
-                cpgset = findBestNpvs(pv, cpgs2use);
+                cpgset = findBestNpvs(pv, n = cpgs2use);
                 rm(pv);
             } # cpgset, -pv
             {
