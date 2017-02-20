@@ -1,68 +1,76 @@
 useDynLib(ramwas, .registration = TRUE)
 export(
-    "cachedRDSload",
-    "findBestNpvs",
-    "pvalue2qvalue",
-    "orthonormalizeCovariates",
-    "parameterDump",
-    "parameterPreprocess",
-    "parametersFromFile",
-    "ramwas0createArtificialData",
-    "ramwas1scanBams",
-    "pipelineProcessBam",
-    "ramwas2collectqc",
-    "ramwas3normalizedCoverage",
-    "ramwas4PCA",
-    "postPCAprocessing",
-    "ramwas5MWAS",
-    "ramwas6annotateTopFindings",
-    "ramwas7ArunMWASes",
-    "ramwas7BrunElasticNet",
-    "ramwas7CplotByNCpGs",
-    "ramwas7riskScoreCV",
-    "processCommandLine",
-    "qcmean",
-    "qqPlotFast",
-    "plotROC",
-    "rowSumsSq",
-    "colSumsSq",
-    "testPhenotype",
-    "getCpGsetALL",
-    "getCpGsetCG",
-    "getTestsByLocation",
-    "getDataByLocation",
-    "insilicoFASTQ",
-    "injectSNPsMAF",
-    "ramwasSNPs",
-    "testPhenotypeSNPs"
+    cachedRDSload,
+    findBestNpvs,
+    pvalue2qvalue,
+    orthonormalizeCovariates,
+    parameterDump,
+    parameterPreprocess,
+    parametersFromFile,
+    ramwas0createArtificialData,
+    ramwas1scanBams,
+    pipelineProcessBam,
+    ramwas2collectqc,
+    ramwas3normalizedCoverage,
+    ramwas4PCA,
+    postPCAprocessing,
+    ramwas5MWAS,
+    ramwas6annotateTopFindings,
+    ramwas7ArunMWASes,
+    ramwas7BrunElasticNet,
+    ramwas7CplotByNCpGs,
+    ramwas7riskScoreCV,
+    processCommandLine,
+    qcmean,
+    qqPlotFast,
+    plotROC,
+    rowSumsSq,
+    colSumsSq,
+    testPhenotype,
+    getCpGsetALL,
+    getCpGsetCG,
+    getTestsByLocation,
+    getDataByLocation,
+    insilicoFASTQ,
+    injectSNPsMAF,
+    ramwasSNPs,
+    testPhenotypeSNPs
 )
 
-importFrom("methods", "setRefClass", "new")
-importFrom("grDevices", "dev.off", "pdf")
-importFrom("graphics", "abline", "legend", "lines", "par", "plot",
-            "points", "title", "axis", "barplot", "hist")
-importFrom("stats", "complete.cases", "pf", "pt", "qf", "qt", "optim",
-            "model.matrix", "quantile", "median", "qlogis",
-            "plogis", "qbeta", "cor", "lm", "qchisq", "runif", "sd")
-importFrom("utils", "flush.console", "head", "tail",
-            "tail.matrix", "read.table", "write.table")
-importFrom("GenomicAlignments", "cigarWidthAlongQuerySpace",
-            "cigarWidthAlongReferenceSpace")
-importFrom("Rsamtools", "scanBamFlag", "ScanBamParam", "BamFile",
-            "open.BamFile", "scanBam", "asBam")
-importFrom("parallel", "makeCluster", "clusterEvalQ", "clusterApplyLB",
-            "stopCluster", "detectCores", "clusterExport")
-importFrom("KernSmooth","locpoly");
-importFrom("digest", "digest")
-importFrom("glmnet", "cv.glmnet", "predict.cv.glmnet")
-importFrom("biomaRt", "useMart", "getBM")
-importFrom("Biostrings","matchPattern")
+importFrom(methods, 
+    setRefClass, new)
+importFrom(grDevices, 
+    dev.off, pdf)
+importFrom(graphics, 
+    abline, legend, lines, par, plot,
+    points, title, axis, barplot, hist)
+importFrom(stats, 
+    complete.cases, pf, pt, qf, qt, optim,
+    model.matrix, quantile, median, qlogis,
+    plogis, qbeta, cor, lm, qchisq, runif, sd)
+importFrom(utils,
+    flush.console, head, tail,
+    tail.matrix, read.table, write.table)
+importFrom(GenomicAlignments, 
+    cigarWidthAlongQuerySpace, cigarWidthAlongReferenceSpace)
+importFrom(Rsamtools, 
+    scanBamFlag, ScanBamParam, BamFile,
+    open.BamFile, scanBam, asBam)
+importFrom(parallel, 
+    makeCluster, clusterEvalQ, clusterApplyLB,
+    stopCluster, detectCores, clusterExport)
+importFrom(KernSmooth, locpoly)
+importFrom(digest, digest)
+importFrom(glmnet, cv.glmnet, predict.cv.glmnet)
+importFrom(biomaRt, useMart, getBM)
+importFrom(Biostrings, matchPattern)
 
-importFrom("filematrix", "fm.create", "fm.load", "fm.open",
-            "fm.create.from.matrix", "closeAndDeleteFiles")
-importClassesFrom("filematrix", "filematrix")
-importMethodsFrom("filematrix", "close")
-importMethodsFrom("BiocGenerics","start");
+importFrom(filematrix, 
+    fm.create, fm.load, fm.open,
+    fm.create.from.matrix, closeAndDeleteFiles)
+importClassesFrom(filematrix, filematrix)
+importMethodsFrom(filematrix, close)
+importMethodsFrom(BiocGenerics, start)
 
 S3method(plot, qcHistScore)
 S3method(plot, qcEditDist)
