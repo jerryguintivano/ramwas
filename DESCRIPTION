@@ -1,15 +1,29 @@
 Package: ramwas
 Type: Package
 Title: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
-Version: 0.99.9
-Date: 2016-11-29
-Author: Andrey A Shabalin
+Version: 0.99.11
+Date: 2017-02-20
+Authors@R: c(person("Andrey A", "Shabalin",
+                    role = c("aut", "cre"),
+                    email = "ashabalin@vcu.edu"),
+            person("Shaunna L", "Clark",
+                    email = "slclark2@vcu.edu",
+                    role = "aut"),
+            person("Mohammad W", "Hattab",
+                    email = "mwhattab@vcu.edu",
+                    role = "aut"),
+            person("Karolina A", "Aberg",
+                    email = "kaaberg@vcu.edu",
+                    role = "aut"),
+            person("Edwin J C G", "van den Oord",
+                    email = "ejvandenoord@vcu.edu",
+                    role = "aut"))
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
 Description: RaMWAS provides a complete toolset for 
     methylome-wide association studies (MWAS).
     It is specifically designed for data from 
     enrichment based methylation assays,
-    but can be applied to other methylomic data as well.
+    but can be applied to other data as well.
     The analysis pipeline includes seven steps:
     (1) scanning aligned reads from BAM files,
     (2) calculation of quality control measures,
@@ -20,18 +34,24 @@ Description: RaMWAS provides a complete toolset for
     while correcting for top PCs and known covariates,
     (6) annotation of significant findings, and
     (7) multi-marker analysis (methylation risk score) using elastic net.
+    Additionally, RaMWAS include tools for joint analysis of methlyation and
+    genotype data.
+URL: https://bioconductor.org/packages/ramwas/
 BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
 LazyLoad: yes
+NeedsCompilation: yes
 Depends: R (>= 3.3.0), methods, filematrix
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, pander, BiocStyle, 
         BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP144.GRCh37,
         BSgenome.Ecoli.NCBI.20080805
-Imports: graphics, stats, GenomicAlignments, Rsamtools, parallel, 
-        KernSmooth, digest, glmnet, grDevices, utils, 
+Imports: graphics, stats, utils, digest, 
+        glmnet, KernSmooth, grDevices,
+        GenomicAlignments, Rsamtools, parallel,
         biomaRt, Biostrings, BiocGenerics
-biocViews: DNAMethylation, Sequencing, QualityControl, Coverage, Preprocessing, 
+biocViews: DNAMethylation, Sequencing, QualityControl, 
+        Coverage, Preprocessing, 
         Normalization, BatchEffect, PrincipalComponent, 
         DifferentialMethylation, Visualization
