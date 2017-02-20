@@ -1018,10 +1018,16 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 findBestNpvs = function(pv, n){
     if(n < 1)
         return(which(pv <= n));
-
-    pvthr = 10^((-100):0);
+    if(n > length(pv))
+        stop('n > length(pv) in findBestNpvs() call');
+    if(n == length(pv))
+        return(seq_len(n));
+    
+    # Thresholds are chosen a reasonable for p-value input
+    pvthr = c(10^((-100):0), .Machine$double.xmax);
     fi = findInterval(pv, pvthr);
     tab = cumsum(tabulate(fi));
+    # Minimum threshold below which there are at least n p-values
     upperfi = which(tab >= n)[1];
     set1 = which(fi <= upperfi);
     cpgsetraw = set1[sort.list(pv[set1])[seq_len(n)]];
