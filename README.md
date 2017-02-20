@@ -36,14 +36,14 @@ To install RaMWAS several R packages must be installed.
 ```
 install.packages(c("knitr","rmarkdown","KernSmooth","filematrix","digest","glmnet","devtools","pander"))
 source("https://bioconductor.org/biocLite.R")
-biocLite(c("BiocInstaller","BiocStyle","GenomicAlignments","Rsamtools","biomaRt","BSgenome.Ecoli.NCBI.20080805"))
+biocLite(c("BiocInstaller","BiocStyle","GenomicAlignments","Rsamtools","biomaRt"))
 ```
 
-Next two packages are optional (used in vignettes only).
+Next packages are optional (used in vignettes only).
 
 ```
 source("https://bioconductor.org/biocLite.R")
-biocLite(c("BSgenome.Hsapiens.UCSC.hg19","SNPlocs.Hsapiens.dbSNP144.GRCh37"))
+biocLite(c("BSgenome.Hsapiens.UCSC.hg19","SNPlocs.Hsapiens.dbSNP144.GRCh37","BSgenome.Ecoli.NCBI.20080805"))
 ```
 
 ### Installing
