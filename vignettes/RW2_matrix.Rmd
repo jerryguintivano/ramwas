@@ -145,7 +145,7 @@ the directory with the data matrix `dircoveragenorm`,
 the data frame with covariates `covariates`, and
 the names of covariates to regress out `modelcovariates`.
 ```{r param1}
-param = list(
+param = ramwasParameters(
     dircoveragenorm = dr,
     covariates = covariates,
     modelcovariates = NULL

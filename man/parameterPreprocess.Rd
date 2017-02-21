@@ -48,7 +48,7 @@ parameterPreprocess(param)
     See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
-param = list(
+param = ramwasParameters(
     dirproject = "."
 )
 

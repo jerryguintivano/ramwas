@@ -57,7 +57,7 @@ ramwas7riskScoreCV(param)
     See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
-param = list(
+param = ramwasParameters(
     dirbam = "/project/bams",
     dirproject = "/project",
     filebamlist = "000_list_of_files.txt",

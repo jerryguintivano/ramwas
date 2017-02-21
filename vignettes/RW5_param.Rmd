@@ -17,7 +17,7 @@ for calling RaMWAS pipeline functions.
 The parameters can be stored in an R list like this:
 
 ```{r eval=FALSE}
-param = list(
+param = ramwasParameters(
     dirproject = ".",
     dirbam = "bams",
     filebamlist = "bam_list.txt",
@@ -273,7 +273,7 @@ expplained by select covariates set by `modelcovariates`.
 The `modelcovariates` parameter must name variables in
 `filecovariates`/`covariates`.
 
-By default, the linear model include a constant.
+By default, the tested linear model includes a constant.
 To exclude it, set 'modelhasconstant' parameter to `FALSE`.
 
 MWAS tests for association of normalized CpG coverage

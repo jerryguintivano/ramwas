@@ -39,7 +39,7 @@ parameterDump(dir, param, toplines = NULL)
     See vignettes: \code{browseVignettes("ramwas")}
 }
 \examples{
-param = list(
+param = ramwasParameters(
     number = 123123,
     integer = 312L,
     textline = "Hi there",

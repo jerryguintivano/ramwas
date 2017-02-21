@@ -172,7 +172,7 @@ correcting for batch effects (`modelcovariates` parameter).
 Save top 20 results (`toppvthreshold` parameter) in a text file.
 
 ```{r paramMWAS, warning=FALSE, message=FALSE}
-param = list(
+param = ramwasParameters(
     dircoveragenorm = dr,
     covariates = covariates,
     modelcovariates = "batch",

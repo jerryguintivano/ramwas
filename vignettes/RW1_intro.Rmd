@@ -96,7 +96,7 @@ See [CpG set vignette](RW4_CpG_sets.html) for more information.
 Each RaMWAS step accepts parameters in the form of a list with named elements.
 Here is the parameter list we will use for all steps below.
 ```{r parameters, eval=TRUE}
-param = list(
+param = ramwasParameters(
     dirproject = dr,
     dirbam = "bams",
     filebamlist = "bam_list.txt",
