@@ -53,65 +53,54 @@ writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), text = chrnames)
 set.seed(18090212)
 
 ## ----fillDataMat---------------------------------------------------------
-fm = fm.create(paste0(dr,"/Coverage"), nrow = nsamples, ncol = nvariables)
-# Row names of the matrix are set to sample names
-rownames(fm) = as.character(covariates$sample)
+fmm = fm.create(paste0(dr,"/Coverage"), nrow = nsamples, ncol = nvariables)
+fms = fm.create(paste0(dr,"/SNPs"), nrow = nsamples, ncol = nvariables, size = 1, type = 'integer')
 
-# The matrix is filled, 2000 variables at a time
+# Row names of the matrices are set to sample names
+rownames(fmm) = as.character(covariates$sample)
+rownames(fms) = as.character(covariates$sample)
+
+# The matrices are filled, 2000 variables at a time
 byrows = 2000
 for( i in seq_len(nvariables/byrows) ){ # i=1
-    slice = matrix(runif(nsamples*byrows), nrow = nsamples, ncol = byrows)
+    ind = (1:byrows) + byrows*(i-1)
+    
+    snps = rbinom(n = byrows * nsamples, size = 2, prob = 0.2)
+	dim(snps) = c(nsamples, byrows)
+    fms[,ind] = snps
+    
+    slice = double(nsamples*byrows)
+    dim(slice) = c(nsamples, byrows)
     slice[,  1:225] = slice[,  1:225] + covariates$sex / 75 / sd(covariates$sex)
     slice[,101:116] = slice[,101:116] + covariates$age / 24 / sd(covariates$age)
-    slice = slice + ((as.integer(factor(covariates$batch))+i) %% 3) / 200
-    fm[,(1:byrows) + byrows*(i-1)] = slice
+    slice = slice + 
+            ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
+            snps/2 +
+            runif(nsamples*byrows)/2
+    fmm[,ind] = slice;
 }
-close(fm)
+close(fms)
+close(fmm)
 
-## ----param1--------------------------------------------------------------
+## ----paramMWAS, warning=FALSE, message=FALSE-----------------------------
 param = ramwasParameters(
     dircoveragenorm = dr,
     covariates = covariates,
-    modelcovariates = NULL
+    modelcovariates = "batch",
+    modeloutcome = "sex",
+    toppvthreshold = 20,
+    fileSNPs = 'SNPs'
 )
 
 ## ----threads, echo=FALSE-------------------------------------------------
 # Bioconductor requires limit of 2 parallel jobs
 param$cputhreads = 2
 
-## ----pcaNULL, warning=FALSE, message=FALSE-------------------------------
-ramwas4PCA(param)
-
-## ----topCorNULL----------------------------------------------------------
-# Get the directory with PCA results
-pfull = parameterPreprocess(param)
-cortbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_corr.txt"),
-                    header = TRUE, sep = "\t")
-pander(head(cortbl,10))
-
-## ----topPvNULL-----------------------------------------------------------
-pvtbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_pvalue.txt"),
-                    header = TRUE, sep = "\t")
-pander(head(pvtbl,10))
-
-## ----pcaBatch, warning=FALSE, message=FALSE------------------------------
-param$modelcovariates = "batch"
-
-ramwas4PCA(param)
-
-## ----topPvBatch----------------------------------------------------------
-# Get the directory with PCA results
-pfull = parameterPreprocess(param)
-pvtbl = read.table(paste0(pfull$dirpca,"/PC_vs_covs_pvalue.txt"),
-                    header = TRUE, sep = "\t")
-pander(head(pvtbl,10))
-
-## ----paramGWAS, warning=FALSE, message=FALSE-----------------------------
-param$modelcovariates = "batch"
-param$modeloutcome = "sex"
-param$toppvthreshold = 20
-
+## ----MWAS, message=FALSE-------------------------------------------------
 ramwas5MWAS(param)
+
+## ----SNPs, message=FALSE-------------------------------------------------
+ramwasSNPs(param)
 
 ## ----topPvMWAS-----------------------------------------------------------
 # Get the directory with testing results
@@ -121,27 +110,9 @@ toptbl = read.table(
                 header = TRUE, sep = "\t",
                 stringsAsFactors = FALSE)
 pander(head(toptbl,10))
-
-## ----getLocation---------------------------------------------------------
-chr = toptbl$chr[1]
-position = toptbl$position[1]
-cat("Top Finding is at:", chr, "-", position, "\n")
-
-## ----getdata-------------------------------------------------------------
-datavec = getDataByLocation(param, chr, position)
-testres = getTestsByLocation(param, chr, position)
-pander(testres)
-
-## ----lm------------------------------------------------------------------
-outcome = param$covariates[[param$modeloutcome]]
-cvrt = param$covariates[[param$modelcovariates]]
-variable = datavec$matrix
-model = lm( outcome ~ variable + cvrt)
-pander(summary(model)$coefficients)
-
-## ----clean---------------------------------------------------------------
-unlink(paste0(dr,"/*"), recursive=TRUE)
-
-## ----version, eval=TRUE--------------------------------------------------
-sessionInfo()
+toptbl = read.table(
+                paste0(pfull$dirSNPs,"/Top_tests.txt"),
+                header = TRUE, sep = "\t",
+                stringsAsFactors = FALSE)
+pander(head(toptbl,10))
 

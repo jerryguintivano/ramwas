@@ -1,5 +1,5 @@
 ---
-title: "2. Analyzing Data from Other Sources"
+title: "2.1. Analyzing Data from Other Sources"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
@@ -28,7 +28,8 @@ is initially designed for studies on methylation measurements
 from enrichment platforms.
 
 RaMWAS can also be useful for analysis of data from other sources,
-such as gene expression, genotype, etc.
+such as methylation measurements from array platforms,
+gene expression, genotype, etc.
 RaMWAS can perform all the analysis steps on such data:
 Principal component analysis (PCA),
 genome-wise association study (GWAS),
@@ -144,7 +145,7 @@ the directory with the data matrix `dircoveragenorm`,
 the data frame with covariates `covariates`, and
 the names of covariates to regress out `modelcovariates`.
 ```{r param1}
-param = list(
+param = ramwasParameters(
     dircoveragenorm = dr,
     covariates = covariates,
     modelcovariates = NULL

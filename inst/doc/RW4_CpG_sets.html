@@ -10,7 +10,7 @@
 
 <meta name="author" content="Andrey A Shabalin" />
 
-<meta name="date" content="2016-11-29" />
+<meta name="date" content="2017-02-21" />
 
 <title></title>
 
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <li>CpG sets for RaMWAS</li>
 </ol></h1>
 <h4 class="author"><em>Andrey A Shabalin</em></h4>
-<h4 class="date"><em>2016-11-29</em></h4>
+<h4 class="date"><em>2017-02-21</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -234,7 +234,7 @@ chrset = paste0(&quot;chr&quot;,1:22)
 targetcov = 75
 covtolerance = 10
 
-param = list(
+param = ramwasParameters(
     dirproject = &quot;.&quot;,
     dirbam = &quot;./bams&quot;,
     dirfilter = TRUE,

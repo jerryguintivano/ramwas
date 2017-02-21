@@ -196,7 +196,7 @@ chrset = paste0("chr",1:22)
 targetcov = 75
 covtolerance = 10
 
-param = list(
+param = ramwasParameters(
     dirproject = ".",
     dirbam = "./bams",
     dirfilter = TRUE,

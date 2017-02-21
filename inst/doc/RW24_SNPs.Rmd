@@ -1,0 +1,227 @@
+---
+title: "2.2. Joint Analysis of Methylation and Genotype Data"
+author: "Andrey A Shabalin"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true # table of content true
+vignette: >
+  %\VignetteIndexEntry{2. Analyzing data from other sources}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
+library(knitr)
+library(pander)
+suppressPackageStartupMessages(library(ramwas))
+panderOptions("digits", 3)
+# opts_chunk$set(eval=FALSE)
+# dr = "D:/temp/simulated_matrix_data"
+```
+
+# Joint Analysis of Methylation and Genotype Data
+
+Single nucleotide polymorphisms (SNPs) can create and destroy CpGs.
+As methylation (measured with MBD-seq) can occur only at CpGs,
+SNPs can directly affect the number of CpGs in a neighborhood
+and thus affect methylation measurements.
+
+[RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
+can account for a possible effect of SNPs
+by testing the following model:
+
+$$\mu_i = \beta_0 + outcome * \beta_1 + {outcome} * {SNP}_i * \beta_2 + {SNP}_i \beta_3  + \gamma * { cvrt} + \epsilon$$
+
+where
+
+* $\mu_i$ -- methylaiton measurement for $i$-th CpG.
+* $outcome$ -- phenotype of interest.
+* $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype) at the $i$-th CpG.
+* $cvrt$ -- covariates and the principal components.
+* $\epsilon$ -- noise.
+
+## Input data
+
+For SNP-corrected analysis RaMWAS requres the usual input
+as for steps 4 and 5 with additional SNP matrix.
+
+The SNP data must have the same dimensions as the coverage matrix,
+with SNPs matching the CpGs.
+
+Below we provide sample code for this analysis.
+
+### Create data matrix from external data
+
+We produce the following artificial files.
+
+* `CpG_locations.*` -- filematrix with the location of the CpGs
+that passed the threshold.\
+It must have two columns with integer values -- chromosome number and location
+(`chr` and `position`).
+* `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
+for the integer column `chr` in the location filematrix.
+* `Coverage.*` -- filematrix with the data for all samples and all locations.\
+  Each row has data for a single sample.
+  Row names must be sample names.\
+  Each column has data for a single location.
+  Columns must match rows of the location filematrix.
+* 'SNPs.*' -- filematrix with genotype data, matching the coverage matrix.
+
+
+First, we load the package and set up a working directory.
+One may choose to set the project directory `dr` to
+a more convenient location when running this code.
+```{r generateData}
+library(ramwas)
+
+# work in a temporary directory
+dr = paste0(tempdir(), "/simulated_matrix_data")
+dir.create(dr, showWarnings = FALSE)
+cat(dr,"\n")
+```
+
+Let the sample data matrix have 1000 samples and 100,000 variables.
+```{r dims}
+nsamples = 1000
+nvariables = 100000
+```
+
+For these `r nsamples` samples we generate a data frame with
+age and sex phenotypes and a batch effect covariate.
+```{r setseed1, echo=FALSE}
+set.seed(18090212)
+```
+```{r genCovar}
+covariates = data.frame(
+    sample = paste0("Sample_",seq_len(nsamples)),
+    sex = seq_len(nsamples) %% 2,
+    age = runif(nsamples, min = 20, max = 80),
+    batch = paste0("batch",(seq_len(nsamples) %% 3))
+)
+pander(head(covariates))
+```
+
+Next, we create the genomic locations for 100,000 variables.
+```{r setseed2, echo=FALSE}
+set.seed(18090212)
+```
+```{r genLocs}
+temp = cumsum(sample(20e7 / nvariables, nvariables, replace = TRUE) + 0)
+chr      = as.integer(temp %/% 1e7) + 1L
+position = as.integer(temp %% 1e7)
+
+locmat = cbind(chr = chr, position = position)
+chrnames = paste0("chr", 1:22)
+pander(head(locmat))
+```
+
+
+Now we save locations in a filematrix 
+and create a text file with chromosome names.\
+```{r locSave}
+fmloc = fm.create.from.matrix(
+            filenamebase = paste0(dr,"/CpG_locations"),
+            mat = locmat)
+close(fmloc)
+writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), text = chrnames)
+```
+
+Finally, we create methylation and SNP matrices 
+and populate them.
+```{r setseed3, echo=FALSE}
+set.seed(18090212)
+```
+```{r fillDataMat}
+fmm = fm.create(paste0(dr,"/Coverage"), nrow = nsamples, ncol = nvariables)
+fms = fm.create(paste0(dr,"/SNPs"), nrow = nsamples, ncol = nvariables, size = 1, type = 'integer')
+
+# Row names of the matrices are set to sample names
+rownames(fmm) = as.character(covariates$sample)
+rownames(fms) = as.character(covariates$sample)
+
+# The matrices are filled, 2000 variables at a time
+byrows = 2000
+for( i in seq_len(nvariables/byrows) ){ # i=1
+    ind = (1:byrows) + byrows*(i-1)
+    
+    snps = rbinom(n = byrows * nsamples, size = 2, prob = 0.2)
+	dim(snps) = c(nsamples, byrows)
+    fms[,ind] = snps
+    
+    slice = double(nsamples*byrows)
+    dim(slice) = c(nsamples, byrows)
+    slice[,  1:225] = slice[,  1:225] + covariates$sex / 75 / sd(covariates$sex)
+    slice[,101:116] = slice[,101:116] + covariates$age / 24 / sd(covariates$age)
+    slice = slice + 
+            ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
+            snps/2 +
+            runif(nsamples*byrows)/2
+    fmm[,ind] = slice;
+}
+close(fms)
+close(fmm)
+```
+
+## Association testing with and without correction for SNPs
+
+Let us test for association between
+variables in the data matrix and the sex covariate
+(`modeloutcome` parameter)
+correcting for batch effects (`modelcovariates` parameter).
+Save top 20 results (`toppvthreshold` parameter) in a text file.
+
+```{r paramMWAS, warning=FALSE, message=FALSE}
+param = ramwasParameters(
+    dircoveragenorm = dr,
+    covariates = covariates,
+    modelcovariates = "batch",
+    modeloutcome = "sex",
+    toppvthreshold = 20,
+    fileSNPs = 'SNPs'
+)
+```
+
+```{r threads, echo=FALSE}
+# Bioconductor requires limit of 2 parallel jobs
+param$cputhreads = 2
+```
+
+First, we perform the usual analysis without correction for SNPs.
+
+```{r MWAS, message=FALSE}
+ramwas5MWAS(param)
+```
+
+The QQ-plot shows mild enrichment among a large number of variables,
+which is consistent with how the data was generated --
+22\% of variables are affected by sex.
+![qqplot](snps_raw.png)
+
+
+The analysis with correction for SNPs is next:
+
+```{r SNPs, message=FALSE}
+ramwasSNPs(param)
+```
+
+The QQ-plot shows better enrichment with significant p-values.
+![qqplot](snps_on.png)
+
+
+
+The top finding are saved in the text files for regular and SNP-corrected MWAS:
+```{r topPvMWAS}
+# Get the directory with testing results
+pfull = parameterPreprocess(param)
+toptbl = read.table(
+                paste0(pfull$dirmwas,"/Top_tests.txt"),
+                header = TRUE, sep = "\t",
+                stringsAsFactors = FALSE)
+pander(head(toptbl,10))
+toptbl = read.table(
+                paste0(pfull$dirSNPs,"/Top_tests.txt"),
+                header = TRUE, sep = "\t",
+                stringsAsFactors = FALSE)
+pander(head(toptbl,10))
+```

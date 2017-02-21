@@ -47,7 +47,7 @@ print(cpgset$NC_008253[1:10])
 #  targetcov = 75
 #  covtolerance = 10
 #  
-#  param = list(
+#  param = ramwasParameters(
 #      dirproject = ".",
 #      dirbam = "./bams",
 #      dirfilter = TRUE,
