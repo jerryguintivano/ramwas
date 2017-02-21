@@ -187,7 +187,7 @@ pipelineProcessBam = function(bamname, param){
         return("Parameter not set: maxfragmentsize");
 
     bamname = gsub("\\.bam$", "", bamname, ignore.case = TRUE);
-    bamfullname = .makefullpath(param$dirbam, paste0(bamname,".bam"))
+    bamfullname = makefullpath(param$dirbam, paste0(bamname,".bam"))
 
     dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
     dir.create(param$dirrqc, showWarnings = FALSE, recursive = TRUE)

@@ -32,10 +32,10 @@
 }
 
 # Get full path to the "filename" assuming current directory is "path"
-.makefullpath = function(path, filename){
+makefullpath = function(path, filename){
     if( is.null(path) )
         return(filename);
-    if(.isAbsolutePath(filename)){
+    if(isAbsolutePath(filename)){
         return(filename)
     } else {
         return( paste0(path, "/", filename) );
@@ -112,7 +112,7 @@ parameterPreprocess = function( param ){
     # Set up directories
     if( is.null(param$dirproject) ) param$dirproject = getwd();
     if(!is.null(param$dirbam))
-        param$dirbam = .makefullpath(param$dirproject, param$dirbam);
+        param$dirbam = makefullpath(param$dirproject, param$dirbam);
 
     if( is.null(param$dirfilter) ){
         param$dirfilter = FALSE;
@@ -125,15 +125,15 @@ parameterPreprocess = function( param ){
             param$dirfilter = param$dirproject;
         }
     } else {
-        param$dirfilter = .makefullpath(param$dirproject, param$dirfilter);
+        param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
     }
     if( is.null(param$dirrbam) )
         param$dirrbam = "rds_rbam";
-    param$dirrbam = .makefullpath( param$dirfilter, param$dirrbam);
+    param$dirrbam = makefullpath( param$dirfilter, param$dirrbam);
     if( is.null(param$dirrqc) ) param$dirrqc = "rds_qc";
-    param$dirrqc = .makefullpath( param$dirfilter, param$dirrqc);
+    param$dirrqc = makefullpath( param$dirfilter, param$dirrqc);
     if( is.null(param$dirqc) ) param$dirqc = "qc";
-    param$dirqc = .makefullpath( param$dirfilter, param$dirqc);
+    param$dirqc = makefullpath( param$dirfilter, param$dirqc);
 
     ### Filter parameters
     if( is.null(param$scoretag) ) param$scoretag = "mapq";
@@ -146,7 +146,7 @@ parameterPreprocess = function( param ){
 
     ### BAM list processing
     if( is.null(param$bamnames) & !is.null(param$filebamlist)){
-        param$filebamlist = .makefullpath(param$dirproject,param$filebamlist)
+        param$filebamlist = makefullpath(param$dirproject,param$filebamlist)
         param$bamnames = readLines(param$filebamlist);
     }
     if( !is.null(param$bamnames)){
@@ -161,7 +161,7 @@ parameterPreprocess = function( param ){
 
     ### BAM2sample processing
     if( !is.null(param$filebam2sample) & is.null(param$bam2sample)){
-        filename = .makefullpath(param$dirproject, param$filebam2sample);
+        filename = makefullpath(param$dirproject, param$filebam2sample);
         param$bam2sample = parseBam2sample( readLines(filename) );
         rm(filename);
     }
@@ -175,7 +175,7 @@ parameterPreprocess = function( param ){
         sep = "\t";
         if(grepl("\\.csv$",param$filecovariates))
             sep = ",";
-        filename = .makefullpath(param$dirproject, param$filecovariates);
+        filename = makefullpath(param$dirproject, param$filecovariates);
         param$covariates = read.table(filename, header = TRUE, sep = sep,
                               stringsAsFactors = FALSE, check.names = FALSE);
         rm(filename);
@@ -188,7 +188,7 @@ parameterPreprocess = function( param ){
             param$dircoveragenorm =
                 paste0("coverage_norm_",nrow(param$covariates));
         param$dircoveragenorm =
-            .makefullpath(param$dirfilter, param$dircoveragenorm);
+            makefullpath(param$dirfilter, param$dircoveragenorm);
 
         if( any(duplicated(param$covariates[[1]])) )
             stop("Repeated samples in the covariate file");
@@ -207,12 +207,12 @@ parameterPreprocess = function( param ){
             param$dircoveragenorm =
                 paste0("coverage_norm_",length(param$bam2sample));
         param$dircoveragenorm =
-            .makefullpath(param$dirfilter, param$dircoveragenorm);
+            makefullpath(param$dirfilter, param$dircoveragenorm);
     } else {
         if( is.null(param$dircoveragenorm) )
             param$dircoveragenorm = "coverage_norm";
         param$dircoveragenorm =
-            .makefullpath(param$dirfilter, param$dircoveragenorm);
+            makefullpath(param$dirfilter, param$dircoveragenorm);
     }
 
     if(is.null(param$dirSNPs))
@@ -220,8 +220,8 @@ parameterPreprocess = function( param ){
                                param$modeloutcome, '_',
                                length(param$modelcovariates), 'cvrts_',
                                param$modelPCs, "PCs");
-    param$dirSNPs = .makefullpath( param$dircoveragenorm, param$dirSNPs);
-    # param$dirSNPs = ramwas:::.makefullpath( param$dircoveragenorm, param$dirSNPs);
+    param$dirSNPs = makefullpath( param$dircoveragenorm, param$dirSNPs);
+    # param$dirSNPs = ramwas:::makefullpath( param$dircoveragenorm, param$dirSNPs);
 
     if( is.null(param$dirpca) ){
         if( length(param$modelcovariates) > 0 ){
@@ -236,12 +236,12 @@ parameterPreprocess = function( param ){
             param$dirpca = "PCA_00_cvrts";
         }
     }
-    param$dirpca = .makefullpath(param$dircoveragenorm, param$dirpca);
+    param$dirpca = makefullpath(param$dircoveragenorm, param$dirpca);
     
     if( is.null(param$dirmwas) )
         param$dirmwas = paste0("Testing_",param$modeloutcome,
                                "_",param$modelPCs,"_PCs");
-    param$dirmwas = .makefullpath(param$dirpca, param$dirmwas);
+    param$dirmwas = makefullpath(param$dirpca, param$dirmwas);
     
     if( is.null(param$qqplottitle) ){
         qqplottitle = paste0("Testing ",param$modeloutcome,"\n",
@@ -259,17 +259,17 @@ parameterPreprocess = function( param ){
                               param$dirmwas, param$cvnfolds);
     
     if( is.null(param$dirtemp) ) param$dirtemp = "temp";
-    param$dirtemp = .makefullpath(param$dircoveragenorm, param$dirtemp );
+    param$dirtemp = makefullpath(param$dircoveragenorm, param$dirtemp );
 
     ### CpG set should exist
     if( !is.null(param$filecpgset) ){
         param$filecpgset =
-            .makefullpath(param$dirproject, param$filecpgset);
+            makefullpath(param$dirproject, param$filecpgset);
         stopifnot( file.exists(param$filecpgset) );
     }
     if( !is.null(param$filenoncpgset) ){
         param$filenoncpgset =
-            .makefullpath(param$dirproject, param$filenoncpgset);
+            makefullpath(param$dirproject, param$filenoncpgset);
         stopifnot( file.exists(param$filenoncpgset) );
     }
 
@@ -988,7 +988,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 
 # Get covariates + PCs matrix for analysis
 # orthonormalized unless normalize == FALSE
-.getCovariates = function(param, rowsubset = NULL, normalize = TRUE, modelhasconstant = TRUE){
+.getCovariates = function(param, rowsubset = NULL, normalize = TRUE, modelhasconstant){
     cvrtqr = param$covariates[ param$modelcovariates ];
     ### Reading PCs, add as coveriates
     if( param$modelPCs > 0 ){
