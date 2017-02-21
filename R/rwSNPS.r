@@ -141,7 +141,7 @@ ramwas5saveTopFindingsSNPs = function(param){
 
     
     # rng = rangeset[[1]];
-    library(filematrix);
+    # library(filematrix);
     fmm = fm.open( filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
                   readonly = TRUE,
                   lockfile = param$lockfile2);
