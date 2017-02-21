@@ -21,13 +21,15 @@
 
 # chech if path is absolute
 # (common alternatives are flawed)
-.isAbsolutePath = function( pathname ){
-    if( grepl("^~/", pathname) )
-        return(TRUE)
-    if( grepl("^.:(/|\\\\)", pathname) )
-        return(TRUE)
-    if( grepl("^(/|\\\\)", pathname) )
-        return(TRUE)
+isAbsolutePath = function( path ){
+    if( path == "~" )
+        return(TRUE);
+    if( grepl("^~/", path) )
+        return(TRUE);
+    if( grepl("^.:(/|\\\\)", path) )
+        return(TRUE);
+    if( grepl("^(/|\\\\)", path) )
+        return(TRUE);
     return(FALSE);
 }
 
