@@ -43,16 +43,17 @@ ramwas0createArtificialData = function(dir,
         rm(x)
     } # fragdistr
 
-    # Exclude CpGs with density over 15
-    {
-        coverage = calc.coverage(
-            rbam = list(startsfwd = cpgset, startsrev = cpgset),
-            cpgset = cpgset,
-            fragdistr = fragdistr);
-        locsgood = locs[ coverage[[1]] <= 15 ];
-        rm(coverage, cpgset, locs)
-    } # locsgood, -locs, -cpgset
-
+    # # Exclude CpGs with density over 15
+    # {
+    #     coverage = ramwas:::calc.coverage(
+    #         rbam = list(startsfwd = cpgset, startsrev = cpgset),
+    #         cpgset = cpgset,
+    #         fragdistr = fragdistr);
+    #     locsgood = locs[ coverage[[1]] <= 15 ];
+    #     rm(coverage, cpgset, locs)
+    # } # locsgood, -locs, -cpgset
+    locsgood = locs
+    
     # Age covariate and effects
     {
         age = sample(20:80, size = nsamples, replace = TRUE)
