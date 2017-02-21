@@ -13,7 +13,7 @@ vignette: >
 # Initialize RaMWAS Parameters
 
 There are several ways to initialize the parameters
-for calling any RaMWAS pipeline function.
+for calling RaMWAS pipeline functions.
 The parameters can be stored in an R list like this:
 
 ```{r eval=FALSE}
@@ -27,17 +27,11 @@ param = list(
     minscore = 4,
     minfragmentsize = 50,
     maxfragmentsize = 250,
-    minavgcpgcoverage = 0.3,
-    minnonzerosamples = 0.3,
     filecovariates = "covariates.txt",
     modelcovariates = NULL,
     modeloutcome = "age",
     modelPCs = 0,
     toppvthreshold = 1e-5,
-    bidataset = "hsapiens_gene_ensembl",
-    biattributes = c("hgnc_symbol","entrezgene","strand"),
-    bifilters = list(with_hgnc_transcript_name=TRUE),
-    biflank = 0,
     cvnfolds = 10,
     mmalpha = 0,
     mmncpgs = c(5,10,50,100,500,1000,5000,10000)

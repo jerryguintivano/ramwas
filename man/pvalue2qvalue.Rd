@@ -1,7 +1,7 @@
 \name{pvalue2qvalue}
 \alias{pvalue2qvalue}
 \title{
-Calculate Benjamini-Hochberg q-values
+    Calculate Benjamini-Hochberg q-values
 }
 \description{
     Calculate Benjamini-Hochberg q-values for a vector of p-values.
@@ -27,9 +27,6 @@ pvalue2qvalue(pv, n = length(pv))
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
-}
-\seealso{
-    See \code{\link[base]{order}}.
 }
 \examples{
 pv = runif(20)^2

@@ -30,7 +30,7 @@ makefullpath(path, filename)
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    See Also \code{\link{isAbsolutePath}}.
+    See also \code{\link{isAbsolutePath}}.
 }
 \examples{
 makefullpath("dir1/dir2", "file.txt")
