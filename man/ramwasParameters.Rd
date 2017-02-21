@@ -43,6 +43,7 @@ ramwasParameters(
     modelcovariates,
     modeloutcome,
     modelPCs,
+    modelhasconstant,
     qqplottitle,
     toppvthreshold,
     mmncpgs,
@@ -217,6 +218,10 @@ ramwasParameters(
     }
     \item{modelPCs}{
         Number of principal components accounted for in MWAS.
+    }
+    \item{modelhasconstant}{
+        By default, the tested linear model includes a constant. \cr
+        To exclude it, set 'modelhasconstant' parameter to \code{FALSE}.
     }
     \item{qqplottitle}{
         The title of the QQ-plot produced by MWAS (step 4 of the pipeline).

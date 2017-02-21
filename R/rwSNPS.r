@@ -242,7 +242,9 @@ ramwasSNPs = function( param ){
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        mwascvrtqr = .getCovariates(param, rowsubset);
+        mwascvrtqr = .getCovariates(param = param, 
+                                    rowsubset = rowsubset, 
+                                    modelhasconstant = param$modelhasconstant);
         # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
     } # mwascvrtqr
 

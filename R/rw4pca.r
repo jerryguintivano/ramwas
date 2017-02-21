@@ -86,21 +86,17 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     ### Prepare covariates, defactor,
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrt = param$covariates[ param$modelcovariates ];
-        if(is.null(cvrt))
-            cvrt = matrix(nrow = length(cvsamples), ncol = 0);
-        cvrtqr = t(orthonormalizeCovariates(cvrt));
-        rm(cvrt);
+        cvrtqr = .getCovariates(param = param, 
+                                rowsubset = rowsubset, 
+                                modelhasconstant = param$modelhasconstant);
     } # cvrtqr
     
     if(is.null(e))
         e = readRDS(file = paste0(param$dirpca,"/eigen.rds"))
     
-    {
     nonzeroPCs = sum(   abs(e$values/e$values[1]) >
                         length(e$values)*.Machine$double.eps );
-    } # nonzeroPCs
-    
+
     # PCA plots
     {
         message("Saving PCA plots");

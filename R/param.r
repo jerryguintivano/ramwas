@@ -87,6 +87,7 @@ ramwasParameters = function(
     modelcovariates,
     modeloutcome,
     modelPCs,
+    modelhasconstant,
     qqplottitle,
     toppvthreshold,
     mmncpgs,
