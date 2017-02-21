@@ -58,6 +58,58 @@ parametersFromFile = function( .parameterfile ){
     return(mget(.nms));
 }
 
+ramwasParameters = function(
+    dirproject,
+    dirfilter,
+    dirrbam,
+    dirrqc,
+    dirqc,
+    dircoveragenorm,
+    dirtemp,
+    dirpca,
+    dirmwas,
+    dircv,
+    dirbam,
+    filebamlist,
+    bamnames,
+    filebam2sample,
+    bam2sample,
+    filecpgset,
+    filenoncpgset,
+    filecovariates,
+    covariates,
+    cputhreads,
+    diskthreads,
+    usefilelock,
+    scoretag,
+    minscore,
+    maxrepeats,
+    minavgcpgcoverage,
+    minnonzerosamples,
+    buffersize,
+    doublesize,
+    modelcovariates,
+    modeloutcome,
+    modelPCs,
+    qqplottitle,
+    toppvthreshold,
+    mmncpgs,
+    mmalpha,
+    cvnfolds,
+    bihost,
+    bimart,
+    bidataset,
+    biattributes,
+    bifilters,
+    biflank,
+    fileSNPs,
+    dirSNPs,
+    ...
+    ){
+    rez = as.list(match.call());
+    return(rez);
+}
+
 # Transform bam2sample file into a list
 parseBam2sample = function( lines ){
     # remove trailing commas, .bam at name ends,
@@ -216,15 +268,18 @@ parameterPreprocess = function( param ){
         param$dircoveragenorm =
             makefullpath(param$dirfilter, param$dircoveragenorm);
     }
-
+    
+    # SNPs analysis
     if(is.null(param$dirSNPs))
         param$dirSNPs = paste0("Testing_wSNPs_",
                                param$modeloutcome, '_',
                                length(param$modelcovariates), 'cvrts_',
                                param$modelPCs, "PCs");
     param$dirSNPs = makefullpath( param$dircoveragenorm, param$dirSNPs);
-    # param$dirSNPs = ramwas:::makefullpath( param$dircoveragenorm, param$dirSNPs);
 
+    if(!is.null(param$fileSNPs))
+        param$fileSNPs = makefullpath( param$dircoveragenorm, param$fileSNPs);
+    
     if( is.null(param$dirpca) ){
         if( length(param$modelcovariates) > 0 ){
             # library(digest);
@@ -247,12 +302,14 @@ parameterPreprocess = function( param ){
     
     if( is.null(param$qqplottitle) ){
         qqplottitle = paste0("Testing ",param$modeloutcome,"\n",
-                             param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
+                             param$modelPCs," PC",
+                             if(param$modelPCs!=1)"s"else"");
         if(length(param$modelcovariates)>0)
-            qqplottitle = paste0(qqplottitle, " and ",
-                                 length(param$modelcovariates)," covariate",
-                                 if(length(param$modelcovariates)!=1)"s:\n"else": ",
-                                 paste0(param$modelcovariates,collapse = ", "))
+            qqplottitle = paste0(
+                qqplottitle, " and ",
+                length(param$modelcovariates)," covariate",
+                if(length(param$modelcovariates)!=1)"s:\n"else": ",
+                paste0(param$modelcovariates,collapse = ", "))
         param$qqplottitle = qqplottitle;
         rm(qqplottitle);
     }

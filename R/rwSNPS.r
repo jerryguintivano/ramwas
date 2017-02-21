@@ -206,8 +206,6 @@ ramwasSNPs = function( param ){
     
     dir.create(param$dirSNPs, showWarnings = FALSE, recursive = TRUE);
     
-    param$fileSNPs = makefullpath( param$dircoveragenorm, param$fileSNPs);
-
     parameterDump(dir = param$dirSNPs, param = param,
                       toplines = c("fileSNPs", "dirSNPs",
                                    "dirpca", "dircoveragenorm",
