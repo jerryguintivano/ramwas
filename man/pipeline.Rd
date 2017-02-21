@@ -11,6 +11,7 @@
 \alias{ramwas7BrunElasticNet}
 \alias{ramwas7CplotByNCpGs}
 \alias{ramwas7riskScoreCV}
+\alias{ramwasSNPs}
 \title{
     RaMWAS: High Level Pipeline Functions
 }
@@ -29,6 +30,7 @@ ramwas7ArunMWASes(param)
 ramwas7BrunElasticNet(param)
 ramwas7CplotByNCpGs(param)
 ramwas7riskScoreCV(param)
+ramwasSNPs(param)
 }
 \arguments{
     \item{param}{
