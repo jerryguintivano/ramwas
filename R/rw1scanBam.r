@@ -1,3 +1,48 @@
+# Make QC plots for an Rbam
+pipelineSaveQCplots = function(param, rbam, bamname){
+    filename = paste0(param$dirqc,"/score/hs_",bamname,".pdf");
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    pdf(filename);
+    plot(rbam$qc$hist.score1, samplename = bamname);
+    plot(rbam$qc$bf.hist.score1, samplename = bamname);
+    dev.off();
+    rm(filename);
+
+    filename = paste0(param$dirqc,"/edit_distance/ed_",bamname,".pdf");
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    pdf(filename);
+    plot(rbam$qc$hist.edit.dist1, samplename = bamname);
+    plot(rbam$qc$bf.hist.edit.dist1, samplename = bamname);
+    dev.off();
+    rm(filename);
+
+    filename = paste0(param$dirqc,"/matched_length/ml_",bamname,".pdf");
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    pdf(filename);
+    plot(rbam$qc$hist.length.matched, samplename = bamname);
+    plot(rbam$qc$bf.hist.length.matched, samplename = bamname);
+    dev.off();
+    rm(filename);
+
+    if( !is.null(rbam$qc$hist.isolated.dist1) ){
+        filename = paste0(param$dirqc,"/isolated_distance/id_",bamname,".pdf");
+        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+        pdf(filename);
+        plot(rbam$qc$hist.isolated.dist1, samplename = bamname);
+        dev.off();
+        rm(filename);
+    }
+    if( !is.null(rbam$qc$avg.coverage.by.density) ){
+        filename = paste0(param$dirqc,
+                          "/coverage_by_density/cbd_",bamname,".pdf");
+        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+        pdf(filename);
+        plot(rbam$qc$avg.coverage.by.density, samplename = bamname);
+        dev.off();
+        rm(filename);
+    }
+}
+
 # Scan a BAM file into Rbam object
 bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
     fields = c("qname","rname","pos","cigar","flag")

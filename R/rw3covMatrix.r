@@ -1,3 +1,50 @@
+# CpG score calculation for a single chromosome
+# Calling some C/C++ code
+.calc.coverage.chr = function(startfrw, startrev, cpgs, fragdistr){
+    maxfragmentsize = length(fragdistr);
+    cover = double(length(cpgs));
+
+    if(length(startfrw) > 0){
+        # CpGs left of start
+        ind1 = findInterval(cpgs - maxfragmentsize, startfrw);
+        # CpGs left of start+250L
+        ind2 = findInterval(cpgs,                   startfrw);
+        # coverage of CpGs
+        # which(ind2>ind1)
+        # are covered by fragments
+        # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+        .Call("cover_frw_c",
+              startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+    }
+    if(length(startrev) > 0){
+        # CpGs left of start
+        ind1 = findInterval(cpgs - 1L,                 startrev);
+        # CpGs left of start+250L
+        ind2 = findInterval(cpgs + maxfragmentsize-1L, startrev);
+        # coverage of CpGs
+        # which(ind2>ind1)
+        # are covered by fragments
+        # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
+        .Call("cover_rev_c",
+              startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+    }
+    return(cover);
+}
+
+# Calculate CpG scores for an Rbam
+calc.coverage = function(rbam, cpgset, fragdistr){
+    coveragelist = vector("list", length(cpgset));
+    names(coveragelist) = names(cpgset);
+    for( chr in names(coveragelist) ){ # chr = names(coveragelist)[1]
+        coveragelist[[chr]] =
+            .calc.coverage.chr(rbam$startsfwd[[chr]],
+                               rbam$startsrev[[chr]],
+                               cpgset[[chr]],
+                               fragdistr);
+    }
+    return(coveragelist);
+}
+
 # calculate CpG score matrix for 1 sample
 pipelineCoverage1Sample = function(colnum, param){
 

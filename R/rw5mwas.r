@@ -1,3 +1,135 @@
+# test a phenotype against the data
+# accounting for covariates
+# cvrtqr - must be orthonormalized
+# Supports categorical outcomes (text of factor)
+testPhenotype = function(phenotype, data, cvrtqr){
+    mycov = matrix(phenotype, nrow = 1);
+    slice = data;
+    cvqr0 = cvrtqr;
+
+    if( any(is.na(mycov)) ){
+        keep = which(colSums(is.na(mycov))==0);
+
+        mycov = mycov[, keep, drop=FALSE];
+        slice = slice[keep, , drop=FALSE];
+        cvqr0 = cvqr0[, keep, drop=FALSE];
+        cvqr0 = t( qr.Q(qr(t(cvqr0))) );
+    }
+
+    # mycov = as.character(round(mycov));
+    if( is.character(mycov) || is.factor(mycov) ){
+        fctr = as.factor(mycov)
+        dummy = t(model.matrix(~fctr)[,-1]);
+        dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
+
+        q = qr(t(dummy));
+        keep = abs(diag(qr.R(q))) > .Machine$double.eps*ncol(mycov);
+
+        mycov = t( qr.Q(qr(t(dummy))) );
+        mycov[!keep,] = 0;
+    } else {
+        cvsumsq1 = sum( mycov^2 );
+        mycov = mycov - tcrossprod(mycov,cvqr0) %*% cvqr0;
+        cvsumsq2 = sum( mycov^2 );
+        if( cvsumsq2 <= cvsumsq1 * .Machine$double.eps*ncol(mycov) ){
+            mycov[] = 0;
+        } else {
+            mycov = mycov / sqrt(rowSums(mycov^2));
+        }
+    }
+
+    ###
+    nVarTested = nrow(mycov);
+    dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
+    if(nVarTested == 1){
+        if(dfFull <= 0)
+            return(list(correlation = 0,
+                        tstat = 0,
+                        pvalue = 1,
+                        nVarTested = nVarTested,
+                        dfFull = dfFull,
+                        statname = ""));
+
+        # SST = rowSums(slice^2);
+        SST = colSumsSq(slice);
+
+        cvD = (mycov %*% slice);
+        # cvD2 = colSums(cvD^2);
+        # cvD2 = cvD2^2;
+
+        cvC = (cvqr0 %*% slice);
+        cvC2 = colSumsSq( cvC );
+        # cvC2 = colSums( cvC^2 );
+
+        # SSR = colSums( cvD^2 );
+        cr = cvD / sqrt(pmax(SST - cvC2, 1e-50, SST/1e15));
+
+        cor2tt = function(x){
+            return( x * sqrt( dfFull / (1 - pmin(x^2,1))));
+        }
+        tt2pv = function(x){
+            return( (pt(-abs(x),dfFull)*2));
+        }
+        tt = cor2tt(cr);
+        pv = tt2pv(tt);
+
+        ### Check:
+        # c(tt[1], pv[1])
+        # summary(lm( as.vector(covariate) ~ 0 + data[1,] +
+        #         t(cvrtqr)))$coefficients[1,]
+        return( list(correlation = cr,
+                     tstat = tt,
+                     pvalue = pv,
+                     nVarTested = nVarTested,
+                     dfFull = dfFull,
+                     statname = "") );
+
+    } else {
+        if(dfFull <= 0)
+            return( list(Rsquared = 0,
+                         Fstat = 0,
+                         pvalue = 1,
+                         nVarTested = nVarTested,
+                         dfFull = dfFull,
+                         statname = paste0("-F_",nVarTested)) );
+
+        # SST = rowSums(slice^2);
+        SST = colSumsSq(slice);
+
+        cvD = (mycov %*% slice);
+        # cvD2 = colSums(cvD^2);
+        cvD2 = colSumsSq(cvD);
+
+        cvC = (cvqr0 %*% slice);
+        # cvC2 = colSums( cvC^2 );
+        cvC2 = colSumsSq( cvC );
+
+        # SSR = colSums( cvD^2 );
+        rsq = cvD2 / pmax(SST - cvC2, SST/1e16);
+
+        # rsq = colSums(cr^2);
+        rsq2F = function(x){
+            return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) );
+        }
+        F2pv = function(x){
+            return( pf(x, nVarTested, dfFull, lower.tail = FALSE) );
+        }
+        ff = rsq2F(rsq);
+        pv = F2pv(ff);
+
+        ### Check:
+        # c(ff[1], pv[1])
+        # anova(lm( data[1,] ~ 0 + t(cvrtqr) +
+        #     as.factor(as.vector(as.character(round(covariate))))))
+        return( list(Rsquared = rsq,
+                     Fstat = ff,
+                     pvalue = pv,
+                     nVarTested = nVarTested,
+                     dfFull = dfFull,
+                     statname = paste0("-F_",nVarTested)) );
+    }
+}
+
 # Fast QQ-plot
 # With confidence band and lambda
 # Makes small PDFs even with billions of p-values
