@@ -120,7 +120,7 @@ param = ramwasParameters(
     biattributes = c("hgnc_symbol","entrezgene","strand"),
     bifilters = list(with_hgnc_transcript_name=TRUE),
     biflank = 0,
-    cvnfolds = 10,
+    cvnfolds = 3,
     mmalpha = 0,
     mmncpgs = c(5,10,50,100,500,1000,5000,10000)
 )
