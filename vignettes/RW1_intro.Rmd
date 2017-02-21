@@ -70,6 +70,7 @@ so we create an artificial data with this simple call.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
 suppressPackageStartupMessages(library(ramwas))
+# dr = 'D:/temp'
 ```
 
 ```{r generateData, warning=FALSE}

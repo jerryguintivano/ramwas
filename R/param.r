@@ -103,7 +103,9 @@ ramwasParameters = function(
     dirSNPs,
     ...
     ){
-    rez = as.list(match.call());
+    # rez = as.list(match.call());
+    rez = c(as.list(environment()), list(...));
+    rez = rez[ !sapply(rez, is.symbol) ];
     return(rez);
 }
 
