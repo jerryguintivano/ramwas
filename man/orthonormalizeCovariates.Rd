@@ -4,7 +4,8 @@
     Orthonormalize Covariates
 }
 \description{
-    Takes a set of covariates, add a constant covariate, and
+    Takes a matrix of data frame with covariates, 
+    adds a constant covariate (optional), and
     orthonormalizes the set.
 }
 \usage{
@@ -12,7 +13,7 @@ orthonormalizeCovariates(cvrt, modelhasconstant)
 }
 \arguments{
     \item{cvrt}{
-        A matrix or data frame with covariates.
+        A matrix or data frame with covariates (one column per covariate).
     }
     \item{modelhasconstant}{
         Set to \code{TRUE} to add a constant covariate
@@ -27,7 +28,7 @@ orthonormalizeCovariates(cvrt, modelhasconstant)
 \value{
     Returns a matrix with orthogonal columns with unit length,
     whose columns spans the same space as the covariates plus a constant 
-    (if modelhasconstant is TRUE).
+    (if \code{modelhasconstant} is \code{TRUE}).
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
@@ -47,4 +48,8 @@ print( round(crossprod(cvrtqr),15) )
 
 # Stop if not orthonormal
 stopifnot(all.equal( crossprod(cvrtqr), diag(ncol(cvrtqr)) ))
+
+# Example with a factor variable
+groups = data.frame(gr = c("a","a","a","b","b","b","c","c","c"))
+orthonormalizeCovariates(groups)
 }
