@@ -132,7 +132,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                     row.names = FALSE);
         PC_values = data.frame(
             PC_num = paste0("PC",seq_len(length(e$values))),
-            e$values/sum(e$values));
+            VarianceExplained = e$values/sum(e$values));
         write.table(file = paste0(param$dirpca, "/PC_values.txt"),
                     x = PC_values,
                     sep = "\t",
