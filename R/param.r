@@ -32,16 +32,17 @@ parameterDump = function(dir, param, toplines = NULL){
     }
 
     fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
+    on.exit(close(fid));
     writeLines(con = fid,
        text = c("## Parameters used to create the files in this directory",""));
     if( !is.null(toplines)){
-        .dump(fid, param[toplines[toplines %in% names(param)]]);
+        set = names(param) %in% toplines;
+        .dump(fid, param[ set]);
         writeLines(con = fid, text = "");
-        .dump(fid, param[!(names(param) %in% toplines)]);
+        .dump(fid, param[!set]);
     } else {
         .dump(fid, param);
     }
-    close(fid);
     return(invisible(NULL));
 }
 
@@ -103,8 +104,9 @@ ramwasParameters = function(
     dirSNPs,
     ...
     ){
-    # rez = as.list(match.call());
+    # Grab all local variables and '...'
     rez = c(as.list(environment()), list(...));
+    # exclude missing parameters
     rez = rez[ !sapply(rez, is.symbol) ];
     return(rez);
 }
@@ -155,11 +157,14 @@ processCommandLine = function(.arg = NULL){
 # Fill in gaps in the parameter list
 # Make paths absolute
 parameterPreprocess = function( param ){
-    ### Get from a file if param is not a list
+    
+    ### Get from a file if 'param' is not a list
     if(is.character(param)){
         param = parametersFromFile(param);
     }
 
+    
+    
     if(is.null(param$modelhasconstant)) param$modelhasconstant = TRUE;
     
     # Set up directories
