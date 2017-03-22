@@ -37,10 +37,10 @@ isAbsolutePath = function( path ){
 makefullpath = function(path, filename){
     if( is.null(path) )
         return(filename);
-    if(isAbsolutePath(filename)){
+    if( isAbsolutePath(filename) ){
         return(filename)
     } else {
-        return( paste0(path, "/", filename) );
+        return(paste0(path, "/", filename));
     }
 }
 
@@ -132,43 +132,55 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 # match those in "covariates" parameter
 # get the total number of CpGs along the way
 .matchCovmatCovar = function( param ){
+    
+    # Sample names in covariates
     cvsamples = param$covariates[[1]];
 
+    # Grab info form coverage matrix
     fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
     fmsamples = rownames(fm);
     ncpgs = ncol(fm);
     close(fm);
 
-    if(is.null(cvsamples))
-        cvsamples = fmsamples;
+    # Match samples in covariates with those in coverage matrix
+    if(is.null(cvsamples)) {
+        # if covariates are not set, assume they match.
+        rowsubset = NULL;
+    } else {
+        rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
+        if( any(rowsubset==0) )
+            stop( paste("Unknown samples in covariate file:",
+                        cvsamples[head(which(rowsubset==0))]) );
     
-    rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
-    if( any(rowsubset==0) )
-        stop( paste("Unknown samples in covariate file:",
-                    cvsamples[head(which(rowsubset==0))]) );
-
-    if( length(cvsamples) == length(fmsamples) ){
-        if( all(rowsubset == seq_along(rowsubset)) ){
-            rowsubset = NULL;
+        # if no reordering is required, set rowsubset=NULL
+        if( length(cvsamples) == length(fmsamples) ){
+            if( all(rowsubset == seq_along(rowsubset)) ){
+                rowsubset = NULL;
+            }
         }
     }
-    return(list(rowsubset = rowsubset, ncpgs = ncpgs, samplenames = fmsamples));
+    return(list(rowsubset = rowsubset, ncpgs = ncpgs, cvsamples = cvsamples));
 }
 
 # Get covariates + PCs matrix for analysis
 # orthonormalized unless normalize == FALSE
-.getCovariates = function(param, rowsubset = NULL, normalize = TRUE, modelhasconstant){
-    cvrtqr = param$covariates[ param$modelcovariates ];
-    ### Reading PCs, add as coveriates
+.getCovariates = function(param,
+                          rowsubset = NULL,
+                          normalize = TRUE,
+                          modelhasconstant){
+    # Named covariates
+    cvrt = param$covariates[ param$modelcovariates ];
+    
+    ### Add PCs as covariates
     if( param$modelPCs > 0 ){
         e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         PCs = e$vectors[, seq_len(param$modelPCs), drop=FALSE];
         if(!is.null( rowsubset ))
             PCs = PCs[rowsubset,];
-        mwascvrtqr = cbind(cvrtqr, PCs);
+        mwascvrtqr = cbind(cvrt, PCs);
         rm(e);
     } else {
-        mwascvrtqr = cvrtqr;
+        mwascvrtqr = cvrt;
     }
     # stopifnot( all.equal( tcrossprod(mwascvrtqr), diag(nrow(mwascvrtqr))) );
     if(normalize){

@@ -235,11 +235,10 @@ ramwasSNPs = function( param ){
         # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
-        cvsamples = param$covariates[[1]];
         rm(rez);
-    } # rowsubset, ncpgs, cvsamples
+    } # rowsubset, ncpgs
 
-    ### Prepare covariates, defactor,
+    ### Prepare covariates, defactor
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
         mwascvrtqr = .getCovariates(param = param, 

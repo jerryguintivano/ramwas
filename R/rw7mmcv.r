@@ -150,7 +150,7 @@ ramwas7BrunElasticNet = function(param){
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
-    	  # rez = ramwas:::.matchCovmatCovar( param );
+	    # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         rm(rez);
@@ -161,7 +161,6 @@ ramwas7BrunElasticNet = function(param){
 
     for( cpgs2use in param$mmncpgs ){ # cpgs2use = param$mmncpgs[1]
         message("Applying Elasting Net to ",cpgs2use," top CpGs");
-
 
         forecast0 = NULL;
         for( fold in seq_len(param$cvnfolds) ){ # fold = 1

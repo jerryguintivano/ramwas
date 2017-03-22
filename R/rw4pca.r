@@ -77,13 +77,11 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
-        cvsamples = param$covariates[[1]];
-        if( is.null(cvsamples))
-            cvsamples = rez$samplenames;
+        cvsamples = rez$cvsamples;
         rm(rez);
     } # rowsubset, ncpgs, cvsamples
     
-    ### Prepare covariates, defactor,
+    ### Prepare covariates, defactor
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
         cvrtqr = .getCovariates(param = param, 
@@ -181,21 +179,19 @@ ramwas4PCA = function( param ){
         # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
-        cvsamples = param$covariates[[1]];
-        if( is.null(cvsamples))
-            cvsamples = rez$samplenames;
+        cvsamples = rez$cvsamples;
         rm(rez);
     } # rowsubset, ncpgs, cvsamples
 
-    ### Prepare covariates, defactor,
+    ### Prepare covariates, defactor
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrt = param$covariates[ param$modelcovariates ];
-        if(is.null(cvrt))
-            cvrt = matrix(nrow = length(cvsamples), ncol = 0);
-        cvrtqr = t(orthonormalizeCovariates(cvrt));
-        rm(cvrt);
-    } # cvrtqr
+        param$modelPCs = 0;
+        mwascvrtqr = .getCovariates(param = param, 
+                                    rowsubset = rowsubset, 
+                                    modelhasconstant = param$modelhasconstant);
+        # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset, TRUE, param$modelhasconstant);
+    } # mwascvrtqr
 
     ### PCA part
     {
@@ -222,17 +218,17 @@ ramwas4PCA = function( param ){
                                          rangeset,
                                          .ramwas4PCAjob,
                                          param = param,
-                                         cvrtqr = cvrtqr,
+                                         cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
                 covmat = Reduce(f = `+`, x = covlist);
                 stopCluster(cl);
                 rm(cl, rng, rangeset, covlist);
                 .file.remove(param$lockfile2);
             } else {
-                covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0),
-                                         param,
-                                         cvrtqr,
-                                         rowsubset);
+                covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), 
+                                         param = param,
+                                         cvrtqr = mwascvrtqr,
+                                         rowsubset = rowsubset);
             }
             cat(file = paste0(param$dirpca,"/Log.txt"),
                  date(), ", Done running Principal Component Analysis.", "\n",
