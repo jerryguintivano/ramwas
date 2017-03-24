@@ -10,33 +10,36 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-```{r switcher, echo=FALSE}
+```{r loadKnitr, echo=FALSE}
 library("knitr")
 # opts_chunk$set(eval=FALSE)
+library(pander)
+panderOptions("digits", 3)
 ```
 
 # Introduction
 
 [RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
 provides a complete toolset for methylome-wide association studies (MWAS).
-It is specifically designed for data from enrichment based methylation assays,
+It is primarily designed for data from enrichment based methylation assays,
 but can be applied to other methylomic data as well.
 
-The analysis pipeline includes seven steps:
+The analysis pipeline includes following major components (steps):
 
 1. Scanning aligned reads from BAM files
-2. Calculation of quality control measures
-3. Creation of methylation score (coverage) matrix
-4. Principal component analysis for capturing batch effects and
-   detection of outliers
-5. Association analysis with respect to phenotypes of interest
-   while correcting for top PCs and known covariates
-6. Annotation of significant findings
+2. Calculation of quality control measures, aggregate plots, 
+   fragment size estimation
+3. Creation of methylation score (coverage) matrix, sample normalization
+4. Principal component analysis to capture batch effects and detect outliers
+5. Methyle-wide Association Study (MWAS) 
+   with correction for top PCs and known covariates
+6. Annotation of significant findings using BioMart database
 7. Multi-marker analysis (methylation risk score) using elastic net
+8. MWAS with correction for effect of SNPs
 
 Most steps of RaMWAS are internally parallelized.
 This is made possible, in part, by the use of
-[filematrix](https://cran.r-project.org/web/packages/filematrix/index.html)
+[filematrix](https://CRAN.R-project.org/package=filematrix)
 package for storing the data and accessing it in parallel jobs.
 
 # Getting Started
@@ -54,7 +57,7 @@ biocLite("ramwas")
 ## Loading Package and Viewing Documentation
 
 The package vignettes and reference manual can be viewed
-[online](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
+[online](https://bioconductor.org/packages/ramwas/)
 and with following commands.
 
 ```{r loadIt, eval=FALSE}
@@ -65,8 +68,8 @@ help(package="ramwas") # Lists package functions
 
 # Steps of the Pipeline
 
-To illustrate the workflow of RaMWAS we need a data set,
-so we create an artificial data with this simple call.
+To illustrate the workflow of RaMWAS 
+we first create an artificial data set.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
 suppressPackageStartupMessages(library(ramwas))
@@ -76,21 +79,24 @@ suppressPackageStartupMessages(library(ramwas))
 ```{r generateData, warning=FALSE}
 library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
-ramwas0createArtificialData(dir = dr, verbose = FALSE)
+ramwas0createArtificialData(dir = dr, 
+                            verbose = FALSE, 
+                            nreads = 100e3, 
+                            ncpgs = 25e3)
 # This is the project directory
 cat(dr)
 ```
 **Note.** One may choose to set the project directory `dr` to
-a more convenient location when running this code.
+a more convenient location when running the code.
 
 
 Now the project directory `dr` contains
 
 * `bams` -- directory with the 20 simulated BAM files
 * `bam_list.txt` -- file with names of all the BAM files
-* `covariates.txt` -- file with age and sex variables for the samples.\
-The methylation level of some CpGs
-is generated to depend on the covariates.
+* `covariates.txt` -- file with generated 
+  age and sex variables for the samples.\
+  The methylation level of some CpGs depends on these covariates.
 * `Simulated_chromosome.rds` - file with locations of all CpGs.
 See [CpG set vignette](RW4_CpG_sets.html) for more information.
 
@@ -120,35 +126,38 @@ param = ramwasParameters(
     biattributes = c("hgnc_symbol","entrezgene","strand"),
     bifilters = list(with_hgnc_transcript_name=TRUE),
     biflank = 0,
-    cvnfolds = 3,
+    cvnfolds = 5,
     mmalpha = 0,
-    mmncpgs = c(5,10,50,100,500,1000,5000,10000)
+    mmncpgs = c(5,10,50,100,500,1000,2000,3000)
 )
 ```
-The meaning of the parameters will be described as they are used below.
+Possible parameters are described in detail in 
+the [parameter vignette](RW5_param.Rmd).
+We also describe the role of each parameter as they are used 
+in the walk-through below.
 
-## Scan BAM Files
+## Scan BAM Files, QC calculation
 
-This step scans all BAM files listed in `filebamlist` file
+This step scans all BAM files listed in `filebamlist` file,
+records read start locations,
 and calculates a number of quality control metrics.
-The BAMs must be located in `dirbam` directory (relative to `dirproject`).
+The BAMs must be located in `dirbam` directory.
 
 The reads are filtered by `scoretag` parameter,
-which is usually the "MAPQ" field or "AS" tag in the BAM file
-([BAM file format](https://samtools.github.io/hts-specs/SAMv1.pdf)).
-The `minscore` parameter defines the minimum admissible score,
-reads with scores below that are excluded.
+which is usually either "MAPQ" field or "AS" tag in the BAM file
+(see [BAM file format](https://samtools.github.io/hts-specs/SAMv1.pdf)).
+Reads with scores below `minscore` are excluded.
 
 The `minfragmentsize` and `maxfragmentsize` parameters define
 the minimum and maximum size of DNA fragments that were sequenced.
 Please note, these parameters are not equal to the read length but
 instead reflect the length of the DNA fragments that were
-extracted and sequenced. Thus, these parameters are determined by
-labtechnical factors such as fragmentation procedure and size selection.
+extracted and sequenced. 
 
 The set of CpGs is loaded from `filecpgset` file.
+For more information see [CpG set vignette](RW4_CpG_sets.html).
 
-BAM scanning is run in `cputhreads` parallel jobs.
+RaMWAS uses `cputhreads` CPU cores (parallel jobs) to scan BAMs.
 
 ```{r scan-bams, warning=FALSE, message=FALSE}
 ramwas1scanBams(param)
@@ -156,7 +165,7 @@ ramwas1scanBams(param)
 
 This creates the following subdirectories in the project directory:
 
-* `qc` -- directory with a number of (quality control) QC plots.
+* `qc` -- directory with a number of quality control (QC) plots.
     * `edit_distance` -- plots showing distribution of edit distance, i.e.
     number of mismatches between the read and the reference genome,
     one plot per BAM.
@@ -180,16 +189,24 @@ This creates the following subdirectories in the project directory:
 one RDS file per BAM.
 
 **Note.** For the full information on BAM-wise QC, see
-[RW3_BAM_QCs.html](BAM QC vignette).
+[BAM QC vignette](RW3_BAM_QCs.html).
 
 Here is a sample `coverage_by_density` plot for the simulated data.\
 It shows higher average coverage for regions
-with higher CpG densities, up to rather high CpG density level.
-![coverage_by_density](coverage_by_density1.png)
+with higher CpG densities.
 
-**Note.** The BAM files are no longer needed after this step.\
-**Note.** If a BAM has already been scanned before, it is not processed again.
-This way it is easy to rerun Step 1 when additional samples have been sequenced.
+```{r plotACbD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+pfull = parameterPreprocess(param)
+qc = readRDS(paste0(pfull$dirrqc, '/BAM007.qc.rds'))
+plot(qc$qc$avg.coverage.by.density)
+```
+
+
+**Note.** The BAM files are no longer needed after this step and the
+RaMWAS raw files are 50 to 100 times smaller than the original BAMs.\
+**Note.** If a BAM file has already been scanned, 
+it is not scanned again in subsequent calls of `ramwas1scanBams`.
+This way it is easy to rerun Step 1 when additional samples are sequenced.
 
 ## Collect QC Measures, Summarize by Samples
 
@@ -230,9 +247,16 @@ from read starts to isolated CpGs.\
     depending on the directory.
 
 Here is an example of a good fit of estimated fragment size distribution.
-![plot](Fragment_size_distribution_estimate.png)
 
-**Note.** The fragment size distribution is estimated using all BAMs in
+```{r plotFSD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+qc = readRDS(paste0(pfull$dirqc, '/summary_total/qclist.rds'))
+frdata = qc$total$hist.isolated.dist1
+estimate = as.double(readLines(
+    paste0(pfull$dirproject,'/Fragment_size_distribution.txt')))
+ramwas:::plotFragmentSizeDistributionEstimate(frdata, estimate)
+```
+
+**Note.** The fragment size distribution is estimated using all BAMs listed in
 `filebam2sample` parameter (if defined).
 
 
@@ -262,8 +286,7 @@ This step creates directory `coverage_norm_20` in the project directory
 CpGs that passed the threshold.\
   Each row has coverage for a single sample.\
   Each column has coverage for a single CpG.
-See
-[`filematrix`](https://cran.r-project.org/web/packages/filematrix/index.html)
+See [filematrix](https://CRAN.R-project.org/package=filematrix)
 package for format details.
 * `CpG_locations.*` - filematrix with the location of the CpGs
 that passed the threshold.\
@@ -273,11 +296,7 @@ for the integer column `chr` in `CpG_locations.*` filematrix.
 * `raw_sample_sums.*` - filematrix with total coverage for each
 sample before normalization.
 
-<!-- **Note.** The temporary files are located in `dirtemp` directory, -->
-<!-- which is "temp" sub-directory of `dircoveragenorm` by default. -->
-<!-- For better performance for large projects set `dirtemp` to a -->
-<!-- location on another hard drive. -->
-
+**Note.** This step created temporary files in the `dirtemp` directory.
 
 ## Principal Component Analysis
 
@@ -285,15 +304,15 @@ RaMWAS can perform principal component analysis (PCA) on the coverage matrix.
 
 PCA has two benefits.
 First, it can capture main directions of variation in the data
-(after regressing out covariates). We correct for them in the
-next steps of the analysis.
+(after regressing out covariates). 
+We correct for them in the next steps of the analysis.
 Second, the sample loadings of the first PCs can indicate
 highly irregular samples which should be excluded.
 
 The analysis can exclude variation explained by known
 covariates by regressing them out from the coverage before PCA.
-The covariates can be stored as a file `filecovariates` in a
-tab-separated table format, with sample names in the first column.
+The covariates are loaded from the file `filecovariates`.
+The file has tab-separated table format, with sample names in the first column.
 The artificial data set includes covariate file *covariates.txt*.
 
 The parameter `modelcovariates` names
@@ -320,25 +339,35 @@ sample loadings for the top 40 PCs (pages 2+).
 with phenotypes/covariates (from `filecovariates` file).
 * `PC_vs_covariates_pvalue.txt` - p-values for these correlations.
 
-The PC plot for artificial data shows no strong components and
+The PC plot for artificial data shows first no strong components and
 no outliers in the sample loadings:
-![plot](pcplot.png)![plot](pcplot3.png)
+
+```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=5, fig.height=5}
+e = readRDS(paste0(pfull$dirpca, '/eigen.rds'))
+ramwas:::plotPCvalues(e$values)
+ramwas:::plotPCvectors(e,2)
+rm(e)
+```
 
 However, there is strong correlation of top PCs with age and sex.
 
-name | age | sex
-:---:|---:|---:
-PC1 |  0.961 | 0.301
-PC2 | -0.104 | 0.812
-... | ... | ...
+```{r tablePCAcr, echo=FALSE, warning=FALSE, message=FALSE}
+tblcr = read.table(paste0(pfull$dirpca, '/PC_vs_covs_corr.txt'), 
+                 header = TRUE, 
+                 sep = '\t', 
+                 stringsAsFactors = TRUE)
+pander(head(tblcr,3))
+```
 
 Table: Correlations\ in\ `PC_vs_covariates_corr.txt`\ file.
 
-name | age | sex
-:---:|---:|---:
-PC1 | 1.8x10^-11^ | 0.20
-PC2 | 0.66 | 1.4x10^-5^
-... | ... | ...
+```{r tablePCApv, echo=FALSE, warning=FALSE, message=FALSE}
+tblpv = read.table(paste0(pfull$dirpca, '/PC_vs_covs_pvalue.txt'), 
+                 header = TRUE, 
+                 sep = '\t', 
+                 stringsAsFactors = TRUE)
+pander(head(tblpv,3))
+```
 
 Table: Significance\ in\ `PC_vs_covariates_pvalue.txt`\ file.
 
@@ -347,7 +376,7 @@ Table: Significance\ in\ `PC_vs_covariates_pvalue.txt`\ file.
 This step performs tests for association
 between normalized coverage and the
 outcome variable named by `modeloutcome` parameter.
-The analysis corrects for covariates listed in `modelcovariates`
+The\ analysis corrects for covariates listed in `modelcovariates`
 parameter and top `modelPCs` principal components.
 The testing is performed using linear regression model.
 
@@ -360,7 +389,7 @@ ramwas5MWAS(param)
 
 This step creates a sub-directory in the PCA directory named
 `Testing_casecontrol_0_PCs`. The name depends on `modeloutcome` and `modelPCs`
-(see [Directory names][]).
+parameters (see [Directory names][]).
 The sub-directory includes:
 
 * `QQ_plot.pdf` -- QQ-plot with confidence band and inflation factor.
@@ -374,12 +403,19 @@ the t- or F test used for testing.
 For the simulated data the QQ-plot for age shows moderate deviation from the
 diagonal for many CpGs. This is consistent with how the data was generated --
 there is weak signal in 1\% of CpGs.
-![plot](qqplot_age.png)
+
+```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
+pv = fm[,3]
+close(fm)
+qqPlotFast(pv)
+title(pfull$qqplottitle)
+```
 
 ## Annotation of top results
 
 RaMWAS can annotate top findings using data from
-[`biomaRt`](https://bioconductor.org/packages/release/bioc/html/biomaRt.html).
+[`biomaRt`](https://bioconductor.org/packages/biomaRt/).
 
 The parameters include:
 
@@ -400,14 +436,13 @@ ramwas6annotateTopFindings(param)
 
 The function overwrites `Top_tests.txt` file in MWAS directory.
 
-
 chr | position | tstat | pvalue | qvalue | hgnc_symbol | entrezgene | strand
 :---:|---:|---:|---:|---:|:---:|:---:|:---:
 chr1 | 15,975,530 |  8.771 | 6.446x10^-8^ | 0.022 | DDI2/DDI2 | 84301/6248 | 1/1
 chr1 | 15,975,533 |  8.568 | 9.097x10^-8^ | 0.022 | DDI2/DDI2 | 84301/6248 | 1/1
 chr1 | 15,418,248 | -7.654 | 4.571x10^-7^ | 0.071 | KAZN | 23254 | 1
 
-Table: Top\ of\ `Top_tests.txt`\ file.
+Table: Example\ of\ top\ of\ `Top_tests.txt`\ file.
 
 ## Methylation Risk Score (Cross-validation of Elastic Net Prediction)
 
@@ -423,7 +458,7 @@ each number of CpGs is tested and the results are aggregated.
 The elastic net parameter alpha can be set via `mmalpha` parameter.
 The number of folds `cvnfolds` in the N-fold cross validation is 10 by default.
 
-```{r parameters7, warning=FALSE, message=FALSE}
+```{r CV, warning=FALSE, message=FALSE}
 ramwas7riskScoreCV(param)
 ```
 
@@ -443,14 +478,30 @@ number of CpGs used for prediction.
 
 For the simulated data
 we get moderately good prediction
-using just 10 top CpGs.
-![plot](mm10.png)
+using just 50 top CpGs.
+```{r plotCV1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+cv = readRDS( paste0(pfull$dircv, "/rds/CpGs=000050_alpha=0.000000.rds") )
+ramwas:::plotPrediction(param = pfull,
+                        outcome = cv$outcome,
+                        forecast = cv$forecast,
+                        cpgs2use = 50,
+                        main = "Prediction success (EN on coverage)")
+```
 
 The correlation of prediction with
-actual age is maximal when we use 1,000
+actual age is maximal when we use 50
 top CpGs in elastic net.
-![plot](mmAll.png)
+```{r plotCV2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+ramwas7CplotByNCpGs(param)
+cl = readRDS(sprintf("%s/rds/cor_data_alpha=%f.rds",
+                    pfull$dircv,
+                    pfull$mmalpha))
+ramwas:::plotCVcors(cl, pfull)
+```
 
+## MWAS with Correction for Effect of SNPs
+
+This type of analysis is explained in the respective [vignette](RW24_SNPs.html).
 
 # Directory names
 
@@ -458,15 +509,15 @@ The names of coverage/PCA/MWAS/MMCV directories can be recovered
 by first calling `parameterPreprocess` function.
 
 ```{r dirlocations, eval=TRUE}
-fullparam = parameterPreprocess(param)
+pfull = parameterPreprocess(param)
 # Here lies coverage matrix
-fullparam$dircoveragenorm
+pfull$dircoveragenorm
 # Here are PCA files
-fullparam$dirpca
+pfull$dirpca
 # Here are MWAS files
-fullparam$dirmwas
+pfull$dirmwas
 # Here are multi-marker cross-validation files
-fullparam$dircv
+pfull$dircv
 ```
 
 ## Cleanup
