@@ -14,8 +14,17 @@ plotROC = function(outcome, forecast){
     fpr = zeroesHereOrRight / zeroesHereOrRight[1]
     tpr = onesHereOrRight / onesHereOrRight[1]
     
-    plot(fpr, tpr, xlim = c(0,1), ylim = c(0,1), xaxs = 'i', yaxs = 'i', type = 'l', col = 'blue', lwd = 2,
-         xlab = 'False positive rate', ylab = 'True positive rate');
+    plot(x = fpr,
+         y = tpr, 
+         xlim = c(0,1), 
+         ylim = c(0,1), 
+         xaxs = 'i', 
+         yaxs = 'i', 
+         type = 'l', 
+         col = 'blue', 
+         lwd = 2,
+         xlab = 'False positive rate', 
+         ylab = 'True positive rate');
     abline(a = 0, b = 1);
 }
 
@@ -104,7 +113,8 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
 
 # Plot true outcome vs. prediction
 # with correlations and p-value in the title
-plotPrediction = function(param, outcome, forecast, cpgs2use, main, dfFull = NULL){
+plotPrediction = function(param, outcome, forecast, 
+                          cpgs2use, main, dfFull = NULL){
     rng = range(c(outcome, forecast));
     stats = predictionStats(outcome, forecast, dfFull);
 
@@ -135,8 +145,7 @@ plotPrediction = function(param, outcome, forecast, cpgs2use, main, dfFull = NUL
 # Apply Elastic Net 10 times and collect
 # out of sample predictions
 ramwas7BrunElasticNet = function(param){
-    # library(glmnet);library(filematrix)
-    # library(ramwas);
+    # library(glmnet); library(filematrix); library(ramwas);
     param = parameterPreprocess(param);
     message("Working in: ",param$dircv);
     {
@@ -268,7 +277,7 @@ ramwas7BrunElasticNet = function(param){
                 object = list(outcome = outcome, forecast = forecast));
         } # rez
         {
-            pdf( sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
+            pdf(sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
                          param$dircv,
                          param$cvnfolds,
                          cpgs2use,
@@ -286,12 +295,35 @@ ramwas7BrunElasticNet = function(param){
                 legend(x = "bottomright",
                        legend = c(paste0("# CpGs = ",   cpgs2use),
                                   paste0("EN alpha = ", param$mmalpha)))
-                title(paste0("ROC curve for prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
+                title(paste0(
+                    "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
+                    param$cvnfolds, "-fold cross validation"));
                 dev.off();
             }
         } # pdf()
     }
     return( invisible(NULL) );
+}
+
+plotCVcors = function(cl, param){
+    aymax = max(abs(cl$cors),abs(cl$corp));
+    plot( x = cl$x,
+          y = cl$cors,
+          col = "red",
+          pch = 19,
+          ylim = c(-1,1)*aymax,
+          log = "x",
+          xlab = "Number of markers",
+          ylab = "Correlation")
+    points( cl$x, cl$corp, col = "cyan4", pch = 17)
+    abline(h=0, col = "grey")
+    legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
+    legend("bottomright",
+           legend = c("Correlations:","Pearson", "Spearman"),
+           pch = c(NA_integer_,19,17),
+           col=c("red","red","cyan4"));
+    title(paste0("Prediction of \"", param$modeloutcome,"\"\n",
+                 param$cvnfolds,"-fold cross validation"));
 }
 
 ramwas7CplotByNCpGs = function(param){
@@ -316,27 +348,18 @@ ramwas7CplotByNCpGs = function(param){
         corp[i] = stats$corp;
     }
 
+    cl = list(x = param$mmncpgs,
+              cors = cors, 
+              corp = corp);
+    saveRDS(file = sprintf( "%s/rds/cor_data_alpha=%f.rds",
+                            param$dircv,
+                            param$mmalpha),
+            object = cl);
+
     pdf( sprintf("%s/Prediction_alpha=%f.pdf",
                  param$dircv,
                  param$mmalpha) );
-
-    aymax = max(abs(cors),abs(corp));
-    plot( x = param$mmncpgs,
-          y = cors,
-          col = "red",
-          pch = 19,
-          ylim = c(-1,1)*aymax,
-          log = "x",
-          xlab = "Number of markers",
-          ylab = "Correlation")
-    points( param$mmncpgs, corp, col = "cyan4", pch = 17)
-    abline(h=0, col = "grey")
-    legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
-    legend("bottomright",
-           legend = c("Correlations:","Pearson", "Spearman"),
-           pch = c(NA_integer_,19,17),
-           col=c("red","red","cyan4"));
-    title(paste0("Prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
+    plotCVcors(cl, param);
     dev.off();
     
     if( length(unique(datalist[[1]]$outcome)) == 2 ){
@@ -350,7 +373,9 @@ ramwas7CplotByNCpGs = function(param){
             legend(x = "bottomright",
                    legend = c(paste0("# CpGs = ",   cpgs2use),
                               paste0("EN alpha = ", param$mmalpha)))
-            title(paste0("ROC curve for prediction of \"", param$modeloutcome,"\"\n",param$cvnfolds,"-fold cross validation"));
+            title(paste0(
+                "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
+                param$cvnfolds,"-fold cross validation"));
         }
         dev.off();
     }
