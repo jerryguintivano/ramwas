@@ -6,7 +6,7 @@ output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{2. Analyzing data from other sources}
+  %\VignetteIndexEntry{2.2. Joint Analysis of Methylation and Genotype Data}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -17,7 +17,7 @@ library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
-# dr = "D:/temp/simulated_matrix_data"
+# dr = "D:/temp/"
 ```
 
 # Joint Analysis of Methylation and Genotype Data
@@ -27,7 +27,7 @@ As methylation (measured with MBD-seq) can occur only at CpGs,
 SNPs can directly affect the number of CpGs in a neighborhood
 and thus affect methylation measurements.
 
-[RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
+[RaMWAS](https://bioconductor.org/packages/ramwas/)
 can account for a possible effect of SNPs
 by testing the following model:
 
@@ -81,9 +81,9 @@ dir.create(dr, showWarnings = FALSE)
 cat(dr,"\n")
 ```
 
-Let the sample data matrix have 1000 samples and 100,000 variables.
+Let the sample data matrix have 200 samples and 100,000 variables.
 ```{r dims}
-nsamples = 1000
+nsamples = 200
 nvariables = 100000
 ```
 
@@ -151,11 +151,11 @@ for( i in seq_len(nvariables/byrows) ){ # i=1
     
     slice = double(nsamples*byrows)
     dim(slice) = c(nsamples, byrows)
-    slice[,  1:225] = slice[,  1:225] + covariates$sex / 75 / sd(covariates$sex)
-    slice[,101:116] = slice[,101:116] + covariates$age / 24 / sd(covariates$age)
+    slice[,  1:225] = slice[,  1:225] + covariates$sex / 50 / sd(covariates$sex)
+    slice[,101:116] = slice[,101:116] + covariates$age / 16 / sd(covariates$age)
     slice = slice + 
             ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
-            snps/2 +
+            snps/1.5 +
             runif(nsamples*byrows)/2
     fmm[,ind] = slice;
 }
@@ -196,7 +196,14 @@ ramwas5MWAS(param)
 The QQ-plot shows mild enrichment among a large number of variables,
 which is consistent with how the data was generated --
 22\% of variables are affected by sex.
-![qqplot](snps_raw.png)
+```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
+pfull = parameterPreprocess(param)
+fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
+pv = fm[,3]
+close(fm)
+qqPlotFast(pv)
+title(pfull$qqplottitle)
+```
 
 
 The analysis with correction for SNPs is next:
@@ -206,8 +213,14 @@ ramwasSNPs(param)
 ```
 
 The QQ-plot shows better enrichment with significant p-values.
-![qqplot](snps_on.png)
-
+```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
+pfull = parameterPreprocess(param)
+fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
+pv = fm[,3]
+close(fm)
+qqPlotFast(pv)
+title("QQ-plot for MWAS with correction for SNPs")
+```
 
 
 The top finding are saved in the text files for regular and SNP-corrected MWAS:
@@ -216,12 +229,12 @@ The top finding are saved in the text files for regular and SNP-corrected MWAS:
 pfull = parameterPreprocess(param)
 toptbl = read.table(
                 paste0(pfull$dirmwas,"/Top_tests.txt"),
-                header = TRUE, sep = "\t",
-                stringsAsFactors = FALSE)
+                header = TRUE,
+                sep = "\t")
 pander(head(toptbl,10))
 toptbl = read.table(
                 paste0(pfull$dirSNPs,"/Top_tests.txt"),
-                header = TRUE, sep = "\t",
-                stringsAsFactors = FALSE)
+                header = TRUE,
+                sep = "\t")
 pander(head(toptbl,10))
 ```

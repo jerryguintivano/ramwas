@@ -293,7 +293,7 @@ a value larger than 1.
 ## Annotation of Top Findings
 
 The annotation is done using
-[`biomaRt`](https://bioconductor.org/packages/release/bioc/html/biomaRt.html)
+[`biomaRt`](https://bioconductor.org/packages/biomaRt/).
 package.
 
 The parameters include:
