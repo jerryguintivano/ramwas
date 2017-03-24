@@ -40,7 +40,7 @@
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
-        cat( part, "of", nsteps, "\n");
+        message("Slice ", part, " of ", nsteps);
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
@@ -214,19 +214,25 @@ ramwas4PCA = function( param ){
             cat(file = paste0(param$dirpca,"/Log.txt"),
                  date(), ", Running Principal Component Analysis.", "\n",
                  sep = "", append = FALSE);
-
-            if( param$diskthreads > 1 ){
-                rng = round(seq(1, ncpgs+1, length.out = param$diskthreads+1));
+            
+            step1 = ceiling( 128*1024*1024 / length(cvsamples) / 8);
+            mm = ncpgs;
+            nsteps = ceiling(mm/step1);
+            
+            nthreads = min(param$diskthreads, nsteps);
+            rm(step1, mm, nsteps);
+            if( nthreads > 1 ){
+                rng = round(seq(1, ncpgs+1, length.out = nthreads+1));
                 rangeset = rbind( rng[-length(rng)],
                                   rng[-1]-1,
-                                  seq_len(param$diskthreads));
+                                  seq_len(nthreads));
                 rangeset = lapply(seq_len(ncol(rangeset)),
                                   function(i) rangeset[,i])
 
                 if(param$usefilelock) param$lockfile2 = tempfile();
                 # library(parallel);
-                cl = makeCluster(param$diskthreads);
-                # cl = makePSOCKcluster(rep("localhost", param$diskthreads))
+                cl = makeCluster(nthreads);
+                on.exit({stopCluster(cl);});
                 covlist = clusterApplyLB(cl,
                                          rangeset,
                                          .ramwas4PCAjob,
@@ -234,7 +240,8 @@ ramwas4PCA = function( param ){
                                          cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
                 covmat = Reduce(f = `+`, x = covlist);
-                stopCluster(cl);
+                eval(sys.on.exit());
+                on.exit();
                 rm(cl, rng, rangeset, covlist);
                 .file.remove(param$lockfile2);
             } else {
@@ -250,7 +257,6 @@ ramwas4PCA = function( param ){
             saveRDS(file = paste0(param$dirpca,"/covmat.rds"),
                     object = covmat,
                     compress = FALSE);
-            # covmat = readRDS(paste0(param$dirpca,"/covmat.rds"));
         } # covmat
 
         ### Eigenvalue decomposition
@@ -261,7 +267,7 @@ ramwas4PCA = function( param ){
                     object = e,
                     compress = FALSE);
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
-        } # e, nonzeroPCs
+        } # e
     }
     
     postPCAprocessing(param, e);
@@ -294,7 +300,7 @@ ramwasPCsCovariateSelection = function(param){
 
         cvtrqr = orthonormalizeCovariates(cvrt = ann[covset]);
         covmat1 = covmat;
-        covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr)
+        covmat1 = covmat1 - tcrossprod(covmat1 %*% cvtrqr, cvtrqr);
         covmat1 = covmat1 - cvtrqr %*% crossprod(cvtrqr, covmat1);
 
         ### Eigenvalue decomposition

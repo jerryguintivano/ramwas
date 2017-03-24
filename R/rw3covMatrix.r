@@ -109,14 +109,13 @@ pipelineCoverage1Sample = function(colnum, param){
 # Job function for calculation of raw CpG score matrix
 .ramwas3coverageJob = function(colnum, param, nslices){
     # library(ramwas);
-    # library(filematrix)
     coverage = pipelineCoverage1Sample(colnum, param);
     coverage = unlist(coverage, use.names = FALSE);
 
     start = 1;
-    for( part in seq_len(nslices) ){
-        message("colnum =",colnum,"part =", part);
-        fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
+    for( part in seq_len(nslices) ){ # part=1
+        message("colnum = ", colnum, " part = ", part);
+        fmname = paste0(param$dirtemp, "/RawCoverage_part", part);
         fm = fm.open(fmname, lockfile = param$lockfile);
         ntowrite = nrow(fm);
         fm$writeCols(colnum, coverage[start:(start+ntowrite-1)]);
@@ -124,7 +123,7 @@ pipelineCoverage1Sample = function(colnum, param){
         start = start + ntowrite;
     }
 
-    fmname = paste0(param$dirtemp,"/RawCoverage_part",1);
+    fmname = paste0(param$dirtemp, "/RawCoverage_part", 1);
     fm = fm.open(fmname, lockfile = param$lockfile);
     fm$filelock$lockedrun( {
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
@@ -142,9 +141,9 @@ pipelineCoverage1Sample = function(colnum, param){
 .ramwas3transposeFilterJob = function(fmpart, param){
     # library(filematrix);
     # fmpart = 1
-    filename = paste0(param$dirtemp,"/RawCoverage_part",fmpart);
-    if( !file.exists(paste0(filename,".bmat")) ||
-        !file.exists(paste0(filename,".desc.txt")) )
+    filename = paste0(param$dirtemp, "/RawCoverage_part", fmpart);
+    if( !file.exists(paste0(filename, ".bmat")) ||
+        !file.exists(paste0(filename, ".desc.txt")) )
         return(paste0("Raw coverage slice filematrix not found: ", filename));
     fmraw = fm.open(filename, lockfile = param$lockfile2);
     mat = fmraw[];
@@ -323,14 +322,17 @@ ramwas3normalizedCoverage = function( param ){
              date(), ", Calculating raw coverage.", "\n",
              sep = "", append = FALSE);
         # library(parallel)
-        if( param$cputhreads > 1){
-            cl = makeCluster(param$cputhreads);
+        nthreads = min(param$cputhreads, nsamples);
+        if( nthreads > 1 ){
+            cl = makeCluster(nthreads);
+            on.exit({stopCluster(cl);});
             z = clusterApplyLB(cl,
                                seq_len(nsamples),
                                .ramwas3coverageJob,
                                param = param,
                                nslices = nslices);
-            stopCluster(cl);
+            eval(sys.on.exit());
+            on.exit();
         } else {
             z = character(nsamples);
             names(z) = names(param$bam2sample);
@@ -338,7 +340,7 @@ ramwas3normalizedCoverage = function( param ){
                 z[i] = .ramwas3coverageJob(colnum = i,
                                            param = param,
                                            nslices = nslices);
-                cat(i,z[i],"\n");
+                message(i, z[i]);
             }
         }
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
@@ -359,20 +361,23 @@ ramwas3normalizedCoverage = function( param ){
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
              date(), ", Transposing coverage matrix, filtering CpGs.", "\n",
              sep = "", append = TRUE);
-        if( param$diskthreads > 1 ){
+        nthreads = min(param$diskthreads, nslices);
+        if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile2 = tempfile();
             # library(parallel);
-            cl = makeCluster(param$diskthreads);
-            # cl = makePSOCKcluster(rep("localhost", param$diskthreads))
+            cl = makeCluster(nthreads);
+            on.exit({
+                stopCluster(cl);
+                .file.remove(param$lockfile2);});
             z = clusterApplyLB(cl,
                                1:nslices,
                                .ramwas3transposeFilterJob,
                                param = param);
-            stopCluster(cl);
-            .file.remove(param$lockfile2);
+            eval(sys.on.exit());
+            on.exit();
         } else {
             for( fmpart in seq_len(nslices) ){ # fmpart = 5
-                .ramwas3transposeFilterJob( fmpart, param);
+                .ramwas3transposeFilterJob(fmpart, param);
             }
         }
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
@@ -425,11 +430,11 @@ ramwas3normalizedCoverage = function( param ){
     {
         message("Gathering sample sums from ", nslices, " slices");
 
-        mat = fm.load( paste0(param$dirtemp,"/0_sample_sums") );
+        mat = fm.load( paste0(param$dirtemp, "/0_sample_sums") );
         samplesums = rowSums(mat);
         rm(mat);
         fm = fm.create.from.matrix(
-            filenamebase = paste0(param$dircoveragenorm,"/raw_sample_sums"),
+            filenamebase = paste0(param$dircoveragenorm, "/raw_sample_sums"),
             mat = samplesums);
         close(fm);
     }
@@ -454,22 +459,23 @@ ramwas3normalizedCoverage = function( param ){
              date(), ", Normalizing coverage matrix.", "\n",
              sep = "", append = TRUE);
         ### normalize and fill in
-        if( param$diskthreads > 1 ){
-
+        nthreads = min(param$diskthreads, nslices);
+        if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile1 = tempfile();
             if(param$usefilelock) param$lockfile2 = tempfile();
             # library(parallel);
-            cl = makeCluster(param$diskthreads);
-            # cl = makePSOCKcluster(rep("localhost", param$diskthreads))
+            cl = makeCluster(nthreads);
+            on.exit({
+                stopCluster(cl);
+                .file.remove(param$lockfile1);
+                .file.remove(param$lockfile2);});
             z = clusterApplyLB(cl,
                                fmpart_offset_list,
                                .ramwas3normalizeJob,
                                param = param,
                                samplesums = samplesums);
-            stopCluster(cl);
-            .file.remove(param$lockfile1);
-            .file.remove(param$lockfile2);
-
+            eval(sys.on.exit());
+            on.exit();
         } else {
             for( fmpart in seq_len(nslices) ){ # fmpart = 5
                 .ramwas3normalizeJob( fmpart_offset_list[[fmpart]],
