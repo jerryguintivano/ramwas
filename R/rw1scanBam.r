@@ -311,18 +311,23 @@ pipelineProcessBam = function(bamname, param){
 # Step 1 of the pipeline
 ramwas1scanBams = function( param ){
     param = parameterPreprocess(param);
-    stopifnot( !is.null(param$bamnames));
+   if(is.null(param$bamnames))
+       stop("BAM names must be specified. See \"filebamlist\" parameter.");
 
-    dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE)
+    dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE);
+
     cat(file = paste0(param$dirfilter,"/Log.txt"),
          date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
-    if( param$cputhreads > 1){
-        cl = makeCluster(param$cputhreads);
+    nthreads = min(param$cputhreads, length(param$bamname));
+    if( nthreads > 1){
+        cl = makeCluster(nthreads);
+        on.exit({stopCluster(cl);});
         z = clusterApplyLB(cl,
                            param$bamnames,
                            .ramwas1scanBamJob,
-                           param = param); #[1:64]
-        stopCluster(cl);
+                           param = param);
+        eval(sys.on.exit());
+        on.exit();
     } else {
         z = character(length(param$bamnames));
         names(z) = param$bamnames;
