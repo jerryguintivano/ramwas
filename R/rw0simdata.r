@@ -15,7 +15,7 @@ ramwas0createArtificialData = function(dir,
                                        randseed = 18090212,
                                        verbose = TRUE){
 
-#dir="D:/temp";nsamples=20;nreads=1e6;ncpgs=500e3;randseed=18090212;verbose=TRUE
+    #dir="D:/temp";nsamples=20;nreads=1e6;ncpgs=500e3;randseed=18090212;verbose=TRUE
     set.seed(randseed);
 
     # Create Directory
@@ -52,7 +52,7 @@ ramwas0createArtificialData = function(dir,
     #     locsgood = locs[ coverage[[1]] <= 15 ];
     #     rm(coverage, cpgset, locs)
     # } # locsgood, -locs, -cpgset
-    locsgood = locs
+    locsgood = locs;
     
     # Age covariate and effects
     {
