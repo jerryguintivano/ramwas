@@ -9,6 +9,8 @@ getTestsByLocation = function(x, chr, position){
         dircov = paste0(x, "/../..");
     }
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
+    if(is.factor(chr))
+        chr = as.character(chr);
     if(is.character(chr)){
         chrn = match(chr, chrnames, nomatch = 0L);
     } else {
@@ -40,6 +42,8 @@ getDataByLocation = function(x, chr, position){
         dircov = x;
     }
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
+    if(is.factor(chr))
+        chr = as.character(chr);
     if(is.character(chr)){
         chrn = match(chr, chrnames, nomatch = 0L);
     } else {
