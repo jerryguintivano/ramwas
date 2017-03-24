@@ -19,7 +19,7 @@ panderOptions("digits", 3)
 
 # Introduction
 
-[RaMWAS](http://www.bioconductor.org/packages/devel/bioc/html/ramwas.html)
+[RaMWAS](https://bioconductor.org/packages/ramwas/)
 provides a complete toolset for methylome-wide association studies (MWAS).
 It is primarily designed for data from enrichment based methylation assays,
 but can be applied to other methylomic data as well.
@@ -195,7 +195,7 @@ Here is a sample `coverage_by_density` plot for the simulated data.\
 It shows higher average coverage for regions
 with higher CpG densities.
 
-```{r plotACbD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+```{r plotACbD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
 qc = readRDS(paste0(pfull$dirrqc, '/BAM007.qc.rds'))
 plot(qc$qc$avg.coverage.by.density)
@@ -248,7 +248,7 @@ from read starts to isolated CpGs.\
 
 Here is an example of a good fit of estimated fragment size distribution.
 
-```{r plotFSD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+```{r plotFSD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 qc = readRDS(paste0(pfull$dirqc, '/summary_total/qclist.rds'))
 frdata = qc$total$hist.isolated.dist1
 estimate = as.double(readLines(
@@ -342,7 +342,7 @@ with phenotypes/covariates (from `filecovariates` file).
 The PC plot for artificial data shows first no strong components and
 no outliers in the sample loadings:
 
-```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=5, fig.height=5}
+```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 e = readRDS(paste0(pfull$dirpca, '/eigen.rds'))
 ramwas:::plotPCvalues(e$values)
 ramwas:::plotPCvectors(e,2)
@@ -354,9 +354,8 @@ However, there is strong correlation of top PCs with age and sex.
 ```{r tablePCAcr, echo=FALSE, warning=FALSE, message=FALSE}
 tblcr = read.table(paste0(pfull$dirpca, '/PC_vs_covs_corr.txt'), 
                  header = TRUE, 
-                 sep = '\t', 
-                 stringsAsFactors = TRUE)
-pander(head(tblcr,3))
+                 sep = '\t')
+pander(head(tblcr, 3))
 ```
 
 Table: Correlations\ in\ `PC_vs_covariates_corr.txt`\ file.
@@ -364,9 +363,8 @@ Table: Correlations\ in\ `PC_vs_covariates_corr.txt`\ file.
 ```{r tablePCApv, echo=FALSE, warning=FALSE, message=FALSE}
 tblpv = read.table(paste0(pfull$dirpca, '/PC_vs_covs_pvalue.txt'), 
                  header = TRUE, 
-                 sep = '\t', 
-                 stringsAsFactors = TRUE)
-pander(head(tblpv,3))
+                 sep = '\t')
+pander(head(tblpv, 3))
 ```
 
 Table: Significance\ in\ `PC_vs_covariates_pvalue.txt`\ file.
@@ -404,7 +402,7 @@ For the simulated data the QQ-plot for age shows moderate deviation from the
 diagonal for many CpGs. This is consistent with how the data was generated --
 there is weak signal in 1\% of CpGs.
 
-```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
 close(fm)
@@ -479,7 +477,7 @@ number of CpGs used for prediction.
 For the simulated data
 we get moderately good prediction
 using just 50 top CpGs.
-```{r plotCV1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+```{r plotCV1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 cv = readRDS( paste0(pfull$dircv, "/rds/CpGs=000050_alpha=0.000000.rds") )
 ramwas:::plotPrediction(param = pfull,
                         outcome = cv$outcome,
@@ -491,7 +489,7 @@ ramwas:::plotPrediction(param = pfull,
 The correlation of prediction with
 actual age is maximal when we use 50
 top CpGs in elastic net.
-```{r plotCV2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=7, fig.height=7}
+```{r plotCV2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 ramwas7CplotByNCpGs(param)
 cl = readRDS(sprintf("%s/rds/cor_data_alpha=%f.rds",
                     pfull$dircv,
