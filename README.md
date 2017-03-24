@@ -14,7 +14,7 @@ RaMWAS provides a complete toolset for
     (5) association analysis with respect to phenotypes of interest
     while correcting for top PCs and known covariates,  
     (6) annotation of significant findings, and  
-    (7) multi-marker analysis (methylation risk score) using elastic net.
+    (7) multi-marker analysis (methylation risk score) using elastic net.  
     Additionally, RaMWAS include tools for joint analysis of methlyation and
     genotype data.
     
