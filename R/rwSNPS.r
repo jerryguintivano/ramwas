@@ -24,7 +24,7 @@ ramwas5saveTopFindingsSNPs = function(param){
 
     toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
                                   position =     cpgloc[ord,2],
-                                  tstat  = mwas[ord,2],
+                                  Ftest  = mwas[ord,2],
                                   pvalue = mwas[ord,3],
                                   qvalue = mwas[ord,4]);
 
@@ -157,7 +157,7 @@ ramwas5saveTopFindingsSNPs = function(param){
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
-        cat( part, "of", nsteps, "\n");
+        message("Slice ", part, " of ", nsteps);
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
@@ -235,6 +235,7 @@ ramwasSNPs = function( param ){
         # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
+        cvsamples = rez$cvsamples;
         rm(rez);
     } # rowsubset, ncpgs
 
