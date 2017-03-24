@@ -410,17 +410,7 @@ ramwas2collectqc = function( param ){
                text = as.character(estimate));
 
     pdf(paste0(param$dirqc,"/Fragment_size_distribution_estimate.pdf"),8,8);
-    lz = lm(frdata[seq_along(estimate)] ~ estimate)
-    plot(as.vector(frdata)/1000,
-         pch = 19,
-         col="blue",
-         main="Isolated CpG coverage vs.\nfragment size distribution estimate",
-         ylab="count, thousands",
-         xlab="Distance to isolated CpGs",
-         xaxs="i");
-    lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
-          lwd = 4,
-          col="red");
+    plotFragmentSizeDistributionEstimate(frdata, estimate);
     dev.off();
     return(invisible(NULL));
 }
