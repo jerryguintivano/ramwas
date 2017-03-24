@@ -424,3 +424,17 @@ ramwas2collectqc = function( param ){
     dev.off();
     return(invisible(NULL));
 }
+
+plotFragmentSizeDistributionEstimate = function(frdata, estimate){
+    lz = lm(frdata[seq_along(estimate)] ~ estimate)
+    plot(as.vector(frdata)/1000,
+         pch = 19,
+         col="blue",
+         main="Isolated CpG coverage vs.\nfragment size distribution estimate",
+         ylab="count, thousands",
+         xlab="Distance to isolated CpGs",
+         xaxs="i");
+    lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
+          lwd = 4,
+          col="red");
+}
