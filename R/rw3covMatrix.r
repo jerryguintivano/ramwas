@@ -46,7 +46,7 @@ calc.coverage = function(rbam, cpgset, fragdistr){
 }
 
 .readRDS = function(object){
-    # readBin(object, what = 'raw', n = file.size(object));
+    # readBin(object, what = "raw", n = file.size(object));
     return(readRDS(object));
 }
 

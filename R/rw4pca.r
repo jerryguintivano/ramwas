@@ -69,15 +69,15 @@
 
 plotPCvalues = function(values, n = 40){
     pc100 = head(values,n)/sum(values)*100;
-    plot(pc100, 
-         pch = 19, 
-         col="blue", 
+    plot(pc100,
+         pch = 19,
+         col="blue",
          ylim = c(0, pc100[1]*1.05),
          xlim = c(0, length(pc100)+0.5),
          main = "Principal components",
-         xlab = "PCs", 
+         xlab = "PCs",
          ylab = "Variation Explained (%)",
-         yaxs = "i", 
+         yaxs = "i",
          xaxs = "i")
 }
 
@@ -95,7 +95,7 @@ plotPCvectors = function(e, i){
 
 postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     param = parameterPreprocess(param);
-    
+
     ### Get and match sample names
     {
         message("Matching samples in covariates and data matrix");
@@ -106,18 +106,18 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         cvsamples = rez$cvsamples;
         rm(rez);
     } # rowsubset, ncpgs, cvsamples
-    
+
     ### Prepare covariates, defactor
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrtqr = .getCovariates(param = param, 
-                                rowsubset = rowsubset, 
+        cvrtqr = .getCovariates(param = param,
+                                rowsubset = rowsubset,
                                 modelhasconstant = param$modelhasconstant);
     } # cvrtqr
-    
+
     if(is.null(e))
         e = readRDS(file = paste0(param$dirpca,"/eigen.rds"))
-    
+
     nonzeroPCs = sum(   abs(e$values/e$values[1]) >
                         length(e$values)*.Machine$double.eps );
 
@@ -130,7 +130,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
             plotPCvectors(e,i);
         dev.off();
     }
-    
+
     # Save PCs and loadings
     {
         message("Saving PC values and vectors");
@@ -150,7 +150,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                     row.names = FALSE,
                     quote = FALSE);
     }
-    
+
     # Saving PC vs. covariates association
     if(NCOL(param$covariates) > 1){
         message("Saving PC vs. covariates associations");
@@ -200,10 +200,9 @@ ramwas4PCA = function( param ){
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
         param$modelPCs = 0;
-        mwascvrtqr = .getCovariates(param = param, 
-                                    rowsubset = rowsubset, 
+        mwascvrtqr = .getCovariates(param = param,
+                                    rowsubset = rowsubset,
                                     modelhasconstant = param$modelhasconstant);
-        # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset, TRUE, param$modelhasconstant);
     } # mwascvrtqr
 
     ### PCA part
@@ -214,11 +213,11 @@ ramwas4PCA = function( param ){
             cat(file = paste0(param$dirpca,"/Log.txt"),
                  date(), ", Running Principal Component Analysis.", "\n",
                  sep = "", append = FALSE);
-            
+
             step1 = ceiling( 128*1024*1024 / length(cvsamples) / 8);
             mm = ncpgs;
             nsteps = ceiling(mm/step1);
-            
+
             nthreads = min(param$diskthreads, nsteps);
             rm(step1, mm, nsteps);
             if( nthreads > 1 ){
@@ -247,7 +246,7 @@ ramwas4PCA = function( param ){
                 rm(cl, rng, rangeset, covlist);
                 .file.remove(param$lockfile2);
             } else {
-                covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0), 
+                covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0),
                                          param = param,
                                          cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
@@ -271,7 +270,7 @@ ramwas4PCA = function( param ){
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         } # e
     }
-    
+
     postPCAprocessing(param, e);
 }
 

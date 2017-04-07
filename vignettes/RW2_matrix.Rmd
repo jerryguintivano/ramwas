@@ -105,14 +105,14 @@ pander(head(locmat))
 ```
 
 
-Now we save locations in a filematrix 
+Now we save locations in a filematrix
 and create a text file with chromosome names.\
 ```{r locSave}
 fmloc = fm.create.from.matrix(
             filenamebase = paste0(dr,"/CpG_locations"),
             mat = locmat)
 close(fmloc)
-writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), 
+writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"),
            text = chrnames)
 ```
 
@@ -168,7 +168,7 @@ ramwas4PCA(param)
 The top several PCs are marginally distinct from the rest.
 ```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
-e = readRDS(paste0(pfull$dirpca, '/eigen.rds'))
+e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 ramwas:::plotPCvalues(e$values)
 ramwas:::plotPCvectors(e,1)
 ramwas:::plotPCvectors(e,2)
@@ -185,9 +185,9 @@ the table shows R^2^ instead of correlations.
 ```{r topCorNULL}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-tblcr = read.table(paste0(pfull$dirpca, '/PC_vs_covs_corr.txt'), 
-                 header = TRUE, 
-                 sep = '\t')
+tblcr = read.table(paste0(pfull$dirpca, "/PC_vs_covs_corr.txt"),
+                 header = TRUE,
+                 sep = "\t")
 pander(head(tblcr, 5))
 ```
 
@@ -196,9 +196,9 @@ show top two PCs are correlated with
 sex and age while a number of others are affected by batch effects.
 ```{r topPvNULL}
 pfull = parameterPreprocess(param)
-tblpv = read.table(paste0(pfull$dirpca, '/PC_vs_covs_pvalue.txt'), 
-                 header = TRUE, 
-                 sep = '\t')
+tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
+                 header = TRUE,
+                 sep = "\t")
 pander(head(tblpv, 5))
 ```
 
@@ -220,9 +220,9 @@ The p-values for association between PCs and covariates changed slightly:
 ```{r topPvBatch}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-tblpv = read.table(paste0(pfull$dirpca, '/PC_vs_covs_pvalue.txt'), 
-                 header = TRUE, 
-                 sep = '\t')
+tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
+                 header = TRUE,
+                 sep = "\t")
 pander(head(tblpv, 5))
 ```
 Note that the PCs are now orthogonal to the batch effects and thus
@@ -262,7 +262,7 @@ The top finding saved in the text file are:
 pfull = parameterPreprocess(param)
 toptbl = read.table(
                 paste0(pfull$dirmwas,"/Top_tests.txt"),
-                header = TRUE, 
+                header = TRUE,
                 sep = "\t")
 pander(head(toptbl, 5))
 ```

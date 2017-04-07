@@ -4,7 +4,7 @@
     Orthonormalize Covariates
 }
 \description{
-    Takes a matrix of data frame with covariates, 
+    Takes a matrix of data frame with covariates,
     adds a constant covariate (optional), and
     orthonormalizes the set.
 }
@@ -27,7 +27,7 @@ orthonormalizeCovariates(cvrt, modelhasconstant)
 }
 \value{
     Returns a matrix with orthogonal columns with unit length,
-    whose columns spans the same space as the covariates plus a constant 
+    whose columns spans the same space as the covariates plus a constant
     (if \code{modelhasconstant} is \code{TRUE}).
 }
 \author{

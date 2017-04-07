@@ -27,11 +27,11 @@ but can be applied to other methylomic data as well.
 The analysis pipeline includes following major components (steps):
 
 1. Scanning aligned reads from BAM files
-2. Calculation of quality control measures, aggregate plots, 
+2. Calculation of quality control measures, aggregate plots,
    fragment size estimation
 3. Creation of methylation score (coverage) matrix, sample normalization
 4. Principal component analysis to capture batch effects and detect outliers
-5. Methyle-wide Association Study (MWAS) 
+5. Methyle-wide Association Study (MWAS)
    with correction for top PCs and known covariates
 6. Annotation of significant findings using BioMart database
 7. Multi-marker analysis (methylation risk score) using elastic net
@@ -68,20 +68,20 @@ help(package="ramwas") # Lists package functions
 
 # Steps of the Pipeline
 
-To illustrate the workflow of RaMWAS 
+To illustrate the workflow of RaMWAS
 we first create an artificial data set.
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE}
 suppressPackageStartupMessages(library(ramwas))
-# dr = 'D:/temp'
+# dr = "D:/temp"
 ```
 
 ```{r generateData, warning=FALSE}
 library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
-ramwas0createArtificialData(dir = dr, 
-                            verbose = FALSE, 
-                            nreads = 100e3, 
+ramwas0createArtificialData(dir = dr,
+                            verbose = FALSE,
+                            nreads = 100e3,
                             ncpgs = 25e3)
 # This is the project directory
 cat(dr)
@@ -94,7 +94,7 @@ Now the project directory `dr` contains
 
 * `bams` -- directory with the 20 simulated BAM files
 * `bam_list.txt` -- file with names of all the BAM files
-* `covariates.txt` -- file with generated 
+* `covariates.txt` -- file with generated
   age and sex variables for the samples.\
   The methylation level of some CpGs depends on these covariates.
 * `Simulated_chromosome.rds` - file with locations of all CpGs.
@@ -131,9 +131,9 @@ param = ramwasParameters(
     mmncpgs = c(5,10,50,100,500,1000,2000,3000)
 )
 ```
-Possible parameters are described in detail in 
+Possible parameters are described in detail in
 the [parameter vignette](RW5_param.Rmd).
-We also describe the role of each parameter as they are used 
+We also describe the role of each parameter as they are used
 in the walk-through below.
 
 ## Scan BAM Files, QC calculation
@@ -152,7 +152,7 @@ The `minfragmentsize` and `maxfragmentsize` parameters define
 the minimum and maximum size of DNA fragments that were sequenced.
 Please note, these parameters are not equal to the read length but
 instead reflect the length of the DNA fragments that were
-extracted and sequenced. 
+extracted and sequenced.
 
 The set of CpGs is loaded from `filecpgset` file.
 For more information see [CpG set vignette](RW4_CpG_sets.html).
@@ -197,14 +197,14 @@ with higher CpG densities.
 
 ```{r plotACbD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
-qc = readRDS(paste0(pfull$dirrqc, '/BAM007.qc.rds'))
+qc = readRDS(paste0(pfull$dirrqc, "/BAM007.qc.rds"))
 plot(qc$qc$avg.coverage.by.density)
 ```
 
 
 **Note.** The BAM files are no longer needed after this step and the
 RaMWAS raw files are 50 to 100 times smaller than the original BAMs.\
-**Note.** If a BAM file has already been scanned, 
+**Note.** If a BAM file has already been scanned,
 it is not scanned again in subsequent calls of `ramwas1scanBams`.
 This way it is easy to rerun Step 1 when additional samples are sequenced.
 
@@ -249,10 +249,10 @@ from read starts to isolated CpGs.\
 Here is an example of a good fit of estimated fragment size distribution.
 
 ```{r plotFSD, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
-qc = readRDS(paste0(pfull$dirqc, '/summary_total/qclist.rds'))
+qc = readRDS(paste0(pfull$dirqc, "/summary_total/qclist.rds"))
 frdata = qc$total$hist.isolated.dist1
 estimate = as.double(readLines(
-    paste0(pfull$dirproject,'/Fragment_size_distribution.txt')))
+    paste0(pfull$dirproject,"/Fragment_size_distribution.txt")))
 ramwas:::plotFragmentSizeDistributionEstimate(frdata, estimate)
 ```
 
@@ -304,7 +304,7 @@ RaMWAS can perform principal component analysis (PCA) on the coverage matrix.
 
 PCA has two benefits.
 First, it can capture main directions of variation in the data
-(after regressing out covariates). 
+(after regressing out covariates).
 We correct for them in the next steps of the analysis.
 Second, the sample loadings of the first PCs can indicate
 highly irregular samples which should be excluded.
@@ -343,7 +343,7 @@ The PC plot for artificial data shows first no strong components and
 no outliers in the sample loadings:
 
 ```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
-e = readRDS(paste0(pfull$dirpca, '/eigen.rds'))
+e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 ramwas:::plotPCvalues(e$values)
 ramwas:::plotPCvectors(e,2)
 rm(e)
@@ -352,18 +352,18 @@ rm(e)
 However, there is strong correlation of top PCs with age and sex.
 
 ```{r tablePCAcr, echo=FALSE, warning=FALSE, message=FALSE}
-tblcr = read.table(paste0(pfull$dirpca, '/PC_vs_covs_corr.txt'), 
-                 header = TRUE, 
-                 sep = '\t')
+tblcr = read.table(paste0(pfull$dirpca, "/PC_vs_covs_corr.txt"),
+                 header = TRUE,
+                 sep = "\t")
 pander(head(tblcr, 3))
 ```
 
 Table: Correlations\ in\ `PC_vs_covariates_corr.txt`\ file.
 
 ```{r tablePCApv, echo=FALSE, warning=FALSE, message=FALSE}
-tblpv = read.table(paste0(pfull$dirpca, '/PC_vs_covs_pvalue.txt'), 
-                 header = TRUE, 
-                 sep = '\t')
+tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
+                 header = TRUE,
+                 sep = "\t")
 pander(head(tblpv, 3))
 ```
 

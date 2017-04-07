@@ -104,7 +104,7 @@ ramwasParameters = function(
     dirSNPs,
     ...
     ){
-    # Grab all local variables and '...'
+    # Grab all local variables and "..."
     rez = c(as.list(environment()), list(...));
     # exclude missing parameters
     rez = rez[ !sapply(rez, is.symbol) ];
@@ -157,26 +157,26 @@ processCommandLine = function(.arg = NULL){
 # Fill in gaps in the parameter list
 # Make paths absolute
 parameterPreprocess = function( param ){
-    
-    ### Get from a file if 'param' is not a list
+
+    ### Get from a file if "param" is not a list
     if(is.character(param)){
         param = parametersFromFile(param);
     }
-    
+
     # Set up basic directories
-    if( is.null(param$dirproject) ) 
+    if( is.null(param$dirproject) )
         param$dirproject = getwd();
-    
+
     if( is.null(param$dirbam))
         param$dirbam = "bams";
     param$dirbam = makefullpath(param$dirproject, param$dirbam);
-    
+
     if( is.null(param$dirfilter))
         param$dirfilter = FALSE;
     if( is.logical(param$dirfilter)){
         if( param$dirfilter ){
             param$dirfilter = paste0( param$dirproject,
-                            "/Filter_", param$scoretag, 
+                            "/Filter_", param$scoretag,
                             "_", param$minscore);
         } else {
             param$dirfilter = param$dirproject;
@@ -184,14 +184,14 @@ parameterPreprocess = function( param ){
     } else {
         param$dirfilter = makefullpath(param$dirproject, param$dirfilter);
     }
-    
+
     if( is.null(param$dirrbam))
         param$dirrbam = "rds_rbam";
     param$dirrbam = makefullpath( param$dirfilter, param$dirrbam);
-    
+
     if( is.null(param$dirrqc)) param$dirrqc = "rds_qc";
     param$dirrqc = makefullpath( param$dirfilter, param$dirrqc);
-    
+
     if( is.null(param$dirqc)) param$dirqc = "qc";
     param$dirqc = makefullpath( param$dirfilter, param$dirqc);
 
@@ -212,7 +212,7 @@ parameterPreprocess = function( param ){
     if( !is.null(param$bamnames)){
         param$bamnames = gsub("\\.bam$", "", param$bamnames, ignore.case = TRUE)
     }
-    
+
     ### BAM2sample processing
     if( !is.null(param$filebam2sample) & is.null(param$bam2sample)){
         filename = makefullpath(param$dirproject, param$filebam2sample);
@@ -242,7 +242,7 @@ parameterPreprocess = function( param ){
                               stringsAsFactors = FALSE, check.names = FALSE);
         rm(filename, sep);
     }
-    
+
     # Set param$dirtemp
     if( is.null(param$dirtemp))
         param$dirtemp = "temp";
@@ -257,7 +257,7 @@ parameterPreprocess = function( param ){
             if( is.null(param$dircoveragenorm))
                 param$dircoveragenorm =
                     paste0("coverage_norm_", length(param$bam2sample));
-    
+
         } else {
             if( is.null(param$dircoveragenorm))
                 param$dircoveragenorm = "coverage_norm";
@@ -265,7 +265,7 @@ parameterPreprocess = function( param ){
     }
     param$dircoveragenorm =
         makefullpath(param$dirfilter, param$dircoveragenorm);
-    
+
     # More checks with covariates
     if( !is.null(param$covariates)){
         param$covariates[[1]] = as.character(param$covariates[[1]]);
@@ -292,7 +292,7 @@ parameterPreprocess = function( param ){
             # library(digest);
             hash = digest(
                 object = paste(sort(param$modelcovariates), collapse = "\t"),
-                algo = "crc32", 
+                algo = "crc32",
                 serialize = FALSE);
             param$dirpca = sprintf("PCA_%02d_cvrts_%s",
                                    length(param$modelcovariates), hash);
@@ -301,14 +301,14 @@ parameterPreprocess = function( param ){
         }
     }
     param$dirpca = makefullpath(param$dircoveragenorm, param$dirpca);
-    
+
     # Set param$dirmwas
     if( is.null(param$dirmwas) )
         param$dirmwas = paste0("Testing_",
                                param$modeloutcome,"_",
                                param$modelPCs,"_PCs");
     param$dirmwas = makefullpath(param$dirpca, param$dirmwas);
-    
+
     # Set QQ-plot title
     if( is.null(param$qqplottitle)){
         qqplottitle = paste0("Testing ", param$modeloutcome, "\n",
@@ -326,7 +326,7 @@ parameterPreprocess = function( param ){
     if( is.null(param$dircv))
         param$dircv = sprintf("%s/CV_%02d_folds",
                               param$dirmwas, param$cvnfolds);
-    
+
     ### CpG set should exist
     if( !is.null(param$filecpgset)){
         param$filecpgset =
@@ -371,12 +371,12 @@ parameterPreprocess = function( param ){
         if( is.null(param$biflank))
             param$biflank = 0;
     }
-    
+
     # SNPs analysis
     if(is.null(param$dirSNPs))
         param$dirSNPs = paste0("Testing_wSNPs_",
-                               param$modeloutcome, '_',
-                               length(param$modelcovariates), 'cvrts_',
+                               param$modeloutcome, "_",
+                               length(param$modelcovariates), "cvrts_",
                                param$modelPCs, "PCs");
     param$dirSNPs = makefullpath( param$dircoveragenorm, param$dirSNPs);
     if(!is.null(param$fileSNPs))

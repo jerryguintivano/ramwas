@@ -56,10 +56,10 @@ findBestNpvs = function(pv, n){
     if(n < 1)
         return(which(pv <= n));
     if(n > length(pv))
-        stop('n > length(pv) in findBestNpvs() call');
+        stop("n > length(pv) in findBestNpvs() call");
     if(n == length(pv))
         return(seq_len(n));
-    
+
     # Thresholds are chosen a reasonable for p-value input
     pvthr = c(10^((-100):0), .Machine$double.xmax);
     fi = findInterval(pv, pvthr);
@@ -108,12 +108,12 @@ cachedRDSload = function(rdsfilename){
 orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     if(any(sapply(lapply(cvrt, is.na), any)))
         stop("Missing values are not allowed in the covariates")
-    if(modelhasconstant) {
+    if(modelhasconstant){
         cvrtset = c(const = list(rep(1, nrow(cvrt))), cvrt);
     } else {
         cvrtset = cvrt;
     }
-    if(is.list(cvrtset)) {
+    if(is.list(cvrtset)){
         factorset = which(sapply(cvrtset, class) %in% c("character","factor"));
         for( ind in factorset ){ # ind = 3
             fctr = factor(cvrtset[[ind]]);
@@ -132,7 +132,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 # match those in "covariates" parameter
 # get the total number of CpGs along the way
 .matchCovmatCovar = function( param ){
-    
+
     # Sample names in covariates
     cvsamples = param$covariates[[1]];
 
@@ -143,7 +143,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     close(fm);
 
     # Match samples in covariates with those in coverage matrix
-    if(is.null(cvsamples)) {
+    if(is.null(cvsamples)){
         # if covariates are not set, assume they match.
         rowsubset = NULL;
     } else {
@@ -151,7 +151,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
         if( any(rowsubset==0) )
             stop( paste("Unknown samples in covariate file:",
                         cvsamples[head(which(rowsubset==0))]) );
-    
+
         # if no reordering is required, set rowsubset=NULL
         if( length(cvsamples) == length(fmsamples) ){
             if( all(rowsubset == seq_along(rowsubset)) ){
@@ -170,7 +170,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
                           modelhasconstant){
     # Named covariates
     cvrt = param$covariates[ param$modelcovariates ];
-    
+
     ### Add PCs as covariates
     if( param$modelPCs > 0 ){
         e = readRDS(paste0(param$dirpca,"/eigen.rds"));
@@ -186,7 +186,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     if(normalize){
         rez = t(orthonormalizeCovariates(mwascvrtqr, modelhasconstant));
     } else {
-        if(modelhasconstant) {
+        if(modelhasconstant){
             rez = t(cbind(rep(1, nrow(mwascvrtqr)),mwascvrtqr));
         } else {
             rez = t(mwascvrtqr); #;

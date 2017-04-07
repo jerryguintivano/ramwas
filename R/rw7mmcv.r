@@ -2,29 +2,29 @@
 plotROC = function(outcome, forecast){
     b = outcome[order(forecast)];
     b = (b == max(b));
-    
+
     countLeftOf = 0:length(b);
     countHereOrRight = length(b) - countLeftOf;
     onesLeftOf = c(0L,cumsum(b));
     totalOnes = tail(onesLeftOf,1);
-    
+
     onesHereOrRight = totalOnes - onesLeftOf
     zeroesHereOrRight = countHereOrRight - onesHereOrRight;
-    
+
     fpr = zeroesHereOrRight / zeroesHereOrRight[1]
     tpr = onesHereOrRight / onesHereOrRight[1]
-    
+
     plot(x = fpr,
-         y = tpr, 
-         xlim = c(0,1), 
-         ylim = c(0,1), 
-         xaxs = 'i', 
-         yaxs = 'i', 
-         type = 'l', 
-         col = 'blue', 
+         y = tpr,
+         xlim = c(0,1),
+         ylim = c(0,1),
+         xaxs = "i",
+         yaxs = "i",
+         type = "l",
+         col = "blue",
          lwd = 2,
-         xlab = 'False positive rate', 
-         ylab = 'True positive rate');
+         xlab = "False positive rate",
+         ylab = "True positive rate");
     abline(a = 0, b = 1);
 }
 
@@ -33,7 +33,7 @@ plotROC = function(outcome, forecast){
 ramwas7ArunMWASes = function(param){
     param = parameterPreprocess(param);
     if( param$toppvthreshold < 1 )
-    	param$toppvthreshold = 50;
+        param$toppvthreshold = 50;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
     parameterDump(dir = param$dircv, param = param,
                     toplines = c("dircv", "mmncpgs", "mmalpha",
@@ -113,7 +113,7 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
 
 # Plot true outcome vs. prediction
 # with correlations and p-value in the title
-plotPrediction = function(param, outcome, forecast, 
+plotPrediction = function(param, outcome, forecast,
                           cpgs2use, main, dfFull = NULL){
     rng = range(c(outcome, forecast));
     stats = predictionStats(outcome, forecast, dfFull);
@@ -159,7 +159,7 @@ ramwas7BrunElasticNet = function(param){
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
-	    # rez = ramwas:::.matchCovmatCovar( param );
+        # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         rm(rez);
@@ -233,20 +233,20 @@ ramwas7BrunElasticNet = function(param){
                                        type = "response",
                                        s = "lambda.min",
                                        alpha = param$mmalpha);
-            	# 
-            	# z1a = cv.glmnet(x = coverageTRAIN,
-            	# 					y = factor(as.vector(outcome[!exclude])),
-            	# 					nfolds = param$cvnfolds,
-            	# 					# keep = TRUE,
-            	# 					parallel = FALSE,
-            	# 					alpha = param$mmalpha,
-            	# 					family = "binomial");
-            	# z2a = predict.cv.glmnet(object = z1a,
-            	# 							  newx = coverageTEST,
-            	# 							  type = "response",
-            	# 							  s = "lambda.min",
-            	# 							  alpha = param$mmalpha);
-            	
+                #
+                # z1a = cv.glmnet(x = coverageTRAIN,
+                #                     y = factor(as.vector(outcome[!exclude])),
+                #                     nfolds = param$cvnfolds,
+                #                     # keep = TRUE,
+                #                     parallel = FALSE,
+                #                     alpha = param$mmalpha,
+                #                     family = "binomial");
+                # z2a = predict.cv.glmnet(object = z1a,
+                #                               newx = coverageTEST,
+                #                               type = "response",
+                #                               s = "lambda.min",
+                #                               alpha = param$mmalpha);
+
                 forecast0[1,exclude] = forecast0[1,exclude] + z2;
                 forecast0[2,exclude] = forecast0[2,exclude] + 1;
                 rm(z1, z2);
@@ -333,7 +333,7 @@ ramwas7CplotByNCpGs = function(param){
     message("Working in: ",param$dircv);
     cors = double(length( param$mmncpgs ));
     corp = double(length( param$mmncpgs ));
-    datalist = vector('list', length(param$mmncpgs));
+    datalist = vector("list", length(param$mmncpgs));
     for( i in seq_along(param$mmncpgs) ){ # i = 1
         cpgs2use = param$mmncpgs[i];
         data = readRDS(sprintf(
@@ -349,7 +349,7 @@ ramwas7CplotByNCpGs = function(param){
     }
 
     cl = list(x = param$mmncpgs,
-              cors = cors, 
+              cors = cors,
               corp = corp);
     saveRDS(file = sprintf( "%s/rds/cor_data_alpha=%f.rds",
                             param$dircv,
@@ -361,7 +361,7 @@ ramwas7CplotByNCpGs = function(param){
                  param$mmalpha) );
     plotCVcors(cl, param);
     dev.off();
-    
+
     if( length(unique(datalist[[1]]$outcome)) == 2 ){
         pdf( sprintf("%s/ROC_alpha=%f.pdf",
                      param$dircv,

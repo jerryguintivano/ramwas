@@ -31,13 +31,15 @@ and thus affect methylation measurements.
 can account for a possible effect of SNPs
 by testing the following model:
 
-$$\mu_i = \beta_0 + outcome * \beta_1 + {outcome} * {SNP}_i * \beta_2 + {SNP}_i \beta_3  + \gamma * { cvrt} + \epsilon$$
+$$\mu_i = \beta_0 + outcome * \beta_1 + {outcome} * {SNP}_i * \beta_2 +
+{SNP}_i \beta_3  + \gamma * { cvrt} + \epsilon$$
 
 where
 
 * $\mu_i$ -- methylaiton measurement for $i$-th CpG.
 * $outcome$ -- phenotype of interest.
-* $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype) at the $i$-th CpG.
+* $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype)
+at the $i$-th CpG.
 * $cvrt$ -- covariates and the principal components.
 * $\epsilon$ -- noise.
 
@@ -66,7 +68,7 @@ for the integer column `chr` in the location filematrix.
   Row names must be sample names.\
   Each column has data for a single location.
   Columns must match rows of the location filematrix.
-* 'SNPs.*' -- filematrix with genotype data, matching the coverage matrix.
+* "SNPs.*" -- filematrix with genotype data, matching the coverage matrix.
 
 
 First, we load the package and set up a working directory.
@@ -117,7 +119,7 @@ pander(head(locmat))
 ```
 
 
-Now we save locations in a filematrix 
+Now we save locations in a filematrix
 and create a text file with chromosome names.\
 ```{r locSave}
 fmloc = fm.create.from.matrix(
@@ -127,14 +129,15 @@ close(fmloc)
 writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), text = chrnames)
 ```
 
-Finally, we create methylation and SNP matrices 
+Finally, we create methylation and SNP matrices
 and populate them.
 ```{r setseed3, echo=FALSE}
 set.seed(18090212)
 ```
 ```{r fillDataMat}
 fmm = fm.create(paste0(dr,"/Coverage"), nrow = nsamples, ncol = nvariables)
-fms = fm.create(paste0(dr,"/SNPs"), nrow = nsamples, ncol = nvariables, size = 1, type = 'integer')
+fms = fm.create(paste0(dr,"/SNPs"), nrow = nsamples, ncol = nvariables,
+                size = 1, type = "integer")
 
 # Row names of the matrices are set to sample names
 rownames(fmm) = as.character(covariates$sample)
@@ -144,16 +147,16 @@ rownames(fms) = as.character(covariates$sample)
 byrows = 2000
 for( i in seq_len(nvariables/byrows) ){ # i=1
     ind = (1:byrows) + byrows*(i-1)
-    
+
     snps = rbinom(n = byrows * nsamples, size = 2, prob = 0.2)
-	dim(snps) = c(nsamples, byrows)
+    dim(snps) = c(nsamples, byrows)
     fms[,ind] = snps
-    
+
     slice = double(nsamples*byrows)
     dim(slice) = c(nsamples, byrows)
     slice[,  1:225] = slice[,  1:225] + covariates$sex / 50 / sd(covariates$sex)
     slice[,101:116] = slice[,101:116] + covariates$age / 16 / sd(covariates$age)
-    slice = slice + 
+    slice = slice +
             ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
             snps/1.5 +
             runif(nsamples*byrows)/2
@@ -178,7 +181,7 @@ param = ramwasParameters(
     modelcovariates = "batch",
     modeloutcome = "sex",
     toppvthreshold = 20,
-    fileSNPs = 'SNPs'
+    fileSNPs = "SNPs"
 )
 ```
 

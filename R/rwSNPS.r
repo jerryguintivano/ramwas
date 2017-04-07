@@ -1,5 +1,3 @@
-
-
 # Save top findings in a text file
 # with annotation
 ramwas5saveTopFindingsSNPs = function(param){
@@ -42,18 +40,18 @@ ramwas5saveTopFindingsSNPs = function(param){
 
 # Job function for MWAS
 .ramwasSNPsJob = function(rng, param, mwascvrtqr, rowsubset){
-    
+
     testPhenotypeSNPs = function(phenotype, slice0, cvrtqr0, snps0){
         mycov = matrix(phenotype, nrow = 1);
         slice = slice0;
         snpss = snps0;
         cvrtq = cvrtqr0;
-        
+
         nsamples = nrow(slice);
-        
+
         if( any(is.na(mycov)) ){
             keep = which(colSums(is.na(mycov))==0);
-    
+
             mycov = mycov[, keep, drop=FALSE];
             slice = slice[keep, , drop=FALSE];
             snpss = snpss[keep, , drop=FALSE];
@@ -61,53 +59,57 @@ ramwas5saveTopFindingsSNPs = function(param){
             cvrtq = t( qr.Q(qr(t(cvrtq))) );
             rm(keep);
         }
-    
-        
+
+
         # methlation
         # slice
-        
+
         # outcome variable
         varot = rep(mycov, ncol(slice));
         dim(varot) = dim(slice);
-        
+
         # outcome*SNP matrix
         matos = snpss * varot;
-        
+
         # pure SNPs
         # snpss
-        
-        
+
+
         # Rezidualize w.r.t. covariates
         slice = slice - crossprod(cvrtq, cvrtq %*% slice); # slice[1:8,1:8]
         varot = varot - crossprod(cvrtq, cvrtq %*% varot); # varot[1:8,1:8]
         matos = matos - crossprod(cvrtq, cvrtq %*% matos); # matos[1:8,1:8]
         snpss = snpss - crossprod(cvrtq, cvrtq %*% snpss); # snpss[1:8,1:8]
-        
+
         # Rezidualize w.r.t. SNPs
-        snpss = snpss / rep(pmax(sqrt(colSums(snpss^2)), 1e-16), each = nsamples);
-        
+        snpss = snpss / rep(pmax(sqrt(colSums(snpss^2)), 1e-16),
+                            each = nsamples);
+
         slice = slice - snpss * rep(colSums(slice*snpss), each = nsamples);
         varot = varot - snpss * rep(colSums(varot*snpss), each = nsamples);
         matos = matos - snpss * rep(colSums(matos*snpss), each = nsamples);
-        
+
         # Normalize
-        
-        slice = slice / rep(pmax(sqrt(colSums(slice^2)), 1e-16), each = nsamples);
-        varot = varot / rep(pmax(sqrt(colSums(varot^2)), 1e-16), each = nsamples);
-        matos = matos / rep(pmax(sqrt(colSums(matos^2)), 1e-16), each = nsamples);
-        
+
+        slice = slice / rep(pmax(sqrt(colSums(slice^2)), 1e-16),
+                            each = nsamples);
+        varot = varot / rep(pmax(sqrt(colSums(varot^2)), 1e-16),
+                            each = nsamples);
+        matos = matos / rep(pmax(sqrt(colSums(matos^2)), 1e-16),
+                            each = nsamples);
+
         cr10 = colSums(slice*varot);
         cr20 = colSums(slice*matos);
         cr12 = colSums(varot*matos);
-        
+
         R2 = (cr10^2 + cr20^2 - 2*cr12*cr10*cr20) / (1 - cr12^2);
-    
+
         # hist(R2,100);
-    
+
         ###
         nVarTested = 2;
         dfFull = ncol(cvrtq) - nrow(cvrtq) - nVarTested - 1; # One for SNPs
-        
+
         if(dfFull <= 0)
             return( list(Rsquared = 0,
                          Fstat = 0,
@@ -115,7 +117,7 @@ ramwas5saveTopFindingsSNPs = function(param){
                          nVarTested = nVarTested,
                          dfFull = dfFull,
                          statname = paste0("-F_",nVarTested)) );
-    
+
         rsq2F = function(x){
             return( x / (1 - pmin(x,1)) * (dfFull/nVarTested) );
         }
@@ -124,12 +126,14 @@ ramwas5saveTopFindingsSNPs = function(param){
         }
         ff = rsq2F(R2);
         pv = F2pv(ff);
-    
+
         ### Check
-    	# lm1 = lm(slice[,1] ~ phenotype + phenotype*snps0[,1] + snps0[,1] + t(cvrtq)[,-1])
-    	# lm0 = lm(slice[,1] ~                                   snps0[,1] + t(cvrtq)[,-1])
-    	# anova(lm0,lm1);
-    	# pv[1]
+        # lm1 = lm(slice[,1] ~ phenotype + phenotype*snps0[,1] +
+        #                            snps0[,1] + t(cvrtq)[,-1])
+        # lm0 = lm(slice[,1] ~
+        #                            snps0[,1] + t(cvrtq)[,-1])
+        # anova(lm0,lm1);
+        # pv[1]
         return( list(
             Rsquared = R2,
             Fstat = ff,
@@ -139,17 +143,17 @@ ramwas5saveTopFindingsSNPs = function(param){
             statname = paste0("-F_",nVarTested)) );
     }
 
-    
+
     # rng = rangeset[[1]];
     # library(filematrix);
     fmm = fm.open( filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
                   readonly = TRUE,
                   lockfile = param$lockfile2);
-    
+
     fms = fm.open( filenamebase = paste0(param$fileSNPs),
                   readonly = TRUE,
                   lockfile = param$lockfile2);
-    
+
     outmat = double(3*(rng[2]-rng[1]+1));
     dim(outmat) = c((rng[2]-rng[1]+1),3);
 
@@ -163,7 +167,7 @@ ramwas5saveTopFindingsSNPs = function(param){
 
         slice = fmm[,fr:to];
         snps =  fms[,fr:to];
-        if( !is.null(rowsubset) ) {
+        if( !is.null(rowsubset) ){
             slice = slice[rowsubset,];
             snps  = snps[ rowsubset,];
         }
@@ -204,11 +208,11 @@ ramwas5saveTopFindingsSNPs = function(param){
 ramwasSNPs = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
-    
+
     # Fix parameters
-    
+
     dir.create(param$dirSNPs, showWarnings = FALSE, recursive = TRUE);
-    
+
     parameterDump(dir = param$dirSNPs, param = param,
                       toplines = c("fileSNPs", "dirSNPs",
                                    "dirpca", "dircoveragenorm",
@@ -242,8 +246,8 @@ ramwasSNPs = function( param ){
     ### Prepare covariates, defactor
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
-        mwascvrtqr = .getCovariates(param = param, 
-                                    rowsubset = rowsubset, 
+        mwascvrtqr = .getCovariates(param = param,
+                                    rowsubset = rowsubset,
                                     modelhasconstant = param$modelhasconstant);
         # mwascvrtqr = ramwas:::.getCovariates(param, rowsubset);
     } # mwascvrtqr
@@ -260,7 +264,7 @@ ramwasSNPs = function( param ){
             # colnames(fm) = c("cor","t-test","p-value","q-value");
             colnames(fm) = c("R-squared","F-test","p-value","q-value");
         } else {
-            stop('Categorical outcome in not supported for analysis with SNPs')
+            stop("Categorical outcome in not supported for analysis with SNPs")
         }
         close(fm);
     }
@@ -269,13 +273,14 @@ ramwasSNPs = function( param ){
     {
         message("Running MWAS");
         cat(file = paste0(param$dirSNPs,"/Log.txt"),
-             date(), ", Running methylome-wide association study with SNPs.", "\n",
-             sep = "", append = FALSE);
-        
+            date(), ", Running methylome-wide association study with SNPs.",
+            "\n",
+            sep = "", append = FALSE);
+
         step1 = ceiling( 512*1024*1024 / length(cvsamples) / 8);
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
-        
+
         nthreads = min(param$diskthreads, nsteps);
         rm(step1, mm, nsteps);
         if( nthreads > 1 ){
@@ -330,17 +335,20 @@ ramwasSNPs = function( param ){
     ### QQ-plot
     {
         if( is.null(param$qqplottitleSNPs) ){
-            qqplottitleSNPs = paste0("Testing ",param$modeloutcome," with SNPs\n",
-                             param$modelPCs," PC",if(param$modelPCs!=1)"s"else"");
+            qqplottitleSNPs = paste0("Testing ", param$modeloutcome,
+                                     " with SNPs\n",
+                                     param$modelPCs,
+                                     " PC",if(param$modelPCs!=1)"s"else"");
             if(length(param$modelcovariates)>0)
                qqplottitleSNPs = paste0(qqplottitleSNPs, " and ",
                                  length(param$modelcovariates)," covariate",
-                                 if(length(param$modelcovariates)!=1)"s:\n"else": ",
+                                 if(length(param$modelcovariates)!=1)
+                                     "s:\n"else": ",
                                  paste0(param$modelcovariates,collapse = ", "))
             param$qqplottitleSNPs = qqplottitleSNPs;
             rm(qqplottitleSNPs);
         }
-            
+
         message("Creating QQ-plot");
         pdf(paste0(param$dirSNPs, "/QQ_plot.pdf"),7,7);
         qqPlotFast(pvalues);

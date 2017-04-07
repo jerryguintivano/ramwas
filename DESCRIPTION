@@ -1,7 +1,7 @@
 Package: ramwas
 Type: Package
 Title: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
-Version: 0.99.13
+Version: 0.99.15
 Date: 2017-03-20
 Authors@R: c(person("Andrey A", "Shabalin",
                     role = c("aut", "cre"),

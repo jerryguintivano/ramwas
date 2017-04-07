@@ -15,7 +15,8 @@ ramwas0createArtificialData = function(dir,
                                        randseed = 18090212,
                                        verbose = TRUE){
 
-    #dir="D:/temp";nsamples=20;nreads=1e6;ncpgs=500e3;randseed=18090212;verbose=TRUE
+    # dir="D:/temp";nsamples=20;nreads=1e6;
+    # ncpgs=500e3;randseed=18090212;verbose=TRUE
     set.seed(randseed);
 
     # Create Directory
@@ -32,7 +33,8 @@ ramwas0createArtificialData = function(dir,
 
         cpgset = list( chr1 = locs );
         saveRDS(object = cpgset,
-                file = paste0(dir,"/Simulated_chromosome.rds"), compress = "xz")
+                file = paste0(dir,"/Simulated_chromosome.rds"),
+                compress = "xz");
     } # locs, cpgset, chrlen, /Single_chromosome.rds
 
     # Fragment size distribution, with 150 median fragment size
@@ -53,7 +55,7 @@ ramwas0createArtificialData = function(dir,
     #     rm(coverage, cpgset, locs)
     # } # locsgood, -locs, -cpgset
     locsgood = locs;
-    
+
     # Age covariate and effects
     {
         age = sample(20:80, size = nsamples, replace = TRUE)

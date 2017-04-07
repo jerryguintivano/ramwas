@@ -6,7 +6,7 @@
 \description{
     RaMWAS parameter vector which is used by major functions of the pipeline
     is a regular R list and setting it does not require a special function.
-    However, using this function makes it much simpler in RStudio 
+    However, using this function makes it much simpler in RStudio
     as the names and role of every parameter is showed in the RStudio IDE.
 }
 \usage{
@@ -62,80 +62,80 @@ ramwasParameters(
 \arguments{
     \item{dirproject}{
         The project directory. Default is currect directory. \cr
-        Files specified by 'file*' parameters are looked for here, 
+        Files specified by "file*" parameters are looked for here,
         unless they have full path specified.
     }
     \item{dirfilter}{
-        By default, the same as 'dirproject'. \cr
+        By default, the same as "dirproject". \cr
         All files created by RaMWAS are created within this directory. \cr
-        If the user wants to test different read filtering rules, 
-        they can dirfilter to TRUE. 
-        This will set it to something like "Filter_MAPQ_4", 
-        there "MAPQ" is the BAM field used for filtering and 
+        If the user wants to test different read filtering rules,
+        they can dirfilter to TRUE.
+        This will set it to something like "Filter_MAPQ_4",
+        there "MAPQ" is the BAM field used for filtering and
         "4" is the thredhold.
     }
     \item{dirrbam}{
-        Directory where RaMWAS saves RaMWAS raw data files 
+        Directory where RaMWAS saves RaMWAS raw data files
         (read start locations) after scanning BAMs. \cr
-        It is "rds_rbam" by default and located in 'dirfilter'.
+        It is "rds_rbam" by default and located in "dirfilter".
     }
     \item{dirrqc}{
         Directory where RaMWAS saves QC files in R format after scanning BAMs.
         \cr
-        It is "rds_qc" by default and located in 'dirfilter'.
+        It is "rds_qc" by default and located in "dirfilter".
     }
     \item{dirqc}{
-        Directory where RaMWAS saves QC plots and text files (BAM QC info) 
+        Directory where RaMWAS saves QC plots and text files (BAM QC info)
         after scanning BAMs. \cr
-        It is "qc" by default and located in 'dirfilter'.
+        It is "qc" by default and located in "dirfilter".
     }
     \item{dircoveragenorm}{
         Directory where RaMWAS saves coverage matrix at Step 3 of the pipeline.
         \cr
-        It is "coverage_norm_123" by default (123 is the number of samples) 
-        and located in 'dirfilter'.
+        It is "coverage_norm_123" by default (123 is the number of samples)
+        and located in "dirfilter".
     }
     \item{dirtemp}{
-        Directory where RaMWAS stores temporary files 
+        Directory where RaMWAS stores temporary files
         during construction of coverage matrix at Step 3 of the pipeline. \cr
-        It is "temp" by default and located in 'dircoveragenorm'. \cr
-        For better performance it can be set to a location 
-        on a different hard drive than 'dircoveragenorm'.
+        It is "temp" by default and located in "dircoveragenorm". \cr
+        For better performance it can be set to a location
+        on a different hard drive than "dircoveragenorm".
     }
     \item{dirpca}{
         Directory where RaMWAS saves results of PCA analysis at Step 4
         of the pipeline. \cr
-        It is "PCA_12_cvrts_0b0a0c" by default and located in 'dircoveragenorm',
-        where 12 is the number of covariates regressed out and 
-        '0b0a0c' is a unique code to differenciate 
+        It is "PCA_12_cvrts_0b0a0c" by default and located in "dircoveragenorm",
+        where 12 is the number of covariates regressed out and
+        "0b0a0c" is a unique code to differenciate
         different sets of 12 covariates.
     }
     \item{dirmwas}{
         Directory where RaMWAS saves results of MWAS analysis at Step 5
         of the pipeline. \cr
-        It is "Testing_age_7_PCs" by default and located in 'dirpca', where
-        'age' is the phenotype being tested and 
-        '7' is number of top PCs included in the model.
+        It is "Testing_age_7_PCs" by default and located in "dirpca", where
+        "age" is the phenotype being tested and
+        "7" is number of top PCs included in the model.
     }
     \item{dircv}{
-        Directory where RaMWAS saves results of Methylation Risk Score analysis 
+        Directory where RaMWAS saves results of Methylation Risk Score analysis
         at Step 7 of the pipeline. \cr
-        It is "CV_10_folds" by default and located in 'dirmwas', where
+        It is "CV_10_folds" by default and located in "dirmwas", where
         10 is number of folds in N-fold cross validation.
     }
     \item{dirbam}{
         Location of BAM files. \cr
-        If not absolute, it is considered to be relative to 'dirproject'.
+        If not absolute, it is considered to be relative to "dirproject".
     }
     \item{filebamlist}{
-        If defined, must point to a text file with one BAM file name per line. 
+        If defined, must point to a text file with one BAM file name per line.
         \cr
-        BAM file names may include path, relative to 'dirbam' or absolute. \cr
+        BAM file names may include path, relative to "dirbam" or absolute. \cr
     }
     \item{bamnames}{
         A character vector with BAM file names. \cr
-        Not required if 'filebamlist' is specified. \cr
-        BAM file names may include path, relative to 'dirbam' or absolute.
+        Not required if "filebamlist" is specified. \cr
+        BAM file names may include path, relative to "dirbam" or absolute.
     }
     \item{filebam2sample}{
         Allowes multiple BAMs contain information about common sample. \cr
@@ -143,15 +143,15 @@ ramwasParameters(
     }
     \item{bam2sample}{
         Allowes multiple BAMs contain information about common sample. \cr
-        Not required if 'filebam2sample' is specified. \cr
+        Not required if "filebam2sample" is specified. \cr
         Must be a list like \code{list(sample1 = c("bam1","bam2","bam3"),
-        sample2 = "bam2")} 
+        sample2 = "bam2")}
     }
     \item{filecpgset}{
         Name of the file storing a set of CpGs.
     }
     \item{filenoncpgset}{
-        If defined, must point to a file storing vetted 
+        If defined, must point to a file storing vetted
         locations away from any CpGs.
     }
     \item{filecovariates}{
@@ -164,7 +164,7 @@ ramwasParameters(
     \item{covariates}{
         Data frame with phenotype and covariates
         for the available samples. \cr
-        Not required if 'filecovariates' is specified.
+        Not required if "filecovariates" is specified.
     }
     \item{cputhreads}{
         Maximum number of CPU intensive tasks running in parallel. \cr
@@ -175,16 +175,16 @@ ramwasParameters(
         Set to 2 by default.
     }
     \item{usefilelock}{
-        If TRUE, parallel jobs are prevented from simultaneous access 
-        to file matrices. \cr 
+        If TRUE, parallel jobs are prevented from simultaneous access
+        to file matrices. \cr
         Can improve performance on some systems.
     }
     \item{scoretag}{
         Reads from BAM files are filtered by this tag. \cr
-        The 'minscore' parameter defines the minimum admissible score.
+        The "minscore" parameter defines the minimum admissible score.
     }
     \item{minscore}{
-        Reads from BAM files with score 'scoretag' below this are excluded.
+        Reads from BAM files with score "scoretag" below this are excluded.
     }
     \item{maxrepeats}{
         Duplicate reads (reads with the same start position and direction)
@@ -200,14 +200,14 @@ ramwasParameters(
     \item{buffersize}{
         Coverage matrix transposition is performed using buffers of this size.
         \cr
-        Larger 'buffersize' improves speed of Step 3 of the pipeline, but
+        Larger "buffersize" improves speed of Step 3 of the pipeline, but
         requires more memory. \cr
         Default is 1e9, i.e. 1 GB.
     }
     \item{doublesize}{
         The coverage matrix is stored with this number of bytes per value. \cr
         Set to 8 for full (double) precision. \cr
-        Set to 4 to use single precision and 
+        Set to 4 to use single precision and
         create 50\% smaller coverage filematrix.
     }
     \item{modelcovariates}{
@@ -221,7 +221,7 @@ ramwasParameters(
     }
     \item{modelhasconstant}{
         By default, the tested linear model includes a constant. \cr
-        To exclude it, set 'modelhasconstant' parameter to \code{FALSE}.
+        To exclude it, set "modelhasconstant" parameter to \code{FALSE}.
     }
     \item{qqplottitle}{
         The title of the QQ-plot produced by MWAS (step 4 of the pipeline).
@@ -262,7 +262,7 @@ ramwasParameters(
     }
     \item{biattributes}{
         Parameter for BiomaRt annotation (Step 6 of the pipeline). \cr
-        BioMart attributes of interest, 
+        BioMart attributes of interest,
         see \code{\link[biomaRt]{listAttributes}}. \cr
         Set to \code{c("hgnc_symbol","entrezgene","strand")} by default.
     }
@@ -274,7 +274,7 @@ ramwasParameters(
     }
     \item{biflank}{
         Parameter for BiomaRt annotation (Step 6 of the pipeline). \cr
-        Allowed distance between CpGs and genes 
+        Allowed distance between CpGs and genes
         or other annotation track elements. \cr
         Set to 0 by default, requiring direct overlap.
     }
@@ -294,7 +294,7 @@ ramwasParameters(
     The function simply collects all the parameters in a list. \cr
     The main benefit of the function is that the user does not
     need to memorize the names of RaMWAS parameters.
-    
+
     Here is how it helps in RStudio: \figure{hint.png}
 }
 \value{
@@ -307,5 +307,5 @@ ramwasParameters(
     See vignettes: \code{browseVignettes("ramwas")}.
 }
 \examples{
-ramwasParameters(dirproject = '.', cputhreads = 4)
+ramwasParameters(dirproject = ".", cputhreads = 4)
 }

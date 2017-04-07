@@ -39,26 +39,26 @@ export(
     ramwasSNPs
 )
 
-importFrom(methods, 
+importFrom(methods,
     setRefClass, new)
-importFrom(grDevices, 
+importFrom(grDevices,
     dev.off, pdf)
-importFrom(graphics, 
+importFrom(graphics,
     abline, legend, lines, par, plot,
     points, title, axis, barplot, hist)
-importFrom(stats, 
+importFrom(stats,
     complete.cases, pf, pt, qf, qt, optim,
     model.matrix, quantile, median, qlogis,
     plogis, qbeta, cor, lm, qchisq, runif, sd)
 importFrom(utils,
     flush.console, head, tail,
     tail.matrix, read.table, write.table)
-importFrom(GenomicAlignments, 
+importFrom(GenomicAlignments,
     cigarWidthAlongQuerySpace, cigarWidthAlongReferenceSpace)
-importFrom(Rsamtools, 
+importFrom(Rsamtools,
     scanBamFlag, ScanBamParam, BamFile,
     open.BamFile, scanBam, asBam)
-importFrom(parallel, 
+importFrom(parallel,
     makeCluster, clusterEvalQ, clusterApplyLB,
     stopCluster, detectCores, clusterExport)
 importFrom(KernSmooth, locpoly)
@@ -67,7 +67,7 @@ importFrom(glmnet, cv.glmnet, predict.cv.glmnet)
 importFrom(biomaRt, useMart, getBM)
 importFrom(Biostrings, matchPattern)
 
-importFrom(filematrix, 
+importFrom(filematrix,
     fm.create, fm.load, fm.open,
     fm.create.from.matrix, closeAndDeleteFiles)
 importClassesFrom(filematrix, filematrix)

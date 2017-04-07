@@ -104,7 +104,7 @@ It is "coverage_norm_123" by default (123 is the number of samples)
 and located in `dirfilter`.
 
 The `dirtemp` parameter is the directory where RaMWAS stores
-temporary files during construction of coverage matrix at 
+temporary files during construction of coverage matrix at
 Step 3 of the pipeline.
 It is "temp" by default and located in `dircoveragenorm`.
 For better performance it can be set to a location on
@@ -148,7 +148,8 @@ batch2/b2sample3.bam
 batch4/sample4.bam
 ```
 
-This file is then loaded into `bamnames` parameter, with ".bam" extension stripped.
+This file is then loaded into `bamnames` parameter,
+with ".bam" extension stripped.
 Note that BAM names must be all different.
 Namely, such list of BAMS is **NOT** allowed:
 ```{r eval=FALSE}
@@ -282,7 +283,7 @@ The `modelcovariates` parameter must name variables in
 `filecovariates`/`covariates`.
 
 By default, the tested linear model includes a constant.
-To exclude it, set 'modelhasconstant' parameter to `FALSE`.
+To exclude it, set "modelhasconstant" parameter to `FALSE`.
 
 MWAS tests for association of normalized CpG coverage
 with `modeloutcome`, accounting for variation
@@ -312,7 +313,8 @@ Default is `grch37.ensembl.org`.
 Default is `ENSEMBL_MART_ENSEMBL`.
 * `bidataset` -- BioMart data set, see listDatasets().
 * `biattributes` -- are attributes of interest, see listAttributes().  
-Default iss`c("hgnc_symbol","entrezgene","strand")`.
+* `biattributes` -- are attributes of interest, see listAttributes().
+Default is `c("hgnc_symbol","entrezgene","strand")`.
 * `bifilters` -- lists filters (if any), see listFilters().
 * `biflank` -- indicates the maximum allowed distance from the
 CpG to the annotation element.
@@ -360,7 +362,7 @@ pander(head(listOfFilters, 20))
 bifilters = list(with_hgnc_trans_name=TRUE)
 
 # Test a location
-chr = 'chr1'
+chr = "chr1"
 pos =  15975530
 param = ramwasParameters(
     bihost = bihost,
@@ -385,7 +387,7 @@ The elastic net mixing parameter alpha can be set via `mmalpha` parameter.
 The number of folds `cvnfolds` in the N-fold cross validation is 10 by default.
 
 The split into folds is random.
-The random seed can be set with the `randseed` parameter, 
+The random seed can be set with the `randseed` parameter,
 which is set to `18090212` by default for consistensy across runs.
 
 
@@ -396,7 +398,7 @@ see corresponding [vignette](RW24_SNPs.html).
 
 The SNP data must be stored in a filematrix
 with dimensions matching the coverage matrix.
-It's name must be defined by `fileSNPs` parameter, with absolute path or
+It"s name must be defined by `fileSNPs` parameter, with absolute path or
 relative to `dircoveragenorm`.
 
 The results of joint analysis are stored in `dirSNPs` directory.
