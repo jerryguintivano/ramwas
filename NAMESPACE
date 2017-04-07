@@ -1,6 +1,7 @@
 useDynLib(ramwas, .registration = TRUE)
 export(
     ramwasParameters,
+    ramwasAnnotateLocations,
     isAbsolutePath,
     makefullpath,
     cachedRDSload,

@@ -370,7 +370,7 @@ param = ramwasParameters(
     bifilters = bifilters,
     biflank = 0);
 
-anno = ramwas:::ramwasAnnotateLocations(param, chr, pos);
+anno = ramwasAnnotateLocations(param, chr, pos);
 pander(anno)
 ```
 

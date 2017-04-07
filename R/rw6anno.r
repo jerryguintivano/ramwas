@@ -3,6 +3,9 @@ ramwasAnnotateLocations = function(param, chr, pos){
     
     maxrequest = 500;
     
+    if(is.null(param$biflank))
+        param$biflank = 0;
+    
     # Sanity check
     if(any(pos > 1e9L))
         stop("Annotation error: chromosome positions must be <= 1e9")
@@ -17,9 +20,9 @@ ramwasAnnotateLocations = function(param, chr, pos){
     # Call biomaRt
     {
         # library(biomaRt)
-        gene_ensembl = useMart(biomart=param$bimart,
+        gene_ensembl = useMart(biomart = param$bimart,
                                host = param$bihost,
-                               dataset=param$bidataset)
+                               dataset = param$bidataset)
         
         if(length(nochr) > maxrequest){
             
@@ -52,7 +55,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
                 rs = list();
                 nms = names(li[[1]]);
                 for( i in 1:length(nms) ) {
-                    rs[[nms[i]]] = unlist(lapply(li,function(x){x[,nms[i]]}));
+                    rs[[nms[i]]] = unlist(lapply(li, function(x){x[,nms[i]]}));
                 }
                 return(data.frame(rs));
             }
@@ -67,7 +70,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
                     "start_position",
                     "end_position")),
                 filters = c(list(
-                    chromosomal_region =paste0(
+                    chromosomal_region = paste0(
                         nochr,":",
                         pos - param$biflank,":",
                         pos + param$biflank + 1L)),
