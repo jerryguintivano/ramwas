@@ -326,7 +326,9 @@ ramwas1scanBams = function( param ){
                            param$bamnames,
                            .ramwas1scanBamJob,
                            param = param);
-        eval(sys.on.exit());
+        tmp = sys.on.exit();
+        eval(tmp);
+        rm(tmp);
         on.exit();
     } else {
         z = character(length(param$bamnames));

@@ -382,7 +382,9 @@ ramwas5MWAS = function( param ){
                            param = param,
                            mwascvrtqr = mwascvrtqr,
                            rowsubset = rowsubset);
-            eval(sys.on.exit());
+            tmp = sys.on.exit();
+            eval(tmp);
+            rm(tmp);
             on.exit();
             rm(cl, rng, rangeset);
             

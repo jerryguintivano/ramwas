@@ -240,7 +240,9 @@ ramwas4PCA = function( param ){
                                          cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
                 covmat = Reduce(f = `+`, x = covlist);
-                eval(sys.on.exit());
+                tmp = sys.on.exit();
+                eval(tmp);
+                rm(tmp);
                 on.exit();
                 rm(cl, rng, rangeset, covlist);
                 .file.remove(param$lockfile2);

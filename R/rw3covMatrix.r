@@ -331,7 +331,9 @@ ramwas3normalizedCoverage = function( param ){
                                .ramwas3coverageJob,
                                param = param,
                                nslices = nslices);
-            eval(sys.on.exit());
+            tmp = sys.on.exit();
+            eval(tmp);
+            rm(tmp);
             on.exit();
         } else {
             z = character(nsamples);
@@ -373,7 +375,9 @@ ramwas3normalizedCoverage = function( param ){
                                1:nslices,
                                .ramwas3transposeFilterJob,
                                param = param);
-            eval(sys.on.exit());
+            tmp = sys.on.exit();
+            eval(tmp);
+            rm(tmp);
             on.exit();
         } else {
             for( fmpart in seq_len(nslices) ){ # fmpart = 5
@@ -474,7 +478,9 @@ ramwas3normalizedCoverage = function( param ){
                                .ramwas3normalizeJob,
                                param = param,
                                samplesums = samplesums);
-            eval(sys.on.exit());
+            tmp = sys.on.exit();
+            eval(tmp);
+            rm(tmp);
             on.exit();
         } else {
             for( fmpart in seq_len(nslices) ){ # fmpart = 5
