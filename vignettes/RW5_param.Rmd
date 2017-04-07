@@ -10,6 +10,14 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
+```{r loadKnitr, echo=FALSE}
+# library("knitr")
+# opts_chunk$set(eval=FALSE)
+library(pander)
+panderOptions("digits", 3)
+```
+
+
 # Initialize RaMWAS Parameters
 
 There are several ways to initialize the parameters
@@ -298,13 +306,73 @@ package.
 
 The parameters include:
 
-* `bihost` -- BioMart host site.
-* `bimart` -- BioMart database name, see listMarts().
+* `bihost` -- BioMart host site.  
+Default is `grch37.ensembl.org`.
+* `bimart` -- BioMart database name, see listMarts().  
+Default is `ENSEMBL_MART_ENSEMBL`.
 * `bidataset` -- BioMart data set, see listDatasets().
-* `biattributes` -- are attributes of interest, see listAttributes().
+* `biattributes` -- are attributes of interest, see listAttributes().  
+Default iss`c("hgnc_symbol","entrezgene","strand")`.
 * `bifilters` -- lists filters (if any), see listFilters().
 * `biflank` -- indicates the maximum allowed distance from the
 CpG to the annotation element.
+
+Here is an example on how to select a custom biomart annotation track:
+
+```{r marts}
+library(biomaRt)
+library(ramwas)
+
+# First pick a host.
+bihost = "grch37.ensembl.org"
+
+# First we list databases
+listOfMarts = listMarts(host = bihost)
+pander(head(listOfMarts, 10))
+
+# Pick a database
+bimart = "ENSEMBL_MART_ENSEMBL"
+
+# Connect to the database
+mart = useMart(biomart = bimart, host = bihost)
+
+# List the data sets in the database
+listOfDatasets = listDatasets(mart = mart)
+pander(head(listOfDatasets, 10))
+
+# Pisk a data set
+bidataset = "hsapiens_gene_ensembl"
+
+# Connect to the data set
+mart = useMart(biomart = bimart, dataset = bidataset, host = bihost)
+
+# List the attributes
+listOfAttributes = listAttributes(mart)
+pander(head(listOfAttributes, 10))
+
+# Pick attributes
+biattributes = c("hgnc_symbol", "entrezgene", "strand")
+
+listOfFilters = listFilters(mart)
+pander(head(listOfFilters, 20))
+
+# Pick a filter
+bifilters = list(with_hgnc_trans_name=TRUE)
+
+# Test a location
+chr = 'chr1'
+pos =  15975530
+param = ramwasParameters(
+    bihost = bihost,
+    bimart = bimart,
+    bidataset = bidataset,
+    biattributes = biattributes,
+    bifilters = bifilters,
+    biflank = 0);
+
+anno = ramwas:::ramwasAnnotateLocations(param, chr, pos);
+pander(anno)
+```
 
 ## Methylation Risk Score
 
@@ -333,6 +401,8 @@ relative to `dircoveragenorm`.
 
 The results of joint analysis are stored in `dirSNPs` directory.
 By default, the directory is created within `dircoveragenorm` directory.
+
+
 
 
 
