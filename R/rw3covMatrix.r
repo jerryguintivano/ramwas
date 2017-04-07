@@ -282,8 +282,8 @@ ramwas3normalizedCoverage = function( param ){
         message("Checking if all required Rbam files present");
         bams = unlist(param$bam2sample);
         for( bname in bams){
-            filename = paste0( param$dirrbam, "/", bname);
-            if( file.exists(filename) ){
+            filename = paste0( param$dirrbam, "/", bname, ".rbam.rds");
+            if( !file.exists(filename) ){
                 stop(paste0("Rbam file from bam2sample not found: ", filename));
             }
         }
