@@ -366,7 +366,7 @@ parameterPreprocess = function( param ){
             param$biattributes = c("hgnc_symbol","entrezgene","strand");
 
         if( is.null(param$bifilters))
-            param$bifilters = list(with_hgnc_transcript_name=TRUE);
+            param$bifilters = list(with_hgnc_trans_name=TRUE);
 
         if( is.null(param$biflank))
             param$biflank = 0;

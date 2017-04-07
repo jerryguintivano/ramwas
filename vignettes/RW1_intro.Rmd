@@ -124,7 +124,7 @@ param = ramwasParameters(
     bimart = "ENSEMBL_MART_ENSEMBL",
     bidataset = "hsapiens_gene_ensembl",
     biattributes = c("hgnc_symbol","entrezgene","strand"),
-    bifilters = list(with_hgnc_transcript_name=TRUE),
+    bifilters = list(with_hgnc_trans_name=TRUE),
     biflank = 0,
     cvnfolds = 5,
     mmalpha = 0,
