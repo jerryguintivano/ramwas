@@ -18,7 +18,7 @@ panderOptions("digits", 3)
 ```
 
 
-# Initialize RaMWAS Parameters
+# Initializing RaMWAS Parameters
 
 There are several ways to initialize the parameters
 for calling RaMWAS pipeline functions.
@@ -71,20 +71,20 @@ if(.Platform$OS.type == "windows"){
 ## Parameters Pointing to Directories
 
 The project directory parameter is `dirproject`.
-Files specified by `file*` parameters are looked for here here,
-unless they have full path specified.
-By default `dirproject` is set to currect directory.
+Files specified by `file*` parameters are looked for here,
+unless they have the full path specified.
+By default `dirproject` is set to current directory.
 
 The `dirbam` directory is the location where RaMWAS expects to find BAM files.
-If it is not absolute path, it is considered to be relative to `dirproject`.
+If it is not an absolute path, it is considered to be relative to `dirproject`.
 
 
 The `dirfilter` directory is, by default, the same as `dirproject`.
 All files created by RaMWAS are created within this directory.
 If the user wants to test different read filtering rules,
-they can `dirfilter` to `TRUE`. This will set it to something
+they can set `dirfilter` to `TRUE`. This will set it to something
 like "Filter_MAPQ_4", there "MAPQ" is the BAM field used for filtering and
-"4" is the thredhold.
+"4" is the threshold.
 
 The `dirrbam` parameter is the location where RaMWAS saves
 RaMWAS raw data files (read start locations) after scanning BAMs.
@@ -114,7 +114,7 @@ The `dirpca` parameter is the sub-directory where RaMWAS saves
 results of PCA analysis at Step 4 of the pipeline.
 It is "PCA_12_cvrts_0b0a0c" by default
 (12 is the number of covariates regressed out and
-0b0a0c is a unique code to differenciate different sets of 12 covariates)
+0b0a0c is a unique code to differentiate different sets of 12 covariates)
 and located in `dircoveragenorm`.
 
 The `dirmwas` parameter is the sub-directory where RaMWAS saves
@@ -162,13 +162,11 @@ batch2/sample2.bam
 ### BAM to Sample Matching
 
 
-The `filebam2sample` parameter allowes multiple BAMs
-contain information about common sample.
-
-To let RaMWAS know the BAM to sample correspondence
-one should use `filebam2sample` parameter, which names the file with
-information on how the BAMs are combined into samples.
-Each line in `filebam2sample` must have information for one sample.
+The `filebam2sample` parameter lets RaMWAS 
+know the BAM to sample correspondence. 
+It provides information on how BAMs 
+from the same sample are to be combined. 
+Each line in `filebam2sample` must have information for one sample. 
 If sample1 contains reads from bam1, bam2 and bam3, the line should be
 
 > sample1=bam1,bam2,bam3
@@ -192,7 +190,7 @@ bam2sample = list(
 
 RaMWAS calculates coverage at a prepared set of CpG locations.
 The set depends on the reference genome and
-often includes CpGs created by common SNPs.
+can include CpGs created by common SNPs.
 The set of CpGs is stored as a `list` with
 one sorted vector of CpG locations per chromosome.
 
@@ -206,15 +204,13 @@ Parameter `filecpgset` must be a file storing a set of CpGs,
 in the format described above, saved using `saveRDS` function.
 Similarly, parameter `filenoncpgset`, if defined,
 must point to a file storing vetted locations away from any CpGs.
-Here, good means not heaving major alignment issues
-(like a middle of centromere).
 
-For more on CpG sets click [here](RW4_CpG_sets.html)
+For more on CpG sets see [the CpG set vignette](RW4_CpG_sets.html)
 
 ### File with covariates
 
 The parameter `filecovariates`, if defined,
-must point to a file containing phenotype and covariates
+must point to a file containing covariates
 for the available samples.
 If the file has extension ".csv",
 it is assumed to be comma separated,
@@ -248,10 +244,11 @@ which is usually the "MAPQ" field or "AS" tag in the BAM file
 The `minscore` parameter defines the minimum admissible score,
 reads with scores below that are excluded.
 
-When there are mulptiple reads with the same start
-position, we suspect them to be falsely duplicated.
-In this case, reads in excess of `maxrepeats` are removed
-(`maxrepeats` is set to 3 by default).
+If there the are more than `maxrepeats` read with 
+the same start position, this excess is assumed to
+be the result of template preparation or amplification artifacts 
+and count is reset to `maxrepeaets`
+(it is set to 3 by default).
 
 ## Coverage matrix
 
@@ -312,7 +309,6 @@ Default is `grch37.ensembl.org`.
 * `bimart` -- BioMart database name, see listMarts().  
 Default is `ENSEMBL_MART_ENSEMBL`.
 * `bidataset` -- BioMart data set, see listDatasets().
-* `biattributes` -- are attributes of interest, see listAttributes().  
 * `biattributes` -- are attributes of interest, see listAttributes().
 Default is `c("hgnc_symbol","entrezgene","strand")`.
 * `bifilters` -- lists filters (if any), see listFilters().
@@ -321,7 +317,7 @@ CpG to the annotation element.
 
 Here is an example on how to select a custom biomart annotation track:
 
-```{r marts}
+```{r marts, eval=FALSE}
 library(biomaRt)
 library(ramwas)
 
@@ -384,11 +380,11 @@ If the `mmncpgs` is set to a vector of several values,
 each number of CpGs is tested and the results are aggregated.
 
 The elastic net mixing parameter alpha can be set via `mmalpha` parameter.
-The number of folds `cvnfolds` in the N-fold cross validation is 10 by default.
+The number of folds `cvnfolds` in the K-fold cross validation is 10 by default.
 
 The split into folds is random.
 The random seed can be set with the `randseed` parameter,
-which is set to `18090212` by default for consistensy across runs.
+which is set to `18090212` by default for consistency across runs.
 
 
 ## Joint Analysis with Genotype Data
@@ -397,8 +393,8 @@ For detailed walkthrough on joint analysis of methylation and genotype data
 see corresponding [vignette](RW24_SNPs.html).
 
 The SNP data must be stored in a filematrix
-with dimensions matching the coverage matrix.
-It"s name must be defined by `fileSNPs` parameter, with absolute path or
+with dimensions matching the CpG score matrix.
+Its name must be defined by `fileSNPs` parameter, with absolute path or
 relative to `dircoveragenorm`.
 
 The results of joint analysis are stored in `dirSNPs` directory.

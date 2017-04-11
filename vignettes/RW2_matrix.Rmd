@@ -1,5 +1,5 @@
 ---
-title: "2.1. Analyzing Data from Other Sources"
+title: "2.1. Analyzing Data from Other Methylation Platforms or Data Types"
 author: "Andrey A Shabalin"
 date: "`r Sys.Date()`"
 output:
@@ -19,41 +19,45 @@ suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
 # dr = "D:/temp/"
+nsamples = 200
 ```
 
-# Applying RaMWAS for other data types
+# Using RaMWAS for with other methylation platforms or data types
 
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
 is initially designed for studies on methylation measurements
 from enrichment platforms.
 
-RaMWAS can also be useful for analysis of data from other sources,
-such as methylation measurements from array platforms,
-gene expression, genotype, etc.
-RaMWAS can perform all the analysis steps on such data:
-Principal component analysis (PCA),
-genome-wise association study (GWAS),
-and multi-variable elastic net with cross validation.
+RaMWAS can also be useful for analysis of 
+methylation measurements from other  platforms 
+(e.g. Illumina HumanMethylation450K array) or
+data types such as gene expression levels or genotypes.
+RaMWAS can perform several analysis steps on such data: 
+principal component analysis (PCA), 
+association studies (GWAS, TWAS), 
+and elastic net analysis with cross validation.
 
-## Create data matrix from external data
+## Import data from other sources
 
-Here we illustrate how RaMWAS can be applied to external data.
-For that we manually create data files
-in the same format as produced by
+Here we illustrate how data from other sources can be imported into RaMWAS.
+
+Namely, we create data files in the same format as produced by
 [Step 3](RW1_intro.html#calculate-methylation-score-coverage-matrix) of RaMWAS.
 
 These files include
 
-* `CpG_locations.*` -- filematrix with the location of the CpGs
-that passed the threshold.\
-It must have two columns with integer values -- chromosome number and location
+* `CpG_locations.*` -- filematrix with the location of 
+the CpGs / SNPs / gene trascription start sites.\
+It must have two columns with integer values -- 
+chromosome number and location
 (`chr` and `position`).
 * `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
 for the integer column `chr` in the location filematrix.
 * `Coverage.*` -- filematrix with the data for all samples and all locations.\
   Each row has data for a single sample.
   Row names must be sample names.\
-  Each column has data for a single location.
+  Each column has data for a single location
+  (CpG / SNP / gene trascription start site).
   Columns must match rows of the location filematrix.\
 
 First, we load the package and set up a working directory.
@@ -116,8 +120,11 @@ writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"),
            text = chrnames)
 ```
 
-Finally, we create data matrix and populate it with
-a combination of signal, noise, and batch effects.
+Finally, we create data matrix.
+We include sex effect in 225 variables and 
+age effect in 16 variables out of each 2000.
+Each variable is also affected by noise and batch effects.
+
 ```{r setseed3, echo=FALSE}
 set.seed(18090212)
 ```
@@ -142,10 +149,12 @@ close(fm)
 
 ## Principal Component Analysis (PCA)
 
-For PCA analysis we populate the list of parameters with
-the directory with the data matrix `dircoveragenorm`,
-the data frame with covariates `covariates`, and
-the names of covariates to regress out `modelcovariates`.
+To run PCA with RaMWAS we specify three parameters:
+
+* `dircoveragenorm` -- directory with the data matrix
+* `covariates` -- data frame with covariates
+* `modelcovariates` -- names of covariates to regress out
+
 ```{r param1}
 param = ramwasParameters(
     dircoveragenorm = dr,
@@ -159,14 +168,14 @@ param = ramwasParameters(
 param$cputhreads = 2
 ```
 
-Now we run principal component analysis.
+Now we run PCA.
 
 ```{r pcaNULL, warning=FALSE, message=FALSE}
 ramwas4PCA(param)
 ```
 
 The top several PCs are marginally distinct from the rest.
-```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
+```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
 e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 ramwas:::plotPCvalues(e$values)
@@ -192,8 +201,8 @@ pander(head(tblcr, 5))
 ```
 
 The p-values for these correlations and R^2^
-show top two PCs are correlated with
-sex and age while a number of others are affected by batch effects.
+show that the top two PCs are correlated with
+sex and age while a number of other PCs are affected by sample batch effects.
 ```{r topPvNULL}
 pfull = parameterPreprocess(param)
 tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
@@ -203,12 +212,12 @@ pander(head(tblpv, 5))
 ```
 
 
-## PCA with batch effects regressed out
+## PCA with batch regressed out
 
-It is common to regress batch and laboratory effects
-from the data in the analysis, including the PCA.
+It is common to regress out batch and lab-technical effects
+from the data in the analysis.
 
-Let"s regress out batch effect in our example
+Let's regress out batch in our example
 by changing `modelcovariates` parameter.
 ```{r pcaBatch, warning=FALSE, message=FALSE}
 param$modelcovariates = "batch"
@@ -247,7 +256,7 @@ ramwas5MWAS(param)
 The QQ-plot shows mild enrichment among a large number of variables,
 which is consistent with how the data was generated --
 22\% of variables are affected by sex.
-```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
+```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
@@ -267,36 +276,7 @@ toptbl = read.table(
 pander(head(toptbl, 5))
 ```
 
-### Confirming the results match those by `lm` function in R
 
-Let"s check that the regular linear regression function in R
-gives the same results for the top finding.
-
-First, we extract the location of the top finding.
-```{r getLocation}
-chr = toptbl$chr[1]
-position = toptbl$position[1]
-cat("Top Finding is at:", chr, "-", position, "\n")
-```
-
-Next, we extract data matrix values and test results for this location.
-```{r getdata}
-datavec = getDataByLocation(param, chr, position)
-testres = getTestsByLocation(param, chr, position)
-pander(testres)
-```
-
-Now, apply "lm" function to the data.
-```{r lm}
-outcome = param$covariates[[param$modeloutcome]]
-cvrt = param$covariates[[param$modelcovariates]]
-variable = datavec$matrix
-model = lm( outcome ~ variable + cvrt)
-pander(summary(model)$coefficients)
-```
-
-The t-statistic and p-value
-produced by RaMWAS and by `lm` function match perfectly.
 
 ## Further steps of RaMWAS pipeline
 
@@ -312,7 +292,7 @@ unlink(paste0(dr,"/*"), recursive=TRUE)
 ```
 
 # Version information
-```{r version, eval=TRUE}
+```{r version}
 sessionInfo()
 ```
 

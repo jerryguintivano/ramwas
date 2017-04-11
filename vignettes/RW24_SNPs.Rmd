@@ -23,9 +23,8 @@ panderOptions("digits", 3)
 # Joint Analysis of Methylation and Genotype Data
 
 Single nucleotide polymorphisms (SNPs) can create and destroy CpGs.
-As methylation (measured with MBD-seq) can occur only at CpGs,
-SNPs can directly affect the number of CpGs in a neighborhood
-and thus affect methylation measurements.
+As methylation occurs mostly at CpGs,
+such CpG-SNPs can directly affect methylation measurements.
 
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
 can account for a possible effect of SNPs
@@ -45,15 +44,17 @@ at the $i$-th CpG.
 
 ## Input data
 
-For SNP-corrected analysis RaMWAS requres the usual input
-as for steps 4 and 5 with additional SNP matrix.
+For CpG-SNPs analysis RaMWAS requires the usual input
+(see 
+[steps 4 and 5](RW1_intro.html#calculate-methylation-score-coverage-matrix))
+with an additional SNP matrix.
 
-The SNP data must have the same dimensions as the coverage matrix,
-with SNPs matching the CpGs.
+The SNP data must have the same dimensions as the CpG score matrix,
+i.e. CpG-SNPs must match the CpGs.
 
 Below we provide sample code for this analysis.
 
-### Create data matrix from external data
+### Create data matrices for CpG-SNP analysis
 
 We produce the following artificial files.
 
@@ -166,10 +167,10 @@ close(fms)
 close(fmm)
 ```
 
-## Association testing with and without correction for SNPs
+## CpG-SNP association testing
 
 Let us test for association between
-variables in the data matrix and the sex covariate
+CpG scores and and the sex covariate
 (`modeloutcome` parameter)
 correcting for batch effects (`modelcovariates` parameter).
 Save top 20 results (`toppvthreshold` parameter) in a text file.
