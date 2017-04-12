@@ -45,25 +45,28 @@ ramwas7ArunMWASes = function(param){
                                 "qqplottitle",
                                 "cputhreads"));
 
-    if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-        param$covariates = data.frame(lapply(
-            param$covariates,
-            `[`,
-            !is.na(param$covariates[[ param$modeloutcome ]])));
-    }
+    # if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+    #     param$covariates = data.frame(lapply(
+    #         param$covariates,
+    #         `[`,
+    #         !is.na(param$covariates[[ param$modeloutcome ]])));
+    # }
+    
+    exclude0 = is.na(param$covariates[[ param$modeloutcome ]]);
+    goodids = which(!exclude0);
     nms = param$covariates[[1]];
-    nsamples = length(nms);
+    nids = length(goodids);
 
     set.seed(param$randseed);
-    shuffle = sample.int(nsamples);
-    starts = floor(seq(1, nsamples+1, length.out = param$cvnfolds+1));
+    shuffle = sample(x = goodids);
+    starts = floor(seq(1, nids+1, length.out = param$cvnfolds+1));
 
 
     for( fold in seq_len(param$cvnfolds) ){ # fold = 9
 
         message("Running MWAS for fold ",fold," of ",param$cvnfolds);
 
-        exclude = logical(nsamples);
+        exclude = exclude0;
         exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
         names(exclude) = nms;
 
@@ -115,7 +118,7 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
 # with correlations and p-value in the title
 plotPrediction = function(param, outcome, forecast,
                           cpgs2use, main, dfFull = NULL){
-    rng = range(c(outcome, forecast));
+    rng = range(c(outcome, forecast), na.rm = TRUE);
     stats = predictionStats(outcome, forecast, dfFull);
 
     plot( outcome,
@@ -149,14 +152,6 @@ ramwas7BrunElasticNet = function(param){
     param = parameterPreprocess(param);
     message("Working in: ",param$dircv);
     {
-        if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-            param$covariates = data.frame(lapply(
-                param$covariates,
-                `[`,
-                !is.na(param$covariates[[ param$modeloutcome ]])));
-        }
-    } # remove samples with NAs in outcome
-    {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
         # rez = ramwas:::.matchCovmatCovar( param );
@@ -171,6 +166,7 @@ ramwas7BrunElasticNet = function(param){
     for( cpgs2use in param$mmncpgs ){ # cpgs2use = param$mmncpgs[1]
         message("Applying Elasting Net to ",cpgs2use," top CpGs");
 
+        forcastlist = list();
         forecast0 = NULL;
         for( fold in seq_len(param$cvnfolds) ){ # fold = 1
             message("Processing fold ", fold, " of ", param$cvnfolds);
@@ -233,23 +229,16 @@ ramwas7BrunElasticNet = function(param){
                                        type = "response",
                                        s = "lambda.min",
                                        alpha = param$mmalpha);
-                #
-                # z1a = cv.glmnet(x = coverageTRAIN,
-                #                     y = factor(as.vector(outcome[!exclude])),
-                #                     nfolds = param$cvnfolds,
-                #                     # keep = TRUE,
-                #                     parallel = FALSE,
-                #                     alpha = param$mmalpha,
-                #                     family = "binomial");
-                # z2a = predict.cv.glmnet(object = z1a,
-                #                               newx = coverageTEST,
-                #                               type = "response",
-                #                               s = "lambda.min",
-                #                               alpha = param$mmalpha);
 
                 forecast0[1,exclude] = forecast0[1,exclude] + z2;
                 forecast0[2,exclude] = forecast0[2,exclude] + 1;
-                rm(z1, z2);
+
+                adt = data.frame( ind = which(exclude), 
+                                  outcome = outcome[exclude], 
+                                  forecast = z2);
+                rownames(adt) = names(exclude)[exclude];
+                forcastlist[[length(forcastlist)+1]] = adt;
+                rm(z1, z2, adt);
             } # forecast0
             rm(cpgset, coverageTRAIN, coverageTEST);
         }
@@ -274,7 +263,11 @@ ramwas7BrunElasticNet = function(param){
                 dirr,
                 cpgs2use,
                 param$mmalpha),
-                object = list(outcome = outcome, forecast = forecast));
+                object = list(outcome = outcome, 
+                              forecast = forecast, 
+                              forcastlist = forcastlist));
+            
+            
         } # rez
         {
             pdf(sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
