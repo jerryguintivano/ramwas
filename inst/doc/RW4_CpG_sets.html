@@ -10,7 +10,7 @@
 
 <meta name="author" content="Andrey A Shabalin" />
 
-<meta name="date" content="2017-03-24" />
+<meta name="date" content="2017-04-11" />
 
 <title></title>
 
@@ -53,16 +53,14 @@ document.addEventListener("DOMContentLoaded", function() {
 <li>CpG sets for RaMWAS</li>
 </ol></h1>
 <h4 class="author"><em>Andrey A Shabalin</em></h4>
-<h4 class="date"><em>2017-03-24</em></h4>
+<h4 class="date"><em>2017-04-11</em></h4>
 </div>
 
 <h1>Contents</h1>
 <div id="TOC">
 <ul>
 <li><a href="#cpg-sets"><span class="toc-section-number">1</span> CpG sets</a></li>
-<li><a href="#downloadable-cpg-sets"><span class="toc-section-number">2</span> Downloadable CpG sets</a><ul>
-<li><a href="#insilico"><span class="toc-section-number">2.1</span> CpG filtering by in-silico alignment experiment</a></li>
-</ul></li>
+<li><a href="#downloadable-cpg-sets"><span class="toc-section-number">2</span> Downloadable CpG sets</a></li>
 <li><a href="#constructing-a-custom-cpg-set"><span class="toc-section-number">3</span> Constructing a custom CpG set</a><ul>
 <li><a href="#constructing-a-cpg-set-for-a-reference-genome"><span class="toc-section-number">3.1</span> Constructing a CpG set for a reference genome</a></li>
 <li><a href="#in-silico-alignment-experiment"><span class="toc-section-number">3.2</span> In-silico alignment experiment</a></li>
@@ -72,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <div id="cpg-sets" class="section level1">
 <h1><span class="header-section-number">1</span> CpG sets</h1>
-<p>One of the required inputs is the set of CpGs at which RaMWAS calculates fragment coverage (step 3 of the pipeline). This set has to be provided in a form of a .rds file (<code>filecpgset</code> parameter). We prepared several CpGs sets for human and mouse genomes and also provide instructions and code for creating custom CpG sets.</p>
+<p>One of the required inputs is the set of CpGs at which RaMWAS calculates fragment coverage (step 3 of the pipeline). This set has to be provided in a .rds file (<code>filecpgset</code> parameter). We prepared several CpGs sets for human and mouse genomes and also provide instructions and code for creating custom CpG sets.</p>
 </div>
 <div id="downloadable-cpg-sets" class="section level1">
 <h1><span class="header-section-number">2</span> Downloadable CpG sets</h1>
@@ -171,24 +169,36 @@ document.addEventListener("DOMContentLoaded", function() {
 </tbody>
 </table>
 <p>Note: SNPs were obtained from the 1000 Genomes super populations (Phase 3 data, <a href="http://www.internationalgenome.org/category/population/">more info</a>). Only SNPs with minor allele frequency above 1% are included. In silico alignment experiments assumed 75 bp single-end reads and alignment with <a href="http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml">Bowtie 2</a>.</p>
-<div id="insilico" class="section level2">
-<h2><span class="header-section-number">2.1</span> CpG filtering by in-silico alignment experiment</h2>
-<p>We conducted an in-silico experiment to find and exclude CpGs located in regions with alignment problems. The experiment was conducted as follows. First, we created an artificial set of reads with all possible 75 bp genomic fragments from the referene genome. Then, these fragments were aligned to the same reference genome. Next, we calculated read coverage for all candidate CpGs. If the alignment were perfect, each CpG would have coverage of exactly 75. We allowed for +/-10 deviation, namely we excluded all CpG with coverage below 65 or above 85, which was about 2% of all CpGs for human genomes and 4% for mouse. The remaining CpGs formed the CpG sets in the “with QC” columns in the tables above.</p>
-<p>We used Bowtie 2 aligner version 2.2.9 with default settings.</p>
-</div>
+<!-- ## CpG filtering by in-silico alignment experiment {#insilico} -->
+<!-- We conducted an in-silico experiment to find and exclude -->
+<!-- CpGs located in regions with alignment problems. -->
+<!-- The experiment was conducted as follows. -->
+<!-- First, we created an artificial set of reads -->
+<!-- with all possible 75 bp genomic fragments -->
+<!-- from the referene genome. -->
+<!-- Then, these fragments were aligned to the same reference genome. -->
+<!-- Next, we calculated read coverage for all candidate CpGs. -->
+<!-- If the alignment were perfect, -->
+<!-- each CpG would have coverage of exactly 75. -->
+<!-- We allowed for +/-10 deviation, namely -->
+<!-- we excluded all CpG with coverage below 65 or above 85, -->
+<!-- which was about 2% of all CpGs for human genomes and 4% for mouse. -->
+<!-- The remaining CpGs formed the CpG sets in -->
+<!-- the "with\ QC" columns in the tables above. -->
+<!-- We used Bowtie 2 aligner version 2.2.9 with default settings. -->
 </div>
 <div id="constructing-a-custom-cpg-set" class="section level1">
 <h1><span class="header-section-number">3</span> Constructing a custom CpG set</h1>
 <div id="constructing-a-cpg-set-for-a-reference-genome" class="section level2">
 <h2><span class="header-section-number">3.1</span> Constructing a CpG set for a reference genome</h2>
-<p>A CpG set can be constructed quickly from a reference genome with the <code>getCpGsetCG</code> function. The functions can use any genome available in Bioconductor as <code>BSGenome</code> class. Additional genomes can be loaded using <code>readDNAStringSet</code> function from .fa files.</p>
+<p>A CpG set can be constructed from a reference genome with the <code>getCpGsetCG</code> function. The functions can use any genome available in Bioconductor as <code>BSGenome</code> class. Additional genomes can be loaded using <code>readDNAStringSet</code> function from .fa files.</p>
 <pre class="r"><code>library(ramwas)
 library(BSgenome.Ecoli.NCBI.20080805)
 cpgset = getCpGsetCG(BSgenome.Ecoli.NCBI.20080805)
 # First 10 CpGs in NC_008253:
 print(cpgset$NC_008253[1:10])</code></pre>
 <pre><code>##  [1]  22  90 152 196 243 248 256 258 283 297</code></pre>
-<p>For a genome with injected SNPs, we provide the function <code>getCpGsetALL</code> for also finding CpGs that can be created by injected SNPs. The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome. We do NOT advice using all dbSNP144 SNPs, as it causes an large number of CpGs that almost never occur in the population.</p>
+<p>For a genome with injected SNPs, we provide the function <code>getCpGsetALL</code> for also finding CpGs that can be created by injected SNPs. The example below uses all SNPs from dbSNP144 for selecting CpGs in human genome. We do NOT advice using all dbSNP144 SNPs, as it causes a large number of CpGs that almost never occur in the population.</p>
 <pre class="r"><code>library(BSgenome.Hsapiens.UCSC.hg19)
 library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
 genome = injectSNPs(Hsapiens, &quot;SNPlocs.Hsapiens.dbSNP144.GRCh37&quot;)
@@ -196,7 +206,7 @@ cpgset = getCpGsetALL(genome)
 # Number of CpGs with all SNPs injected in autosomes
 sum(sapply(cpgset[1:22], length))</code></pre>
 <pre><code>## [1] 42841152</code></pre>
-<p>The code above shows that using all dbSNP144 SNPs we get over 42 million CpGs instead of about 29 million when using only SNPs with minor allele frequency above 1%. Unfortunately, (to our knowledge) Bioconductor packages with SNP information do not provide any data on SNP allele frequency. To alleviate this problem, we provide a way to inject SNP information from 1000 Genomes data or any other VCF.</p>
+<p>The code above shows that using all dbSNP144 SNPs we get over 42 million CpGs instead of about 29 million when using only SNPs with minor allele frequency above 1%. In outbred population such as Humans one may want to delete rare CpG-SNPs because they would lose power to detect any associations. For this we need allele frequency information that is available for humans. Unfortunately, (to our knowledge) Bioconductor packages with SNP information do not provide any data on SNP allele frequency. To alleviate this problem, we provide a way to inject SNP information from 1000 Genomes data or any other VCF.</p>
 <p>First, the VCF files, obtained from 1000 Genomes project or otherwise, need to be processed by <a href="https://vcftools.github.io/man_latest.html"><code>vcftools</code></a> command <code>--counts</code>, e.g.:</p>
 <blockquote>
 <p><code>vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt</code></p>
@@ -216,8 +226,10 @@ cpgset = getCpGsetALL(genome)</code></pre>
 </div>
 <div id="in-silico-alignment-experiment" class="section level2">
 <h2><span class="header-section-number">3.2</span> In-silico alignment experiment</h2>
+<p>CpG sites in loci that are problematic in terms of alignment need to be eliminated prior to analysis as CpG score estimates will be confounded with alignment errors. For example, repetitive elements constitute about 45% of the human genome. Reads may be difficult to align to these loci because of their high sequence similarity. To identify problematic sites we conduct an in-silico experiment.</p>
+<p>For example, assume we have data with 75bp single end reads and that we aligned to the human reference genome (build hg19/GRCh37). In the in-silico experiment we first generate all possible 75 bp single-end reads for this reference, with each 75bp sequence starting 1bp downstream of the previous sequence. For example, the sequence of in silico read 1 is identical to the sequence of position 1 to 75 on chromosome 1 of the reference, read 2 was identical to positions 2 to 76, etc. In the perfect scenario, aligning these reads to the reference genome should show that each CpG is covered by 75 reads. CpG sites with read coverage below or above a certain threshold can then be eliminated from further analyses.</p>
 <p>For a typical mammalian genome the in-silico experiment is rather computationally intensive, as it requires alignment of billions of artificially created reads.</p>
-<p>The files with artificial reads can be created with function <code>insilicoFASTQ</code>. It supports gz compression of the output files, decreasing disk space requirements from about 500 GB to 17 GB for human genome.</p>
+<p>The files with artificial reads can be created with function <code>insilicoFASTQ</code>. It supports gz compression of the output files, decreasing disk space requirement from about 500 GB to 17 GB for the human genome.</p>
 <p>Here is an example for the <code>insilicoFASTQ</code> function</p>
 <pre class="r"><code># Do for all chromosomes
 insilicoFASTQ(

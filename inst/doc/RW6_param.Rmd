@@ -205,7 +205,7 @@ in the format described above, saved using `saveRDS` function.
 Similarly, parameter `filenoncpgset`, if defined,
 must point to a file storing vetted locations away from any CpGs.
 
-For more on CpG sets see [the CpG set vignette](RW4_CpG_sets.html)
+For more on CpG sets see [the CpG set vignette](RW2_CpG_sets.html)
 
 ### File with covariates
 
@@ -390,7 +390,7 @@ which is set to `18090212` by default for consistency across runs.
 ## Joint Analysis with Genotype Data
 
 For detailed walkthrough on joint analysis of methylation and genotype data
-see corresponding [vignette](RW24_SNPs.html).
+see corresponding [vignette](RW4_SNPs.html).
 
 The SNP data must be stored in a filematrix
 with dimensions matching the CpG score matrix.

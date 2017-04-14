@@ -7,8 +7,6 @@ library(ramwas)
 ## ----loadCgGset----------------------------------------------------------
 filename = system.file("extdata", "bigQC.rds", package = "ramwas")
 qc = readRDS(filename)$qc
-# show(names(qc))
-
 
 ## ----nbams---------------------------------------------------------------
 cat("N BAMs:", qc$nbams)
@@ -85,9 +83,17 @@ cat("Reads total:", qc$reads.total)
 ## ----avg.cpg.coverage----------------------------------------------------
 {
  cat("Summed across", qc$nbams, "bams", "\n")
- cat("Average     CpG coverage:", qc$avg.cpg.coverage,   "\n")
- cat("Average non-CpG coverage:", qc$avg.noncpg.coverage,"\n")
- cat("Enrichment ratio:", qc$avg.cpg.coverage / qc$avg.noncpg.coverage)
+ cat("Average     CpG coverage:", qc$avg.cpg.coverage, "\n")
+ cat("Average non-CpG coverage:", qc$avg.noncpg.coverage, "\n")
+ cat("Enrichment ratio:", qc$avg.cpg.coverage / qc$avg.noncpg.coverage, "\n")
+ cat("Noise level:", qc$avg.noncpg.coverage / qc$avg.cpg.coverage)
+}
+
+## ----avg.coverage.by.density---------------------------------------------
+{
+    cat("Highest coverage is observed at CpG density of",
+        qcmean(qc$avg.coverage.by.density)^2)
+    plot(qc$avg.coverage.by.density)
 }
 
 ## ----hist.isolated.dist1-------------------------------------------------
@@ -97,14 +103,7 @@ plot(qc$hist.isolated.dist1)
 {
  cat("ChrX reads: ", qc$chrX.count[1], ", which is ",
      qcmean(qc$chrX.count)*100, "% of total", sep="", "\n")
- cat("ChrX reads: ", qc$chrY.count[1], ", which is ",
+ cat("ChrY reads: ", qc$chrY.count[1], ", which is ",
      qcmean(qc$chrY.count)*100, "% of total", sep="", "\n")
-}
-
-## ----avg.coverage.by.density---------------------------------------------
-{
-    cat("Highest coverage is observed at CpG density of",
-        qcmean(qc$avg.coverage.by.density)^2)
-    plot(qc$avg.coverage.by.density)
 }
 
