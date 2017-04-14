@@ -13,8 +13,8 @@ ramwasAnnotateLocations(param, chr, pos)
 }
 \arguments{
     \item{param}{
-        Vector of parameters as described in the "RW5_param.Rmd" vignette. \cr
-        Try: \code{vignette("RW5_param","ramwas")}.
+        Vector of parameters as described in the "RW6_param.Rmd" vignette. \cr
+        Try: \code{vignette("RW6_param","ramwas")}.
     }
     \item{chr}{
         A vector of chromosome names or numbers.

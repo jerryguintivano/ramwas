@@ -22,7 +22,7 @@ panderOptions("digits", 3)
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
 provides a complete toolset for methylome-wide association studies (MWAS).
 It is primarily designed for data from enrichment based methylation assays,
-but can be applied to other methylomic data as well ([see vignette](RW2_matrix.html)).
+but can be applied to other methylomic data as well ([see vignette](RW5_matrix.html)).
 
 The analysis pipeline includes following major components (steps):
 
@@ -99,7 +99,7 @@ Now the project directory `dr` contains
   age and sex variables for the samples.\
   The methylation level of some CpGs depends on these covariates.
 * `Simulated_chromosome.rds` - file with locations of all CpGs.
-See [CpG set vignette](RW4_CpG_sets.html) for more information.
+See [CpG set vignette](RW2_CpG_sets.html) for more information.
 
 Each RaMWAS step accepts parameters in the form of a list with named elements.
 Here is the parameter list we will use for all steps below.
@@ -133,7 +133,7 @@ param = ramwasParameters(
 )
 ```
 Possible parameters are described in detail in
-the [parameter vignette](RW5_param.Rmd).
+the [parameter vignette](RW6_param.Rmd).
 We also describe the role of each parameter as they are used
 in the walk-through below.
 
@@ -156,7 +156,7 @@ instead reflect the length of the DNA fragments that were
 extracted and sequenced.
 
 The set of CpGs is loaded from `filecpgset` file.
-For more information see [CpG set vignette](RW4_CpG_sets.html).
+For more information see [CpG set vignette](RW2_CpG_sets.html).
 
 RaMWAS uses `cputhreads` CPU cores (parallel jobs) to scan BAMs.
 
@@ -502,7 +502,7 @@ ramwas:::plotCVcors(cl, pfull)
 
 ## CpG-SNP analysis
 
-This type of analysis is explained in the respective [vignette](RW24_SNPs.html).
+This type of analysis is explained in the respective [vignette](RW4_SNPs.html).
 
 # Confirming the results match those by `lm` function in R
 
