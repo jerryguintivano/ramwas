@@ -41,8 +41,8 @@ ramwas0createArtificialData = function(dir,
     {
         x = 0:250;
         fragdistr = pmin(1.01*plogis((150-x)/20),1);
-        # plot(x,fragdistr,pch=19)
-        rm(x)
+        # plot(x, fragdistr, pch=19);
+        rm(x);
     } # fragdistr
 
     # # Exclude CpGs with density over 15
@@ -93,6 +93,7 @@ ramwas0createArtificialData = function(dir,
 
     # Main loop
     cpgprob = rep(1,length(locsgood));
+    cpgprob[1:(length(locsgood)/5)] = 0;
     for( bam in seq_len(nsamples)){ # bam = 1
 
         if(verbose)
