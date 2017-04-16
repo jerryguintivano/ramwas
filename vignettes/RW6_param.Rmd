@@ -1,12 +1,11 @@
 ---
-title: "5. RaMWAS Parameters"
-author: "Andrey A Shabalin"
+title: "6. RaMWAS Parameters"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{5. RaMWAS parameters}
+  %\VignetteIndexEntry{6. RaMWAS parameters}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -73,10 +72,11 @@ if(.Platform$OS.type == "windows"){
 The project directory parameter is `dirproject`.
 Files specified by `file*` parameters are looked for here,
 unless they have the full path specified.
-By default `dirproject` is set to current directory.
+By default `dirproject` is set to the current directory.
 
 The `dirbam` directory is the location where RaMWAS expects to find BAM files.
-If it is not an absolute path, it is considered to be relative to `dirproject`.
+If it is not an absolute path, 
+it is considered to be relative to the `dirproject`.
 
 
 The `dirfilter` directory is, by default, the same as `dirproject`.
@@ -88,25 +88,25 @@ like "Filter_MAPQ_4", there "MAPQ" is the BAM field used for filtering and
 
 The `dirrbam` parameter is the location where RaMWAS saves
 RaMWAS raw data files (read start locations) after scanning BAMs.
-It is "rds_rbam" by default and located in `dirfilter`.
+It is "rds_rbam" by default and is located in `dirfilter`.
 
 The `dirrqc` parameter is the location where RaMWAS saves
 QC files in R format after scanning BAMs.
-It is "rds_qc" by default and located in `dirfilter`.
+It is "rds_qc" by default and is located in `dirfilter`.
 
 The `dirqc` parameter is the location where RaMWAS saves
 QC plots and text files (BAM QC info) after scanning BAMs.
-It is "qc" by default and located in `dirfilter`.
+It is "qc" by default and is located in `dirfilter`.
 
 The `dircoveragenorm` parameter is the sub-directory where RaMWAS saves
 coverage matrix at Step 3 of the pipeline.
 It is "coverage_norm_123" by default (123 is the number of samples)
-and located in `dirfilter`.
+and is located in `dirfilter`.
 
 The `dirtemp` parameter is the directory where RaMWAS stores
 temporary files during construction of coverage matrix at
 Step 3 of the pipeline.
-It is "temp" by default and located in `dircoveragenorm`.
+It is "temp" by default and is located in `dircoveragenorm`.
 For better performance it can be set to a location on
 a different hard drive than `dircoveragenorm`.
 
@@ -115,31 +115,31 @@ results of PCA analysis at Step 4 of the pipeline.
 It is "PCA_12_cvrts_0b0a0c" by default
 (12 is the number of covariates regressed out and
 0b0a0c is a unique code to differentiate different sets of 12 covariates)
-and located in `dircoveragenorm`.
+and is located in `dircoveragenorm`.
 
 The `dirmwas` parameter is the sub-directory where RaMWAS saves
 results of MWAS analysis at Step 5.
 It is "Testing_age_7_PCs" by default
 (age is the phenotype being tested and
 7 is number of top PCs included in the model)
-and located in `dirpca`.
+and is located in `dirpca`.
 
 The `dircv` parameter is the sub-directory where RaMWAS saves
 results of Methylation Risk Score analysis at Step 7.
 It is "CV_10_folds" by default
 (10 is number of folds in N-fold cross validation)
-and located in `dirmwas`.
+and is located in `dirmwas`.
 
 ## Parameters Pointing to Files
 
-### BAM Names
+### BAM names
 
 Parameter `filebamlist`, if defined, must point to a text file
 with one BAM file name per line. BAM file names can include path,
 relative to `dirbam` or absolute.
 
 Such file may looks like this.
-```{r eval=FALSE}
+```
 batch1/b1sample1.bam
 batch1/b1sample2.bam
 batch2/b2sample1.bam
@@ -150,16 +150,17 @@ batch4/sample4.bam
 
 This file is then loaded into `bamnames` parameter,
 with ".bam" extension stripped.
-Note that BAM names must be all different.
-Namely, such list of BAMS is **NOT** allowed:
-```{r eval=FALSE}
+
+**Note:** BAM file names must be different.
+For example, the list of BAMS below is **NOT** allowed, 
+as it contains "sample1.bam" twice:
+```
 batch1/sample1.bam
 batch1/sample2.bam
 batch2/sample1.bam
-batch2/sample2.bam
 ```
 
-### BAM to Sample Matching
+### BAM to Sample Matching {#bam2sample}
 
 
 The `filebam2sample` parameter lets RaMWAS 
@@ -188,10 +189,12 @@ bam2sample = list(
 
 ### CpG locations
 
-RaMWAS calculates coverage at a prepared set of CpG locations.
-The set depends on the reference genome and
-can include CpGs created by common SNPs.
-The set of CpGs is stored as a `list` with
+RaMWAS calculates CpG scores and performs further analyses
+at a set of CpGs (or locations in general) defined by the user
+via `filecpgset` parameter.
+The `filecpgset` parameter must point to an .rds file
+(a file saved using `saveRDS` function),
+with the set of locations stored as a `list` with
 one sorted vector of CpG locations per chromosome.
 
 ```{r CpGsetExample}
@@ -200,25 +203,29 @@ cpgset = list( chr1 = c(12L, 57L, 123L),
                chr3 = c(22L, 40L, 199L, 211L) )
 ```
 
-Parameter `filecpgset` must be a file storing a set of CpGs,
-in the format described above, saved using `saveRDS` function.
-Similarly, parameter `filenoncpgset`, if defined,
-must point to a file storing vetted locations away from any CpGs.
+In practice, the set should depend
+on the reference genome and
+can include CpGs created by common SNPs.
+
+Optionally, parameter `filenoncpgset`, 
+can point to a file storing vetted locations away from any CpGs.
 
 For more on CpG sets see [the CpG set vignette](RW2_CpG_sets.html)
 
 ### File with covariates
 
 The parameter `filecovariates`, if defined,
-must point to a file containing covariates
+must point to a file containing 
+phenotype information and covariates
 for the available samples.
 If the file has extension ".csv",
 it is assumed to be comma separated,
 otherwise - tab separated.
 It must have a header and
-the first column must have sample names.
+the first column must have sample names
+as defined by `bam2sample` parameter ([see above](#bam2sample)).
 
-The data in `filecovariates` is read into `covariates` parameter.
+The data in `filecovariates` is read into the `covariates` parameter.
 
 ## Multithreading
 
@@ -227,9 +234,10 @@ The `cputhreads` parameter determines the maximum number of
 CPU intensive tasks running in parallel.
 By default `cputhreads` is set to the number of CPU cores.
 
-Some tasks are disk intensive, the maximum number of such
-tasks running in parallel is `diskthreads`.
-By default `diskthreads` is 2.
+Some tasks are disk intensive.
+The maximum number of such
+tasks running in parallel is set by the `diskthreads` parameter.
+By default `diskthreads` value is 2.
 Higher values can be beneficial on machine with lots of RAM.
 
 On some systems the performance is better if different jobs are
@@ -262,35 +270,35 @@ with nonzero coverage\
   (default is 0.3, i.e. a CpG is preserved if at least 30\% of samples
   have non-zero coverage).
 
-The file operations in this step can be performed faster if done
-in large blocks.
-To set the buffer size use `buffersize` parameter.
+The file operations in this step 
+can be performed faster if done in large blocks.
+To set the block size use `buffersize` parameter.
 Be default it is set to 1 GB (`buffersize = 1e9`).
 
-Numerical values take 8 bytes with full precision.
+Numerical values take 8 bytes is stored with full precision.
 The coverage matrix does not need such precision and
-can safely stored with 4 bytes per value (single precision).
+can safely be stored with 4 bytes per value (single precision).
 The value size is set by `doublesize` parameter, which is 4 by default.
 
 ## PCA and MWAS
 
 Both PCA and MWAS correct for variation
-expplained by select covariates set by `modelcovariates`.
+explained by selected covariates set by `modelcovariates`.
 The `modelcovariates` parameter must name variables in
 `filecovariates`/`covariates`.
 
 By default, the tested linear model includes a constant.
-To exclude it, set "modelhasconstant" parameter to `FALSE`.
+To exclude it, set `modelhasconstant` parameter to `FALSE`.
 
 MWAS tests for association of normalized CpG coverage
 with `modeloutcome`, accounting for variation
 of top `modelPCs` principal components.
 
 MWAS produces a QQ-plot in `dirmwas`.
-The title of the QQ-plot can be overidden by `qqplottitle` parameter.
-For no title set `qqplottitle=""`.
+The title of the QQ-plot can be changed by the `qqplottitle` parameter.
+To exclude the title set `qqplottitle=""`.
 
-Top MWAS result are saved in a text file `Top_tests.txt`.
+Top MWAS results are saved in a text file `Top_tests.txt`.
 Parameter `toppvthreshold` defines p-value threshold
 for selection of top results.
 Alternatively, it can define the number of top results, if it is set to
@@ -376,8 +384,12 @@ pander(anno)
 
 RaMWAS predicts the outcome variable (`modeloutcomes` parameter)
 using top `mmncpgs` CpGs from the MWAS.
-If the `mmncpgs` is set to a vector of several values,
-each number of CpGs is tested and the results are aggregated.
+This prediction is done for each fold in k-fold cross validation
+and the prediction performance is measured via correlations and 
+(for binary outcomes) ROC curves.
+
+To run the procedure for multiple number of top CpGs,
+The parameter `mmncpgs` can be set to a vector of multiple values.
 
 The elastic net mixing parameter alpha can be set via `mmalpha` parameter.
 The number of folds `cvnfolds` in the K-fold cross validation is 10 by default.
@@ -389,15 +401,15 @@ which is set to `18090212` by default for consistency across runs.
 
 ## Joint Analysis with Genotype Data
 
-For detailed walkthrough on joint analysis of methylation and genotype data
-see corresponding [vignette](RW4_SNPs.html).
+The joint analysis of methylation and genotype data
+is described in the corresponding [vignette](RW4_SNPs.html).
 
 The SNP data must be stored in a filematrix
 with dimensions matching the CpG score matrix.
 Its name must be defined by `fileSNPs` parameter, with absolute path or
 relative to `dircoveragenorm`.
 
-The results of joint analysis are stored in `dirSNPs` directory.
+The results of the joint analysis are stored in `dirSNPs` directory.
 By default, the directory is created within `dircoveragenorm` directory.
 
 
