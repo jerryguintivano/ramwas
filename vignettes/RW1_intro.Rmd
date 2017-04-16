@@ -142,7 +142,7 @@ Possible parameters are described in detail in
 the [parameter vignette](RW6_param.Rmd).
 We also describe the role of each parameter as they are used below.
 
-## Scan BAM Files and calculate QC indices
+## Scan BAM Files and calculate QC indices {#step1}
 
 This step scans all BAM files listed in the `filebamlist` file,
 it records read start locations,
@@ -213,7 +213,7 @@ to efficiently add additional BAMs (samples) when they become available.
 **Note.** The BAM files are no longer needed after this step and the
 RaMWAS raw files are 50 to 100 times smaller than the original BAMs.
 
-## Summarize QC measures
+## Summarize QC measures {#step2}
 
 This step aggregates quality control metrics across all scanned BAM files,
 produces a number of summary plots, and estimates fragment size distribution.
@@ -279,7 +279,7 @@ ramwas:::plotFragmentSizeDistributionEstimate(frdata, estimate)
 `filebam2sample` parameter (if defined).
 
 
-## Calculate CpG score matrix {#scorematrix}
+## Calculate CpG score matrix {#step3}
 
 This step creates a CpG score matrix (i.e., Fragment coverage)
 for all samples and all CpGs in the CpG set.
@@ -329,7 +329,7 @@ sample before normalization.
 
 **Note.** This step created temporary files in the `dirtemp` directory.
 
-## Principal component analysis
+## Principal component analysis {#step4}
 
 This step performs principal component analysis (PCA) on the CpG score matrix.
 
@@ -406,7 +406,7 @@ pander(head(tblpv, 3))
 
 Table: Significance\ in\ `PC_vs_covariates_pvalue.txt`\ file.
 
-## Methylome-wide association study (MWAS)
+## Methylome-wide association study (MWAS) {#step5}
 
 This step performs tests for association
 between normalized CpG scores and the
@@ -449,7 +449,7 @@ qqPlotFast(pv)
 title(pfull$qqplottitle)
 ```
 
-## Annotation of top results
+## Annotation of top results {#step6}
 
 RaMWAS can annotate top findings using data from
 [`biomaRt`](https://bioconductor.org/packages/biomaRt/).
@@ -481,7 +481,7 @@ chr1 | 15,418,248 | -7.654 | 4.571x10^-7^ | 0.071 | KAZN | 23254 | 1
 
 Table: Example\ of\ the\ top\ of\ the\ `Top_tests.txt`\ file.
 
-## Methylation risk score
+## Methylation risk score {#step7}
 
 While it is important to find individual CpGs associated with a phenotype,
 we can often achieve better predictive power by 

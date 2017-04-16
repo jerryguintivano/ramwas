@@ -41,8 +41,8 @@ and elastic net analysis with cross validation.
 
 Here we illustrate how data from other sources can be imported into RaMWAS.
 
-Namely, we create data files in the same format as produced by
-[Step 3](RW1_intro.html#calculate-methylation-score-coverage-matrix) of RaMWAS.
+We need create data files in the same format as produced by
+[Step 3](RW1_intro.html#step3) of RaMWAS.
 
 These files include
 
