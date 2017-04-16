@@ -17,7 +17,7 @@ panderOptions("digits", 3)
 ```
 
 
-# Initializing RaMWAS Parameters
+# Initializing RaMWAS parameters
 
 There are several ways to initialize the parameters
 for calling RaMWAS pipeline functions.
@@ -67,7 +67,7 @@ if(.Platform$OS.type == "windows"){
 
 # Explanation of all parameters
 
-## Parameters Pointing to Directories
+## Parameters pointing to directories
 
 The project directory parameter is `dirproject`.
 Files specified by `file*` parameters are looked for here,
@@ -130,7 +130,7 @@ It is "CV_10_folds" by default
 (10 is number of folds in N-fold cross validation)
 and is located in `dirmwas`.
 
-## Parameters Pointing to Files
+## Parameters pointing to files
 
 ### BAM names
 
@@ -160,7 +160,7 @@ batch1/sample2.bam
 batch2/sample1.bam
 ```
 
-### BAM to Sample Matching {#bam2sample}
+### BAM to sample matching {#bam2sample}
 
 
 The `filebam2sample` parameter lets RaMWAS 
@@ -304,7 +304,7 @@ for selection of top results.
 Alternatively, it can define the number of top results, if it is set to
 a value larger than 1.
 
-## Annotation of Top Findings
+## Annotation of top findings
 
 The annotation is done using
 [`biomaRt`](https://bioconductor.org/packages/biomaRt/).
@@ -380,7 +380,7 @@ anno = ramwasAnnotateLocations(param, chr, pos);
 pander(anno)
 ```
 
-## Methylation Risk Score
+## Methylation risk score
 
 RaMWAS predicts the outcome variable (`modeloutcomes` parameter)
 using top `mmncpgs` CpGs from the MWAS.
@@ -399,7 +399,7 @@ The random seed can be set with the `randseed` parameter,
 which is set to `18090212` by default for consistency across runs.
 
 
-## Joint Analysis with Genotype Data
+## Joint analysis with genotype data
 
 The joint analysis of methylation and genotype data
 is described in the corresponding [vignette](RW4_SNPs.html).

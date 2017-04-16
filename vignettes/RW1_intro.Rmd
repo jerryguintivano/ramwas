@@ -61,7 +61,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("ramwas")
 ```
 
-## Loading package and viewing Documentation
+## Loading package and viewing documentation
 
 The package vignettes and reference manual can be viewed
 [online](https://bioconductor.org/packages/ramwas/)
@@ -142,7 +142,7 @@ Possible parameters are described in detail in
 the [parameter vignette](RW6_param.Rmd).
 We also describe the role of each parameter as they are used below.
 
-## Scan BAM Files and calculate QC indices {#step1}
+## Scan BAM files and calculate QC indices {#step1}
 
 This step scans all BAM files listed in the `filebamlist` file,
 it records read start locations,
@@ -582,12 +582,12 @@ pfull$dirmwas
 pfull$dircv
 ```
 
-## Cleanup
+<!-- ## Cleanup -->
 
-Here we remove all files created by the code above.
-```{r clean}
-unlink(paste0(dr,"/*"), recursive=TRUE)
-```
+<!-- Here we remove all files created by the code above. -->
+<!-- ```{r clean} -->
+<!-- unlink(paste0(dr,"/*"), recursive=TRUE) -->
+<!-- ``` -->
 
 # Version information
 

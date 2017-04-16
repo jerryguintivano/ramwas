@@ -19,7 +19,7 @@ panderOptions("digits", 3)
 dr = "D:/temp/"
 ```
 
-# Joint Analysis of Methylation and Genotype Data
+# Joint analysis of methylation and genotype data
 
 Single nucleotide polymorphisms (SNPs) can create and destroy CpGs.
 As methylation occurs mostly at CpGs,

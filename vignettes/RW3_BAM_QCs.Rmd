@@ -21,8 +21,9 @@ and illustrated in mulpiple plots.
 ## QC text summary
 
 The text summary is saved in two versions:
-`Summary_QC.txt` -- formatted for viewing in Excel and
-`Summary_QC_R.txt` -- formatted for easy import in R.
+
+* `Summary_QC.txt` -- formatted for viewing in Excel.
+* `Summary_QC_R.txt` -- formatted for easy import in R.
 
 Excel\ friendly\ column\ name | R\ friendly column name | brief\ description\ and\ link\ to\ section
 :---|:---|:---

@@ -69,27 +69,6 @@ GRCm38.p5 | [22.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p5
 
 Table: CpG sets for mouse genome.
 
-
-<!-- ## CpG filtering by in-silico alignment experiment {#insilico} -->
-
-<!-- We conducted an in-silico experiment to find and exclude -->
-<!-- CpGs located in regions with alignment problems. -->
-<!-- The experiment was conducted as follows. -->
-<!-- First, we created an artificial set of reads -->
-<!-- with all possible 75 bp genomic fragments -->
-<!-- from the referene genome. -->
-<!-- Then, these fragments were aligned to the same reference genome. -->
-<!-- Next, we calculated read coverage for all candidate CpGs. -->
-<!-- If the alignment were perfect, -->
-<!-- each CpG would have coverage of exactly 75. -->
-<!-- We allowed for +/-10 deviation, namely -->
-<!-- we excluded all CpG with coverage below 65 or above 85, -->
-<!-- which was about 2% of all CpGs for human genomes and 4% for mouse. -->
-<!-- The remaining CpGs formed the CpG sets in -->
-<!-- the "with\ QC" columns in the tables above. -->
-
-<!-- We used Bowtie 2 aligner version 2.2.9 with default settings. -->
-
 # Constructing a custom CpG set
 
 ## Constructing a CpG set for a reference genome
