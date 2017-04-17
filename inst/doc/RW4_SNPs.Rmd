@@ -1,12 +1,11 @@
 ---
-title: "2.2. Joint Analysis of Methylation and Genotype Data"
-author: "Andrey A Shabalin"
+title: "4. Joint Analysis of Methylation and Genotype Data"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{2.2. Joint Analysis of Methylation and Genotype Data}
+  %\VignetteIndexEntry{4. Joint Analysis of Methylation and Genotype Data}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -17,25 +16,34 @@ library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
-# dr = "D:/temp/"
+dr = "D:/temp/"
 ```
 
-# Joint Analysis of Methylation and Genotype Data
+# Joint analysis of methylation and genotype data
 
 Single nucleotide polymorphisms (SNPs) can create and destroy CpGs.
 As methylation occurs mostly at CpGs,
 such CpG-SNPs can directly affect methylation measurements.
 
+Recall that enrichment-based methylation methods measure 
+total methylation in a vicinity of a CpG.
+By creating or destroying a CpG, 
+CpG-SNPs introduce a variation in the
+total methylation in a vicinity of the CpG
+which can greatly reduce our power to
+detect case-control differences.
+
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
-can account for a possible effect of SNPs
-by testing the following model:
+can account for a possible effect of CpG-SNPs
+by testing for joint significance of $\beta_1$
+and $\beta_2$ the following model:
 
 $$\mu_i = \beta_0 + outcome * \beta_1 + {outcome} * {SNP}_i * \beta_2 +
-{SNP}_i \beta_3  + \gamma * { cvrt} + \epsilon$$
+{SNP}_i * \beta_3  + \gamma * { cvrt} + \epsilon$$
 
 where
 
-* $\mu_i$ -- methylaiton measurement for $i$-th CpG.
+* $\mu_i$ -- methylation measurement for $i$-th CpG.
 * $outcome$ -- phenotype of interest.
 * $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype)
 at the $i$-th CpG.
@@ -50,31 +58,32 @@ For CpG-SNPs analysis RaMWAS requires the usual input
 with an additional SNP matrix.
 
 The SNP data must have the same dimensions as the CpG score matrix,
-i.e. CpG-SNPs must match the CpGs.
-
-Below we provide sample code for this analysis.
+i.e. it must be available for the 
+same set of samples and the same set of locations.
+Data preparation may include finding the closest SNP for every CpG and
+exclusion of CpGs without any SNPs in vicinity.
 
 ### Create data matrices for CpG-SNP analysis
 
-We produce the following artificial files.
+To illustrate this type of analysis we
+produce the following artificial files.
 
-* `CpG_locations.*` -- filematrix with the location of the CpGs
-that passed the threshold.\
-It must have two columns with integer values -- chromosome number and location
+* `CpG_locations.*` -- filematrix with the location of the SNP-CpGs.\
+It has two columns with integer values --
+chromosome number and location
 (`chr` and `position`).
 * `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
 for the integer column `chr` in the location filematrix.
 * `Coverage.*` -- filematrix with the data for all samples and all locations.\
   Each row has data for a single sample.
-  Row names must be sample names.\
+  Row names are sample names.\
   Each column has data for a single location.
-  Columns must match rows of the location filematrix.
-* "SNPs.*" -- filematrix with genotype data, matching the coverage matrix.
-
+  Columns match rows of the location filematrix.
+* `SNPs.*` -- filematrix with genotype data, matching the coverage matrix.
 
 First, we load the package and set up a working directory.
-One may choose to set the project directory `dr` to
-a more convenient location when running this code.
+The project directory `dr` can be set to
+a more convenient location when running the code.
 ```{r generateData}
 library(ramwas)
 
@@ -85,7 +94,7 @@ cat(dr,"\n")
 ```
 
 Let the sample data matrix have 200 samples and 100,000 variables.
-```{r dims}
+```{r dims, eval=TRUE}
 nsamples = 200
 nvariables = 100000
 ```
@@ -167,7 +176,7 @@ close(fms)
 close(fmm)
 ```
 
-## CpG-SNP association testing
+## SNP-CpG analysis
 
 Let us test for association between
 CpG scores and and the sex covariate
@@ -191,16 +200,31 @@ param = ramwasParameters(
 param$cputhreads = 2
 ```
 
-First, we perform the usual analysis without correction for SNPs.
+The CpG-SNP analysis:
+
+```{r SNPs, message=FALSE}
+ramwasSNPs(param)
+```
+
+The QQ-plot shows better enrichment with significant p-values.
+```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+pfull = parameterPreprocess(param)
+fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
+pv = fm[,3]
+close(fm)
+qqPlotFast(pv)
+title("QQ-plot for CpG-SNP analysis")
+```
+
+For comparison, we also perform the usual MWAS for these CpGs
+without regard for SNPs.
 
 ```{r MWAS, message=FALSE}
 ramwas5MWAS(param)
 ```
 
-The QQ-plot shows mild enrichment among a large number of variables,
-which is consistent with how the data was generated --
-22\% of variables are affected by sex.
-```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
+The QQ-plot shows much weaker signal for the standard MWAS.
+```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
@@ -209,35 +233,24 @@ qqPlotFast(pv)
 title(pfull$qqplottitle)
 ```
 
-
-The analysis with correction for SNPs is next:
-
-```{r SNPs, message=FALSE}
-ramwasSNPs(param)
-```
-
-The QQ-plot shows better enrichment with significant p-values.
-```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6}
-pfull = parameterPreprocess(param)
-fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
-title("QQ-plot for MWAS with correction for SNPs")
-```
-
-
-The top finding are saved in the text files for regular and SNP-corrected MWAS:
-```{r topPvMWAS}
+The top finding are saved in the text files `Top_tests.txt`
+for both analyses:
+```{r topPvSNPs}
 # Get the directory with testing results
-pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirmwas,"/Top_tests.txt"),
+                paste0(pfull$dirSNPs,"/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))
+```
+
+Note that CpG-SNP analysis tests for 
+joint significance of $\beta_1$ and $\beta_2$
+and thus uses F-test, while regular MWAS uses t-test.
+```{r topPvMWAS}
+pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirSNPs,"/Top_tests.txt"),
+                paste0(pfull$dirmwas,"/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))

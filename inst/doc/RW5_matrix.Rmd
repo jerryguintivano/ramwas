@@ -1,12 +1,11 @@
 ---
-title: "2.1. Analyzing Data from Other Methylation Platforms or Data Types"
-author: "Andrey A Shabalin"
+title: "5. Analyzing Data from Other Methylation Platforms or Data Types"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{2.1. Analyzing data from other sources}
+  %\VignetteIndexEntry{5. Analyzing data from other sources}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -19,30 +18,34 @@ suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
 # dr = "D:/temp/"
-nsamples = 200
 ```
 
 # Using RaMWAS for with other methylation platforms or data types
 
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
-is initially designed for studies on methylation measurements
+is primarily designed for studies of methylation measurements
 from enrichment platforms.
 
-RaMWAS can also be useful for analysis of 
+However, RaMWAS can also be useful for the analysis of 
 methylation measurements from other  platforms 
 (e.g. Illumina HumanMethylation450K array) or
-data types such as gene expression levels or genotypes.
-RaMWAS can perform several analysis steps on such data: 
+other data types such as gene expression levels or genotype information.
+RaMWAS can perform several analysis steps on such data including: 
 principal component analysis (PCA), 
-association studies (GWAS, TWAS), 
-and elastic net analysis with cross validation.
+association testing (MWAS, TWAS, GWAS), 
+and multimarker analysis with cross validation using the elastic net.
 
 ## Import data from other sources
 
-Here we illustrate how data from other sources can be imported into RaMWAS.
+Without external data source at hand,
+we show how to create and fill data matrices
+with artificial data.
+Importing real data can be done in a similar way,
+with random data generation replaced with reading data from
+existing sources.
 
-Namely, we create data files in the same format as produced by
-[Step 3](RW1_intro.html#calculate-methylation-score-coverage-matrix) of RaMWAS.
+We create data files in the same format as produced by
+[Step 3](RW1_intro.html#step3) of RaMWAS.
 
 These files include
 
@@ -61,8 +64,8 @@ for the integer column `chr` in the location filematrix.
   Columns must match rows of the location filematrix.\
 
 First, we load the package and set up a working directory.
-One may choose to set the project directory `dr` to
-a more convenient location when running this code.
+The project directory `dr` can be set to
+a more convenient location when running the code.
 ```{r generateData}
 library(ramwas)
 
@@ -74,7 +77,7 @@ cat(dr,"\n")
 
 
 Let the sample data matrix have 200 samples and 100,000 variables.
-```{r dims}
+```{r dims, eval=TRUE}
 nsamples = 200
 nvariables = 100000
 ```

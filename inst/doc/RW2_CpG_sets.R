@@ -1,3 +1,8 @@
+## ----CpGsetExample-------------------------------------------------------
+cpgset = list( chr1 = c(12L, 57L, 123L),
+               chr2 = c(45L, 95L, 99L, 111L),
+               chr3 = c(22L, 40L, 199L, 211L) )
+
 ## ----loadPackages, echo=FALSE, warning=FALSE, message=FALSE--------------
 suppressPackageStartupMessages(library(ramwas))
 suppressPackageStartupMessages(library(BSgenome.Ecoli.NCBI.20080805))
@@ -21,7 +26,6 @@ print(cpgset$NC_008253[1:10])
 42841152
 
 ## ----getCpGsetALL2, eval=FALSE-------------------------------------------
-#  # Do for all chromosomes
 #  genome[["chr22"]] =
 #      injectSNPsMAF(
 #          gensequence = BSGenome[["chr22"]],

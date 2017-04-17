@@ -5,7 +5,6 @@ suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
 # dr = "D:/temp/"
-nsamples = 200
 
 ## ----generateData--------------------------------------------------------
 library(ramwas)
@@ -15,7 +14,7 @@ dr = paste0(tempdir(), "/simulated_matrix_data")
 dir.create(dr, showWarnings = FALSE)
 cat(dr,"\n")
 
-## ----dims----------------------------------------------------------------
+## ----dims, eval=TRUE-----------------------------------------------------
 nsamples = 200
 nvariables = 100000
 

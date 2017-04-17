@@ -1,26 +1,36 @@
 ---
-title: "4. CpG sets for RaMWAS"
-author: "Andrey A Shabalin"
+title: "2. CpG sets"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{4. CpG sets}
+  %\VignetteIndexEntry{2. CpG sets}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
 # CpG sets
 
-One of the required inputs is
-the set of CpGs at which RaMWAS
-calculates fragment coverage
-(step 3 of the pipeline).
-This set has to be provided
-in a .rds file (`filecpgset` parameter).
-We prepared several CpGs sets for
-human and mouse genomes and also
-provide instructions and code for creating custom CpG sets.
+RaMWAS calculates CpG scores and performs further analyses
+at a set of CpGs (or locations in general) defined by the user
+via `filecpgset` parameter.
+The `filecpgset` parameter must point to an .rds file
+(a file saved using `saveRDS` function),
+with the set of locations stored as a `list` with
+one sorted vector of CpG locations per chromosome.
+
+```{r CpGsetExample}
+cpgset = list( chr1 = c(12L, 57L, 123L),
+               chr2 = c(45L, 95L, 99L, 111L),
+               chr3 = c(22L, 40L, 199L, 211L) )
+```
+
+In practice, the set should depend
+on the reference genome and
+can include CpGs created by common SNPs.
+
+Optionally, parameter `filenoncpgset`, 
+can point to a file storing vetted locations away from any CpGs.
 
 # Downloadable CpG sets
 
@@ -29,7 +39,7 @@ reference genome sequence data with SNP information
 as SNPs can often create or destroy CpGs in the reference.
 Our sets exclude CpGs with unreliable coverage estimates due to
 poor alignment (e.g. CpG in repetitive elements)
-as indicated by our in-silico experiment ([details below](#insilico)).
+as indicated by our *in silico* experiment ([details below](#insilico)).
 
 Code | Super\ Population | hg19 no\ QC | hg19 with\ QC | hg38 no\ QC | hg38 with\ QC
 :---:|:---|:---:|:---:|:---:|:---:
@@ -43,6 +53,14 @@ SAS | South Asian | [28.0M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_S
 
 Table: CpG sets for human genome (autosomes only).
 
+**Note:** SNPs were obtained from the 1000 Genomes super populations
+(Phase 3 data,
+[more info](http://www.internationalgenome.org/category/population/)).
+Only SNPs with minor allele frequency above 1% are included.
+*In silico* alignment experiments assumed 75 bp single-end reads and
+alignment with
+[Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
+
 
 Genome | No\ QC | With\ QC
 :---:|:---:|:---:
@@ -50,34 +68,6 @@ GRCm38.p4 | [22.6M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p4
 GRCm38.p5 | [22.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p5.rds "22,651,390 CpGs, 26.1 MB file") | [21.7M](http://www.people.vcu.edu/~ashabalin/RaMWAS/cpgset_GRCm38.p5_bowtie2_75bp.rds "21,726,529 CpGs, 25.2 MB file")
 
 Table: CpG sets for mouse genome.
-
-Note: SNPs were obtained from the 1000 Genomes super populations
-(Phase 3 data,
-[more info](http://www.internationalgenome.org/category/population/)).
-Only SNPs with minor allele frequency above 1% are included.
-In silico alignment experiments assumed 75 bp single-end reads and
-alignment with
-[Bowtie 2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml).
-
-<!-- ## CpG filtering by in-silico alignment experiment {#insilico} -->
-
-<!-- We conducted an in-silico experiment to find and exclude -->
-<!-- CpGs located in regions with alignment problems. -->
-<!-- The experiment was conducted as follows. -->
-<!-- First, we created an artificial set of reads -->
-<!-- with all possible 75 bp genomic fragments -->
-<!-- from the referene genome. -->
-<!-- Then, these fragments were aligned to the same reference genome. -->
-<!-- Next, we calculated read coverage for all candidate CpGs. -->
-<!-- If the alignment were perfect, -->
-<!-- each CpG would have coverage of exactly 75. -->
-<!-- We allowed for +/-10 deviation, namely -->
-<!-- we excluded all CpG with coverage below 65 or above 85, -->
-<!-- which was about 2% of all CpGs for human genomes and 4% for mouse. -->
-<!-- The remaining CpGs formed the CpG sets in -->
-<!-- the "with\ QC" columns in the tables above. -->
-
-<!-- We used Bowtie 2 aligner version 2.2.9 with default settings. -->
 
 # Constructing a custom CpG set
 
@@ -105,9 +95,9 @@ print(cpgset$NC_008253[1:10])
 
 For a genome with injected SNPs,
 we provide the function `getCpGsetALL`
-for also finding CpGs that can be created by injected SNPs.
+for also finding CpGs that can be created by the SNPs.
 The example below uses all SNPs from dbSNP144 for
-selecting CpGs in human genome.
+listing CpGs in human genome.
 We do NOT advice using all dbSNP144 SNPs,
 as it causes a large number of CpGs that almost never occur in the population.
 
@@ -122,33 +112,37 @@ sum(sapply(cpgset[1:22], length))
 42841152
 ```
 
-
 The code above shows that using all dbSNP144 SNPs
 we get over 42 million CpGs instead of
 about 29 million when using only
 SNPs with minor allele frequency above 1%.
-In outbred population such as Humans one 
-may want to delete rare CpG-SNPs because they would 
-lose power to detect any associations.
-For this we need allele frequency information
-that is available for humans. 
-Unfortunately, (to our knowledge) Bioconductor packages with SNP information
-do not provide any data on SNP allele frequency.
+In outbred population such as humans 
+it's reasonable to ignore rare CpG-SNPs 
+because they would have low power
+to detect associations.
+To exclude rare CpG-SNPs,
+we need allele frequency information. 
+Unfortunately, (to our knowledge) 
+Bioconductor packages with SNP information
+do not contain SNP allele frequencies.
 To alleviate this problem, we provide a way
 to inject SNP information from 1000 Genomes data or any other VCF.
 
-First, the VCF files, obtained from 1000 Genomes project or otherwise,
+First, the VCF files, obtained from the 1000 Genomes project (or other sources),
 need to be processed by
 [`vcftools`](https://vcftools.github.io/man_latest.html)
-command `--counts`, e.g.:
+command `--counts`. 
+Note that `vcftools` is an independent software,
+not part of RaMWAS.
 
 > `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
 
-The generated allele count file can then be used to
-inject SNPs using the function `injectSNPsMAF`.
+RaMWAS provides the function `injectSNPsMAF` to
+read in the generated allele count files,
+select common SNPs, and inject them in the reference genome.
+Here we apply it to chromosome 22.
 
 ```{r getCpGsetALL2, eval=FALSE}
-# Do for all chromosomes
 genome[["chr22"]] =
     injectSNPsMAF(
         gensequence = BSGenome[["chr22"]],
@@ -166,7 +160,7 @@ Once a CpG set is generated, it can be saved with
 saveRDS(file = "My_cpgset.rds", object = cpgset)
 ```
 
-## In-silico alignment experiment
+## *In silico* alignment experiment
 
 CpG sites in loci that are problematic in terms of alignment
 need to be eliminated prior to analysis as CpG score estimates 
@@ -174,25 +168,31 @@ will be confounded with alignment errors.
 For example, repetitive elements constitute about 45% of the human genome. 
 Reads may be difficult to align to these loci because of 
 their high sequence similarity. 
-To identify problematic sites we conduct an in-silico experiment.
+To identify problematic sites we conduct an *in silico* experiment.
 
-For example, assume we have data with 75bp single end reads and 
-that we aligned to the human reference genome (build hg19/GRCh37). 
-In the in-silico experiment we first generate 
-all possible 75 bp single-end reads for this reference, 
-with each 75bp sequence starting 1bp downstream of the previous sequence.
-For example, the sequence of in silico read 1 is identical to the sequence of position 1 to 75 on chromosome 1 of the reference, read 2 was identical to positions 2 to 76, etc. In the perfect scenario, aligning these reads to the reference genome should show that each CpG is covered by 75 reads. CpG sites with read coverage below or above a certain threshold can then be eliminated from further analyses. 
+The pre-computed CpG sets for human genome 
+in this vignette are prepared for 75 bp single end reads.
+In the *in silico* experiment we first generate 
+all possible 75 bp single-end reads from the forward strand of the reference. 
+It starts with the read from position 1 to 75 on chromosome 1 of the reference.
+Next read spans positions 2 to 76, etc.
+In the perfect scenario, 
+aligning these reads to the reference genome they originated from
+should cause each CpG to be covered by 75 reads.
+We excluded CpG sites with read coverage deviating from 75 by more than 10.
 
 For a typical mammalian genome
-the in-silico experiment is rather computationally intensive,
+the *in silico* experiment is computationally intensive,
 as it requires alignment of billions of artificially created reads.
 
-The files with artificial reads can be created with function `insilicoFASTQ`.
-It supports gz compression of the output files,
-decreasing disk space requirement 
-from about 500 GB to 17 GB for the human genome.
+RaMWAS supports *in silico* experiments with 
+the function `insilicoFASTQ` for creating
+artificial reads from the reference genome.
+The function supports gz compression of the output files,
+decreasing disk space requirement for human genome 
+from about 500 GB to 17 GB.
 
-Here is an example for the `insilicoFASTQ` function
+Here is how `insilicoFASTQ` function
 
 ```{r insilicoFASTQ, eval=FALSE}
 # Do for all chromosomes
@@ -237,7 +237,7 @@ ramwas1scanBams(param)
 ramwas3normalizedCoverage(param)
 ```
 
-The following code then filters CpGs by the in-silico coverage
+The following code then filters CpGs by the *in silico* coverage
 
 ```{r filter, eval=FALSE}
 # Preprocess parameters to learn the location of coverage matrix

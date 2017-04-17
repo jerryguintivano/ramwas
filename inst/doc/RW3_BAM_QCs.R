@@ -5,11 +5,12 @@ knitr::opts_chunk$set(fig.retina=1)
 library(ramwas)
 
 ## ----loadCgGset----------------------------------------------------------
+library(ramwas)
 filename = system.file("extdata", "bigQC.rds", package = "ramwas")
 qc = readRDS(filename)$qc
 
 ## ----nbams---------------------------------------------------------------
-cat("N BAMs:", qc$nbams)
+cat("Number of BAMs:", qc$nbams)
 
 ## ----reads.total---------------------------------------------------------
 cat("Reads total:", qc$reads.total)
@@ -28,17 +29,33 @@ cat("Reads total:", qc$reads.total)
      "% of aligned reads", sep="")
 }
 
+## ----reads.recorded.no.repeats-------------------------------------------
+{
+ cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
+ cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
+     "% of aligned reads", "\n", sep="")
+}
+
+## ----frwrevNR------------------------------------------------------------
+{
+ cat("Excluding duplicate reads", "\n")
+ cat("Reads on forward strand:", qc$frwrev.no.repeats[1], "\n")
+ cat("Reads on reverse strand:", qc$frwrev.no.repeats[2], "\n")
+ cat("Fraction of reads on forward strand:", qcmean(qc$frwrev.no.repeats),"\n")
+}
+
 ## ----frwrev--------------------------------------------------------------
 {
- cat("Reads on forward strand:", qc$frwrev[1],"\n")
- cat("Reads on reverse strand:", qc$frwrev[2],"\n")
- cat("Fraction of reads on forward strand:", qcmean(qc$frwrev), "\n")
+ cat("Not excluding duplicate reads", "\n")
+ cat("Reads on forward strand:", qc$frwrev[1], "\n")
+ cat("Reads on reverse strand:", qc$frwrev[2], "\n")
+ cat("Fraction of reads on forward strand (before QC):", qcmean(qc$frwrev),"\n")
 }
 
 ## ----hist.score1, fig.width=8--------------------------------------------
 {
- cat("Average alignment score:", qcmean(qc$hist.score1), "\n")
- cat("Average alignment score, no filter:", qcmean(qc$bf.hist.score1), "\n")
+ cat("Average alignment score, after filter:", qcmean(qc$hist.score1),    "\n")
+ cat("Average alignment score, no filter:   ", qcmean(qc$bf.hist.score1), "\n")
  par(mfrow=c(1,2))
  plot(qc$hist.score1)
  plot(qc$bf.hist.score1)
@@ -46,8 +63,9 @@ cat("Reads total:", qc$reads.total)
 
 ## ----hist.length.matched, fig.width=8------------------------------------
 {
- cat("Average aligned length:", qcmean(qc$hist.length.matched), "\n")
- cat("Average aligned length, no filter:",
+ cat("Average aligned length, after filter:", 
+     qcmean(qc$hist.length.matched),    "\n")
+ cat("Average aligned length, no filter:   ",
      qcmean(qc$bf.hist.length.matched), "\n")
  par(mfrow = c(1,2))
  plot(qc$hist.length.matched)
@@ -56,22 +74,13 @@ cat("Reads total:", qc$reads.total)
 
 ## ----hist.edit.dist1-----------------------------------------------------
 {
- cat("Average edit distance:", qcmean(qc$hist.edit.dist1), "\n")
- cat("Average edit distance, no filter:", qcmean(qc$bf.hist.edit.dist1), "\n")
+ cat("Average edit distance, after filter:", 
+     qcmean(qc$hist.edit.dist1),    "\n")
+ cat("Average edit distance, no filter:   ", 
+     qcmean(qc$bf.hist.edit.dist1), "\n")
  par(mfrow = c(1,2))
  plot(qc$hist.edit.dist1)
  plot(qc$bf.hist.edit.dist1)
-}
-
-## ----reads.recorded.no.repeats-------------------------------------------
-{
- cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
- cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
-     "% of aligned reads", "\n", sep="")
- cat("Fraction of reads on forward strand (with    duplicates):",
-     qcmean(qc$frwrev), "\n")
- cat("Fraction of reads on forward strand (without duplicates):",
-     qcmean(qc$frwrev.no.repeats), "\n")
 }
 
 ## ----cnt.nonCpG.reads----------------------------------------------------

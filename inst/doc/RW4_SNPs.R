@@ -4,7 +4,7 @@ library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
 # opts_chunk$set(eval=FALSE)
-# dr = "D:/temp/"
+dr = "D:/temp/"
 
 ## ----generateData--------------------------------------------------------
 library(ramwas)
@@ -14,7 +14,7 @@ dr = paste0(tempdir(), "/simulated_matrix_data")
 dir.create(dr, showWarnings = FALSE)
 cat(dr,"\n")
 
-## ----dims----------------------------------------------------------------
+## ----dims, eval=TRUE-----------------------------------------------------
 nsamples = 200
 nvariables = 100000
 
@@ -97,10 +97,21 @@ param = ramwasParameters(
 # Bioconductor requires limit of 2 parallel jobs
 param$cputhreads = 2
 
+## ----SNPs, message=FALSE-------------------------------------------------
+ramwasSNPs(param)
+
+## ----plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6----
+pfull = parameterPreprocess(param)
+fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
+pv = fm[,3]
+close(fm)
+qqPlotFast(pv)
+title("QQ-plot for CpG-SNP analysis")
+
 ## ----MWAS, message=FALSE-------------------------------------------------
 ramwas5MWAS(param)
 
-## ----plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6----
+## ----plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6----
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
@@ -108,27 +119,18 @@ close(fm)
 qqPlotFast(pv)
 title(pfull$qqplottitle)
 
-## ----SNPs, message=FALSE-------------------------------------------------
-ramwasSNPs(param)
-
-## ----plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.width=6, fig.height=6----
-pfull = parameterPreprocess(param)
-fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
-title("QQ-plot for MWAS with correction for SNPs")
-
-## ----topPvMWAS-----------------------------------------------------------
+## ----topPvSNPs-----------------------------------------------------------
 # Get the directory with testing results
-pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirmwas,"/Top_tests.txt"),
+                paste0(pfull$dirSNPs,"/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))
+
+## ----topPvMWAS-----------------------------------------------------------
+pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirSNPs,"/Top_tests.txt"),
+                paste0(pfull$dirmwas,"/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))

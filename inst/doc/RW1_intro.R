@@ -12,7 +12,7 @@ panderOptions("digits", 3)
 ## ----loadIt, eval=FALSE--------------------------------------------------
 #  library(ramwas) # Loads the package
 #  browseVignettes("ramwas") # Opens vignettes
-#  help(package="ramwas") # Lists package functions
+#  help(package = "ramwas") # Lists package functions
 
 ## ----loadPackages, echo=FALSE, warning=FALSE, message=FALSE--------------
 suppressPackageStartupMessages(library(ramwas))
@@ -25,8 +25,7 @@ ramwas0createArtificialData(dir = dr,
                             verbose = FALSE,
                             nreads = 100e3,
                             ncpgs = 25e3)
-# This is the project directory
-cat(dr)
+cat("Project directory:", dr)
 
 ## ----parameters----------------------------------------------------------
 param = ramwasParameters(
@@ -42,7 +41,7 @@ param = ramwasParameters(
     minavgcpgcoverage = 0.3,
     minnonzerosamples = 0.3,
     filecovariates = "covariates.txt",
-    modelcovariates = "sex",
+    modelcovariates = NULL,
     modeloutcome = "age",
     modelPCs = 0,
     toppvthreshold = 1e-5,
@@ -60,7 +59,7 @@ param = ramwasParameters(
 ## ----scan-bams, warning=FALSE, message=FALSE-----------------------------
 ramwas1scanBams(param)
 
-## ----plotACbD, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6----
+## ----plotACbD, warning=FALSE, message=FALSE, fig.width=6, fig.height=6----
 pfull = parameterPreprocess(param)
 qc = readRDS(paste0(pfull$dirrqc, "/BAM007.qc.rds"))
 plot(qc$qc$avg.coverage.by.density)
@@ -84,6 +83,7 @@ ramwas4PCA(param)
 ## ----plotPCA, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6----
 e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 ramwas:::plotPCvalues(e$values)
+ramwas:::plotPCvectors(e,1)
 ramwas:::plotPCvectors(e,2)
 rm(e)
 
@@ -130,45 +130,13 @@ cl = readRDS(sprintf("%s/rds/cor_data_alpha=%f.rds",
                     pfull$mmalpha))
 ramwas:::plotCVcors(cl, pfull)
 
-## ----topPvMWAS-----------------------------------------------------------
-# Get the directory with testing results
-pfull = parameterPreprocess(param)
-toptbl = read.table(
-                paste0(pfull$dirmwas,"/Top_tests.txt"),
-                header = TRUE,
-                sep = "\t")
-pander(head(toptbl, 5))
-
-## ----getLocation---------------------------------------------------------
-chr = toptbl$chr[1]
-position = toptbl$position[1]
-cat("Top Finding is at:", chr, "-", position, "\n")
-
-## ----getdata-------------------------------------------------------------
-datavec = getDataByLocation(param, chr, position)
-testres = getTestsByLocation(param, chr, position)
-pander(testres)
-
-## ----lm------------------------------------------------------------------
-outcome = pfull$covariates[[pfull$modeloutcome]]
-cvrt = pfull$covariates[[pfull$modelcovariates]]
-variable = datavec$matrix
-model = lm( outcome ~ variable + cvrt)
-pander(summary(model)$coefficients)
-
 ## ----dirlocations--------------------------------------------------------
 pfull = parameterPreprocess(param)
-# Here lies coverage matrix
-pfull$dircoveragenorm
-# Here are PCA files
-pfull$dirpca
-# Here are MWAS files
-pfull$dirmwas
-# Here are multi-marker cross-validation files
-pfull$dircv
-
-## ----clean---------------------------------------------------------------
-unlink(paste0(dr,"/*"), recursive=TRUE)
+cat("CpG score directory:", "\n", pfull$dircoveragenorm,"\n")
+cat("PCA directory:", "\n", pfull$dirpca, "\n")
+cat("MWAS directory:", "\n", pfull$dirmwas, "\n")
+cat("MRS directory:", "\n", pfull$dircv, "\n")
+cat("CpG-SNP directory:", "\n", pfull$dirSNPs, "\n")
 
 ## ----version-------------------------------------------------------------
 sessionInfo()

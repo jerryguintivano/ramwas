@@ -40,20 +40,6 @@ panderOptions("digits", 3)
 #      filecpgset="/computing_cluster/ramwas/cpgset_hg19_SNPS_at_MAF_0.05.rds"
 #  }
 
-## ----eval=FALSE----------------------------------------------------------
-#  batch1/b1sample1.bam
-#  batch1/b1sample2.bam
-#  batch2/b2sample1.bam
-#  batch2/b2sample2.bam
-#  batch2/b2sample3.bam
-#  batch4/sample4.bam
-
-## ----eval=FALSE----------------------------------------------------------
-#  batch1/sample1.bam
-#  batch1/sample2.bam
-#  batch2/sample1.bam
-#  batch2/sample2.bam
-
 ## ----bam2sample----------------------------------------------------------
 bam2sample = list(
     sample1 = c("bam1","bam2","bam3"),

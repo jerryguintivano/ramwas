@@ -1,23 +1,68 @@
 ---
-title: "3. RaMWAS QC Measures for BAM files"
-author: "Andrey A Shabalin"
+title: "3. BAM Quality Control Measures"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{3. QC Meansures for BAM files}
+  %\VignetteIndexEntry{3. BAM Quality Control Measures}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-# Loading and Saving RaMWAS objects
+# Loading and saving RaMWAS objects
 
-All RaMWAS objects are saved as text files,
-filematrices, or .rds files.
-The .rds files are saved and loaded with `saveRDS` and `readRDS` functions.
+Steps 1 and 2 of RaMWAS 
+scan BAM files, calculate and collect 
+quality control (QC) metrics
+The QC information is stored in .rds files in "rqc" directory.
+They are also summarizes in text files in the "qc" directory
+and illustrated in mulpiple plots.
 
-Below we load a sample QC file, which contains accumulated
-QC measures from BAM files of a small project.
+## QC text summary
+
+The text summary is saved in two versions:
+
+* `Summary_QC.txt` -- formatted for viewing in Excel.
+* `Summary_QC_R.txt` -- formatted for easy import in R.
+
+Excel\ friendly\ column\ name | R\ friendly column name | brief\ description\ and\ link\ to\ section
+:---|:---|:---
+Sample | Sample | Sample / BAM name
+\# BAMs | NBAMs | [Number of BAMs in the sample](#NBAMs)
+Total reads | TotalReads | [Total number of reads](#TotalReads)
+Reads aligned | ReadsAligned | [The number of aligned reads](#ReadsAligned)
+RA \% of total | ReadsAlignedPct | Percent of reads aligned
+Reads after filter | ReadsAfterFilter | [Number of reads that passed minimum score filter](#ReadsAfterFilter)
+RAF \% of aligned | ReadsAfterFilterPct | Percent of reads passing the filter out of all aligned reads
+Reads removed as duplicate | ReadsRemovedAsDuplicate | [Reads removed as duplicate](#ReadsRemovedAsDuplicate)
+RRAD % of aligned | ReadsRemovedAsDuplicatePct | Percent of reads removed as duplicate out of all aligned reads
+Reads used for coverage | ReadsUsedForCoverage | Number of aligned reads used for coverage (left after filtering and removal of duplicate reads)
+RUFC % of aligned | ReadsUsedForCoveragePct | Percent of reads used for coverage out of all aligned reads
+Forward strand (%) | ForwardStrandPct | [Percent of reads used for coverage aligned to the forward strand](#ForwardStrandPct)
+Avg alignment score | AvgAlignmentScore | [Average alignment score](#AvgAlignmentScore)
+Avg aligned length | AvgAlignedLength | [Average length of the aligned part of the read](#AvgAlignedLength)
+Avg edit distance | AvgEditDistance | [Average number of mismatches between the aligned part of the read and the reference genome](#AvgEditDistance)
+Non-CpG reads (%) | NonCpGreadsPct | [Percent of reads aligned away from CpGs](#NonCpGreadsPct)
+Avg non-CpG coverage | AvgNonCpGcoverage | [Average CpG score for non-CpG locations](#AvgNonCpGcoverage)
+Avg CpG coverage | AvgCpGcoverage | [Average CpG score for CpGs](#AvgNonCpGcoverage)
+Non-Cpg/CpG coverage ratio | NonCpg2CpGcoverageRatio | [Ratio of average non-CpG and CpG scores](#AvgNonCpGcoverage)
+ChrX reads (%) | ChrXreadsPct | [Fraction of reads aligned to chromosome X](#ChrXreadsPct)
+ChrY reads (%) | ChrYreadsPct | [Fraction of reads aligned to chromosome Y](#ChrXreadsPct)
+Peak SQRT | PeakSQRT | [Square root of the CpG density with highest average CpG score](#PeakSQRT)
+
+# Quality control measures
+
+All QC measures are designed to be additive, in the sense that any QC
+measure calculated for a combination of two BAM files is equal to the
+sum of the respective measure calculated for those BAMs separately.
+
+Many QC measures can be visualized by calling the `plot` function.
+For most QC measures, a single number summary is 
+available via the `qcmean` function.
+
+A sample QC file, which contains accumulated
+QC measures from 42 BAM files,
+can be loaded with the following code.
 
 ```{r global_options, include=FALSE}
 #getwd()
@@ -27,39 +72,37 @@ library(ramwas)
 ```
 
 ```{r loadCgGset}
+library(ramwas)
 filename = system.file("extdata", "bigQC.rds", package = "ramwas")
 qc = readRDS(filename)$qc
 ```
 
-# Quality control measures
+Next we describe the QC metrics calculated by RaMWAS.
 
-All QC measures are designed to be additive, in the sence that any QC
-measure calculated for a concatination of two BAM files is equal to the
-sum of the respective measure calculated for those BAMs separately.
+## The number of BAM files {#NBAMs}
 
-Many QC measures can be visualized by calling `plot` function on them.
-For some, single number summary is available via `qcmean` function.
-
-The currently supported QC measures include the following:
-
-## The number of BAM files
-
-The sample QC file accumulates information from 42 BAMs.
+The `nbams` QC metric counts the number of BAM files.
+This cumulative metric is calculated for total of 42 BAMs.
 
 ```{r nbams}
-cat("N BAMs:", qc$nbams)
+cat("Number of BAMs:", qc$nbams)
 ```
 
-## Total number of reads in the BAM file(s)
+## Total number of reads in the BAM file(s) {#TotalReads}
 
+The `reads.total` QC metric counts the number of reads
+scanned in the BAM file(s). This includes reads later excluded
+due to low alignment score or as duplicates.\
 The 42 BAMs contain 2.46 billion reads.
 
 ```{r reads.total}
 cat("Reads total:", qc$reads.total)
 ```
 
-## Number of reads aligned to the reference genome
+## Number of reads aligned to the reference genome {#ReadsAligned}
 
+The `reads.aligned` QC metric indicates the number of reads
+that were successfully aligned to the reference genome.\
 The number of aligned reads is only 2\% smaller, 2.42 billion.
 
 ```{r reads.aligned}
@@ -70,8 +113,14 @@ The number of aligned reads is only 2\% smaller, 2.42 billion.
 }
 ```
 
-## Number of reads that passed minimum score filter
+## Number of reads that passed minimum score filter {#ReadsAfterFilter}
 
+At step 1 of RaMWAS, reads are filtered by the `scoretag` parameter,
+which is usually either the "MAPQ" field or "AS" tag in the BAM file.
+Reads with scores below `minscore` are excluded.
+
+The `reads.recorded` QC metric counts the number of reads
+that passed the score threshold.\
 Almost of 2.2 billion reads passed the score threshold.
 
 ```{r reads.recorded}
@@ -82,60 +131,117 @@ Almost of 2.2 billion reads passed the score threshold.
 }
 ```
 
-## Number of recorded reads aligned to each strand
+## Number of reads after removal of duplicate reads {#ReadsRemovedAsDuplicate}
 
-For this measure, `qcmean` returns the fraction of reads on forward strand.
-Normally, the number of reads on forward and reverse strands is very close,
-so `qcmean` should give a number close to `0.5`.
+Reads that start at the same nucleotide positions
+and aligned to the same strand are called duplicate reads.
+When sequencing a whole genome, duplicate-reads often arise from 
+template preparation or amplification artifacts. 
+In the context of sequencing an enriched genomic fraction,
+duplicate-reads are increasingly likely to occur because
+reads align to a much smaller fraction of the genome. 
+RaMWAS allows the user to define a threshold for the number
+of reads starting at the same position and 
+limits the read count to this threshold 
+(implicitly assuming that an excess of 
+reads are tagging the same clonal fragment). 
 
-```{r frwrev}
+The  threshold is set by `maxrepeats` parameter with the default value 3.
+
+When there are mulptiple reads with the same start
+position, we suspect them to be falsely duplicated.
+
+The `reads.recorded.no.repeats` QC metric records the
+total number of reads after removal of duplicates.
+
+In our example, 10\% of reads are removed as duplicates.
+
+```{r reads.recorded.no.repeats}
 {
- cat("Reads on forward strand:", qc$frwrev[1],"\n")
- cat("Reads on reverse strand:", qc$frwrev[2],"\n")
- cat("Fraction of reads on forward strand:", qcmean(qc$frwrev), "\n")
+ cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
+ cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
+     "% of aligned reads", "\n", sep="")
 }
 ```
 
+## Number of recorded reads aligned to each strand {#ForwardStrandPct}
 
-## Distribution of the alignment scores
+The `frwrev` QC metric records two values -- the number of reads
+aligned to the forward and reverse strands respectively,
+after filtering reads by alignment score.
 
-The QC measures `bf.hist.score1` and `hist.score1` record the distribution of
+The `frwrev.no.repeats` is similar to `frwrev`,
+but it excludes duplicate reads.
+
+For these measures, the `qcmean` function returns 
+the fraction of reads on the forward strand.
+Normally, the number of reads on the forward 
+and reverse strands are very close,
+so `qcmean` should give a number close to `0.5`.
+
+```{r frwrevNR}
+{
+ cat("Excluding duplicate reads", "\n")
+ cat("Reads on forward strand:", qc$frwrev.no.repeats[1], "\n")
+ cat("Reads on reverse strand:", qc$frwrev.no.repeats[2], "\n")
+ cat("Fraction of reads on forward strand:", qcmean(qc$frwrev.no.repeats),"\n")
+}
+```
+
+Clearly before removal of duplicate reads the 
+fraction of reads on the forward strand was further away from 0.5.
+
+```{r frwrev}
+{
+ cat("Not excluding duplicate reads", "\n")
+ cat("Reads on forward strand:", qc$frwrev[1], "\n")
+ cat("Reads on reverse strand:", qc$frwrev[2], "\n")
+ cat("Fraction of reads on forward strand (before QC):", qcmean(qc$frwrev),"\n")
+}
+```
+
+## Distribution of the alignment scores {#AvgAlignmentScore}
+
+The QC metrics `bf.hist.score1` and `hist.score1` record the distribution of
 the alignment scores before and after the filter.
 The score is defined by the `scoretag` parameter.
 While `hist.score1` contain the distribution for reads that passed the filter,
 `bf.hist.score1` has the distribution for all reads.
-The `qcmean` function for this QC measure returns
+The `qcmean` function for these QC measures returns
 the average score for the respective group.
 The first element of the vector `qc$hist.score1` contains the number of
-reads with score of 0, the second with score of 1,
-and so on. Negative scores (if any) are ignored.
+reads with score of 0, the second with score of 1, and so on.
+Negative scores (if any) are ignored.
 
 ```{r hist.score1, fig.width=8}
 {
- cat("Average alignment score:", qcmean(qc$hist.score1), "\n")
- cat("Average alignment score, no filter:", qcmean(qc$bf.hist.score1), "\n")
+ cat("Average alignment score, after filter:", qcmean(qc$hist.score1),    "\n")
+ cat("Average alignment score, no filter:   ", qcmean(qc$bf.hist.score1), "\n")
  par(mfrow=c(1,2))
  plot(qc$hist.score1)
  plot(qc$bf.hist.score1)
 }
 ```
 
+## Distribution of the length of the aligned part of the reads {#AvgAlignedLength}
 
-## Distribution of the length of the aligned part of the reads
-
+The `hist.length.matched` QC metrix records the 
+distribution of the length of the aligned part of the reads.
 The length of the aligned part of a read is calculated from
-the CIGAR string in the BAM file using `cigarWidthAlongQuerySpace` function.
-As previously, the vector `hist.length.matched` has the distribution
-for reads that passed the filter, `bf.hist.length.matched` -- for all reads.
+the CIGAR string in the BAM file using the `cigarWidthAlongQuerySpace` function.
+The vector `hist.length.matched` has the distribution
+for reads that passed the filter, 
+`bf.hist.length.matched` -- for all reads.
 The `qcmean` function for these QC measures returns the
-average values.
+average length
 The first element of the vector contains the number of
 reads with 1 aligned basepair, the second with 2, and so on.
 
 ```{r hist.length.matched, fig.width=8}
 {
- cat("Average aligned length:", qcmean(qc$hist.length.matched), "\n")
- cat("Average aligned length, no filter:",
+ cat("Average aligned length, after filter:", 
+     qcmean(qc$hist.length.matched),    "\n")
+ cat("Average aligned length, no filter:   ",
      qcmean(qc$bf.hist.length.matched), "\n")
  par(mfrow = c(1,2))
  plot(qc$hist.length.matched)
@@ -144,80 +250,50 @@ reads with 1 aligned basepair, the second with 2, and so on.
 ```
 
 
-## Distribution of edit distance
+## Distribution of edit distance {#AvgEditDistance}
 
-This QC measure is calculated from the NM tag in BAM files.
-It records the difference between the aligned part of the read 
-and the reference genome as a result of base call errors or genetic variation.
-The `qcmean` function for this QC measure returns
-the average values.
+The `hist.edit.dist1` QC metricrecords the 
+distribution of the number of mismatches between 
+the aligned part of the read and the reference genome.
+The mismatches are caused by base call errors and genetic variation.
+The metric is calculated from the NM tag in BAM files.
+
+The `bf.hist.edit.dist1` QC metric records
+the distribution before read filtering, while `hist.edit.dist1` after.
 The first element of the vector contains the number of reads
 with 0 edit distance (perfect match), the second with edit distance 1,
 and so on.
 
+The `qcmean` function for this QC metric returns the average edit distance.
+
 ```{r hist.edit.dist1}
 {
- cat("Average edit distance:", qcmean(qc$hist.edit.dist1), "\n")
- cat("Average edit distance, no filter:", qcmean(qc$bf.hist.edit.dist1), "\n")
+ cat("Average edit distance, after filter:", 
+     qcmean(qc$hist.edit.dist1),    "\n")
+ cat("Average edit distance, no filter:   ", 
+     qcmean(qc$bf.hist.edit.dist1), "\n")
  par(mfrow = c(1,2))
  plot(qc$hist.edit.dist1)
  plot(qc$bf.hist.edit.dist1)
 }
 ```
 
-## Number of reads after removal of duplicate reads
-
-Duplicate-reads are reads that start at the same nucleotide positions. 
-When sequencing a whole genome, duplicate-reads often arise from 
-template preparation or amplification artifacts. 
-In the context of sequencing an enriched genomic fraction, 
-duplicate-reads are increasingly likely to occur because 
-reads align to a much smaller fraction of the genome. 
-RaMWAS allows the user to define a threshold for the number 
-of reads starting at the same position and l
-imits the read count to this threshold 
-(implicitly assuming that an excess of 
-reads are tagging the same clonal fragment). 
-
-The  threshold is set by `maxrepeats` parameter
-with the default being 3.
-
-
-When there are mulptiple reads with the same start
-position, we suspect them to be falsely duplicated.
-QC metric `reads.recorded.no.repeats` records the
-total number of reads after removal of duplicates and
-`frwrev.no.repeats` 
-shows how these reads are distributed across the forward and reverse strands. 
-
-In our example, after removal of duplicates we are left with 90\% of the reads.
-After removal of duplicate reads the fraction of reads on
-forward strand got even closer to 0.5.
-
-```{r reads.recorded.no.repeats}
-{
- cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
- cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
-     "% of aligned reads", "\n", sep="")
- cat("Fraction of reads on forward strand (with    duplicates):",
-     qcmean(qc$frwrev), "\n")
- cat("Fraction of reads on forward strand (without duplicates):",
-     qcmean(qc$frwrev.no.repeats), "\n")
-}
-```
-
-## Number of reads away from CpGs
+## Number of reads away from CpGs {#NonCpGreadsPct}
 
 MBD-seq detects CpG methylation, 
 such that reads aligning to loci that are 
-at least `maxfragmentsize` away from any CpG represent "noise".
+at least `maxfragmentsize` away from any CpGs represent "noise".
 These reads occur due to alignment errors or 
 imperfect enrichment leading to sequencing of non-methylated fragments).
 
-The QC measure `cnt.nonCpG.reads` contains the number of
-non-CpG reads in it"s first element.
+The `cnt.nonCpG.reads` QC metric contains the number of
+non-CpG reads in it's first element and
+the total number of reads in the second.
 
-In our example there is less than 1\% of non-CpG reads,
+The `qcmean` function for this QC metric returns the
+percent of non-CpG reads out of all reads. \
+
+For our data there is less than 1\% of non-CpG reads,
 which is consistent with low level of noise.
 
 ```{r cnt.nonCpG.reads}
@@ -227,13 +303,17 @@ which is consistent with low level of noise.
 }
 ```
 
-## Average coverage of CpGs and non-CpGs
+## Average CpG score for CpGs and non-CpGs {#AvgNonCpGcoverage}
 
-Another measure of success of enrichment is calculated as follows.
-We calculate average coverage of all CpGs and the
-average coverage at a set of locations away from CpGs (so-called non-CpGs).
-The ratio gives us a lower bound on the enrichment level of the samples.
-The opposite ratio measures the noise level (lower is better.)
+The `avg.cpg.coverage` and `avg.noncpg.coverage` QC metrics record
+the average CpG score (fragment coverage) for 
+all CpGs and for all non-CpGs (locations away from CpGs).
+
+For successfull enrichment, the average CpG score
+should be much larger that average non-CpG score
+The ratio of these metrics,
+gives us a lower bound on the enrichment level (higher is better).
+The opposite ratio measures the noise level (lower is better).
 
 ```{r avg.cpg.coverage}
 {
@@ -245,23 +325,23 @@ The opposite ratio measures the noise level (lower is better.)
 }
 ```
 
-## Coverage vs. CpG density
+## Average CpG score vs. CpG density {#PeakSQRT}
 
 Enrichment profiles are not only affected by the 
 total amount of methylation of the DNA fragments,
-which is a function of the number of CpGs and how much they are methylated, 
+which is a function of the number of CpGs and how many of them are methylated, 
 but also variability in the laboratory protocol. 
-For example if the amount of MBD2 protein coated beads is too low 
-highly methylated fragments will be overrepresented, 
-and if the amount of protein is too high non-specific binding will occur. 
-To capture such protocol variability, 
-the The QC `measure avg.coverage.by.density` can be used to explore 
-how average fragment coverage depends on CpG density. 
-The The `qcmean` function returns the square root of the CpG density 
+To capture protocol variability, 
+
+The `avg.coverage.by.density` QC metric
+records the dependence of average CpG score 
+as a function of CpG density.
+The `qcmean` function returns the square root of the CpG density 
 where maximum average CpG score is achieved. 
-This `peak' sensitivity can be used as a lab technical covariate in 
+
+This 'sqrt peak' sensitivity can be used as a laboratory technical covariate in 
 downstream analyses to regress out 
-variability in enrichment profiles across samples. 
+variability in enrichment profiles across samples.
 
 ```{r avg.coverage.by.density}
 {
@@ -273,39 +353,48 @@ variability in enrichment profiles across samples.
 
 ## Coverage around isolated CpGs
 
+A CpG is called isolated if
+there are no other CpGs within 
+a sufficient distance from it.
+The distance is usually the longest possible fragment size.
+
 The distribution of reads around isolated CpGs 
-(a site C for which the interval $[C-d,C+d]$ contains no other CpGs but $C$ 
-where $d$ is the longest possible fragment size) 
 also contains information about the enrichment profile. 
 Because the total amount of methylation in fragments 
 containing isolated CpGs is small, 
 this distribution reflects the sensitivity of the enrichment.
 That is, a sensitive assay would be characterized by a pattern where 
 most reads start close to the isolated CpG. 
-The read counts start to decrease further away from $C$ until 
+The read counts should decrease further away from the CpG until 
 they eventually stabilize to a "noise" level 
 at distances larger than the maximum fragment size. 
 This pattern of read counts around isolated CpGs 
-also from the basis of the fragment size estimation needed 
+also form the basis of the fragment size estimation needed 
 to calculate CpG score for single end sequencing data.
 
-The QC measure `hist.isolated.dist1` records the distribution of
+The `hist.isolated.dist1` QC metric records the distribution of
 distances from read start sites to isolated CpGs.
 In our example, as we expected,
-there are more reads starting closer to isolated CpGs.
+there are more reads starting closer to the isolated CpGs.
 
 ```{r hist.isolated.dist1}
 plot(qc$hist.isolated.dist1)
 ```
 
-## Fraction of reads from chrX and chrY
+## Fraction of reads from chrX and chrY {#ChrXreadsPct}
 
-The fractions of reads from chrX and chrY can be used to test whether
-the individuals have the same sex as recorded in the phenotype data.
-Mismatches often indicate swapped or mislabeled samples.
-The first element of `qc$chrX.count` contains the number of chrX reads,
-while `qcmean(qc$chrX.count)` gives the fraction of total. Same for chrY.
+The fractions of reads from chromosome X and chromosome Y
+can be used to test whether the investigated biosamples
+have the same sex as recorded in the phenotype data.
+Mismatches often indicate swapped biosamples or phenotypes information.
+They can also indicate contamination across biosamples.
 
+The `chrX.count` QC metric records the number of chromosome X reads 
+in its first element and the total number of reads in the second.
+The `qcmean` function returns the percent of chromosome X reads 
+out of the total.
+
+The `chrY.count` QC metric is defined analogously for chromosome Y.
 
 ```{r chrXY}
 {
