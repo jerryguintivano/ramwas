@@ -304,7 +304,7 @@ for selection of top results.
 Alternatively, it can define the number of top results, if it is set to
 a value larger than 1.
 
-## Annotation of top findings
+## Annotation of top findings {#biomart}
 
 The annotation is done using
 [`biomaRt`](https://bioconductor.org/packages/biomaRt/).
