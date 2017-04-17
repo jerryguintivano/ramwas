@@ -569,10 +569,13 @@ ramwas:::plotCVcors(cl, pfull)
 
 Point mutated CpG sites, called CpG-SNPs [@shoemaker2010allele], 
 are interesting sites for human diseases because 
-in addition to the sequence variation they may show individual differences in DNA methylation. 
-RaMWAS can perform CpG-SNP analyses if SNP data from the same subjects/samples is also available. 
+in addition to the sequence variation they may 
+show individual differences in DNA methylation. 
+RaMWAS can perform CpG-SNP analyses if SNP data 
+from the same subjects/samples is also available. 
 These tests are performed using a regression model that assesses 
-whether the case-control differences are proportional to the number of CpG sites [@van2015whole].
+whether the case-control differences are 
+proportional to the number of CpG sites [@van2015whole].
 
 This type of analysis is explained in the [CpG-SNP vignette](RW4_SNPs.html).
 
