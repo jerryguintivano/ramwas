@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2017-04-17" />
+<meta name="date" content="2017-04-19" />
 
 <title></title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <h1 class="title"><ol start="5" style="list-style-type: decimal">
 <li>Analyzing Data from Other Methylation Platforms or Data Types</li>
 </ol></h1>
-<h4 class="date"><em>2017-04-17</em></h4>
+<h4 class="date"><em>2017-04-19</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -94,7 +94,7 @@ Each column has data for a single location (CpG / SNP / gene trascription start 
 dr = paste0(tempdir(), &quot;/simulated_matrix_data&quot;)
 dir.create(dr, showWarnings = FALSE)
 cat(dr,&quot;\n&quot;)</code></pre>
-<pre><code>## D:\Mapped_to_boot_drive\Temp\RtmpE9uTyn/simulated_matrix_data</code></pre>
+<pre><code>## D:\Mapped_to_boot_drive\Temp\RtmpS00rIN/simulated_matrix_data</code></pre>
 <p>Let the sample data matrix have 200 samples and 100,000 variables.</p>
 <pre class="r"><code>nsamples = 200
 nvariables = 100000</code></pre>
@@ -522,49 +522,49 @@ pander(head(toptbl, 5))</code></pre>
 ## [5] LC_TIME=English_United States.1252    
 ## 
 ## attached base packages:
-##  [1] tools     stats4    parallel  stats     graphics  grDevices utils    
-##  [8] datasets  methods   base     
+## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+## [8] methods   base     
 ## 
 ## other attached packages:
-##  [1] ramwas_0.99.19                       
-##  [2] biomaRt_2.31.7                       
-##  [3] BSgenome.Ecoli.NCBI.20080805_1.3.1000
-##  [4] BSgenome_1.43.7                      
-##  [5] rtracklayer_1.35.12                  
-##  [6] Biostrings_2.43.7                    
-##  [7] XVector_0.15.2                       
-##  [8] GenomicRanges_1.27.23                
-##  [9] GenomeInfoDb_1.11.10                 
-## [10] IRanges_2.9.19                       
-## [11] S4Vectors_0.13.15                    
-## [12] BiocGenerics_0.21.3                  
-## [13] filematrix_1.1.0                     
-## [14] RSQLite_1.1-2                        
-## [15] pander_0.6.0                         
-## [16] knitr_1.15.1                         
-## [17] BiocStyle_2.3.31                     
-## [18] devtools_1.12.0                      
+##  [1] BSgenome.Ecoli.NCBI.20080805_1.3.1000
+##  [2] BSgenome_1.43.7                      
+##  [3] rtracklayer_1.35.12                  
+##  [4] Biostrings_2.43.7                    
+##  [5] XVector_0.15.2                       
+##  [6] GenomicRanges_1.27.23                
+##  [7] GenomeInfoDb_1.11.10                 
+##  [8] IRanges_2.9.19                       
+##  [9] S4Vectors_0.13.15                    
+## [10] BiocGenerics_0.21.3                  
+## [11] ramwas_0.99.19                       
+## [12] filematrix_1.1.0                     
+## [13] RSQLite_1.1-2                        
+## [14] pander_0.6.0                         
+## [15] knitr_1.15.1                         
+## [16] BiocStyle_2.3.31                     
+## [17] devtools_1.12.0                      
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.10               BiocInstaller_1.25.3      
 ##  [3] compiler_3.4.0             iterators_1.0.8           
-##  [5] bitops_1.0-6               zlibbioc_1.21.0           
-##  [7] digest_0.6.12              lattice_0.20-35           
-##  [9] evaluate_0.10              memoise_1.0.0             
-## [11] foreach_1.4.3              Matrix_1.2-9              
-## [13] DelayedArray_0.1.8         DBI_0.6-1                 
-## [15] yaml_2.1.14                GenomeInfoDbData_0.99.0   
-## [17] withr_1.0.2                stringr_1.2.0             
-## [19] glmnet_2.0-5               grid_3.4.0                
-## [21] rprojroot_1.2              Biobase_2.35.1            
-## [23] AnnotationDbi_1.37.4       XML_3.98-1.6              
-## [25] BiocParallel_1.9.6         rmarkdown_1.4             
-## [27] magrittr_1.5               codetools_0.2-15          
-## [29] backports_1.0.5            Rsamtools_1.27.16         
-## [31] htmltools_0.3.5            matrixStats_0.52.1        
-## [33] GenomicAlignments_1.11.12  SummarizedExperiment_1.5.7
-## [35] KernSmooth_2.23-15         stringi_1.1.5             
-## [37] RCurl_1.95-4.8</code></pre>
+##  [5] bitops_1.0-6               tools_3.4.0               
+##  [7] zlibbioc_1.21.0            biomaRt_2.31.7            
+##  [9] digest_0.6.12              evaluate_0.10             
+## [11] memoise_1.0.0              lattice_0.20-35           
+## [13] foreach_1.4.3              Matrix_1.2-9              
+## [15] DelayedArray_0.1.8         DBI_0.6-1                 
+## [17] yaml_2.1.14                GenomeInfoDbData_0.99.0   
+## [19] withr_1.0.2                stringr_1.2.0             
+## [21] glmnet_2.0-5               rprojroot_1.2             
+## [23] grid_3.4.0                 Biobase_2.35.1            
+## [25] AnnotationDbi_1.37.4       XML_3.98-1.6              
+## [27] BiocParallel_1.9.6         rmarkdown_1.4             
+## [29] magrittr_1.5               codetools_0.2-15          
+## [31] Rsamtools_1.27.16          backports_1.0.5           
+## [33] htmltools_0.3.5            matrixStats_0.52.1        
+## [35] GenomicAlignments_1.11.12  SummarizedExperiment_1.5.7
+## [37] KernSmooth_2.23-15         stringi_1.1.5             
+## [39] RCurl_1.95-4.8</code></pre>
 </div>
 
 

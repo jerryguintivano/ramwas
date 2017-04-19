@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2017-04-17" />
+<meta name="date" content="2017-04-19" />
 
 <title></title>
 
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <h1 class="title"><ol start="3" style="list-style-type: decimal">
 <li>BAM Quality Control Measures</li>
 </ol></h1>
-<h4 class="date"><em>2017-04-17</em></h4>
+<h4 class="date"><em>2017-04-19</em></h4>
 </div>
 
 <h1>Contents</h1>
@@ -386,9 +386,8 @@ For our data there is less than 1% of non-CpG reads, which is consistent with lo
 </div>
 <div id="PeakSQRT" class="section level2">
 <h2><span class="header-section-number">2.12</span> Average CpG score vs. CpG density</h2>
-<p>Enrichment profiles are not only affected by the total amount of methylation of the DNA fragments, which is a function of the number of CpGs and how many of them are methylated, but also variability in the laboratory protocol. To capture protocol variability,</p>
-<p>The <code>avg.coverage.by.density</code> QC metric records the dependence of average CpG score as a function of CpG density. The <code>qcmean</code> function returns the square root of the CpG density where maximum average CpG score is achieved.</p>
-<p>This ‘sqrt peak’ sensitivity can be used as a laboratory technical covariate in downstream analyses to regress out variability in enrichment profiles across samples.</p>
+<p>Enrichment profiles are not only affected by the total amount of methylation of the DNA fragments, which is a function of the number of CpGs and how many of them are methylated, but also by variability in the laboratory protocol. To capture this variability, the <code>avg.coverage.by.density</code> QC metric records the dependence of average CpG score as a function of CpG density. The <code>qcmean</code> function returns the square root of the CpG density where maximum average CpG score is achieved.</p>
+<p>This ‘sqrt peak’ sensitivity measure can be used as a covariate in downstream analyses to regress out variability in enrichment profiles across samples caused by lab-technical factors.</p>
 <pre class="r"><code>{
     cat(&quot;Highest coverage is observed at CpG density of&quot;,
         qcmean(qc$avg.coverage.by.density)^2)
