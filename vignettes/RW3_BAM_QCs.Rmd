@@ -330,18 +330,18 @@ The opposite ratio measures the noise level (lower is better).
 Enrichment profiles are not only affected by the 
 total amount of methylation of the DNA fragments,
 which is a function of the number of CpGs and how many of them are methylated, 
-but also variability in the laboratory protocol. 
-To capture protocol variability, 
-
-The `avg.coverage.by.density` QC metric
+but also by variability in the laboratory protocol. 
+To capture this variability, 
+the `avg.coverage.by.density` QC metric
 records the dependence of average CpG score 
 as a function of CpG density.
 The `qcmean` function returns the square root of the CpG density 
 where maximum average CpG score is achieved. 
 
-This 'sqrt peak' sensitivity can be used as a laboratory technical covariate in 
+This 'sqrt peak' sensitivity measure can be used as a covariate in 
 downstream analyses to regress out 
-variability in enrichment profiles across samples.
+variability in enrichment profiles across samples
+caused by lab-technical factors.
 
 ```{r avg.coverage.by.density}
 {
