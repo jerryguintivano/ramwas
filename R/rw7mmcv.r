@@ -132,7 +132,7 @@ plotPrediction = function(param, outcome, forecast,
           main = sprintf(paste0(
               "%s\n",
               "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
-              "R2 = %.3f / %.3f, p-value = %.2e / %.2e"),
+              "R2 = %.3f / %.3f, p-value = %.3e / %.3e"),
             main, stats$MSE, stats$MAD,
             stats$corp, stats$cors,
             stats$R2p, stats$R2s,
