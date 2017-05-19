@@ -29,4 +29,5 @@ vignettes/*.pdf
 .httr-oauth
 .Rproj.user
 
+# Skip extra files
 temp/*
