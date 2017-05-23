@@ -243,11 +243,6 @@ parameterPreprocess = function( param ){
         rm(filename, sep);
     }
 
-    # Set param$dirtemp
-    if( is.null(param$dirtemp))
-        param$dirtemp = "temp";
-    param$dirtemp = makefullpath(param$dircoveragenorm, param$dirtemp);
-
     # Set param$dircoveragenorm
     if( is.null(param$dircoveragenorm)){
         if( !is.null(param$covariates)){
@@ -266,6 +261,11 @@ parameterPreprocess = function( param ){
     param$dircoveragenorm =
         makefullpath(param$dirfilter, param$dircoveragenorm);
 
+    # Set param$dirtemp
+    if( is.null(param$dirtemp))
+        param$dirtemp = "temp";
+    param$dirtemp = makefullpath(param$dircoveragenorm, param$dirtemp);
+    
     # More checks with covariates
     if( !is.null(param$covariates)){
         param$covariates[[1]] = as.character(param$covariates[[1]]);
