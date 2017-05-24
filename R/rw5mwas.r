@@ -18,7 +18,15 @@ testPhenotype = function(phenotype, data, cvrtqr){
 
     # mycov = as.character(round(mycov));
     if( is.character(mycov) || is.factor(mycov) ){
-        fctr = as.factor(mycov)
+        fctr = as.factor(mycov);
+        if(length(levels(fctr)) <= 1){
+            return( list(Rsquared = 0,
+                Fstat = 0,
+                pvalue = 1,
+                nVarTested = 0,
+                dfFull = ncol(cvqr0) - nrow(cvqr0),
+                statname = paste0("-F_",0)) );
+        }
         dummy = t(model.matrix(~fctr)[,-1]);
         dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
 
