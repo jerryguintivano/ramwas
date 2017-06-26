@@ -11,7 +11,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
         stop("Annotation error: chromosome positions must be <= 1e9")
 
     # BiomaRt likes 1-22,X,Y, not chr1-chr22,chrX,chrY
-    if(is.character(chr)){
+    if(is.character(chr) || is.factor(chr)){
         nochr = gsub("^chr","",chr);
     } else {
         nochr = chr;
