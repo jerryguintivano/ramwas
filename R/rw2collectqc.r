@@ -49,6 +49,7 @@
     afracb = function(a,b){ sprintf("%s\t%.1f%%",s(a),100*a/b) };
     perc = function(x){ sprintf("%.2f%%",100*x) };
     twodig = function(x){ sprintf("%.2f",x) };
+    fourdig = function(x){ sprintf("%.4f",x) };
     s = function(x){
         formatC(x=x,
                 digits=ceiling(log10(max(x)+1)),
@@ -87,7 +88,7 @@
         perc(qcmean( qc$cnt.nonCpG.reads )), # Non-CpG reads (%)
         twodig( qc$avg.noncpg.coverage ), # Avg non-CpG coverage
         twodig( qc$avg.cpg.coverage ), # Avg CpG coverage
-        perc( qc$avg.noncpg.coverage / qc$avg.cpg.coverage), # Non-Cpg/CpG
+        fourdig( qc$avg.noncpg.coverage / qc$avg.cpg.coverage), # Non-Cpg/CpG
         perc(qcmean( qc$chrX.count )), # ChrX reads (%)
         perc(qcmean( qc$chrY.count )), # ChrY reads (%)
         twodig(qcmean( qc$avg.coverage.by.density )) # Peak SQRT
