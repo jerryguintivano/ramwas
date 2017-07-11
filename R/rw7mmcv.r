@@ -301,14 +301,14 @@ ramwas7BrunElasticNet = function(param){
 plotCVcors = function(cl, param){
     aymax = max(abs(cl$cors),abs(cl$corp));
     plot( x = cl$x,
-          y = cl$cors,
+          y = cl$corp,
           col = "red",
           pch = 19,
           ylim = c(-1,1)*aymax,
           log = "x",
           xlab = "Number of markers",
           ylab = "Correlation")
-    points( cl$x, cl$corp, col = "cyan4", pch = 17)
+    points( cl$x, cl$cors, col = "cyan4", pch = 17)
     abline(h=0, col = "grey")
     legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
     legend("bottomright",
