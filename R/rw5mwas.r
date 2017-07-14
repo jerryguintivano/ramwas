@@ -113,7 +113,7 @@ testPhenotype = function(phenotype, data, cvrtqr){
         cvC2 = colSumsSq( cvC );
 
         # SSR = colSums( cvD^2 );
-        rsq = cvD2 / pmax(SST - cvC2, SST/1e16);
+        rsq = cvD2 / pmax(SST - cvC2, (SST+1e-16)/1e16);
 
         # rsq = colSums(cr^2);
         rsq2F = function(x){
@@ -397,9 +397,9 @@ ramwas5MWAS = function( param ){
 
         } else {
             covmat = .ramwas5MWASjob(rng = c(1, ncpgs, 0),
-                                     param,
-                                     mwascvrtqr,
-                                     rowsubset);
+                                     param = param,
+                                     mwascvrtqr = mwascvrtqr,
+                                     rowsubset = rowsubset);
         }
         cat(file = paste0(param$dirmwas,"/Log.txt"),
              date(), ", Done running methylome-wide association study.", "\n",
