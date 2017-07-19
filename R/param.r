@@ -223,6 +223,9 @@ parameterPreprocess = function( param ){
         param$bam2sample = basename(param$bamnames);
         names(param$bam2sample) = basename(param$bamnames);
     }
+    
+    if(!is.null(param$bam2sample))
+        param$bam2sample = lapply(param$bam2sample, trimBamFilename);
 
     ### CV and Multi-marker approach
     if( is.null(param$cvnfolds)) param$cvnfolds = 10;
