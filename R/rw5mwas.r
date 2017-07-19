@@ -248,6 +248,8 @@ ramwas5saveTopFindings = function(param){
 .ramwas5MWASjob = function(rng, param, mwascvrtqr, rowsubset){
     # rng = rangeset[[1]];
     # library(filematrix);
+    .set1MLKthread();
+    
     fm = fm.open( filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
                   readonly = TRUE,
                   lockfile = param$lockfile2);

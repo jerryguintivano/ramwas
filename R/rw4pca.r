@@ -30,6 +30,8 @@
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
     # rng = rangeset[[1]];
     # library(filematrix);
+    .set1MLKthread();
+    
     fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"),
                   readonly = TRUE,
                   lockfile = param$lockfile2);
@@ -218,7 +220,7 @@ ramwas4PCA = function( param ){
             mm = ncpgs;
             nsteps = ceiling(mm/step1);
 
-            nthreads = min(param$diskthreads, nsteps);
+            nthreads = min(param$cputhreads, nsteps);
             rm(step1, mm, nsteps);
             if( nthreads > 1 ){
                 rng = round(seq(1, ncpgs+1, length.out = nthreads+1));

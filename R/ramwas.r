@@ -202,3 +202,8 @@ trimBamFilename = function(bamnames){
     return(BNnodotbam);
 }
 
+.set1MLKthread = function(){
+    if("package:RevoUtilsMath" %in% search())
+        if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
+            setMKLthreads(1);
+}
