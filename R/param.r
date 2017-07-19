@@ -266,6 +266,12 @@ parameterPreprocess = function( param ){
         param$dirtemp = "temp";
     param$dirtemp = makefullpath(param$dircoveragenorm, param$dirtemp);
     
+    if(is.null(param$covariates))
+        if(!is.null(param$bam2sample))
+            param$covariates = data.frame(
+                sample = names(param$bam2sample), 
+                stringsAsFactors = FALSE);
+
     # More checks with covariates
     if( !is.null(param$covariates)){
         param$covariates[[1]] = as.character(param$covariates[[1]]);
