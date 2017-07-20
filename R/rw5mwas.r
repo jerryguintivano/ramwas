@@ -330,6 +330,7 @@ ramwas5MWAS = function( param ){
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         cvsamples = rez$cvsamples;
+        nsamplesall = rez$nsamplesall;
         rm(rez);
     } # rowsubset, ncpgs
 
@@ -364,11 +365,11 @@ ramwas5MWAS = function( param ){
              date(), ", Running methylome-wide association study.", "\n",
              sep = "", append = FALSE);
 
-        step1 = ceiling( 512*1024*1024 / length(cvsamples) / 8);
+        step1 = ceiling( 512*1024*1024 / nsamplesall / 8);
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
 
-        nthreads = min(param$diskthreads, nsteps);
+        nthreads = min(param$cputhreads, nsteps);
         rm(step1, mm, nsteps);
         if( nthreads > 1 ){
             rng = round(seq(1, ncpgs+1, length.out = nthreads+1));

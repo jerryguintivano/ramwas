@@ -150,6 +150,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
     fmsamples = rownames(fm);
     ncpgs = ncol(fm);
+    nsamplesall = nrow(fm);
     close(fm);
 
     # Match samples in covariates with those in coverage matrix
@@ -169,7 +170,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
             }
         }
     }
-    return(list(rowsubset = rowsubset, ncpgs = ncpgs, cvsamples = cvsamples));
+    return(list(rowsubset = rowsubset, ncpgs = ncpgs, cvsamples = cvsamples, nsamplesall = nsamplesall));
 }
 
 # Get covariates + PCs matrix for analysis
