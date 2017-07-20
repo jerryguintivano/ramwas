@@ -109,13 +109,29 @@ pipelineCoverage1Sample = function(colnum, param){
 # Job function for calculation of raw CpG score matrix
 .ramwas3coverageJob = function(colnum, param, nslices){
     # library(ramwas);
+    
+    # Log start of raw coverage calculation.
+    fmname = paste0(param$dirtemp1, "/RawCoverage_part", 1);
+    fm = fm.open(fmname, lockfile = param$lockfile);
+    fm$filelock$lockedrun( {
+        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
+            date(), ", Process ", Sys.getpid(),
+            ", Start processing sample ", colnum, " ",
+            names(param$bam2sample)[colnum], "\n",
+            sep = "", append = TRUE);
+    });
+    close(fm);
+    
+    # Calculate coverage
+    # coverage = ramwas:::pipelineCoverage1Sample(colnum, param);
     coverage = pipelineCoverage1Sample(colnum, param);
     coverage = unlist(coverage, use.names = FALSE);
 
+    # Save it in file matrix slices
     start = 1;
     for( part in seq_len(nslices) ){ # part=1
         message("colnum = ", colnum, " part = ", part);
-        fmname = paste0(param$dirtemp, "/RawCoverage_part", part);
+        fmname = paste0(param$dirtemp1, "/RawCoverage_part", part);
         fm = fm.open(fmname, lockfile = param$lockfile);
         ntowrite = nrow(fm);
         fm$writeCols(colnum, coverage[start:(start+ntowrite-1)]);
@@ -123,12 +139,13 @@ pipelineCoverage1Sample = function(colnum, param){
         start = start + ntowrite;
     }
 
-    fmname = paste0(param$dirtemp, "/RawCoverage_part", 1);
+    # Log end of raw coverage calculation.
+    fmname = paste0(param$dirtemp1, "/RawCoverage_part", 1);
     fm = fm.open(fmname, lockfile = param$lockfile);
     fm$filelock$lockedrun( {
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
              date(), ", Process ", Sys.getpid(),
-             ", Processing sample ", colnum, " ",
+             ", End processing sample ", colnum, " ",
              names(param$bam2sample)[colnum], "\n",
              sep = "", append = TRUE);
     });
@@ -139,22 +156,35 @@ pipelineCoverage1Sample = function(colnum, param){
 
 # Job function for filtering CpGs
 .ramwas3transposeFilterJob = function(fmpart, param){
-    # library(filematrix);
+    # library(ramwas);
+    
     # fmpart = 1
-    filename = paste0(param$dirtemp, "/RawCoverage_part", fmpart);
+    # Open input file matrix slice
+    filename = paste0(param$dirtemp1, "/RawCoverage_part", fmpart);
     if( !file.exists(paste0(filename, ".bmat")) ||
         !file.exists(paste0(filename, ".desc.txt")) )
         return(paste0("Raw coverage slice filematrix not found: ", filename));
     fmraw = fm.open(filename, lockfile = param$lockfile2);
+
+    # Log start of processing slice
+    fmraw$filelock$lockedrun( {
+        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
+            date(), ", Process ", Sys.getpid(),
+            ", Start processing slice ", fmpart, "\n",
+            sep = "", append = TRUE);
+    });
+    
+    # Read the whole slice
     mat = fmraw[];
     # mat = as.matrix(fmraw);
 
-    fmout = fm.create( paste0(param$dirtemp,"/TrCoverage_part",fmpart),
+    # Create transposed+filtered output and the corresponding location files
+    fmout = fm.create( paste0(param$dirtemp2,"/TrCoverage_part",fmpart),
                        nrow = ncol(mat),
                        ncol = 0,
                        size = param$doublesize,
                        lockfile = param$lockfile2);
-    fmpos = fm.create( paste0(param$dirtemp,"/TrCoverage_loc",fmpart),
+    fmpos = fm.create( paste0(param$dirtemp2,"/TrCoverage_loc",fmpart),
                        nrow = 1,
                        ncol = 0,
                        type = "integer",
@@ -203,7 +233,7 @@ pipelineCoverage1Sample = function(colnum, param){
     close(fmout);
     close(fmpos);
 
-    fmss = fm.open( paste0(param$dirtemp,"/0_sample_sums"),
+    fmss = fm.open( paste0(param$dirtemp2,"/0_sample_sums"),
                     lockfile = param$lockfile2);
     fmss[,fmpart] = samplesums;
     close(fmss);
@@ -211,7 +241,7 @@ pipelineCoverage1Sample = function(colnum, param){
     fmraw$filelock$lockedrun( {
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
              date(), ", Process ", Sys.getpid(),
-             ", Processing slice ", fmpart, "\n",
+             ", End processing slice ", fmpart, "\n",
              sep = "", append = TRUE);
     });
     closeAndDeleteFiles(fmraw);
@@ -220,12 +250,22 @@ pipelineCoverage1Sample = function(colnum, param){
 
 # Job function for sample normalization
 .ramwas3normalizeJob = function(fmpart_offset, param, samplesums){
+    # library(ramwas);
     # fmpart_offset = fmpart_offset_list[[2]]
     scale = as.vector(samplesums) / mean(samplesums);
 
-    # library(filematrix);
-
-    filename = paste0(param$dirtemp, "/TrCoverage_part", fmpart_offset[1]);
+    # Read filtered+transposed 
+    filename = paste0(param$dirtemp2, "/TrCoverage_part", fmpart_offset[1]);
+    
+    # Log about start of slice processing
+    fm$filelock$lockedrun( {
+        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
+            date(), ", Process ", Sys.getpid(),
+            ", Start processing slice ", fmpart_offset[1], "\n",
+            sep = "", append = TRUE);
+    });
+    
+    
     mat = fm.load(filename, param$lockfile1);
     mat = mat / scale;
 
@@ -237,7 +277,7 @@ pipelineCoverage1Sample = function(colnum, param){
     fm$filelock$lockedrun( {
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
              date(), ", Process ", Sys.getpid(),
-             ", Processing slice ", fmpart_offset[1], "\n",
+             ", End processing slice ", fmpart_offset[1], "\n",
              sep = "", append = TRUE);
     });
 
@@ -290,6 +330,14 @@ ramwas3normalizedCoverage = function( param ){
         rm(bams, bname, filename);
     }
 
+    if(is.null(param$dirtemp1))
+        param$dirtemp1 = param$dirtemp;
+    if(is.null(param$dirtemp2))
+        param$dirtemp1 = param$dirtemp;
+    
+    stopifnot(dir.exists(param$dirtemp1))
+    stopifnot(dir.exists(param$dirtemp2))
+    
     ### Create raw coverage matrix slices
     {
         # library(filematrix)
@@ -299,12 +347,12 @@ ramwas3normalizedCoverage = function( param ){
         mm = ncpgs;
         nslices = ceiling(mm/step1);
         message("Creating ", nslices, " file matrices for raw scores at: ",
-                param$dirtemp);
+                param$dirtemp1);
         for( part in 1:nslices ){ # part = 1
             # cat("Creating raw  matrix slices", part, "of", nslices, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
-            fmname = paste0(param$dirtemp,"/RawCoverage_part",part);
+            fmname = paste0(param$dirtemp1,"/RawCoverage_part",part);
             fm = fm.create(fmname,
                            nrow = to-fr+1,
                            ncol = nsamples,
@@ -355,7 +403,7 @@ ramwas3normalizedCoverage = function( param ){
     {
         message("Transposing score matrices and filtering CpGs by score");
 
-        fm = fm.create( paste0(param$dirtemp,"/0_sample_sums"),
+        fm = fm.create( paste0(param$dirtemp2,"/0_sample_sums"),
                         nrow = nsamples,
                         ncol = nslices);
         close(fm);
@@ -409,7 +457,7 @@ ramwas3normalizedCoverage = function( param ){
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
 
-            indx = fm.load( paste0(param$dirtemp,"/TrCoverage_loc",part) );
+            indx = fm.load( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             indx = as.vector(indx)
             cpgsloclist[[part]] = cpgsloc1e9[fr:to][indx];
         }
@@ -434,7 +482,7 @@ ramwas3normalizedCoverage = function( param ){
     {
         message("Gathering sample sums from ", nslices, " slices");
 
-        mat = fm.load( paste0(param$dirtemp, "/0_sample_sums") );
+        mat = fm.load( paste0(param$dirtemp2, "/0_sample_sums") );
         samplesums = rowSums(mat);
         rm(mat);
         fm = fm.create.from.matrix(
@@ -499,12 +547,12 @@ ramwas3normalizedCoverage = function( param ){
     {
         message("Removing temporary files");
         for( part in 1:nslices ){
-            fm = fm.open( paste0(param$dirtemp,"/TrCoverage_loc",part) );
+            fm = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             closeAndDeleteFiles(fm);
-            fm = fm.open( paste0(param$dirtemp,"/TrCoverage_part",part) );
+            fm = fm.open( paste0(param$dirtemp2,"/TrCoverage_part",part) );
             closeAndDeleteFiles(fm);
         }
-        fm = fm.open( paste0(param$dirtemp,"/0_sample_sums") );
+        fm = fm.open( paste0(param$dirtemp2,"/0_sample_sums") );
         closeAndDeleteFiles(fm);
     }
 }
