@@ -335,7 +335,7 @@ ramwas3normalizedCoverage = function( param ){
     if(is.null(param$dirtemp1))
         param$dirtemp1 = param$dirtemp;
     if(is.null(param$dirtemp2))
-        param$dirtemp1 = param$dirtemp;
+        param$dirtemp2 = param$dirtemp;
     
     stopifnot(dir.exists(param$dirtemp1))
     stopifnot(dir.exists(param$dirtemp2))
