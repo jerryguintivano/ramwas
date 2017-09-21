@@ -388,7 +388,9 @@ ramwas2collectqc = function( param ){
     if( !is.null(param$bam2sample) ){
         # by sample
         message("Saving QC info by BAMs in bam2sample");
-        collect.qc.summary(bamset = unlist(param$bam2sample),
+        bb = unlist(param$bam2sample, use.names = FALSE);
+        names(bb) = bb;
+        collect.qc.summary(bamset = bb,
                            dirname = "summary_bams_in_bam2sample");
         message("Saving QC info by SAMPLE");
         collect.qc.summary(bamset = param$bam2sample,
