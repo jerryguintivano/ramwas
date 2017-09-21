@@ -209,6 +209,7 @@ ramwas7BrunElasticNet = function(param){
                     coverage = coverage[rowsubset,];
                 close(fm);
                 rm(fm);
+                gc();
             } # coverage
             {
                 coverageTRAIN = coverage[!exclude,];
@@ -241,6 +242,7 @@ ramwas7BrunElasticNet = function(param){
                 rm(z1, z2, adt);
             } # forecast0
             rm(cpgset, coverageTRAIN, coverageTEST);
+            gc();
         }
         forecast = forecast0[1,]/forecast0[2,];
         {
