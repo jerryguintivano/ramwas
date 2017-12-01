@@ -318,6 +318,8 @@ pipelineProcessBam = function(bamname, param){
 # Step 1 of the pipeline
 ramwas1scanBams = function( param ){
     param = parameterPreprocess(param);
+    ld = param$dirfilter;
+    
     # Parameter checks
     if(is.null(param$bamnames))
         stop("BAM names must be specified. ",
