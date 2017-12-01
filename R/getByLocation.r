@@ -9,9 +9,9 @@ getTestsByLocation = function(x, chr, position){
         dircov = paste0(x, "/../..");
     }
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
-    if(is.factor(chr))
+    if( is.factor(chr) )
         chr = as.character(chr);
-    if(is.character(chr)){
+    if( is.character(chr) ){
         chrn = match(chr, chrnames, nomatch = 0L);
     } else {
         chrn = chr;
@@ -42,9 +42,9 @@ getDataByLocation = function(x, chr, position){
         dircov = x;
     }
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
-    if(is.factor(chr))
+    if( is.factor(chr) )
         chr = as.character(chr);
-    if(is.character(chr)){
+    if( is.character(chr) ){
         chrn = match(chr, chrnames, nomatch = 0L);
     } else {
         chrn = chr;
@@ -81,7 +81,7 @@ getLocations = function(x){
     locations = data.frame(chr = chr, 
                            start = locmat[,2], 
                            end = locmat[,2] + 1L);
-    if(ncol(locmat) >= 3)
+    if( ncol(locmat) >= 3 )
         locations$end = locmat[,3];
     return(locations);
 }
@@ -97,32 +97,12 @@ getMWASandLocations = function(x){
     }
     locations = getLocations(dircov);
     mwas = fm.load(paste0(dirmwas, "/Stats_and_pvalues"));
-    result = data.frame(locations, ttest = mwas[,2], pvalue = mwas[,3], qvalue = mwas[,4]);
+    result = data.frame(locations, 
+                        mwas, 
+                        check.names = FALSE);
     return(result);
 }
 
-if(FALSE){
-    library(filematrix)
-    setwd('D:/')
-    x = '/gpfs_fs/pharm/AUD_brain/RaMWAS/coverage_norm_50/PCA_05_cvrts_9a48f039/Testing_AUD_0_PCs'
-    # locs = getLocations(x)
-    mwas1 = ramwas:::getMWASandLocations(x);
-    
-    y = '/gpfs_fs/pharm/NESDA/RaMWAS/Alcohol/Split_cntrl_aaudit01_320/PCA_23_cvrts_81fb5393/Testing_cntrl_aaudit01_r_3_PCs'
-    mwas2 = ramwas:::getMWASandLocations(y);
-    
-    head(mwas1)
-    head(mwas2)
-    mwas1$chr[1:10]
-    mwas2$chr[1:10]
-}
-
-# setwd('D:/')
-# dr = '/gpfs_fs/pharm/NESDA/RaMWAS/Alcohol/Split_cntrl_aaudit01_320'
-# setwd(dr);
-# tbl = read.table('AUDBrain_AUD_NESDA_aaudit01_overlap_all.txt', header = TRUE);
-# head(tbl)
-# 
 subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     if(is.list(x)){
         param = parameterPreprocess(x);
@@ -155,8 +135,12 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     fm = fm.create.from.matrix('CpG_locations', locmat[mch,]);
     close(fm);
 
-    fi = fm.open(paste0(dircov,'/Coverage'))
-    fo = fm.create('Coverage', nrow = nrow(fi), ncol = length(mch), type = fi$type, size = fi$size);
+    fi = fm.open(paste0(dircov,'/Coverage'), readonly = TRUE)
+    fo = fm.create('Coverage',
+                   nrow = nrow(fi),
+                   ncol = length(mch),
+                   type = fi$type,
+                   size = fi$size);
 
     step1 = 1024;
     runto = length(mch);
@@ -176,16 +160,6 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     if( !is.null(colnames(fi)))
         colnames(fo) = colnames(fi)[mch];
 
-    close(fo)
-    close(fi)
+    close(fo);
+    close(fi);
 }
-# 
-# library(filematrix)
-# subsetCoverageDirByLocation(
-#     x = '/gpfs_fs/pharm/NESDA/RaMWAS/Alcohol/Split_cntrl_aaudit01_320', 
-#     chr = tbl$chr, 
-#     position = tbl$position, 
-#     targetdir = '/gpfs_fs/pharm/NESDA/RaMWAS/Alcohol/Split_cntrl_aaudit01_320/subset')
-# 
-
-
