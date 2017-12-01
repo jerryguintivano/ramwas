@@ -22,6 +22,9 @@ pvalue2qvalue(pv, n = length(pv))
     The q-values can be slightly conservative compared to
     other popular q-value calculation methods.
 }
+\note{
+    The function runs faster if the vector \code{pv} is sorted.
+}
 \value{
     Return a vector of q-values matching p-values in \code{pv}.
 }

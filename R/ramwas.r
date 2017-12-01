@@ -74,14 +74,23 @@ findBestNpvs = function(pv, n){
 
 # Standard BH p-value to q-value calculation
 pvalue2qvalue = function(pv, n = length(pv)){
-    ord = sort.list(pv);
-    FDR = pv[ord] * n / seq_along(pv);
-    FDR[length(FDR)] = min(FDR[length(FDR)], 1);
-    FDR = rev(cummin(rev(FDR)));
-
-    rez = double(length(pv));
-    rez[ord] = FDR;
-    return(rez)
+    if( length(pv) == 0 )
+        return(pv);
+    if( is.unsorted(pv) ){
+        ord = sort.list(pv, decreasing = TRUE);
+        FDR = pv[ord] * n / (length(pv):1);
+        FDR[1] = min(FDR[1], 1);
+        FDR = cummin(FDR);
+    
+        rez = double(length(pv));
+        rez[ord] = FDR;
+        return(rez);
+    } else {
+        FDR = pv * n / seq_along(pv);
+        FDR[length(FDR)] = min(FDR[length(FDR)], 1);
+        FDR = rev(cummin(rev(FDR)));
+        return(FDR);
+    }
 }
 
 # Caching environment
