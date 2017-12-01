@@ -1,42 +1,47 @@
+.dump = function(fid, param){
+    for( nm in names(param) ){ # nm = "modelcovariates"
+        prefix = "";
+        value = param[[nm]];
+        # Consider special cases of
+        # 1. Data frame
+        # 2. List
+        # 3. Vectors (but not bamnames)
+        # Anything else
+        if( is.data.frame(value) ){
+            txt = paste0("<Data frame ", nrow(value), " x ", ncol(value), ">");
+            prefix = "# ";
+        } else if( is.list(value) ){
+            txt = paste0("<List of length ", length(value), ">");
+            prefix = "# ";
+        } else if( length(value) > 1 ){
+            if( nm == "bamnames" ){
+                txt = paste0("<Total ", length(value), " BAM names>");
+                prefix = "# ";
+            } else {
+                txt = paste0(
+                    "c(\n",
+                    paste0("  ", sapply(value,deparse), collapse = ",\n"),
+                    ")");
+            }
+        } else {
+            txt = deparse(value);
+        }
+        cat(file = fid, prefix, nm, " = ", txt, "\n", sep = "");
+    }
+}
+
 # Save parameters "param" to a file in the "dir" directory
 # Save "toplines" first, other parameters next
 # Lists and "bamnames" are skipped
 parameterDump = function(dir, param, toplines = NULL){
-    message("Working in: ",dir);
-    .dump = function(fid, param){
-        for( nm in names(param) ){ # nm = "modelcovariates"
-            pre = "";
-            value = param[[nm]];
-            if( is.data.frame(value) ){
-                txt = paste0("<Data frame ",nrow(value)," x ",ncol(value),">");
-                pre = "# ";
-            } else if( is.list(value) ){
-                txt = paste0("<List of length ", length(value), ">");
-                pre = "# ";
-            } else if( length(value) > 1 ){
-                if(nm == "bamnames"){
-                    txt = paste0("<Total ",length(value)," BAM names>");
-                    pre = "# ";
-                } else {
-                    txt = paste0(
-                        "c(\n",
-                        paste0("  ",sapply(value, deparse),collapse = ",\n"),
-                        ")");
-                }
-            } else {
-                txt = deparse(value);
-            }
-            cat(file = fid, pre, nm, " = ", txt, "\n", sep = "");
-            # dput(param[[nm]], file = fid)
-        }
-    }
+    message("Working in: ", dir);
 
     fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
     on.exit(close(fid));
     writeLines(con = fid,
        text = c("## Parameters used to create the files in this directory",""));
     if( !is.null(toplines)){
-        set = names(param) %in% toplines;
+        set = (names(param) %in% toplines);
         .dump(fid, param[ set]);
         writeLines(con = fid, text = "");
         .dump(fid, param[!set]);
