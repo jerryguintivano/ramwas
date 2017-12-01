@@ -1,6 +1,6 @@
 # Get MWAS results by locations
 getTestsByLocation = function(x, chr, position){
-    if(is.list(x)){
+    if( is.list(x) ){
         param = parameterPreprocess(x);
         dirmwas = param$dirmwas;
         dircov = param$dircoveragenorm
@@ -35,7 +35,7 @@ getTestsByLocation = function(x, chr, position){
 
 # Get MWAS results by locations
 getDataByLocation = function(x, chr, position){
-    if(is.list(x)){
+    if( is.list(x) ){
         param = parameterPreprocess(x);
         dircov = param$dircoveragenorm
     } else {
@@ -67,7 +67,7 @@ getDataByLocation = function(x, chr, position){
 }
 
 getLocations = function(x){
-    if(is.list(x)){
+    if( is.list(x) ){
         param = parameterPreprocess(x);
         dircov = param$dircoveragenorm
     } else {
@@ -87,7 +87,7 @@ getLocations = function(x){
 }
 
 getMWASandLocations = function(x){
-    if(is.list(x)){
+    if( is.list(x) ){
         param = parameterPreprocess(x);
         dirmwas = param$dirmwas;
         dircov = param$dircoveragenorm
@@ -104,16 +104,16 @@ getMWASandLocations = function(x){
 }
 
 subsetCoverageDirByLocation = function(x, chr, position, targetdir){
-    if(is.list(x)){
+    if( is.list(x) ){
         param = parameterPreprocess(x);
         dircov = param$dircoveragenorm
     } else {
         dircov = x;
     }
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
-    if(is.factor(chr))
+    if( is.factor(chr) )
         chr = as.character(chr);
-    if(is.character(chr)){
+    if( is.character(chr) ){
         chrn = match(chr, chrnames, nomatch = 0L);
     } else {
         chrn = chr;
@@ -122,7 +122,7 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     maxmult = (max(locmat)+2)*2;
 
     mch = match(chrn*maxmult + position, locmat %*% c(maxmult,1), nomatch = 0L);
-    if(any(mch == 0L))
+    if( any(mch == 0L) )
         stop('Some locations not found')
 
     mch = sort(mch);
