@@ -302,11 +302,17 @@ pipelineProcessBam = function(bamname, param){
 
 # Parallel job function
 .ramwas1scanBamJob = function(bamname, param){
-    cat(file = paste0(param$dirfilter,"/Log.txt"),
-         date(), ", Process ", Sys.getpid(),
-         ", Processing BAM: ", bamname, "\n",
-         sep = "", append = TRUE);
-    pipelineProcessBam(bamname = bamname, param = param);
+    ld = param$dirfilter;
+    
+    .log(ld, "%s, Process %06d, Starting BAM: %s",
+            date(), Sys.getpid(), bamname);
+
+    logfun = .logErrors(ld, pipelineProcessBam);
+    rez = logfun(bamname = bamname, param = param);
+    
+    .log(ld, "%s, Process %06d, Starting BAM: %s",
+            date(), Sys.getpid(), bamname);
+    return(rez);
 }
 
 # Step 1 of the pipeline
@@ -333,8 +339,8 @@ ramwas1scanBams = function( param ){
     
     dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE);
 
-    cat(file = paste0(param$dirfilter,"/Log.txt"),
-         date(), ", Scanning bams.", "\n", sep = "", append = FALSE);
+    .log(ld, "%s, Scanning bams.", date(), append = FALSE);
+    
     nthreads = min(param$cputhreads, length(param$bamname));
     if( nthreads > 1){
         cl = makeCluster(nthreads);
@@ -355,7 +361,7 @@ ramwas1scanBams = function( param ){
                                       param = param);
         }
     }
-    cat(file = paste0(param$dirfilter,"/Log.txt"),
-         date(), ", Done scanning bams.", "\n", sep = "", append = TRUE);
+    
+    .log(ld, "%s, Done scanning bams.", date());
     return(invisible(z));
 }
