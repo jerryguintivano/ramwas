@@ -235,10 +235,10 @@ pipelineProcessBam = function(bamname, param){
     bamfullname = makefullpath(param$dirbam, paste0(bamname,".bam"))
 
     dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
-    dir.create(param$dirrqc, showWarnings = FALSE, recursive = TRUE)
+    dir.create(param$dirrqc,  showWarnings = FALSE, recursive = TRUE)
 
     rdsbmfile = paste0( param$dirrbam, "/", basename(bamname), ".rbam.rds" );
-    rdsqcfile = paste0( param$dirrqc, "/", basename(bamname), ".qc.rds" );
+    rdsqcfile = paste0( param$dirrqc,  "/", basename(bamname), ".qc.rds" );
 
     savebam = TRUE;
     if( file.exists( rdsbmfile ) ){
@@ -253,9 +253,10 @@ pipelineProcessBam = function(bamname, param){
     } else {
         if( !file.exists( bamfullname ) )
             return(paste0("Bam file does not exist: ",bamfullname));
-        rbam = bam.scanBamFile(bamfilename = bamfullname,
-                               scoretag = param$scoretag,
-                               minscore = param$minscore);
+        rbam = bam.scanBamFile(
+                    bamfilename = bamfullname,
+                    scoretag = param$scoretag,
+                    minscore = param$minscore);
     }
 
     rbam2 = bam.removeRepeats(rbam, param$maxrepeats);
@@ -338,9 +339,9 @@ ramwas1scanBams = function( param ){
     if( nthreads > 1){
         cl = makeCluster(nthreads);
         on.exit({stopCluster(cl);});
-        z = clusterApplyLB(cl,
-                           param$bamnames,
-                           .ramwas1scanBamJob,
+        z = clusterApplyLB(cl = cl,
+                           x = param$bamnames, 
+                           fun = .ramwas1scanBamJob,
                            param = param);
         tmp = sys.on.exit();
         eval(tmp);
