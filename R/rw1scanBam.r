@@ -311,9 +311,25 @@ pipelineProcessBam = function(bamname, param){
 # Step 1 of the pipeline
 ramwas1scanBams = function( param ){
     param = parameterPreprocess(param);
-   if(is.null(param$bamnames))
-       stop("BAM names must be specified. See \"filebamlist\" parameter.");
+    # Parameter checks
+    if(is.null(param$bamnames))
+        stop("BAM names must be specified. ",
+             "See \"filebamlist\" or \"bamnames\" parameter.");
 
+    if( dir.exists(param$dirbam) )
+        stop("Directory with BAM files not found: ",
+             param$dirbam, "\n",
+             "See \"dirbam\" parameter");
+    
+    for( nm in param$bamname ){ # nm = param$bamname[1]
+        fn = makefullpath(param$dirbam, paste0(nm, ".bam"));
+        if( !file.exists(fn) )
+            stop("BAM file not found: ", fn);
+    }
+    
+    if( !is.null(param$filecpgset) && is.null(param$maxfragmentsize) )
+        stop("Parameter not set: maxfragmentsize");
+    
     dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE);
 
     cat(file = paste0(param$dirfilter,"/Log.txt"),
