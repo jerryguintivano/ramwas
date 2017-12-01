@@ -145,7 +145,7 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     step1 = 1024;
     runto = length(mch);
     nsteps = ceiling(runto/step1);
-    for( part in seq_len(nsteps) ) { # part = 1
+    for( part in seq_len(nsteps) ){ # part = 1
         message('Loop filling coverage matrix, step ', part, ' of ', nsteps);
         fr = (part-1)*step1 + 1;
         to = min(part*step1, runto);
