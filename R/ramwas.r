@@ -234,3 +234,29 @@ trimBamFilename = function(bamnames){
         if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
             setMKLthreads(1);
 }
+
+# The logging function
+.log = function(ld, fmt, ..., append = TRUE){
+    msg = sprintf(fmt, ...);
+    cat(file = paste0(ld,"/Log.txt"),
+         msg, "\n", sep = "", append = append);
+    message(msg);
+}
+
+.logErrors = function(ld, fun){
+    function(...){
+        withCallingHandlers(
+            tryCatch(fun(...), 
+                error=function(e) {
+                    err <<- .log(ld, "%s, Process %06d, Error produced: %s", 
+                            date(), Sys.getpid(), conditionMessage(e));
+                }
+            ), 
+            warning = function(w) {
+                .log(ld, "%s, Process %06d, Warning produced: %s", 
+                    date(), Sys.getpid(), conditionMessage(w));
+                invokeRestart("muffleWarning");
+            }
+        )
+    }
+}
