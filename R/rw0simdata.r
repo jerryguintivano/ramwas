@@ -2,7 +2,7 @@
 groupSample = function(len, size, gr){
     # len = 1000; size = 36; gr = 6; set.seed(18090212);
     groupstarts = sample(floor(len/gr)-1, size/gr);
-    rez = rep(groupstarts, each = gr)*gr + (seq_len(gr)-1L)
+    rez = rep(groupstarts, each = gr)*gr + (seq_len(gr)-1L);
     return(rez);
 }
 
@@ -25,7 +25,7 @@ ramwas0createArtificialData = function(dir,
     # CpG locations
     {
         # ncpgs = 500e3
-        chrlen = ncpgs*50
+        chrlen = ncpgs*50;
         probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
         locs = which(probs > runif(chrlen)) + 1e6L;
         locs[1] = 800e3; # for non-CpG count
@@ -33,8 +33,11 @@ ramwas0createArtificialData = function(dir,
 
         cpgset = list( chr1 = locs );
         saveRDS(object = cpgset,
-                file = paste0(dir,"/Simulated_chromosome.rds"),
+                file = paste0(dir, "/Simulated_chromosome.rds"),
                 compress = "xz");
+        if( verbose )
+            message('Simulated CpG locations saved in: ',
+                paste0(dir, "/Simulated_chromosome.rds"));
     } # locs, cpgset, chrlen, /Single_chromosome.rds
 
     # Fragment size distribution, with 150 median fragment size
@@ -43,6 +46,8 @@ ramwas0createArtificialData = function(dir,
         fragdistr = pmin(1.01*plogis((150-x)/20),1);
         # plot(x, fragdistr, pch=19);
         rm(x);
+        if( verbose )
+            message('Generated fragment size distribution');
     } # fragdistr
 
     # # Exclude CpGs with density over 15
@@ -87,11 +92,20 @@ ramwas0createArtificialData = function(dir,
                     x = cvrt,
                     sep = "\t",
                     row.names = FALSE);
+        if( verbose )
+            message('Simulated covariates saved in: ',
+                paste0(dir,"/covariates.txt"));
+
         writeLines(con = paste0(dir,"/bam_list.txt"),
                    text = cvrt$samples);
+        if( verbose )
+            message('List of BAM files saved in: ',
+                paste0(dir,"/bam_list.txt"));
+        
     } # cvrt, /covariates.txt, /bam_list.txt
 
     # Main loop
+    # 1/5 of CpGs will be unmethylated
     cpgprob = rep(1,length(locsgood));
     cpgprob[1:(length(locsgood)/5)] = 0;
     for( bam in seq_len(nsamples)){ # bam = 1
@@ -127,11 +141,11 @@ ramwas0createArtificialData = function(dir,
         ord = sort.list(readpos);
         readpos = readpos[ord];
         readdir = readdir[ord];
-        rm(ord)
+        rm(ord);
 
         # Write sam file
         filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
-        fid = file(description = filesam, open = "wt")
+        fid = file(description = filesam, open = "wt");
         writeLines(con = fid,
                    sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",
                            chrlen+2e6));
@@ -152,12 +166,12 @@ ramwas0createArtificialData = function(dir,
             ));
         # flush(fid)
         close(fid);
-        rm(readdir, readpos)
+        rm(readdir, readpos);
 
         asBam(file = filesam,
               destination = sprintf("%s/bams/BAM%03d", dir, bam),
               overwrite=TRUE, indexDestination=FALSE);
-        file.remove(filesam)
+        file.remove(filesam);
     }
     return(invisible(NULL));
 }
