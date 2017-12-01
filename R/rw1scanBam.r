@@ -297,7 +297,7 @@ pipelineProcessBam = function(bamname, param){
     rbam6$startsrev=NULL;
     saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 
-    return(paste0("OK. ", bamname));
+    return(NULL);
 }
 
 # Parallel job function
@@ -321,11 +321,11 @@ ramwas1scanBams = function( param ){
     ld = param$dirfilter;
     
     # Parameter checks
-    if(is.null(param$bamnames))
+    if( is.null(param$bamnames) )
         stop("BAM names must be specified. ",
              "See \"filebamlist\" or \"bamnames\" parameter.");
 
-    if( dir.exists(param$dirbam) )
+    if( !dir.exists(param$dirbam) )
         stop("Directory with BAM files not found: ",
              param$dirbam, "\n",
              "See \"dirbam\" parameter");
