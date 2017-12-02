@@ -297,7 +297,7 @@ pipelineProcessBam = function(bamname, param){
     rbam6$startsrev=NULL;
     saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 
-    return(NULL);
+    return("OK");
 }
 
 # Parallel job function
@@ -307,11 +307,10 @@ pipelineProcessBam = function(bamname, param){
     .log(ld, "%s, Process %06d, Starting BAM: %s",
             date(), Sys.getpid(), bamname);
 
-    logfun = .logErrors(ld, pipelineProcessBam);
-    rez = logfun(bamname = bamname, param = param);
+    rez = pipelineProcessBam(bamname = bamname, param = param);
     
-    .log(ld, "%s, Process %06d, Starting BAM: %s",
-            date(), Sys.getpid(), bamname);
+    .log(ld, "%s, Process %06d, Finished BAM: %s, %s",
+            date(), Sys.getpid(), bamname, rez);
     return(rez);
 }
 
@@ -343,14 +342,16 @@ ramwas1scanBams = function( param ){
 
     .log(ld, "%s, Scanning bams.", date(), append = FALSE);
     
+    logfun = .logErrors(ld, .ramwas1scanBamJob);
     nthreads = min(param$cputhreads, length(param$bamname));
     if( nthreads > 1){
         cl = makeCluster(nthreads);
         on.exit({stopCluster(cl);});
-        z = clusterApplyLB(cl = cl,
-                           x = param$bamnames, 
-                           fun = .ramwas1scanBamJob,
-                           param = param);
+        z = clusterApplyLB(
+                cl = cl,
+                x = param$bamnames, 
+                fun = logfun,
+                param = param);
         tmp = sys.on.exit();
         eval(tmp);
         rm(tmp);
@@ -359,8 +360,7 @@ ramwas1scanBams = function( param ){
         z = character(length(param$bamnames));
         names(z) = param$bamnames;
         for(i in seq_along(param$bamnames)){ # i=1
-            z[i] = .ramwas1scanBamJob(bamname = param$bamnames[i],
-                                      param = param);
+            z[i] = logfun(bamname = param$bamnames[i], param = param);
         }
     }
     
