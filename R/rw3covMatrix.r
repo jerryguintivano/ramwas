@@ -292,6 +292,8 @@ pipelineCoverage1Sample = function(colnum, param){
 ramwas3normalizedCoverage = function( param ){
     # Prepare
     param = parameterPreprocess(param);
+    
+    # Fragment size estimate
     if( param$minfragmentsize < param$maxfragmentsize ){
         filename = paste0(param$dirfilter,"/Fragment_size_distribution.txt");
         param$fragdistr = as.double( readLines(con = filename));
@@ -299,27 +301,24 @@ ramwas3normalizedCoverage = function( param ){
     } else {
         param$fragdistr = rep(1, param$maxfragmentsize);
     }
-    dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
-    dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
-
-    if( !is.null(param$covariates) )
+    
+    # Is CpG set defined.
+    if(is.null(param$filecpgset))
+        stop("CpG set is not defined. See \"filecpgset\" parameter.")
+    
+    
+    # Are samples in covariates are in bam2sample?
+    if( !is.null(param$covariates) ){
+        badset = !(names(param$bam2sample) %in% param$covariates[[1]]);
+        if( any(badset) )
+            stop("Covariate file has samples not present in \"bam2sample\" ",
+                "parameter:\n ",
+                paste0(head(param$covariates[[1]][badset]), collapse = "\n "));
+        
+        message('Using only samples in the covariate file.')
         param$bam2sample = param$bam2sample[param$covariates[[1]]];
-
-    parameterDump(dir = param$dircoveragenorm, param = param,
-                      toplines = c("dircoveragenorm", "dirtemp", "dirrbam",
-                                       "filebam2sample", "bam2sample",
-                                       "maxrepeats",
-                                       "minavgcpgcoverage", "minnonzerosamples",
-                                       "filecpgset",
-                                       "buffersize", "doublesize",
-                                       "cputhreads", "diskthreads"));
-
-    ### data dimensions
-    cpgset = cachedRDSload(param$filecpgset);
-    ncpgs = sum(sapply(cpgset, length));
-    nsamples = length(param$bam2sample);
-
-    ### Check is all rbams are in place
+    }
+    # Check is all rbams are in place
     {
         message("Checking if all required Rbam files present");
         bams = unlist(param$bam2sample);
@@ -330,7 +329,29 @@ ramwas3normalizedCoverage = function( param ){
             }
         }
         rm(bams, bname, filename);
-    }
+    }    
+    
+    
+    dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
+    dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
+
+    
+
+    parameterDump(dir = param$dircoveragenorm, param = param,
+        toplines = c(   "dircoveragenorm", "dirtemp", "dirrbam",
+                        "filebam2sample", "bam2sample",
+                        "maxrepeats",
+                        "minavgcpgcoverage", "minnonzerosamples",
+                        "filecpgset",
+                        "buffersize", "doublesize",
+                        "cputhreads", "diskthreads"));
+
+    ### data dimensions
+    cpgset = cachedRDSload(param$filecpgset);
+    ncpgs = sum(sapply(cpgset, length));
+    nsamples = length(param$bam2sample);
+
+
 
     if(is.null(param$dirtemp1))
         param$dirtemp1 = param$dirtemp;
