@@ -229,31 +229,19 @@ pipelineCoverage1Sample = function(colnum, param){
 # Job function for sample normalization
 .ramwas3normalizeJob = function(fmpart_offset, param, samplesums){
     # library(ramwas);
-    # fmpart_offset = fmpart_offset_list[[2]]
+    ld = param$dircoveragenorm;
+    
     scale = as.vector(samplesums) / mean(samplesums);
 
-    
     # Open output file
     filename = paste0(param$dircoveragenorm, "/Coverage");
     fm = fm.open(filename, lockfile = param$lockfile2);
     
-    # Log about start of slice processing
-    fm$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-            date(), ", Process ", Sys.getpid(),
-            ", Start processing slice ", fmpart_offset[1], "\n",
-            sep = "", append = TRUE);
-    });
+    .log(ld, "%s, Process %06d, Start normalizing slice: %03d",
+            date(), Sys.getpid(), fmpart_offset[1]);
 
     # Read filtered+transposed 
     filename = paste0(param$dirtemp2, "/TrCoverage_part", fmpart_offset[1]);
-    # Log about end of slice processing
-    fm$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Process ", Sys.getpid(),
-             ", End processing slice ", fmpart_offset[1], "\n",
-             sep = "", append = TRUE);
-    });
     fmin = fm.open(filename, lockfile = param$lockfile1);
 
     step1 = max(floor(32*1024*1024 / 8 / nrow(fmin)),1);
@@ -270,8 +258,13 @@ pipelineCoverage1Sample = function(colnum, param){
     }
     rm(part, step1, mm, nsteps, fr, to);
 
+    # Cleanup
+    closeAndDeleteFiles(fmin);
     close(fm);
-    return("OK.");
+
+    .log(ld, "%s, Process %06d,  Done normalizing slice: %03d",
+        date(), Sys.getpid(), fmpart_offset[1]);
+    return(NULL);
 }
 
 # Step 3 of RaMWAS
