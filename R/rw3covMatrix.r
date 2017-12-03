@@ -246,14 +246,6 @@ pipelineCoverage1Sample = function(colnum, param){
 
     # Read filtered+transposed 
     filename = paste0(param$dirtemp2, "/TrCoverage_part", fmpart_offset[1]);
-    mat = fm.load(filename, param$lockfile1);
-    gc();
-    mat = mat / scale;
-    gc();
-    fm$writeCols( start = fmpart_offset[2]+1L, mat);
-    rm(mat);
-    gc();
-    
     # Log about end of slice processing
     fm$filelock$lockedrun( {
         cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
@@ -261,6 +253,22 @@ pipelineCoverage1Sample = function(colnum, param){
              ", End processing slice ", fmpart_offset[1], "\n",
              sep = "", append = TRUE);
     });
+    fmin = fm.open(filename, lockfile = param$lockfile1);
+
+    step1 = max(floor(32*1024*1024 / 8 / nrow(fmin)),1);
+    mm = ncol(fmin);
+    nsteps = ceiling(mm/step1);
+    for( part in seq_len(nsteps) ){ # part = 1L
+        # message(part, " of ", nsteps);
+        fr = (part-1)*step1 + 1L;
+        to = min(part*step1, mm);
+
+        fm$writeCols( 
+                start = fmpart_offset[2]+fr,
+                value = fmin[,fr:to] / scale);
+    }
+    rm(part, step1, mm, nsteps, fr, to);
+
     close(fm);
     return("OK.");
 }
