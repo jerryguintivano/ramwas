@@ -241,6 +241,7 @@ trimBamFilename = function(bamnames){
     cat(file = paste0(ld,"/Log.txt"),
          msg, "\n", sep = "", append = append);
     message(msg);
+    return(msg);
 }
 
 .logErrors = function(ld, fun){
@@ -248,8 +249,8 @@ trimBamFilename = function(bamnames){
         withCallingHandlers(
             tryCatch(fun(...), 
                 error=function(e) {
-                    err <<- .log(ld, "%s, Process %06d, Error produced: %s", 
-                            date(), Sys.getpid(), conditionMessage(e));
+                    .log(ld, "%s, Process %06d, Error produced: %s", 
+                        date(), Sys.getpid(), conditionMessage(e));
                 }
             ), 
             warning = function(w) {

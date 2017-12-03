@@ -297,7 +297,7 @@ pipelineProcessBam = function(bamname, param){
     rbam6$startsrev=NULL;
     saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 
-    return("OK");
+    return(NULL);
 }
 
 # Parallel job function
@@ -309,8 +309,8 @@ pipelineProcessBam = function(bamname, param){
 
     rez = pipelineProcessBam(bamname = bamname, param = param);
     
-    .log(ld, "%s, Process %06d, Finished BAM: %s, %s",
-            date(), Sys.getpid(), bamname, rez);
+    .log(ld, "%s, Process %06d, Finished BAM: %s. %s",
+            date(), Sys.getpid(), bamname, if(!is.null(rez)){rez}else{""});
     return(rez);
 }
 
@@ -363,6 +363,8 @@ ramwas1scanBams = function( param ){
             z[i] = logfun(bamname = param$bamnames[i], param = param);
         }
     }
+    
+    lapply(z, function(x){if(!is.null(x)){message(x)}});
     
     .log(ld, "%s, Done scanning bams.", date());
     return(invisible(z));
