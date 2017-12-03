@@ -275,7 +275,10 @@ ramwas3normalizedCoverage = function( param ){
     # Fragment size estimate
     if( param$minfragmentsize < param$maxfragmentsize ){
         filename = paste0(param$dirfilter,"/Fragment_size_distribution.txt");
-        param$fragdistr = as.double( readLines(con = filename));
+        if( !file.exists(filename) )
+            stop("Fragment size distribution estimate not found: ", filename,
+                 "\nRun ramwas2collectqc() function first")
+        param$fragdistr = as.double(readLines(con = filename));
         rm(filename);
     } else {
         param$fragdistr = rep(1, param$maxfragmentsize);
