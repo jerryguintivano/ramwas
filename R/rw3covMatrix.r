@@ -153,7 +153,8 @@ pipelineCoverage1Sample = function(colnum, param){
         date(), Sys.getpid(), fmpart);
 
     # Read the whole slice
-    mat = as.matrix(fmraw);
+    # mat = fmraw[]; # Not elegant
+    mat = as.matrix(fmraw); # Failed with missing line in NAMESPACE
 
     # Create transposed+filtered output and the corresponding location files
     fmout = fm.create( 
