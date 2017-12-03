@@ -109,19 +109,11 @@ pipelineCoverage1Sample = function(colnum, param){
 # Job function for calculation of raw CpG score matrix
 .ramwas3coverageJob = function(colnum, param, nslices){
     # library(ramwas);
-    
-    # Log start of raw coverage calculation.
-    fmname = paste0(param$dirtemp1, "/RawCoverage_part", 1);
-    fm = fm.open(fmname, lockfile = param$lockfile);
-    fm$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-            date(), ", Process ", Sys.getpid(),
-            ", Start processing sample ", colnum, " ",
-            names(param$bam2sample)[colnum], "\n",
-            sep = "", append = TRUE);
-    });
-    close(fm);
-    
+    ld = param$dircoveragenorm;
+
+    .log(ld, "%s, Process %06d, Start processing sample: %04d, %s",
+        date(), Sys.getpid(), colnum, names(param$bam2sample)[colnum]);
+
     # Calculate coverage
     # coverage = ramwas:::pipelineCoverage1Sample(colnum, param);
     coverage = pipelineCoverage1Sample(colnum, param);
@@ -130,7 +122,7 @@ pipelineCoverage1Sample = function(colnum, param){
     # Save it in file matrix slices
     start = 1;
     for( part in seq_len(nslices) ){ # part=1
-        message("colnum = ", colnum, " part = ", part);
+        # message("colnum = ", colnum, " part = ", part);
         fmname = paste0(param$dirtemp1, "/RawCoverage_part", part);
         fm = fm.open(fmname, lockfile = param$lockfile);
         ntowrite = nrow(fm);
@@ -139,19 +131,10 @@ pipelineCoverage1Sample = function(colnum, param){
         start = start + ntowrite;
     }
 
-    # Log end of raw coverage calculation.
-    fmname = paste0(param$dirtemp1, "/RawCoverage_part", 1);
-    fm = fm.open(fmname, lockfile = param$lockfile);
-    fm$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Process ", Sys.getpid(),
-             ", End processing sample ", colnum, " ",
-             names(param$bam2sample)[colnum], "\n",
-             sep = "", append = TRUE);
-    });
-    close(fm);
+    .log(ld, "%s, Process %06d,  Done processing sample: %04d, %s",
+        date(), Sys.getpid(), colnum, names(param$bam2sample)[colnum]);
 
-    return("OK");
+    return(NULL);
 }
 
 # Job function for filtering CpGs
