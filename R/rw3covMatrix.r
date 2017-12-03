@@ -474,6 +474,10 @@ ramwas3normalizedCoverage = function( param ){
             indx = fm.load( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             indx = as.vector(indx)
             cpgsloclist[[part]] = cpgsloc1e9[fr:to][indx];
+            
+            # Cleanup
+            fmlc = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
+            closeAndDeleteFiles(fmlc);
         }
         rm(part, step1, mm, nsteps, fr, to, kbblock, indx);
         sliceoffsets = c(0L, cumsum(sapply(cpgsloclist, length)));
@@ -503,6 +507,10 @@ ramwas3normalizedCoverage = function( param ){
             filenamebase = paste0(param$dircoveragenorm, "/raw_sample_sums"),
             mat = samplesums);
         close(fm);
+        
+        # Cleanup
+        fm = fm.open( paste0(param$dirtemp2,"/0_sample_sums") );
+        closeAndDeleteFiles(fm);
     }
 
     ### Normalize and combine in one matrix
@@ -554,18 +562,6 @@ ramwas3normalizedCoverage = function( param ){
                         samplesums = samplesums);
             }
         }
-
-    ### Cleanup
-    {
-        message("Removing temporary files");
-        for( part in 1:nslices ){
-            fm = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
-            closeAndDeleteFiles(fm);
-            fm = fm.open( paste0(param$dirtemp2,"/TrCoverage_part",part) );
-            closeAndDeleteFiles(fm);
-        }
-        fm = fm.open( paste0(param$dirtemp2,"/0_sample_sums") );
-        closeAndDeleteFiles(fm);
         .showErrors(z);
         .log(ld, "%s, Done Normalizing coverage matrix.", date());
     }
