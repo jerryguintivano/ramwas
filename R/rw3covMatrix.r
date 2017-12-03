@@ -297,7 +297,8 @@ ramwas3normalizedCoverage = function( param ){
                 "parameter:\n ",
                 paste0(head(param$covariates[[1]][badset]), collapse = "\n "));
         
-        message('Using only samples in the covariate file.')
+        message('Using the ',length(param$covariates[[1]]),
+                ' samples in the covariate file.')
         param$bam2sample = param$bam2sample[param$covariates[[1]]];
     }
     # Check is all rbams are in place
@@ -311,16 +312,16 @@ ramwas3normalizedCoverage = function( param ){
             }
         }
         rm(bams, bname, filename);
-    }    
+        message('All required Rbam files present are present.');
+    }
     
-    
-    dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
     dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
+    dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 
-    
 
     parameterDump(dir = param$dircoveragenorm, param = param,
         toplines = c(   "dircoveragenorm", "dirtemp", "dirrbam",
+                        "dirtemp","dirtemp1","dirtemp2",
                         "filebam2sample", "bam2sample",
                         "maxrepeats",
                         "minavgcpgcoverage", "minnonzerosamples",
@@ -336,14 +337,14 @@ ramwas3normalizedCoverage = function( param ){
     nsamples = length(param$bam2sample);
 
 
-
+    # Two temporary directories for faster processing
     if(is.null(param$dirtemp1))
         param$dirtemp1 = param$dirtemp;
     if(is.null(param$dirtemp2))
         param$dirtemp2 = param$dirtemp;
     
-    stopifnot(dir.exists(param$dirtemp1))
-    stopifnot(dir.exists(param$dirtemp2))
+    stopifnot(dir.exists(param$dirtemp1));
+    stopifnot(dir.exists(param$dirtemp2));
     
     ### Create raw coverage matrix slices
     {
@@ -353,17 +354,19 @@ ramwas3normalizedCoverage = function( param ){
         step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
         mm = ncpgs;
         nslices = ceiling(mm/step1);
-        for( part in 1:nslices ){ # part = 1
         .log(ld, "%s, Creating %d file matrices for raw scores at: %s",
              date(), nslices, param$dirtemp1);
+        
+        for( part in seq_len(nslices) ){ # part = 1
             # cat("Creating raw  matrix slices", part, "of", nslices, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
-            fmname = paste0(param$dirtemp1,"/RawCoverage_part",part);
-            fm = fm.create(fmname,
-                           nrow = to-fr+1,
-                           ncol = nsamples,
-                           size = param$doublesize)
+            fmname = paste0(param$dirtemp1, "/RawCoverage_part", part);
+            fm = fm.create( 
+                        filenamebase = fmname,
+                        nrow = to-fr+1,
+                        ncol = nsamples,
+                        size = param$doublesize)
             close(fm);
         }
         rm(part, step1, mm, fr, to, fmname);
@@ -411,9 +414,10 @@ ramwas3normalizedCoverage = function( param ){
         .log(ld, "%s, Transposing score matrices and filtering CpGs by score",
             date());
 
-        fm = fm.create( paste0(param$dirtemp2,"/0_sample_sums"),
-                        nrow = nsamples,
-                        ncol = nslices);
+        fm = fm.create( 
+                    filenamebase = paste0(param$dirtemp2,"/0_sample_sums"),
+                    nrow = nsamples,
+                    ncol = nslices);
         close(fm);
 
         logfun = .logErrors(ld, .ramwas3transposeFilterJob);
