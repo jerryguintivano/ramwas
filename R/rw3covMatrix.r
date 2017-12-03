@@ -139,39 +139,35 @@ pipelineCoverage1Sample = function(colnum, param){
 
 # Job function for filtering CpGs
 .ramwas3transposeFilterJob = function(fmpart, param){
+    ld = param$dircoveragenorm;
     # library(ramwas);
     
     # fmpart = 1
     # Open input file matrix slice
     filename = paste0(param$dirtemp1, "/RawCoverage_part", fmpart);
-    if( !file.exists(paste0(filename, ".bmat")) ||
-        !file.exists(paste0(filename, ".desc.txt")) )
-        return(paste0("Raw coverage slice filematrix not found: ", filename));
-    fmraw = fm.open(filename, lockfile = param$lockfile2);
+    fmraw = fm.open(
+                filenamebase = filename,
+                lockfile = param$lockfile2);
 
-    # Log start of processing slice
-    fmraw$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-            date(), ", Process ", Sys.getpid(),
-            ", Start processing slice ", fmpart, "\n",
-            sep = "", append = TRUE);
-    });
-    
+    .log(ld, "%s, Process %06d, Start transposing slice: %03d",
+        date(), Sys.getpid(), fmpart);
+
     # Read the whole slice
-    mat = fmraw[];
-    # mat = as.matrix(fmraw);
+    mat = as.matrix(fmraw);
 
     # Create transposed+filtered output and the corresponding location files
-    fmout = fm.create( paste0(param$dirtemp2,"/TrCoverage_part",fmpart),
-                       nrow = ncol(mat),
-                       ncol = 0,
-                       size = param$doublesize,
-                       lockfile = param$lockfile2);
-    fmpos = fm.create( paste0(param$dirtemp2,"/TrCoverage_loc",fmpart),
-                       nrow = 1,
-                       ncol = 0,
-                       type = "integer",
-                       lockfile = param$lockfile2);
+    fmout = fm.create( 
+                filenamebase = paste0(param$dirtemp2,"/TrCoverage_part",fmpart),
+                nrow = ncol(mat),
+                ncol = 0,
+                size = param$doublesize,
+                lockfile = param$lockfile2);
+    fmpos = fm.create( 
+                filenamebase = paste0(param$dirtemp2,"/TrCoverage_loc",fmpart),
+                nrow = 1,
+                ncol = 0,
+                type = "integer",
+                lockfile = param$lockfile2);
 
     samplesums = rep(0, ncol(mat));
 
@@ -179,8 +175,8 @@ pipelineCoverage1Sample = function(colnum, param){
     step1 = max(floor(32*1024*1024 / 8 / ncol(mat)),1);
     mm = nrow(mat);
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ){ # part = 1
-        message(part, " of ", nsteps);
+    for( part in seq_len(nsteps) ){ # part = 1
+        # message(part, " of ", nsteps);
         fr = (part-1)*step1 + 1;
         to = min(part*step1, mm);
 
@@ -216,19 +212,17 @@ pipelineCoverage1Sample = function(colnum, param){
     close(fmout);
     close(fmpos);
 
-    fmss = fm.open( paste0(param$dirtemp2,"/0_sample_sums"),
-                    lockfile = param$lockfile2);
+    fmss = fm.open( 
+                filenamebase = paste0(param$dirtemp2,"/0_sample_sums"),
+                lockfile = param$lockfile2);
     fmss[,fmpart] = samplesums;
     close(fmss);
 
-    fmraw$filelock$lockedrun( {
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Process ", Sys.getpid(),
-             ", End processing slice ", fmpart, "\n",
-             sep = "", append = TRUE);
-    });
+    .log(ld, "%s, Process %06d,  Done transposing slice: %03d",
+        date(), Sys.getpid(), fmpart);
+    
     closeAndDeleteFiles(fmraw);
-    return("OK.");
+    return(NULL);
 }
 
 # Job function for sample normalization
