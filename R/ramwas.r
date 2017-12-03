@@ -268,4 +268,4 @@ trimBamFilename = function(bamnames){
             message(x);
 }
 
-.logErrors = function(ld, fun)fun;
+# .logErrors = function(ld, fun)fun;
