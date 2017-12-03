@@ -261,3 +261,9 @@ trimBamFilename = function(bamnames){
         )
     }
 }
+
+.showErrors = function(z){
+    for( x in z )
+        if(!is.null(x))
+            message(x);
+}
