@@ -269,8 +269,8 @@ pipelineCoverage1Sample = function(colnum, param){
 
 # Step 3 of RaMWAS
 ramwas3normalizedCoverage = function( param ){
-    # Prepare
     param = parameterPreprocess(param);
+    ld = param$dircoveragenorm;
     
     # Fragment size estimate
     if( param$minfragmentsize < param$maxfragmentsize ){
@@ -325,6 +325,8 @@ ramwas3normalizedCoverage = function( param ){
                         "buffersize", "doublesize",
                         "cputhreads", "diskthreads"));
 
+    .log(ld, "%s, Start ramwas3normalizedCoverage()", date(), append = FALSE);
+    
     ### data dimensions
     cpgset = cachedRDSload(param$filecpgset);
     ncpgs = sum(sapply(cpgset, length));
@@ -348,9 +350,9 @@ ramwas3normalizedCoverage = function( param ){
         step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
         mm = ncpgs;
         nslices = ceiling(mm/step1);
-        message("Creating ", nslices, " file matrices for raw scores at: ",
-                param$dirtemp1);
         for( part in 1:nslices ){ # part = 1
+        .log(ld, "%s, Creating %d file matrices for raw scores at: %s",
+             date(), nslices, param$dirtemp1);
             # cat("Creating raw  matrix slices", part, "of", nslices, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
@@ -366,53 +368,52 @@ ramwas3normalizedCoverage = function( param ){
 
     ### Fill in the raw coverage files
     {
-        message("Calculating and saving raw coverage");
-        if(param$usefilelock) param$lockfile = tempfile();
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Calculating raw coverage.", "\n",
-             sep = "", append = FALSE);
         # library(parallel)
+        logfun = .logErrors(ld, .ramwas3coverageJob);
         nthreads = min(param$cputhreads, nsamples);
+        .log(ld, "%s, Calculating raw coverage", date());
+        if(param$usefilelock) param$lockfile = tempfile();
         if( nthreads > 1 ){
             cl = makeCluster(nthreads);
-            on.exit({stopCluster(cl);});
-            z = clusterApplyLB(cl,
-                               seq_len(nsamples),
-                               .ramwas3coverageJob,
-                               param = param,
-                               nslices = nslices);
+            on.exit({
+                stopCluster(cl);
+                .file.remove(param$lockfile);
+            });
+            z = clusterApplyLB(
+                        cl = cl,
+                        x = seq_len(nsamples),
+                        fun = logfun,
+                        param = param,
+                        nslices = nslices);
             tmp = sys.on.exit();
             eval(tmp);
             rm(tmp);
             on.exit();
         } else {
-            z = character(nsamples);
+            z = vector('list', nsamples);
             names(z) = names(param$bam2sample);
             for(i in seq_along(param$bam2sample)){ # i=1
-                z[i] = .ramwas3coverageJob(colnum = i,
-                                           param = param,
-                                           nslices = nslices);
-                message(i, z[i]);
+                z[[i]] = logfun(  
+                        colnum = i,
+                        param = param,
+                        nslices = nslices);
             }
         }
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Done calculating raw coverage.", "\n",
-             sep = "", append = TRUE);
-        .file.remove(param$lockfile);
+        .showErrors(z);
+        .log(ld, "%s, Done calculating raw coverage", date());
     }
-
+    
     ### Transpose the slices, filter by average and fraction of non-zeroes
     {
-        message("Transposing score matrices and filtering CpGs by score");
+        .log(ld, "%s, Transposing score matrices and filtering CpGs by score",
+            date());
 
         fm = fm.create( paste0(param$dirtemp2,"/0_sample_sums"),
                         nrow = nsamples,
                         ncol = nslices);
         close(fm);
 
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Transposing coverage matrix, filtering CpGs.", "\n",
-             sep = "", append = TRUE);
+        logfun = .logErrors(ld, .ramwas3transposeFilterJob);
         nthreads = min(param$diskthreads, nslices);
         if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile2 = tempfile();
@@ -420,23 +421,25 @@ ramwas3normalizedCoverage = function( param ){
             cl = makeCluster(nthreads);
             on.exit({
                 stopCluster(cl);
-                .file.remove(param$lockfile2);});
-            z = clusterApplyLB(cl,
-                               1:nslices,
-                               .ramwas3transposeFilterJob,
-                               param = param);
+                .file.remove(param$lockfile2);
+            });
+            z = clusterApplyLB(
+                        cl = cl,
+                        x = seq_len(nslices),
+                        fun = logfun,
+                        param = param);
             tmp = sys.on.exit();
             eval(tmp);
             rm(tmp);
             on.exit();
         } else {
-            for( fmpart in seq_len(nslices) ){ # fmpart = 5
-                .ramwas3transposeFilterJob(fmpart, param);
+            z = vector('list', nslices);
+            for( fmpart in seq_len(nslices) ){ # fmpart = 1
+                z[[fmpart]] = logfun(fmpart, param);
             }
         }
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Done transposing coverage matrix, filtering CpGs.",
-             "\n", sep = "", append = TRUE);
+        .showErrors(z);
+        .log(ld, "%s, Done transposing score matrices, filtering CpGs", date());
     }
 
     ### Prepare CpG set for filtered CpGs
@@ -448,6 +451,8 @@ ramwas3normalizedCoverage = function( param ){
             cpgsloc1e9[[i]] = cpgset[[i]] + i*1e9;
         }
         cpgsloc1e9 = unlist(cpgsloc1e9, recursive = FALSE, use.names = FALSE);
+        .log(ld, "%s, Saving locations for CpGs which passed the filter", 
+             date());
 
         kbblock = (128*1024)/8;
         step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
@@ -482,7 +487,7 @@ ramwas3normalizedCoverage = function( param ){
 
     ### Sample sums
     {
-        message("Gathering sample sums from ", nslices, " slices");
+        .log(ld, "%s, Gathering sample sums from %d slices", date(), nslices);
 
         mat = fm.load( paste0(param$dirtemp2, "/0_sample_sums") );
         samplesums = rowSums(mat);
@@ -495,7 +500,7 @@ ramwas3normalizedCoverage = function( param ){
 
     ### Normalize and combine in one matrix
     {
-        message("Normalizing coverage and saving in one matrix");
+        .log(ld, "%s, Normalizing coverage and saving in one matrix", date());
 
         fmpart_offset_list = as.list(data.frame(rbind(
             seq_len(nslices),
@@ -509,10 +514,9 @@ ramwas3normalizedCoverage = function( param ){
         rownames(fm) = names(param$bam2sample);
         close(fm);
 
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Normalizing coverage matrix.", "\n",
-             sep = "", append = TRUE);
+        
         ### normalize and fill in
+        logfun = .logErrors(ld, .ramwas3normalizeJob);
         nthreads = min(param$diskthreads, nslices);
         if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile1 = tempfile();
@@ -522,28 +526,27 @@ ramwas3normalizedCoverage = function( param ){
             on.exit({
                 stopCluster(cl);
                 .file.remove(param$lockfile1);
-                .file.remove(param$lockfile2);});
-            z = clusterApplyLB(cl,
-                               fmpart_offset_list,
-                               .ramwas3normalizeJob,
-                               param = param,
-                               samplesums = samplesums);
+                .file.remove(param$lockfile2);
+            });
+            z = clusterApplyLB(
+                        cl = cl,
+                        x = fmpart_offset_list,
+                        fun = logfun,
+                        param = param,
+                        samplesums = samplesums);
             tmp = sys.on.exit();
             eval(tmp);
             rm(tmp);
             on.exit();
         } else {
-            for( fmpart in seq_len(nslices) ){ # fmpart = 5
-                .ramwas3normalizeJob( fmpart_offset_list[[fmpart]],
-                                      param,
-                                      samplesums);
+            for( i in seq_len(nslices) ){ # i = 1
+                z = vector('list', nslices);
+                z[[i]] = logfun( 
+                        fmpart_offset = fmpart_offset_list[[i]],
+                        param = param,
+                        samplesums = samplesums);
             }
         }
-        cat(file = paste0(param$dircoveragenorm,"/Log.txt"),
-             date(), ", Done normalizing coverage matrix.", "\n",
-             sep = "", append = TRUE);
-
-    }
 
     ### Cleanup
     {
@@ -556,5 +559,9 @@ ramwas3normalizedCoverage = function( param ){
         }
         fm = fm.open( paste0(param$dirtemp2,"/0_sample_sums") );
         closeAndDeleteFiles(fm);
+        .showErrors(z);
+        .log(ld, "%s, Done Normalizing coverage matrix.", date());
     }
+        
+    .log(ld, "%s,  Done ramwas3normalizedCoverage()", date());
 }
