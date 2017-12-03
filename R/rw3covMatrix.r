@@ -466,7 +466,7 @@ ramwas3normalizedCoverage = function( param ){
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
         cpgsloclist = vector("list",nsteps);
-        for( part in 1:nsteps ){ # part = 1
+        for( part in seq_len(nsteps) ){ # part = 1
             # cat( part, "of", nsteps, "\n");
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
@@ -490,6 +490,7 @@ ramwas3normalizedCoverage = function( param ){
             filenamebase = paste0(param$dircoveragenorm, "/CpG_locations"),
             mat = cpgslocmat);
         close(fm);
+        
         writeLines(
             con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt"),
             text = names(cpgset));
