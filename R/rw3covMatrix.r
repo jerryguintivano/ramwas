@@ -517,9 +517,12 @@ ramwas3normalizedCoverage = function( param ){
     {
         .log(ld, "%s, Normalizing coverage and saving in one matrix", date());
 
-        fmpart_offset_list = as.list(data.frame(rbind(
-            seq_len(nslices),
-            sliceoffsets[-length(sliceoffsets)])));
+        mat2cols = function(x){lapply(seq_len(ncol(x)), function(i) x[,i]);};
+        
+        fmpart_offset_list = mat2cols(
+            rbind(
+                seq_len(nslices),
+                sliceoffsets[-length(sliceoffsets)]));
 
         ### Create big matrix for normalized coverage
         fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"),
