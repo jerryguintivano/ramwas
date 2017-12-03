@@ -73,6 +73,7 @@ importFrom(filematrix,
     fm.create.from.matrix, closeAndDeleteFiles)
 importClassesFrom(filematrix, filematrix)
 importMethodsFrom(filematrix, close)
+importMethodsFrom(filematrix, as.matrix)
 importMethodsFrom(BiocGenerics, start)
 
 S3method(plot, qcHistScore)
