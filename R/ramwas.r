@@ -267,3 +267,5 @@ trimBamFilename = function(bamnames){
         if(!is.null(x))
             message(x);
 }
+
+.logErrors = function(ld, fun)fun;
