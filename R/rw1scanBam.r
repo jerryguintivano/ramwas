@@ -309,8 +309,8 @@ pipelineProcessBam = function(bamname, param){
 
     rez = pipelineProcessBam(bamname = bamname, param = param);
     
-    .log(ld, "%s, Process %06d, Finished BAM: %s. %s",
-            date(), Sys.getpid(), bamname, if(!is.null(rez)){rez}else{""});
+    .log(ld, "%s, Process %06d, Finished BAM: %s",
+            date(), Sys.getpid(), bamname);
     return(rez);
 }
 
@@ -357,16 +357,13 @@ ramwas1scanBams = function( param ){
         rm(tmp);
         on.exit();
     } else {
-        z = z = vector('list', length(param$bamnames));
+        z = vector('list', length(param$bamnames));
         names(z) = param$bamnames;
         for(i in seq_along(param$bamnames)){ # i=1
             z[[i]] = logfun(bamname = param$bamnames[i], param = param);
         }
     }
-    
-    # Show errors and warnings
     .showErrors(z)
-
     .log(ld, "%s, Done scanning bams.", date());
     return(invisible(z));
 }
