@@ -357,15 +357,16 @@ ramwas1scanBams = function( param ){
         rm(tmp);
         on.exit();
     } else {
-        z = character(length(param$bamnames));
+        z = z = vector('list', length(param$bamnames));
         names(z) = param$bamnames;
         for(i in seq_along(param$bamnames)){ # i=1
-            z[i] = logfun(bamname = param$bamnames[i], param = param);
+            z[[i]] = logfun(bamname = param$bamnames[i], param = param);
         }
     }
     
-    lapply(z, function(x){if(!is.null(x)){message(x)}});
-    
+    # Show errors and warnings
+    .showErrors(z)
+
     .log(ld, "%s, Done scanning bams.", date());
     return(invisible(z));
 }
