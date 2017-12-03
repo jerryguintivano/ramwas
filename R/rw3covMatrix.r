@@ -451,21 +451,19 @@ ramwas3normalizedCoverage = function( param ){
 
     ### Prepare CpG set for filtered CpGs
     {
-        message("Saving locations for CpGs which passed the filter");
-
-        cpgsloc1e9 = cpgset;
-        for( i in seq_along(cpgsloc1e9) ){
-            cpgsloc1e9[[i]] = cpgset[[i]] + i*1e9;
-        }
-        cpgsloc1e9 = unlist(cpgsloc1e9, recursive = FALSE, use.names = FALSE);
         .log(ld, "%s, Saving locations for CpGs which passed the filter", 
              date());
 
+        chr = rep(seq_along(cpgset), sapply(cpgset, length));
+        pos = unlist(cpgset, recursive = FALSE, use.names = FALSE);
+        keep = logical(ncpgs);
+        
         kbblock = (128*1024)/8;
         step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
-        cpgsloclist = vector("list",nsteps);
+        keeplist = vector("list",nsteps);
+        sliceoffsets = integer(1+nsteps);
         for( part in seq_len(nsteps) ){ # part = 1
             # cat( part, "of", nsteps, "\n");
             fr = (part-1)*step1 + 1;
@@ -473,18 +471,18 @@ ramwas3normalizedCoverage = function( param ){
 
             indx = fm.load( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             indx = as.vector(indx)
-            cpgsloclist[[part]] = cpgsloc1e9[fr:to][indx];
+            keep[fr:to][indx] = TRUE;
+            sliceoffsets[part+1] = sliceoffsets[part] + sum(keep);
             
             # Cleanup
             fmlc = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             closeAndDeleteFiles(fmlc);
         }
         rm(part, step1, mm, nsteps, fr, to, kbblock, indx);
-        sliceoffsets = c(0L, cumsum(sapply(cpgsloclist, length)));
 
-        cpgslocvec = unlist(cpgsloclist, use.names = FALSE);
-        cpgslocmat = cbind( chr = as.integer(cpgslocvec %/% 1e9),
-                            position = as.integer(cpgslocvec %% 1e9));
+        cpgslocmat = cbind( 
+                    chr = chr[keep],
+                    position = pos[keep]);
 
         fm = fm.create.from.matrix(
             filenamebase = paste0(param$dircoveragenorm, "/CpG_locations"),
@@ -494,7 +492,7 @@ ramwas3normalizedCoverage = function( param ){
         writeLines(
             con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt"),
             text = names(cpgset));
-        rm(cpgsloc1e9, cpgsloclist, cpgslocvec, cpgslocmat);
+        rm(chr, pos, cpgslocmat);
     } # /CpG_locations, sliceoffsets
 
     ### Sample sums
