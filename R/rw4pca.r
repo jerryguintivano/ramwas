@@ -28,13 +28,15 @@
 # Job function for PCA analysis
 # (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
-    # rng = rangeset[[1]];
     # library(filematrix);
+    ld = param$dirpca;
     .set1MLKthread();
     
     fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"),
                   readonly = TRUE,
                   lockfile = param$lockfile2);
+    .log(ld, "%s, Process %06d, Starting PCA job: %02d, CpG range %d-%d",
+        date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
     covmat = 0;
 
@@ -99,10 +101,13 @@ plotPCvectors = function(e, i){
 
 postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     param = parameterPreprocess(param);
+    ld = param$dirpca;
+     .log(ld, "%s, Start postPCAprocessing() call", date());
 
+    
     ### Get and match sample names
     {
-        message("Matching samples in covariates and data matrix");
+        .log(ld, "%s, Matching samples in covariates and data matrix", date());
         rez = .matchCovmatCovar( param );
         # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
@@ -127,8 +132,9 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 
     # PCA plots
     {
-        message("Saving PCA plots");
-        pdf(paste0(param$dirpca, "/PC_plot_covariates_removed.pdf"),7,7);
+        plotfilename = paste0(param$dirpca, "/PC_plot_covariates_removed.pdf")
+        .log(ld, "%s, Saving PCA plots in: ", date(), plotfilename);
+        pdf(plotfilename,7,7);
         plotPCvalues(e$values,40);
         for( i in seq_len(min(plotPCs,nonzeroPCs)))
             plotPCvectors(e,i);
@@ -137,7 +143,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 
     # Save PCs and loadings
     {
-        message("Saving PC values and vectors");
+        .log(ld, "%s, Saving PC values and vectors", date());
         PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
         rownames(PC_loads) = cvsamples;
         colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
@@ -157,11 +163,11 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 
     # Saving PC vs. covariates association
     if(NCOL(param$covariates) > 1){
-        message("Saving PC vs. covariates associations");
         testcov = .testCovariates(covariates1 = param$covariates[-1],
                                   data = e$vectors[,seq_len(nonzeroPCs)],
                                   cvrtqr = cvrtqr);
 
+        .log(ld, "%s, Saving PC vs. covariates associations", date());
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
                         name=paste0("PC",seq_len(nonzeroPCs)),
@@ -175,6 +181,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                         check.names = FALSE),
                     sep="\t", row.names = FALSE);
     }
+     .log(ld, "%s, Done postPCAprocessing() call", date());
 }
 
 # Step 4 of RaMWAS
@@ -182,6 +189,9 @@ ramwas4PCA = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
     dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
+    ld = param$dirpca;
+     .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
+    
 
     parameterDump(dir = param$dirpca, param = param,
         toplines = c(   "dirpca", "dircoveragenorm",
@@ -191,7 +201,7 @@ ramwas4PCA = function( param ){
 
     ### Get and match sample names
     {
-        message("Matching samples in covariates and data matrix");
+        .log(ld, "%s, Matching samples in covariates and data matrix", date());
         rez = .matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
@@ -201,7 +211,8 @@ ramwas4PCA = function( param ){
 
     ### Prepare covariates, defactor
     {
-        message("Preparing covariates (splitting dummies, orthonormalizing)");
+        .log(ld, "%s, Preparing covariates (splitting dummies, orthonormalize)"
+             , date());
         param$modelPCs = 0;
         mwascvrtqr = .getCovariates(
                             param = param,
@@ -213,10 +224,7 @@ ramwas4PCA = function( param ){
     {
         ### Calculate covmat from the data matrix
         {
-            message("Calculating Principal Components");
-            cat(file = paste0(param$dirpca,"/Log.txt"),
-                 date(), ", Running Principal Component Analysis.", "\n",
-                 sep = "", append = FALSE);
+            .log(ld, "%s, Calculating covariance matrix", date());
 
             step1 = ceiling( 128*1024*1024 / length(cvsamples) / 8);
             mm = ncpgs;
@@ -254,10 +262,10 @@ ramwas4PCA = function( param ){
                                          cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
             }
-            cat(file = paste0(param$dirpca,"/Log.txt"),
-                 date(), ", Done running Principal Component Analysis.", "\n",
-                 sep = "", append = TRUE);
+            
+            .log(ld, "%s, Done calculating covariance matrix", date());
 
+            .log(ld, "%s, Saving covariance matrix", date());
             saveRDS(file = paste0(param$dirpca,"/covmat.rds"),
                     object = covmat,
                     compress = FALSE);
@@ -265,16 +273,18 @@ ramwas4PCA = function( param ){
 
         ### Eigenvalue decomposition
         {
-            message("Performing Eigenvalue Decomposition");
             e = eigen(covmat, symmetric=TRUE);
             saveRDS(file = paste0(param$dirpca,"/eigen.rds"),
                     object = e,
                     compress = FALSE);
+            .log(ld, "%s, Performing Eigenvalue Decomposition", date());
+            e = eigen(covmat, symmetric = TRUE);
+            .log(ld, "%s, Saving Eigenvalue Decomposition", date());
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         } # e
     }
-
     postPCAprocessing(param, e);
+    .log(ld, "%s, Done ramwas4PCA() call", date());
 }
 
 # Interactive covariate selection via
