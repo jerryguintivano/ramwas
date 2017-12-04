@@ -516,8 +516,6 @@ ramwas3normalizedCoverage = function( param ){
     {
         .log(ld, "%s, Normalizing coverage and saving in one matrix", date());
 
-        mat2cols = function(x){lapply(seq_len(ncol(x)), function(i) x[,i]);};
-        
         fmpart_offset_list = mat2cols(
             rbind(
                 seq_len(nslices),

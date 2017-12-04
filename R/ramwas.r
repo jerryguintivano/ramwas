@@ -262,3 +262,6 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 }
 
 # .logErrors = function(ld, fun)fun;
+
+mat2cols = function(x){lapply(seq_len(ncol(x)), function(i) x[,i]);};
+        

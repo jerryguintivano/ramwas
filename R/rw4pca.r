@@ -227,8 +227,7 @@ ramwas4PCA = function( param ){
                 rangeset = rbind( rng[-length(rng)],
                                   rng[-1]-1,
                                   seq_len(nthreads));
-                rangeset = lapply(seq_len(ncol(rangeset)),
-                                  function(i) rangeset[,i])
+                rangeset = mat2cols(rangeset);
 
                 if(param$usefilelock) param$lockfile2 = tempfile();
                 # library(parallel);
