@@ -71,27 +71,29 @@
 
 plotPCvalues = function(values, n = 40){
     pc100 = head(values,n)/sum(values)*100;
-    plot(pc100,
-         pch = 19,
-         col="blue",
-         ylim = c(0, pc100[1]*1.05),
-         xlim = c(0, length(pc100)+0.5),
-         main = "Principal components",
-         xlab = "PCs",
-         ylab = "Variation Explained (%)",
-         yaxs = "i",
-         xaxs = "i")
+    plot(
+        x = pc100,
+        pch = 19,
+        col = "blue",
+        ylim = c(0, pc100[1]*1.05),
+        xlim = c(0, length(pc100)+0.5),
+        main = "Principal components",
+        xlab = "PCs",
+        ylab = "Variation Explained (%)",
+        yaxs = "i",
+        xaxs = "i")
 }
 
 plotPCvectors = function(e, i){
-     plot(e$vectors[,i],
-                 main = paste("PC",i),
-                 xlab = "Samples",
-                 ylab = "PC components",
-                 pch = 19,
-                 col = "blue1",
-                 xlim = c(0, length(e$values)+0.5),
-                 xaxs = "i");
+    plot(
+        x = e$vectors[,i],
+        main = paste("PC",i),
+        xlab = "Samples",
+        ylab = "PC components",
+        pch = 19,
+        col = "blue1",
+        xlim = c(0, length(e$values)+0.5),
+        xaxs = "i");
     abline(h = 0, col = "grey");
 }
 
