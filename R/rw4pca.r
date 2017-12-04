@@ -32,16 +32,18 @@
     ld = param$dirpca;
     .set1MLKthread();
     
-    fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"),
-                  readonly = TRUE,
-                  lockfile = param$lockfile2);
     .log(ld, "%s, Process %06d, Starting PCA job: %02d, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
+
+    fm = fm.open( 
+            filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
+            readonly = TRUE,
+            lockfile = param$lockfile2);
 
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
-    mm = rng[2]-rng[1]+1;
+    mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
         message("Slice ", part, " of ", nsteps);
@@ -109,7 +111,6 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     {
         .log(ld, "%s, Matching samples in covariates and data matrix", date());
         rez = .matchCovmatCovar( param );
-        # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         cvsamples = rez$cvsamples;
@@ -118,10 +119,12 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 
     ### Prepare covariates, defactor
     {
-        message("Preparing covariates (splitting dummies, orthonormalizing)");
-        cvrtqr = .getCovariates(param = param,
-                                rowsubset = rowsubset,
-                                modelhasconstant = param$modelhasconstant);
+        .log(ld, "%s, Preparing covariates (splitting dummies, orthonormalize)",
+            date());
+        cvrtqr = .getCovariates(
+                        param = param,
+                        rowsubset = rowsubset,
+                        modelhasconstant = param$modelhasconstant);
     } # cvrtqr
 
     if(is.null(e))
@@ -152,8 +155,8 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                     sep="\t",
                     row.names = FALSE);
         PC_values = data.frame(
-            PC_num = paste0("PC",seq_len(length(e$values))),
-            VarianceExplained = e$values/sum(e$values));
+                    PC_num = paste0("PC",seq_len(length(e$values))),
+                    VarianceExplained = e$values/sum(e$values));
         write.table(file = paste0(param$dirpca, "/PC_values.txt"),
                     x = PC_values,
                     sep = "\t",
@@ -163,23 +166,25 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 
     # Saving PC vs. covariates association
     if(NCOL(param$covariates) > 1){
-        testcov = .testCovariates(covariates1 = param$covariates[-1],
-                                  data = e$vectors[,seq_len(nonzeroPCs)],
-                                  cvrtqr = cvrtqr);
-
         .log(ld, "%s, Saving PC vs. covariates associations", date());
+        testcov = .testCovariates(
+                        covariates1 = param$covariates[-1],
+                        data = e$vectors[,seq_len(nonzeroPCs)],
+                        cvrtqr = cvrtqr);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
                         name=paste0("PC",seq_len(nonzeroPCs)),
                         testcov$crF,
                         check.names = FALSE),
-                    sep="\t", row.names = FALSE);
+                    sep="\t", 
+                    row.names = FALSE);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"),
                     x = data.frame(
                         name=paste0("PC",seq_len(nonzeroPCs)),
                         testcov$pv,
                         check.names = FALSE),
-                    sep="\t", row.names = FALSE);
+                    sep="\t", 
+                    row.names = FALSE);
     }
      .log(ld, "%s, Done postPCAprocessing() call", date());
 }
@@ -188,10 +193,10 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
 ramwas4PCA = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
-    dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
     ld = param$dirpca;
      .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
     
+    dir.create(param$dirpca, showWarnings = FALSE, recursive = TRUE);
 
     parameterDump(dir = param$dirpca, param = param,
         toplines = c(   "dirpca", "dircoveragenorm",
@@ -242,20 +247,24 @@ ramwas4PCA = function( param ){
                 if(param$usefilelock) param$lockfile2 = tempfile();
                 # library(parallel);
                 cl = makeCluster(nthreads);
-                on.exit({stopCluster(cl);});
-                covlist = clusterApplyLB(cl,
-                                         rangeset,
-                                         .ramwas4PCAjob,
-                                         param = param,
-                                         cvrtqr = mwascvrtqr,
-                                         rowsubset = rowsubset);
+                on.exit({
+                    stopCluster(cl);
+                    .file.remove(param$lockfile2);
+                });
+                covlist = clusterApplyLB(
+                                cl = cl,
+                                x = rangeset,
+                                fun = .ramwas4PCAjob,
+                                param = param,
+                                cvrtqr = mwascvrtqr,
+                                rowsubset = rowsubset);
                 covmat = Reduce(f = `+`, x = covlist);
                 tmp = sys.on.exit();
                 eval(tmp);
                 rm(tmp);
                 on.exit();
                 rm(cl, rng, rangeset, covlist);
-                .file.remove(param$lockfile2);
+                
             } else {
                 covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0),
                                          param = param,
@@ -273,13 +282,13 @@ ramwas4PCA = function( param ){
 
         ### Eigenvalue decomposition
         {
-            e = eigen(covmat, symmetric=TRUE);
-            saveRDS(file = paste0(param$dirpca,"/eigen.rds"),
-                    object = e,
-                    compress = FALSE);
             .log(ld, "%s, Performing Eigenvalue Decomposition", date());
             e = eigen(covmat, symmetric = TRUE);
             .log(ld, "%s, Saving Eigenvalue Decomposition", date());
+            saveRDS(
+                file = paste0(param$dirpca, "/eigen.rds"),
+                object = e,
+                compress = FALSE);
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         } # e
     }
