@@ -159,6 +159,13 @@ processCommandLine = function(.arg = NULL){
     return(mget(ls()));
 }
 
+trimBamFilename = function(bamnames){
+    # bamnames = c('/gpfs_fs/pharm/MDDBrain/RaMWAS_SOLiD/bams/Wildfire_2014_06_16_1_STAN1_BA10_d15.bam','/gpfs_fs/pharm/blood_brain_celltype/bam_files/brain/GFM57_PE+.bam')
+    BNnopath = basename(bamnames);
+    BNnodotbam = gsub('\\.bam$', '', BNnopath, ignore.case = TRUE);
+    return(BNnodotbam);
+}
+
 # Fill in gaps in the parameter list
 # Make paths absolute
 parameterPreprocess = function( param ){

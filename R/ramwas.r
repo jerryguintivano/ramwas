@@ -222,13 +222,6 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     return(rez);
 }
 
-trimBamFilename = function(bamnames){
-    # bamnames = c('/gpfs_fs/pharm/MDDBrain/RaMWAS_SOLiD/bams/Wildfire_2014_06_16_1_STAN1_BA10_d15.bam','/gpfs_fs/pharm/blood_brain_celltype/bam_files/brain/GFM57_PE+.bam')
-    BNnopath = basename(bamnames);
-    BNnodotbam = gsub('\\.bam$', '', BNnopath, ignore.case = TRUE);
-    return(BNnodotbam);
-}
-
 .set1MLKthread = function(){
     if("package:RevoUtilsMath" %in% search())
         if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
