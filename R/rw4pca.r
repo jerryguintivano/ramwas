@@ -182,16 +182,15 @@ ramwas4PCA = function( param ){
     dir.create(param$dirpca,  showWarnings = FALSE, recursive = TRUE);
 
     parameterDump(dir = param$dirpca, param = param,
-                      toplines = c("dirpca", "dircoveragenorm",
-                                       "filecovariates", "covariates",
-                                       "modelcovariates",
-                                       "cputhreads", "diskthreads"));
+        toplines = c(   "dirpca", "dircoveragenorm",
+                        "filecovariates", "covariates",
+                        "modelcovariates",
+                        "cputhreads", "diskthreads"));
 
     ### Get and match sample names
     {
         message("Matching samples in covariates and data matrix");
         rez = .matchCovmatCovar( param );
-        # rez = ramwas:::.matchCovmatCovar( param );
         rowsubset = rez$rowsubset;
         ncpgs     = rez$ncpgs;
         cvsamples = rez$cvsamples;
@@ -202,9 +201,10 @@ ramwas4PCA = function( param ){
     {
         message("Preparing covariates (splitting dummies, orthonormalizing)");
         param$modelPCs = 0;
-        mwascvrtqr = .getCovariates(param = param,
-                                    rowsubset = rowsubset,
-                                    modelhasconstant = param$modelhasconstant);
+        mwascvrtqr = .getCovariates(
+                            param = param,
+                            rowsubset = rowsubset,
+                            modelhasconstant = param$modelhasconstant);
     } # mwascvrtqr
 
     ### PCA part

@@ -231,7 +231,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 # The logging function
 .log = function(ld, fmt, ..., append = TRUE){
     msg = sprintf(fmt, ...);
-    cat(file = paste0(ld,"/Log.txt"),
+    cat(file = paste0(ld, "/Log.txt"),
          msg, "\n", sep = "", append = append);
     message(msg);
     return(msg);
