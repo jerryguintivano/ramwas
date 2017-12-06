@@ -245,112 +245,109 @@ ramwas5saveTopFindings = function(param){
 }
 
 # Job function for MWAS
-.ramwas5MWASjob = function(rng, param, mwascvrtqr, rowsubset){
+.ramwas5MWASjob = function(rng, param){
     # rng = rangeset[[1]];
     # library(filematrix);
     .set1MLKthread();
-    
-    fm = fm.open( filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
-                  readonly = TRUE,
-                  lockfile = param$lockfile2);
+    ld = param$dirmwas;
+  
+    .log(ld, "%s, Process %06d, Job %02d, Start MWAS, CpG range %d-%d",
+        date(), Sys.getpid(), rng[3], rng[1], rng[2]);
+  
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, lockfile = param$lockfile2);
 
     outmat = double(3*(rng[2]-rng[1]+1));
     dim(outmat) = c((rng[2]-rng[1]+1),3);
 
-    step1 = ceiling( 512*1024*1024 / nrow(fm) / 8);
+    step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ){ # part = 1
-        message("Slice ", part, " of ", nsteps);
+    for( part in seq_len(nsteps) ){ # part = 1
+        .log(ld, "%s, Process %06d, Job %02d, Processing slice: %03d of %d",
+            date(), Sys.getpid(), rng[3], part, nsteps);
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
-        slice = fm[,fr:to];
-        if( !is.null(rowsubset) )
-            slice = slice[rowsubset,];
+        slice = data$getDataRez(fr, to, resid = FALSE);
+        
+        rez = testPhenotype(
+                    phenotype = param$covariates[[param$modeloutcome]],
+                    data = slice,
+                    cvrtqr = t(data$cvrtqr))
 
-        rez = testPhenotype(phenotype = param$covariates[[param$modeloutcome]],
-                            data = slice,
-                            cvrtqr = mwascvrtqr)
+        outmat[(fr:to) - (rng[1] - 1), ] = cbind(rez[[1]], rez[[2]], rez[[3]]);
 
-        outmat[(fr:to) - (rng[1] - 1),] = cbind(rez[[1]], rez[[2]], rez[[3]]);
-
-        fm$filelock$lockedrun( {
-            cat(file = paste0(param$dirmwas,"/Log.txt"),
-                 date(), ", Process ", Sys.getpid(), ", Job ", rng[3],
-                 ", processing slice ", part, " of ", nsteps, "\n",
-                 sep = "", append = TRUE);
-        });
         rm(slice);
     }
-    close(fm)
 
-    if(rng[1]==1){
-        writeLines( con = paste0(param$dirmwas, "/DegreesOfFreedom.txt"),
-                        text = as.character(c(rez$nVarTested, rez$dfFull)))
+    if( rng[1] == 1 ){
+        writeLines( 
+                con = paste0(param$dirmwas, "/DegreesOfFreedom.txt"),
+                text = as.character(c(rez$nVarTested, rez$dfFull)));
     }
 
-    fmout = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"),
-                    lockfile = param$lockfile2);
-    fmout[rng[1]:rng[2],1:3] = outmat;
+    fmout = fm.open(
+                filenamebase = paste0(param$dirmwas, "/Stats_and_pvalues"),
+                lockfile = param$lockfile2);
+    fmout[rng[1]:rng[2], 1:3] = outmat;
     close(fmout);
 
-    return("OK");
+    return(invisible(NULL));
 }
 
 # Setp 5 of RaMWAS
 ramwas5MWAS = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
+    ld = param$dirmwas;
     dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
+     .log(ld, "%s, Start ramwas5MWAS() call", date(), append = FALSE);
 
+    if(is.null(param$modeloutcome))
+        stop("Model outcome variable not defined\n",
+             "See \"modeloutcome\" parameter");
+    if( !any(names(param$covariates) == param$modeloutcome) )
+        stop("Model outcome is not found among covariates.\'n",
+             "See \"modeloutcome\" parameter");
+    
     parameterDump(dir = param$dirmwas, param = param,
-                      toplines = c("dirmwas", "dirpca", "dircoveragenorm",
-                                       "filecovariates", "covariates",
-                                       "modeloutcome", "modelcovariates",
-                                       "modelPCs", "modelhasconstant",
-                                       "qqplottitle",
-                                       "diskthreads"));
+        toplines = c(   "dirmwas", "dirpca", "dircoveragenorm",
+                        "filecovariates", "covariates",
+                        "modeloutcome", "modelcovariates",
+                        "modelPCs", "modelhasconstant",
+                        "qqplottitle",
+                        "diskthreads"));
 
 
     message("Preparing for MWAS");
 
     ### Kill NA outcomes
-    if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
+    killset = is.na(param$covariates[[ param$modeloutcome ]]);
+    if(any(killset)){
+        .log(ld, "%s, Removing observations with missing outcome", date());
         param$covariates = data.frame(lapply(
             param$covariates,
             `[`,
-            !is.na(param$covariates[[ param$modeloutcome ]])));
+            !killset));
     }
-    ### Get and match sample names
-    {
-        message("Matching samples in covariates and data matrix");
-        rez = .matchCovmatCovar( param );
-        # rez = ramwas:::.matchCovmatCovar( param );
-        rowsubset = rez$rowsubset;
-        ncpgs     = rez$ncpgs;
-        cvsamples = rez$cvsamples;
-        nsamplesall = rez$nsamplesall;
-        rm(rez);
-    } # rowsubset, ncpgs
-
-    ### Prepare covariates, defactor
-    {
-        message("Preparing covariates (splitting dummies, orthonormalizing)");
-        mwascvrtqr = .getCovariates(param = param,
-                                    rowsubset = rowsubset,
-                                    modelhasconstant = param$modelhasconstant);
-    } # mwascvrtqr
-
+    
+    outcome = param$covariates[[ param$modeloutcome ]];
+    
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param);
 
     ### Outpout matrix. Cor / t-test / p-value / q-value
     ### Outpout matrix. R2  / F-test / p-value / q-value
     {
-        message("Creating output matrix");
-        fm = fm.create( paste0(param$dirmwas, "/Stats_and_pvalues"),
-                        nrow = ncpgs,
-                        ncol = 4);
-        if( !is.character( param$covariates[[param$modeloutcome]] ) ){
+        .log(ld, "%s, Creating output matrix", date());
+        fm = fm.create( 
+                    filenamebase = paste0(param$dirmwas, "/Stats_and_pvalues"),
+                    nrow = data$ncpgs,
+                    ncol = 4);
+        if( is.numeric( outcome ) ){
             colnames(fm) = c("cor","t-test","p-value","q-value");
         } else {
             colnames(fm) = c("R-squared","F-test","p-value","q-value");
@@ -360,38 +357,37 @@ ramwas5MWAS = function( param ){
 
     ### Running MWAS in parallel
     {
-        message("Running MWAS");
-        cat(file = paste0(param$dirmwas,"/Log.txt"),
-             date(), ", Running methylome-wide association study.", "\n",
-             sep = "", append = FALSE);
+        .log(ld, "%s, Start Association Analysis", date());
 
-        step1 = ceiling( 512*1024*1024 / nsamplesall / 8);
-        mm = ncpgs;
+        step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
+        mm = data$ncpgs;
         nsteps = ceiling(mm/step1);
 
         nthreads = min(param$cputhreads, nsteps);
         rm(step1, mm, nsteps);
         if( nthreads > 1 ){
-            rng = round(seq(1, ncpgs+1, length.out = nthreads+1));
-            rangeset = rbind( rng[-length(rng)],
-                              rng[-1]-1,
-                              seq_len(nthreads));
-            rangeset = lapply(seq_len(ncol(rangeset)),
-                              function(i) rangeset[,i])
+            rng = round(seq(1, data$ncpgs+1, length.out = nthreads+1));
+            rangeset = rbind( 
+                            rng[-length(rng)],
+                            rng[-1] - 1,
+                            seq_len(nthreads));
+            rangeset = mat2cols(rangeset);
 
             if(param$usefilelock) param$lockfile2 = tempfile();
             # library(parallel);
             cl = makeCluster(nthreads);
             on.exit({
                 stopCluster(cl);
-                .file.remove(param$lockfile2);});
-            clusterExport(cl, "testPhenotype")
-            clusterApplyLB(cl,
-                           rangeset,
-                           .ramwas5MWASjob,
-                           param = param,
-                           mwascvrtqr = mwascvrtqr,
-                           rowsubset = rowsubset);
+                .file.remove(param$lockfile2);
+            });
+            clusterExport(cl, "testPhenotype");
+            logfun = .logErrors(ld, .ramwas3coverageJob);
+            z = clusterApplyLB(
+                        cl = cl,
+                        x = rangeset,
+                        fun = logfun,
+                        param = param);
+            .showErrors(z);
             tmp = sys.on.exit();
             eval(tmp);
             rm(tmp);
@@ -399,26 +395,24 @@ ramwas5MWAS = function( param ){
             rm(cl, rng, rangeset);
 
         } else {
-            covmat = .ramwas5MWASjob(rng = c(1, ncpgs, 0),
-                                     param = param,
-                                     mwascvrtqr = mwascvrtqr,
-                                     rowsubset = rowsubset);
+            z = .ramwas5MWASjob(
+                        rng = c(1, data$ncpgs, 0),
+                        param = param);
         }
-        cat(file = paste0(param$dirmwas,"/Log.txt"),
-             date(), ", Done running methylome-wide association study.", "\n",
-             sep = "", append = TRUE);
+        
+        .log(ld, "%s, Done Association Analysis", date());
     }
+    data$close();
 
     ### Fill in FDR column
     {
+        .log(ld, "%s, Calculating FDR (q-values)", date());
         message("Calculating FDR (q-values)");
         fm = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"));
         pvalues = fm[,3];
         pvalues[pvalues==0] = .Machine$double.xmin;
         fm[,4] = pvalue2qvalue( pvalues );
         close(fm);
-
-        rm(fm);
     } # sortedpv
 
     ### QQ-plot
