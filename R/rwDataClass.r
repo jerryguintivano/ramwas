@@ -40,6 +40,7 @@ setRefClass("rwDataClass",
 		samplenames = "character",
 		nsamples = "numeric",
 		ncpgs = "numeric",
+		ndatarows = "numeric",
 		rowsubset = "ANY",
 		cvrtqr = "ANY"
 	),
@@ -49,6 +50,7 @@ setRefClass("rwDataClass",
 		    samplenames <<- character(0);
 		    nsamples <<- 0;
 			ncpgs <<- 0;
+			ndatarows <<- 0;
 			rowsubset <<- NULL;
 			cvrtqr <<- NULL;
 			return(.self);
@@ -84,6 +86,7 @@ setRefClass("rwDataClass",
             fmdata <<- fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
             fmsamples = rownames(fmdata);
             ncpgs <<- ncol(fmdata);
+            ndatarows <<- nrow(fmdata);
             # nsamplesall = nrow(fmdata);
         
             # Match samples in covariates with those in coverage matrix

@@ -41,7 +41,7 @@
     
     covmat = 0;
 
-    step1 = ceiling( 128*1024*1024 / nrow(data$fmdata) / 8);
+    step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
@@ -193,7 +193,7 @@ ramwas4PCA = function( param ){
         {
             .log(ld, "%s, Calculating covariance matrix", date());
 
-            step1 = ceiling( 128*1024*1024 / data$nsamples / 8);
+            step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
             mm = data$ncpgs;
             nsteps = ceiling(mm/step1);
 
