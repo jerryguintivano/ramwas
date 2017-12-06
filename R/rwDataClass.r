@@ -82,7 +82,7 @@ setRefClass("rwDataClass",
 
 		    
 		    # Sample names in covariates
-            samplenames <<- param$covariates[[1]];
+            samplenames <<- as.character(param$covariates[[1]]);
             nsamples <<- length(samplenames);
         
             # Open data matrix
