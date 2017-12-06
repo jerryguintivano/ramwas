@@ -29,6 +29,9 @@ if(FALSE){
         mmncpgs = c(5,10,50,100,500,1000,2000,3000)
     )
     
+    ramwas4PCA(param);
+    ramwas5MWAS(param);
+    
     # param$modelcovariates = c('age','sex');
 }
 #
@@ -55,7 +58,7 @@ setRefClass("rwDataClass",
 			cvrtqr <<- NULL;
 			return(.self);
 		},
-		open = function( param, getPCs = TRUE ){
+		open = function( param, getPCs = TRUE, lockfile = NULL){
 		    
 		    # Checks of parameters and files
 		    
@@ -83,7 +86,10 @@ setRefClass("rwDataClass",
             nsamples <<- length(samplenames);
         
             # Open data matrix
-            fmdata <<- fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
+            fmdata <<- fm.open( 
+                    filenamebase = paste0(param$dircoveragenorm, "/Coverage"), 
+                    readonly = TRUE,
+                    lockfile = lockfile);
             fmsamples = rownames(fmdata);
             ncpgs <<- ncol(fmdata);
             ndatarows <<- nrow(fmdata);
