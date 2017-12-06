@@ -40,6 +40,8 @@ export(
     ramwasSNPs
 )
 
+exportClasses("rwDataClass")
+
 importFrom(methods,
     setRefClass, new)
 importFrom(grDevices,
