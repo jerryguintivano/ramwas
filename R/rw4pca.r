@@ -27,7 +27,7 @@
 
 # Job function for PCA analysis
 # (covariance matrix calculation)
-.ramwas4PCAjob = function(rng, param, cvrtqr, rowsubset){
+.ramwas4PCAjob = function(rng, param){
     # library(filematrix);
     ld = param$dirpca;
     .set1MLKthread();
@@ -35,14 +35,13 @@
     .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
-    fm = fm.open( 
-            filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
-            readonly = TRUE,
-            lockfile = param$lockfile2);
-
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, getPCs = FALSE);
+    
     covmat = 0;
 
-    step1 = ceiling( 128*1024*1024 / nrow(fm) / 8);
+    step1 = ceiling( 128*1024*1024 / nrow(data$fmdata) / 8);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
@@ -51,26 +50,15 @@
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
-        slice = fm[,fr:to];
-        if( !is.null(rowsubset) )
-            slice = slice[rowsubset,];
-        slice = t(slice);
+        slice = data$getDataRez(fr, to);
 
-        slice = slice - tcrossprod(slice, cvrtqr) %*% cvrtqr;
-        ### rowMeans(slice) == 0
-        slice = slice / pmax(sqrt(rowSums(slice^2)), 1e-3);
-        ### rowSums(slice^2) == 1
-
-        covmat = covmat + crossprod(slice);
-        fm$filelock$lockedrun( {
-            cat(file = paste0(param$dirpca,"/Log.txt"),
-                 date(), ", Process ", Sys.getpid(), ", Job ", rng[3],
-                 ", processing slice ", part, " of ", nsteps, "\n",
-                 sep = "", append = TRUE);
-        });
+        slice = slice /
+            rep( pmax(sqrt(colSums(slice^2)), 1e-3), each = data$nsamples);
+        
+        covmat = covmat + tcrossprod(slice);
+        
         rm(slice);
     }
-    close(fm)
     
     .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
@@ -111,26 +99,9 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     ld = param$dirpca;
      .log(ld, "%s, Start postPCAprocessing() call", date());
 
-    
-    ### Get and match sample names
-    {
-        .log(ld, "%s, Matching samples in covariates and data matrix", date());
-        rez = .matchCovmatCovar( param );
-        rowsubset = rez$rowsubset;
-        ncpgs     = rez$ncpgs;
-        cvsamples = rez$cvsamples;
-        rm(rez);
-    } # rowsubset, ncpgs, cvsamples
-
-    ### Prepare covariates, defactor
-    {
-        .log(ld, "%s, Preparing covariates (splitting dummies, orthonormalize)",
-            date());
-        cvrtqr = .getCovariates(
-                        param = param,
-                        rowsubset = rowsubset,
-                        modelhasconstant = param$modelhasconstant);
-    } # cvrtqr
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, getPCs = FALSE)
 
     if(is.null(e))
         e = readRDS(file = paste0(param$dirpca,"/eigen.rds"))
@@ -153,7 +124,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     {
         .log(ld, "%s, Saving PC values and vectors", date());
         PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
-        rownames(PC_loads) = cvsamples;
+        rownames(PC_loads) = data$samplenames;
         colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
         write.table(file = paste0(param$dirpca, "/PC_loadings.txt"),
                     x = data.frame(name=rownames(PC_loads),PC_loads),
@@ -175,7 +146,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         testcov = .testCovariates(
                         covariates1 = param$covariates[-1],
                         data = e$vectors[,seq_len(nonzeroPCs)],
-                        cvrtqr = cvrtqr);
+                        cvrtqr = t(data$cvrtqr));
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
                         name=paste0("PC",seq_len(nonzeroPCs)),
@@ -191,6 +162,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                     sep="\t", 
                     row.names = FALSE);
     }
+    data$close();
      .log(ld, "%s, Done postPCAprocessing() call", date());
 }
 
@@ -209,26 +181,10 @@ ramwas4PCA = function( param ){
                         "modelcovariates",
                         "cputhreads", "diskthreads"));
 
-    ### Get and match sample names
-    {
-        .log(ld, "%s, Matching samples in covariates and data matrix", date());
-        rez = .matchCovmatCovar( param );
-        rowsubset = rez$rowsubset;
-        ncpgs     = rez$ncpgs;
-        cvsamples = rez$cvsamples;
-        rm(rez);
-    } # rowsubset, ncpgs, cvsamples
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, getPCs = FALSE);
 
-    ### Prepare covariates, defactor
-    {
-        .log(ld, "%s, Preparing covariates (splitting dummies, orthonormalize)"
-             , date());
-        param$modelPCs = 0;
-        mwascvrtqr = .getCovariates(
-                            param = param,
-                            rowsubset = rowsubset,
-                            modelhasconstant = param$modelhasconstant);
-    } # mwascvrtqr
 
     ### PCA part
     {
@@ -236,17 +192,18 @@ ramwas4PCA = function( param ){
         {
             .log(ld, "%s, Calculating covariance matrix", date());
 
-            step1 = ceiling( 128*1024*1024 / length(cvsamples) / 8);
-            mm = ncpgs;
+            step1 = ceiling( 128*1024*1024 / data$nsamples / 8);
+            mm = data$ncpgs;
             nsteps = ceiling(mm/step1);
 
             nthreads = min(param$cputhreads, nsteps);
             rm(step1, mm, nsteps);
             if( nthreads > 1 ){
-                rng = round(seq(1, ncpgs+1, length.out = nthreads+1));
-                rangeset = rbind( rng[-length(rng)],
-                                  rng[-1]-1,
-                                  seq_len(nthreads));
+                rng = round(seq(1, data$ncpgs+1, length.out = nthreads+1));
+                rangeset = rbind(
+                                rng[-length(rng)],
+                                rng[-1]-1,
+                                seq_len(nthreads));
                 rangeset = mat2cols(rangeset);
                 
                 logfun = .logErrors(ld, .ramwas3coverageJob);
@@ -261,10 +218,8 @@ ramwas4PCA = function( param ){
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
-                                param = param,
-                                cvrtqr = mwascvrtqr,
-                                rowsubset = rowsubset);
                                 fun = logfun,
+                                param = param);
                 .showErrors(covlist);
                 covmat = Reduce(f = `+`, x = covlist);
                 tmp = sys.on.exit();
@@ -274,14 +229,12 @@ ramwas4PCA = function( param ){
                 rm(cl, rng, rangeset, covlist);
                 
             } else {
-                covmat = .ramwas4PCAjob( rng = c(1, ncpgs, 0),
-                                         param = param,
-                                         cvrtqr = mwascvrtqr,
-                                         rowsubset = rowsubset);
+                covmat = .ramwas4PCAjob( 
+                                rng = c(1, data$ncpgs, 0),
+                                param = param);
                 if(is.character(covmat))
                     stop(covmat);
             }
-            
             .log(ld, "%s, Done calculating covariance matrix", date());
 
             .log(ld, "%s, Saving covariance matrix", date());
@@ -302,6 +255,7 @@ ramwas4PCA = function( param ){
             # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
         } # e
     }
+    data$close();
     postPCAprocessing(param, e);
     .log(ld, "%s, Done ramwas4PCA() call", date());
 }
