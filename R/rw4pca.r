@@ -44,7 +44,7 @@
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ){ # part = 1
+    for( part in seq_len(nsteps) ){ # part = 1
         .log(ld, "%s, Process %06d, Job %02d, Processing slice: %03d of %d",
             date(), Sys.getpid(), rng[3], part, nsteps);
         fr = (part-1)*step1 + rng[1];
@@ -172,9 +172,9 @@ ramwas4PCA = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
     ld = param$dirpca;
+    dir.create(param$dirpca, showWarnings = FALSE, recursive = TRUE);
      .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
     
-    dir.create(param$dirpca, showWarnings = FALSE, recursive = TRUE);
 
     parameterDump(dir = param$dirpca, param = param,
         toplines = c(   "dirpca", "dircoveragenorm",
@@ -207,7 +207,6 @@ ramwas4PCA = function( param ){
                                 seq_len(nthreads));
                 rangeset = mat2cols(rangeset);
                 
-                logfun = .logErrors(ld, .ramwas3coverageJob);
 
                 if(param$usefilelock) param$lockfile2 = tempfile();
                 # library(parallel);
@@ -216,6 +215,7 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
+                logfun = .logErrors(ld, .ramwas3coverageJob);
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
