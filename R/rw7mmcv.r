@@ -34,27 +34,43 @@ ramwas7ArunMWASes = function(param){
     param = parameterPreprocess(param);
     if( param$toppvthreshold < 1 )
         param$toppvthreshold = 50;
+    ld = param$dircv;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
-    parameterDump(dir = param$dircv, param = param,
-                    toplines = c("dircv", "mmncpgs", "mmalpha",
-                                "cvnfolds","randseed",
-                                "dirmwas", "dirpca", "dircoveragenorm",
-                                "filecovariates", "covariates",
-                                "modeloutcome", "modelcovariates",
-                                "modelPCs",
-                                "qqplottitle",
-                                "cputhreads"));
+     .log(ld, "%s, Start ramwas7ArunMWASes() call", date(), append = FALSE);
 
-    # if(any(is.na(param$covariates[[ param$modeloutcome ]]))){
-    #     param$covariates = data.frame(lapply(
-    #         param$covariates,
-    #         `[`,
-    #         !is.na(param$covariates[[ param$modeloutcome ]])));
-    # }
+    if(is.null(param$modeloutcome))
+        stop("Model outcome variable not defined\n",
+             "See \"modeloutcome\" parameter");
+    if( !any(names(param$covariates) == param$modeloutcome) )
+        stop("Model outcome is not found among covariates.\'n",
+             "See \"modeloutcome\" parameter");
+
+    outcome = param$covariates[[ param$modeloutcome ]];
     
-    exclude0 = is.na(param$covariates[[ param$modeloutcome ]]);
+    if( !is.numeric(outcome) )
+        stop("Categorical outcomes are not supported by Elastic Net");
+    
+    parameterDump(dir = param$dircv, param = param,
+        toplines = c(   "dircv", "mmncpgs", "mmalpha",
+                        "cvnfolds","randseed",
+                        "dirmwas", "dirpca", "dircoveragenorm",
+                        "filecovariates", "covariates",
+                        "modeloutcome", "modelcovariates",
+                        "modelPCs",
+                        "qqplottitle",
+                        "cputhreads"));
+
+
+    
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, getPCs = FALSE);
+
+    # data$samplenames
+    
+    exclude0 = is.na(outcome);
+    names(exclude0) = data$samplenames; #param$covariates[[1]];
     goodids = which(!exclude0);
-    nms = param$covariates[[1]];
     nids = length(goodids);
 
     set.seed(param$randseed);
@@ -62,23 +78,22 @@ ramwas7ArunMWASes = function(param){
     starts = floor(seq(1, nids+1, length.out = param$cvnfolds+1));
 
 
-    for( fold in seq_len(param$cvnfolds) ){ # fold = 9
+    for( fold in seq_len(param$cvnfolds) ){ # fold = 1
 
-        message("Running MWAS for fold ",fold," of ",param$cvnfolds);
+        .log(ld, "%s, Start MWAS for fold %02d of %d",
+             date(), fold, param$cvnfolds);
 
         exclude = exclude0;
         exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
-        names(exclude) = nms;
-
-        outcome = param$covariates[[ param$modeloutcome ]];
-
+        
         param2 = param;
         param2$dirmwas = sprintf("%s/fold_%02d", param$dircv, fold);
         param2$covariates[[ param$modeloutcome ]][exclude] = NA;
 
         ramwas5MWAS(param2);
-        saveRDS( file = paste0(param2$dirmwas, "/exclude.rds"),
-                 object = exclude);
+        saveRDS(
+            file = paste0(param2$dirmwas, "/exclude.rds"),
+            object = exclude);
     }
     return( invisible(NULL) );
 }
@@ -150,31 +165,35 @@ plotPrediction = function(param, outcome, forecast,
 ramwas7BrunElasticNet = function(param){
     # library(glmnet); library(filematrix); library(ramwas);
     param = parameterPreprocess(param);
-    message("Working in: ",param$dircv);
-    {
-        message("Matching samples in covariates and data matrix");
-        rez = .matchCovmatCovar( param );
-        # rez = ramwas:::.matchCovmatCovar( param );
-        rowsubset = rez$rowsubset;
-        ncpgs     = rez$ncpgs;
-        rm(rez);
-    } # rowsubset, ncpgs
-    {
-        outcome = param$covariates[[ param$modeloutcome ]];
-    } # outcome
+    ld = param$dircv;
+    .log(ld, "%s, Start ramwas7BrunElasticNet() call", date());
+    
+    if(is.null(param$modeloutcome))
+        stop("Model outcome variable not defined\n",
+             "See \"modeloutcome\" parameter");
+    if( !any(names(param$covariates) == param$modeloutcome) )
+        stop("Model outcome is not found among covariates.\'n",
+             "See \"modeloutcome\" parameter");
+
+    
+    # Get data access
+    data = new("rwDataClass");
+    data$open(param, getPCs = FALSE);
+    
+    outcome = param$covariates[[ param$modeloutcome ]];
 
     for( cpgs2use in param$mmncpgs ){ # cpgs2use = param$mmncpgs[1]
-        message("Applying Elasting Net to ",cpgs2use," top CpGs");
+        .log(ld, "%s, Applying Elasting Net to %d top CpGs", date(), cpgs2use);
 
         forcastlist = list();
         forecast0 = NULL;
         for( fold in seq_len(param$cvnfolds) ){ # fold = 1
-            message("Processing fold ", fold, " of ", param$cvnfolds);
+            .log(ld, "%s, Processing fold %02d of %d", 
+                 date(), fold, param$cvnfolds);
             {
                 dircvmwas = sprintf("%s/fold_%02d", param$dircv, fold);
                 rdsfile = paste0(dircvmwas, "/exclude.rds");
                 if( !file.exists( rdsfile ) ){
-                    message("Missing CV MWAS: ", rdsfile);
                     stop("Missing CV MWAS: ", rdsfile);
                     next;
                 }
@@ -201,15 +220,7 @@ ramwas7BrunElasticNet = function(param){
                 rm(pv);
             } # cpgset, -pv
             {
-                # get raw coverage
-                fm = fm.open( paste0(param$dircoveragenorm,"/Coverage") );
-                coverage = fm[, cpgset];
-                # rownames(coverage) = rownames(fm);
-                if( !is.null(rowsubset) )
-                    coverage = coverage[rowsubset,];
-                close(fm);
-                rm(fm);
-                gc();
+                coverage = data$getDataRez(cpgset, resid = FALSE)
             } # coverage
             {
                 coverageTRAIN = coverage[!exclude,];
@@ -219,45 +230,48 @@ ramwas7BrunElasticNet = function(param){
             } # coverageTRAIN, coverageTEST, -coverage
             {
                 # library(glmnet)
-                z1 = cv.glmnet(x = coverageTRAIN,
-                               y = as.vector(outcome[!exclude]),
-                               nfolds = param$cvnfolds,
-                               # keep = TRUE,
-                               parallel = FALSE,
-                               alpha = param$mmalpha);
-                z2 = predict.cv.glmnet(object = z1,
-                                       newx = coverageTEST,
-                                       type = "response",
-                                       s = "lambda.min",
-                                       alpha = param$mmalpha);
+                net = cv.glmnet(
+                            x = coverageTRAIN,
+                            y = as.vector(outcome[!exclude]),
+                            nfolds = param$cvnfolds,
+                            # keep = TRUE,
+                            parallel = FALSE,
+                            alpha = param$mmalpha);
+                pred = predict.cv.glmnet(
+                            object = net,
+                            newx = coverageTEST,
+                            type = "response",
+                            s = "lambda.min",
+                            alpha = param$mmalpha);
 
-                forecast0[1,exclude] = forecast0[1,exclude] + z2;
+                forecast0[1,exclude] = forecast0[1,exclude] + pred;
                 forecast0[2,exclude] = forecast0[2,exclude] + 1;
 
-                adt = data.frame( ind = which(exclude), 
-                                  outcome = outcome[exclude], 
-                                  forecast = z2);
-                rownames(adt) = names(exclude)[exclude];
+                adt = data.frame(
+                            ind = which(exclude), 
+                            outcome = outcome[exclude], 
+                            forecast = pred,
+                            row.names = names(exclude)[exclude]);
                 forcastlist[[length(forcastlist)+1]] = adt;
-                rm(z1, z2, adt);
-            } # forecast0
+                rm(net, pred, adt);
+            } # forecast0, forcastlist
             rm(cpgset, coverageTRAIN, coverageTEST);
             gc();
-        }
+        } # fold in seq_len(param$cvnfolds)
+        .log(ld, "%s, Saving Cross Validation Predictions and Plots", date());
         forecast = forecast0[1,]/forecast0[2,];
         {
-            rez = data.frame(samples = colnames(forecast0),
-                             outcome = outcome,
-                             forecast = forecast
-            )
-            write.table( file = sprintf(
-                "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.txt",
-                param$dircv,
-                param$cvnfolds,
-                cpgs2use,
-                param$mmalpha),
-                         x = rez,
-                         sep = "\t", row.names = FALSE);
+            rez = data.frame(
+                        samples = colnames(forecast0),
+                        outcome = outcome,
+                        forecast = forecast)
+            write.table( 
+                file = sprintf(
+                    "%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.txt",
+                    param$dircv, param$cvnfolds, cpgs2use, param$mmalpha),
+                x = rez,
+                sep = "\t", 
+                row.names = FALSE);
             dirr = paste0(param$dircv,"/rds");
             dir.create(dirr, showWarnings = FALSE);
             saveRDS(file = sprintf(
@@ -265,58 +279,58 @@ ramwas7BrunElasticNet = function(param){
                 dirr,
                 cpgs2use,
                 param$mmalpha),
-                object = list(outcome = outcome, 
-                              forecast = forecast, 
-                              forcastlist = forcastlist));
-            
-            
+                object = list(
+                    outcome = outcome, 
+                    forecast = forecast, 
+                    forcastlist = forcastlist));
         } # rez
         {
             pdf(sprintf("%s/MMCVN_prediction_folds=%02d_CpGs=%06d_alpha=%f.pdf",
-                         param$dircv,
-                         param$cvnfolds,
-                         cpgs2use,
-                         param$mmalpha) );
+                    param$dircv, param$cvnfolds, cpgs2use, param$mmalpha) );
             plotPrediction(param, outcome, rez$forecast, cpgs2use,
-                           main = "Prediction success (EN on coverage)");
+                    main = "Prediction success (EN on coverage)");
             dev.off();
             if( length(unique(outcome)) == 2 ){
                 pdf( sprintf("%s/ROC_CpGs=%06d_alpha=%f.pdf",
-                             param$dircv,
-                             cpgs2use,
-                             param$mmalpha) );
+                        param$dircv, cpgs2use, param$mmalpha) );
                 plotROC(outcome = outcome,
                         forecast = forecast)
-                legend(x = "bottomright",
-                       legend = c(paste0("# CpGs = ",   cpgs2use),
-                                  paste0("EN alpha = ", param$mmalpha)))
+                legend(
+                    "bottomright",
+                    legend = c(
+                        paste0("# CpGs = ",   cpgs2use),
+                        paste0("EN alpha = ", param$mmalpha)));
                 title(paste0(
                     "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
                     param$cvnfolds, "-fold cross validation"));
                 dev.off();
             }
         } # pdf()
-    }
+    } # cpgs2use in param$mmncpgs
+    data$close();
+    .log(ld, "%s, Done ramwas7BrunElasticNet() call", date());
     return( invisible(NULL) );
 }
 
 plotCVcors = function(cl, param){
     aymax = max(abs(cl$cors),abs(cl$corp));
-    plot( x = cl$x,
-          y = cl$corp,
-          col = "red",
-          pch = 19,
-          ylim = c(-1,1)*aymax,
-          log = "x",
-          xlab = "Number of markers",
-          ylab = "Correlation")
+    plot( 
+        x = cl$x,
+        y = cl$corp,
+        col = "red",
+        pch = 19,
+        ylim = c(-1,1)*aymax,
+        log = "x",
+        xlab = "Number of markers",
+        ylab = "Correlation")
     points( cl$x, cl$cors, col = "cyan4", pch = 17)
     abline(h=0, col = "grey")
     legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
-    legend("bottomright",
-           legend = c("Correlations:","Pearson", "Spearman"),
-           pch = c(NA_integer_,19,17),
-           col=c("red","red","cyan4"));
+    legend(
+        "bottomright",
+        legend = c("Correlations:","Pearson", "Spearman"),
+        pch = c(NA_integer_,19,17),
+        col = c("red","red","cyan4"));
     title(paste0("Prediction of \"", param$modeloutcome,"\"\n",
                  param$cvnfolds,"-fold cross validation"));
 }
@@ -333,41 +347,39 @@ ramwas7CplotByNCpGs = function(param){
         cpgs2use = param$mmncpgs[i];
         data = readRDS(sprintf(
             "%s/rds/CpGs=%06d_alpha=%f.rds",
-            param$dircv,
-            cpgs2use,
-            param$mmalpha));
+            param$dircv, cpgs2use, param$mmalpha));
         datalist[[i]] = data;
-        stats = predictionStats(outcome = data$outcome,
-                                forecast = data$forecast);
+        stats = predictionStats(
+                    outcome = data$outcome,
+                    forecast = data$forecast);
         cors[i] = stats$cors;
         corp[i] = stats$corp;
     }
 
-    cl = list(x = param$mmncpgs,
-              cors = cors,
-              corp = corp);
+    cl = list(
+            x = param$mmncpgs,
+            cors = cors,
+            corp = corp);
     saveRDS(file = sprintf( "%s/rds/cor_data_alpha=%f.rds",
-                            param$dircv,
-                            param$mmalpha),
+                            param$dircv, param$mmalpha),
             object = cl);
 
-    pdf( sprintf("%s/Prediction_alpha=%f.pdf",
-                 param$dircv,
-                 param$mmalpha) );
+    pdf( sprintf("%s/Prediction_alpha=%f.pdf", param$dircv, param$mmalpha) );
     plotCVcors(cl, param);
     dev.off();
 
     if( length(unique(datalist[[1]]$outcome)) == 2 ){
         pdf( sprintf("%s/ROC_alpha=%f.pdf",
-                     param$dircv,
-                     param$mmalpha) );
+                    param$dircv, param$mmalpha) );
         for( i in seq_along(param$mmncpgs) ){ # i = 1
             cpgs2use = param$mmncpgs[i];
             plotROC(outcome = datalist[[i]]$outcome,
                     forecast = datalist[[i]]$forecast)
-            legend(x = "bottomright",
-                   legend = c(paste0("# CpGs = ",   cpgs2use),
-                              paste0("EN alpha = ", param$mmalpha)))
+            legend(
+                    "bottomright",
+                    legend = c(
+                            paste0("# CpGs = ",   cpgs2use),
+                            paste0("EN alpha = ", param$mmalpha)));
             title(paste0(
                 "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
                 param$cvnfolds,"-fold cross validation"));
