@@ -281,6 +281,7 @@ ramwas5saveTopFindings = function(param){
 
         rm(slice);
     }
+    data$close();
 
     if( rng[1] == 1 ){
         writeLines( 
@@ -293,6 +294,8 @@ ramwas5saveTopFindings = function(param){
                 lockfile = param$lockfile2);
     fmout[rng[1]:rng[2], 1:3] = outmat;
     close(fmout);
+    .log(ld, "%s, Process %06d, Job %02d, Done MWAS, CpG range %d-%d",
+        date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
     return(invisible(NULL));
 }
