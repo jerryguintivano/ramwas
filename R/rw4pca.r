@@ -50,7 +50,7 @@
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
-        slice = data$getDataRez(fr, to);
+        slice = data$getDataRez(fr:to);
 
         slice = slice /
             rep( pmax(sqrt(colSums(slice^2)), 1e-3), each = data$nsamples);

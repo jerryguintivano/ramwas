@@ -270,7 +270,7 @@ ramwas5saveTopFindings = function(param){
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
-        slice = data$getDataRez(fr, to, resid = FALSE);
+        slice = data$getDataRez(fr:to, resid = FALSE);
         
         rez = testPhenotype(
                     phenotype = param$covariates[[param$modeloutcome]],
@@ -324,8 +324,6 @@ ramwas5MWAS = function( param ){
                         "diskthreads"));
 
 
-    message("Preparing for MWAS");
-
     ### Kill NA outcomes
     killset = is.na(param$covariates[[ param$modeloutcome ]]);
     if(any(killset)){
@@ -333,7 +331,7 @@ ramwas5MWAS = function( param ){
         param$covariates = data.frame(lapply(
             param$covariates,
             `[`,
-            !killset));
+            !killset), stringsAsFactors = FALSE);
     }
     
     outcome = param$covariates[[ param$modeloutcome ]];

@@ -161,9 +161,9 @@ setRefClass("rwDataClass",
 		close = function(){
 		    fmdata$close();
 		},
-		getDataRez = function(fr,to, resid = TRUE){
+		getDataRez = function(colset, resid = TRUE){
 		    # Get data
-		    x = fmdata[,fr:to];
+		    x = fmdata[,colset];
 		    
 		    # Subset to active rows
 		    if( !is.null(rowsubset) )
