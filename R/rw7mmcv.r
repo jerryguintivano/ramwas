@@ -90,8 +90,8 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
     tt2pv = function(x){ return( (pt(-x,dfFull))) }
     corp = cor(outcome, forecast, use = "complete.obs", method = "pearson");
     cors = cor(outcome, forecast, use = "complete.obs", method = "spearman");
-    MSE = sqrt(mean( (outcome - forecast)^2 ));
-    MAD = median( abs(outcome - forecast) );
+    MSE = sqrt(mean( (outcome - forecast)^2, na.rm = TRUE ));
+    MAD = median( abs(outcome - forecast)  , na.rm = TRUE );
     R2p = max(corp, 0)^2;
     R2s = max(cors, 0)^2;
     tp = cor2tt(corp);
