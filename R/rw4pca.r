@@ -29,8 +29,8 @@
 # (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param){
     # library(filematrix);
-    ld = param$dirpca;
     .set1MLKthread();
+    ld = param$dirpca;
     
     .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
@@ -203,7 +203,7 @@ ramwas4PCA = function( param ){
                 rng = round(seq(1, data$ncpgs+1, length.out = nthreads+1));
                 rangeset = rbind(
                                 rng[-length(rng)],
-                                rng[-1]-1,
+                                rng[-1] - 1,
                                 seq_len(nthreads));
                 rangeset = mat2cols(rangeset);
                 

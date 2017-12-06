@@ -412,7 +412,7 @@ ramwas5MWAS = function( param ){
     ### Fill in FDR column
     {
         message("Calculating FDR (q-values)");
-        fm = fm.open( paste0(param$dirmwas, "/Stats_and_pvalues"));
+        fm = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"));
         pvalues = fm[,3];
         pvalues[pvalues==0] = .Machine$double.xmin;
         fm[,4] = pvalue2qvalue( pvalues );
@@ -424,7 +424,7 @@ ramwas5MWAS = function( param ){
     ### QQ-plot
     {
         message("Creating QQ-plot");
-        pdf(paste0(param$dirmwas, "/QQ_plot.pdf"),7,7);
+        pdf(paste0(param$dirmwas, "/QQ_plot.pdf"), 7, 7);
         qqPlotFast(pvalues);
         title(param$qqplottitle);
         dev.off();
