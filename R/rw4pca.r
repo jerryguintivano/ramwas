@@ -59,7 +59,7 @@
         
         rm(slice);
     }
-    
+    data$close();
     .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
@@ -164,6 +164,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     }
     data$close();
      .log(ld, "%s, Done postPCAprocessing() call", date());
+    return(invisible(NULL));
 }
 
 # Step 4 of RaMWAS
@@ -258,6 +259,7 @@ ramwas4PCA = function( param ){
     data$close();
     postPCAprocessing(param, e);
     .log(ld, "%s, Done ramwas4PCA() call", date());
+    return(invisible(NULL));
 }
 
 # Interactive covariate selection via
