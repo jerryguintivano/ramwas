@@ -186,7 +186,6 @@ ramwas4PCA = function( param ){
     data = new("rwDataClass");
     data$open(param, getPCs = FALSE);
 
-
     ### PCA part
     {
         ### Calculate covmat from the data matrix
