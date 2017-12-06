@@ -257,7 +257,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 
 .showErrors = function(z){
     for( x in z )
-        if(!is.null(x))
+        if(is.character(x))
             message(x);
 }
 
