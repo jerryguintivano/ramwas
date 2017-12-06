@@ -32,7 +32,7 @@
     ld = param$dirpca;
     .set1MLKthread();
     
-    .log(ld, "%s, Process %06d, Starting PCA job: %02d, CpG range %d-%d",
+    .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
     fm = fm.open( 
@@ -46,7 +46,8 @@
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in 1:nsteps ){ # part = 1
-        message("Slice ", part, " of ", nsteps);
+        .log(ld, "%s, Process %06d, Job %02d, Processing slice: %03d of %d",
+            date(), Sys.getpid(), rng[3], part, nsteps);
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
@@ -70,6 +71,10 @@
         rm(slice);
     }
     close(fm)
+    
+    .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
+        date(), Sys.getpid(), rng[3], rng[1], rng[2]);
+
     return(covmat);
 }
 
@@ -136,9 +141,9 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     # PCA plots
     {
         plotfilename = paste0(param$dirpca, "/PC_plot_covariates_removed.pdf")
-        .log(ld, "%s, Saving PCA plots in: ", date(), plotfilename);
-        pdf(plotfilename,7,7);
-        plotPCvalues(e$values,40);
+        .log(ld, "%s, Saving PCA plots in: %s", date(), plotfilename);
+        pdf(plotfilename, 7, 7);
+        plotPCvalues(e$values, n = 40);
         for( i in seq_len(min(plotPCs,nonzeroPCs)))
             plotPCvectors(e,i);
         dev.off();
@@ -165,7 +170,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     }
 
     # Saving PC vs. covariates association
-    if(NCOL(param$covariates) > 1){
+    if( NCOL(param$covariates) > 1 ){
         .log(ld, "%s, Saving PC vs. covariates associations", date());
         testcov = .testCovariates(
                         covariates1 = param$covariates[-1],
@@ -243,6 +248,8 @@ ramwas4PCA = function( param ){
                                   rng[-1]-1,
                                   seq_len(nthreads));
                 rangeset = mat2cols(rangeset);
+                
+                logfun = .logErrors(ld, .ramwas3coverageJob);
 
                 if(param$usefilelock) param$lockfile2 = tempfile();
                 # library(parallel);
@@ -254,10 +261,11 @@ ramwas4PCA = function( param ){
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
-                                fun = .ramwas4PCAjob,
                                 param = param,
                                 cvrtqr = mwascvrtqr,
                                 rowsubset = rowsubset);
+                                fun = logfun,
+                .showErrors(covlist);
                 covmat = Reduce(f = `+`, x = covlist);
                 tmp = sys.on.exit();
                 eval(tmp);
@@ -270,6 +278,8 @@ ramwas4PCA = function( param ){
                                          param = param,
                                          cvrtqr = mwascvrtqr,
                                          rowsubset = rowsubset);
+                if(is.character(covmat))
+                    stop(covmat);
             }
             
             .log(ld, "%s, Done calculating covariance matrix", date());
