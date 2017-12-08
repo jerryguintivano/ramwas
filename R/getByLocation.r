@@ -75,7 +75,7 @@ getLocations = function(x){
     }   
     chrnames = readLines(paste0(dircov,"/CpG_chromosome_names.txt"));
     locmat = fm.load(paste0(dircov,"/CpG_locations"));
-    chr = locmat[,1];
+    chr = as.integer(locmat[,1]);
     levels(chr) = chrnames;
     class(chr) = "factor";
     locations = data.frame(chr = chr, 
