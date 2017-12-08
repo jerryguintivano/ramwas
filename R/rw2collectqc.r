@@ -298,23 +298,28 @@ ramwas2collectqc = function( param ){
         {
             textT = sapply(bigqc, .qcTextLineT)
             textR = sapply(bigqc, .qcTextLineR)
-            writeLines(con = paste0(dirloc, "/Summary_QC.txt"),
-                       text = c(.qcTextHeaderT, textT));
-            writeLines(con = paste0(dirloc, "/Summary_QC_R.txt"),
-                       text = c(.qcTextHeaderR, textR));
+            writeLines(
+                    con = paste0(dirloc, "/Summary_QC.txt"),
+                    text = c(.qcTextHeaderT, textT));
+            writeLines(
+                    con = paste0(dirloc, "/Summary_QC_R.txt"),
+                    text = c(.qcTextHeaderR, textR));
             rm(textT, textR);
         } # text summary
 
         histqc = function(qcfun, plottitle, filename){
             vec = unlist(lapply(bigqc, qcfun));
             vec = vec[vec<1e6];
-            pdf(paste0(dirloc,"/Fig_hist_",filename,".pdf"));
-            hist(vec,
-                 breaks = 3*round(sqrt(length(vec))),
-                 main = plottitle,
-                 col = "lightblue",
-                 xlab = "value",
-                 yaxs = "i")
+            if(length(vec) == 0)
+                return();
+            pdf(paste0(dirloc, "/Fig_hist_", filename, ".pdf"));
+            hist(
+                x = vec,
+                breaks = 3*round(sqrt(length(vec))),
+                main = plottitle,
+                col = "lightblue",
+                xlab = "value",
+                yaxs = "i")
             dev.off()
         }
 
@@ -330,35 +335,45 @@ ramwas2collectqc = function( param ){
             dev.off();
         }
 
-        figfun(qcname = "hist.score1",
-               plotname = "score");
-        figfun(qcname = "bf.hist.score1",
-               plotname = "score_before_filter");
-        figfun(qcname = "hist.edit.dist1",
-               plotname = "edit_distance");
-        figfun(qcname = "bf.hist.edit.dist1",
-               plotname = "edit_distance_before_filter");
-        figfun(qcname = "hist.length.matched",
-               plotname = "matched_length");
-        figfun(qcname = "bf.hist.length.matched",
-               plotname = "matched_length_before_filter");
-        figfun(qcname = "hist.isolated.dist1",
-               plotname = "isolated_distance");
-        figfun(qcname = "avg.coverage.by.density",
-               plotname = "coverage_by_density");
+        figfun(
+            qcname = "hist.score1",
+            plotname = "score");
+        figfun(
+            qcname = "bf.hist.score1",
+            plotname = "score_before_filter");
+        figfun(
+            qcname = "hist.edit.dist1",
+            plotname = "edit_distance");
+        figfun(
+            qcname = "bf.hist.edit.dist1",
+            plotname = "edit_distance_before_filter");
+        figfun(
+            qcname = "hist.length.matched",
+            plotname = "matched_length");
+        figfun(
+            qcname = "bf.hist.length.matched",
+            plotname = "matched_length_before_filter");
+        figfun(
+            qcname = "hist.isolated.dist1",
+            plotname = "isolated_distance");
+        figfun(
+            qcname = "avg.coverage.by.density",
+            plotname = "coverage_by_density");
         # bigqc[[1]]$cnt.nonCpG.reads
         if(length(bigqc) >= 10){
             histqc(
                 qcfun = function(x){x$avg.cpg.coverage /
                         max(x$avg.noncpg.coverage,.Machine$double.eps)},
-                plottitle = paste0("Enrichment lower bound\n",
-                                   "(Avg CpG / non-CpG score)"),
+                plottitle = paste0(
+                                "Enrichment lower bound\n",
+                                "(Avg CpG / non-CpG score)"),
                 filename = "enrichment")
             histqc(
                 qcfun = function(x){x$avg.noncpg.coverage /
                         x$avg.cpg.coverage * 100},
-                plottitle = paste0("Background noise level\n",
-                                   "(Avg non-CpG / CpG score, %)"),
+                plottitle = paste0(
+                                "Background noise level\n",
+                                "(Avg non-CpG / CpG score, %)"),
                 filename = "noise")
             histqc(qcfun = function(x){x$reads.recorded.no.repeats/1e6},
                 plottitle = "Number of reads after filters, millions",
@@ -367,8 +382,9 @@ ramwas2collectqc = function( param ){
                 plottitle = "Average edit distance of aligned reads",
                 filename = "edit_dist")
             histqc(qcfun = function(x){qcmean(x$avg.coverage.by.density)},
-                plottitle = paste0("CpG density at peak sensitivity (SQRT)\n",
-                                   "(a value per BAM / sample)"),
+                plottitle = paste0(
+                                "CpG density at peak sensitivity (SQRT)\n",
+                                "(a value per BAM / sample)"),
                 filename = "peak")
             histqc(qcfun = function(x){qcmean(x$cnt.nonCpG.reads)},
                 plottitle = "Fraction of reads not covering any CpGs",
