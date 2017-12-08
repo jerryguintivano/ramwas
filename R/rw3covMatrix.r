@@ -375,7 +375,6 @@ ramwas3normalizedCoverage = function( param ){
     ### Fill in the raw coverage files
     {
         # library(parallel)
-        logfun = .logErrors(ld, .ramwas3coverageJob);
         nthreads = min(param$cputhreads, nsamples);
         .log(ld, "%s, Calculating raw coverage", date());
         if(param$usefilelock) param$lockfile = tempfile();
@@ -385,6 +384,7 @@ ramwas3normalizedCoverage = function( param ){
                 stopCluster(cl);
                 .file.remove(param$lockfile);
             });
+            logfun = .logErrors(ld, .ramwas3coverageJob);
             z = clusterApplyLB(
                         cl = cl,
                         x = seq_len(nsamples),
@@ -399,7 +399,7 @@ ramwas3normalizedCoverage = function( param ){
             z = vector('list', nsamples);
             names(z) = names(param$bam2sample);
             for(i in seq_along(param$bam2sample)){ # i=1
-                z[[i]] = logfun(  
+                z[[i]] = .ramwas3coverageJob(  
                         colnum = i,
                         param = param,
                         nslices = nslices);
