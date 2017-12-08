@@ -6,7 +6,6 @@ groupSample = function(len, size, gr){
     return(rez);
 }
 
-
 # Create artificial data set for vignettes and examples
 ramwas0createArtificialData = function(
             dir,
@@ -28,8 +27,8 @@ ramwas0createArtificialData = function(
         # ncpgs = 500e3
         chrlen = ncpgs*50;
         probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
-        locs = which(probs > runif(chrlen)) + 1e3L;
-        locs[1] = 0L; # for non-CpG count
+        locs = which(probs > runif(chrlen)) + 10e3L;
+        locs[1] = 100L; # for non-CpG count
         rm(probs);
 
         cpgset = list( chr1 = locs );
@@ -86,14 +85,15 @@ ramwas0createArtificialData = function(
     # Covariate file, bam list
     {
         cvrt = data.frame(
-            samples = sprintf("BAM%03d",1:nsamples),
+            samples = sprintf("BAM%03d", seq_len(nsamples)),
             age = age,
             sex = sex,
             stringsAsFactors = FALSE);
-        write.table(file = paste0(dir,"/covariates.txt"),
-                    x = cvrt,
-                    sep = "\t",
-                    row.names = FALSE);
+        write.table(
+                file = paste0(dir,"/covariates.txt"),
+                x = cvrt,
+                sep = "\t",
+                row.names = FALSE);
         if( verbose )
             message('Simulated covariates saved in: ',
                 paste0(dir,"/covariates.txt"));
@@ -179,8 +179,7 @@ ramwas0createArtificialData = function(
                 # 9 TLEN Int [-231+1,231-1] observed Template LENgth
                 # 10 SEQ String \*|[A-Za-z=.]+ segment SEQuence
                 # 11 QUAL String [!-~]+ ASCII of Phred-scaled base QUALity+33
-                75-readlen));
-        # flush(fid)
+                75 - readlen));
         close(fid);
         rm(readdir, readpos);
 
