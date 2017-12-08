@@ -8,12 +8,13 @@ groupSample = function(len, size, gr){
 
 
 # Create artificial data set for vignettes and examples
-ramwas0createArtificialData = function(dir,
-                                       nsamples = 20,
-                                       nreads = 1e6,
-                                       ncpgs = 500e3,
-                                       randseed = 18090212,
-                                       verbose = TRUE){
+ramwas0createArtificialData = function(
+            dir,
+            nsamples = 20,
+            nreads = 1e6,
+            ncpgs = 500e3,
+            randseed = 18090212,
+            verbose = TRUE){
 
     # dir="D:/temp";nsamples=20;nreads=1e6;
     # ncpgs=500e3;randseed=18090212;verbose=TRUE
@@ -27,14 +28,15 @@ ramwas0createArtificialData = function(dir,
         # ncpgs = 500e3
         chrlen = ncpgs*50;
         probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
-        locs = which(probs > runif(chrlen)) + 1e6L;
-        locs[1] = 800e3; # for non-CpG count
+        locs = which(probs > runif(chrlen)) + 1e3L;
+        locs[1] = 0L; # for non-CpG count
         rm(probs);
 
         cpgset = list( chr1 = locs );
-        saveRDS(object = cpgset,
-                file = paste0(dir, "/Simulated_chromosome.rds"),
-                compress = "xz");
+        saveRDS(
+            object = cpgset,
+            file = paste0(dir, "/Simulated_chromosome.rds"),
+            compress = "xz");
         if( verbose )
             message('Simulated CpG locations saved in: ',
                 paste0(dir, "/Simulated_chromosome.rds"));
@@ -63,7 +65,7 @@ ramwas0createArtificialData = function(dir,
 
     # Age covariate and effects
     {
-        age = sample(20:80, size = nsamples, replace = TRUE)
+        age = sample(x = 20:80, size = nsamples, replace = TRUE)
         cpgageset = groupSample( len = length(locsgood),
                                  size = length(locsgood)/100,
                                  gr = 6);
@@ -96,8 +98,9 @@ ramwas0createArtificialData = function(dir,
             message('Simulated covariates saved in: ',
                 paste0(dir,"/covariates.txt"));
 
-        writeLines(con = paste0(dir,"/bam_list.txt"),
-                   text = cvrt$samples);
+        writeLines(
+            con = paste0(dir,"/bam_list.txt"),
+            text = cvrt$samples);
         if( verbose )
             message('List of BAM files saved in: ',
                 paste0(dir,"/bam_list.txt"));
@@ -121,18 +124,31 @@ ramwas0createArtificialData = function(dir,
         cpgprob[cpgsex2] = 1 - sex[bam];
 
         # Pick CpG locations by the probabilities above
-        cpglocs = sample(locsgood, prob = cpgprob,
-                              size = nreads, replace = TRUE);
+        cpglocs = sample(
+                        x = locsgood, 
+                        prob = cpgprob,
+                        size = nreads, 
+                        replace = TRUE);
 
         # Add non-CpG reads
-        cpglocs[1:(length(cpglocs)/100)] = 900e3 + (1:(length(cpglocs)/100));
+        cpglocs[1:(length(cpglocs)/100)] = seq_len(length(cpglocs)/100);
 
         # read strand (0 - forward, 1 - reverse)
-        readdir = sample(c(0L,1L), size = nreads, replace = TRUE);
-        readlen = sample(75:70, size = nreads, prob = (6:1)^4, replace = TRUE);
+        readdir = sample(
+                        x = c(0L,1L), 
+                        size = nreads, 
+                        replace = TRUE);
+        readlen = sample(
+                        x = 75:70, 
+                        size = nreads, 
+                        prob = (6:1)^4, 
+                        replace = TRUE);
         # distance to the CpG of interest
-        roffset = sample(seq_along(fragdistr)-1L, prob = fragdistr,
-                              size = nreads, replace = TRUE);
+        roffset = sample(
+                        x = seq_along(fragdistr)-1L, 
+                        prob = fragdistr,
+                        size = nreads, 
+                        replace = TRUE);
         # read start (and end) position, as reads are 1bp long
         readpos = cpglocs - (1L - 2L*readdir)*roffset - readlen * readdir;
         rm(roffset, cpglocs);
@@ -146,9 +162,10 @@ ramwas0createArtificialData = function(dir,
         # Write sam file
         filesam = sprintf("%s/bams/SAM%03d.sam", dir, bam);
         fid = file(description = filesam, open = "wt");
-        writeLines(con = fid,
-                   sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d",
-                           chrlen+2e6));
+        writeLines(
+            con = fid,
+            sprintf("@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:chr1\tLN:%d", 
+                chrlen+2e6));
         writeLines(con = fid,
             sprintf("%06d\t%d\tchr1\t%d\t%d\t%dM\t*\t0\t0\t*\t*\tNM:i:%d",
                 1:nreads, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
@@ -162,15 +179,16 @@ ramwas0createArtificialData = function(dir,
                 # 9 TLEN Int [-231+1,231-1] observed Template LENgth
                 # 10 SEQ String \*|[A-Za-z=.]+ segment SEQuence
                 # 11 QUAL String [!-~]+ ASCII of Phred-scaled base QUALity+33
-                75-readlen
-            ));
+                75-readlen));
         # flush(fid)
         close(fid);
         rm(readdir, readpos);
 
-        asBam(file = filesam,
-              destination = sprintf("%s/bams/BAM%03d", dir, bam),
-              overwrite=TRUE, indexDestination=FALSE);
+        asBam(
+            file = filesam,
+            destination = sprintf("%s/bams/BAM%03d", dir, bam),
+            overwrite = TRUE,
+            indexDestination = FALSE);
         file.remove(filesam);
     }
     return(invisible(NULL));
