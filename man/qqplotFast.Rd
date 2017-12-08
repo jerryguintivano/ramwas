@@ -1,30 +1,93 @@
 \name{qqPlotFast}
 \alias{qqPlotFast}
+\alias{qqPlotPrepare}
 \title{
     Fast QQ-plot for Large Number of P-values
 }
 \description{
-    Plots a QQ-plot with a confidence band and
+    Function \code{qqPlotFast} creates a QQ-plot
+    with a confidence band and
     an estimate of inflation factor lambda.
-    Works quickly even for tens of millions of p-values.
+    It optimized to work quickly even for tens of millions of p-values.
 }
 \usage{
-qqPlotFast(pvalues, ntests = NULL, ci.level = 0.05)
+qqPlotPrepare(
+        pvalues,
+        ntests = NULL,
+        ismlog10 = FALSE)
+qqPlotFast(
+        x, 
+        ntests = NULL, 
+        ismlog10 = FALSE, 
+        ci.level = 0.05, 
+        ylim = NULL, 
+        newplot = TRUE, 
+        col = "#D94D4C", 
+        cex = 0.5, 
+        yaxmax = NULL, 
+        lwd = 3, 
+        axistep = 2, 
+        col.band = "#ECA538")
 }
 \arguments{
     \item{pvalues}{
-        Vector of p-values, preferably sorted.
+        Vector of p-values. 
+        As is (if \code{ismlog10 = FALSE}) or minus log10 transformed
+        (if \code{ismlog10 = TRUE}).
     }
     \item{ntests}{
         If only significant p-values are provided,
-        the total number of tests performed.
-        By default equal to the length of \code{pvalues}.
+        the total number of tests performed.\cr
+        By default \code{ntests} is  equal to the length of \code{pvalues}.
+    }
+    \item{ismlog10}{
+        Specifies whether the provides p-values (\code{pvalues} parameter)
+        are minus log10 transformed (\code{- log10(pv)});
+    }
+    \item{x}{
+        Either a vector of p-values, as in \code{qqPlotPrepare},
+        or the object returned by \code{qqPlotPrepare}.
     }
     \item{ci.level}{
         Significance level of the confidence band.
+        Set to \code{NULL} avoid plotting the confidence band.
+    }
+    \item{ylim}{
+        Numeric vectors of length 2, giving the y coordinate range.
+        Exactly as in \link[graphics:plot.window]{Plotting Parameters}.
+    }
+    \item{newplot}{
+        If \code{TRUE}, the function creates a new plot window.
+    }
+    \item{col}{
+        The QQ-plot curve color.
+    }
+    \item{col.band}{
+        Confidence band curve color.
+    }
+    \item{cex}{
+        The size of QQ-plot points.
+        As in \link[graphics:par]{Graphics Parameters}.
+    }
+    \item{lwd}{
+        The line width.\cr
+        As in \link[graphics:par]{Graphics Parameters}.
+    }
+    \item{axistep}{
+        Distance between axis label ticks for both axis.
+    }
+    \item{yaxmax}{
+        Maximum reach of the y axis.
     }
 }
 \details{
+    The function \code{qqPlotFast} creates a QQ-plot. \cr
+    The function \code{qqPlotPrepare} extracts the necessary information
+    from a vector of p-values sufficient for creating QQ-plot. \cr
+    The resulting object is many times smaller than the vector of p-values.
+    
+}
+\note{
     The plot has no title. To add a title use \code{\link[graphics]{title}}.
 }
 \value{
@@ -48,4 +111,20 @@ pv = runif(n)
 
 # QQ-plot should be nearly diagonal
 qqPlotFast(pv)
+
+# Size of p-values before extraction of QQ-plot info
+object.size(pv)
+
+# Extract the QQ-plot info
+qq = qqPlotPrepare(pv)
+
+# Size of the QQ-plot info object
+object.size(qq)
+
+# QQ-plot is the same
+qqPlotFast(qq)
+
+# QQ-plot with plotting parameters
+qqPlotFast(qq, ylim = c(0,10), yaxmax = 9, axistep = 3, lwd = 3, cex = 1)
+
 }
