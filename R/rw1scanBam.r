@@ -241,6 +241,7 @@ pipelineProcessBam = function(bamname, param){
     rdsqcfile = paste0( param$dirrqc,  "/", basename(bamname), ".qc.rds" );
 
     savebam = TRUE;
+    rbam = NULL;
     if( file.exists( rdsbmfile ) ){
         if( param$recalculate.QCs ){
             ### Precache the input rds file
@@ -248,11 +249,17 @@ pipelineProcessBam = function(bamname, param){
             rbam = readRDS(rdsbmfile);
             savebam = FALSE;
         } else {
-            return(paste0("Rbam rds file already exists: ",rdsqcfile));
+            if( !file.exists( bamfullname ) )
+                return(paste0("Rbam rds file already exists",
+                            " (no bam): ", rdsqcfile));
+            if( file.mtime(rdsbmfile) > file.mtime(bamfullname) )
+                return(paste0("Rbam rds file already exists",
+                            " (newer than bam): ", rdsqcfile));  
         }
-    } else {
+    }
+    if( is.null(rbam) ){
         if( !file.exists( bamfullname ) )
-            return(paste0("Bam file does not exist: ",bamfullname));
+            return(paste0("Bam file does not exist: ", bamfullname));
         rbam = bam.scanBamFile(
                     bamfilename = bamfullname,
                     scoretag = param$scoretag,
@@ -266,19 +273,23 @@ pipelineProcessBam = function(bamname, param){
     if( !is.null(param$filecpgset) ){
         cpgset = cachedRDSload(param$filecpgset);
         noncpgset = cachedRDSload(param$filenoncpgset);
-        isocpgset = isocpgSitesFromCpGset(cpgset = cpgset,
-                                          distance = param$maxfragmentsize);
-        rbam3 = bam.hist.isolated.distances(rbam = rbam2,
-                                            isocpgset = isocpgset,
-                                            distance = param$maxfragmentsize);
-        rbam4 = bam.coverage.by.density(rbam = rbam3,
-                                        cpgset = cpgset,
-                                        noncpgset = noncpgset,
-                                        minfragmentsize = param$minfragmentsize,
-                                        maxfragmentsize = param$maxfragmentsize)
-        rbam5 = bam.count.nonCpG.reads(rbam = rbam4,
-                                       cpgset = cpgset,
-                                       distance = param$maxfragmentsize);
+        isocpgset = isocpgSitesFromCpGset(
+                        cpgset = cpgset,
+                        distance = param$maxfragmentsize);
+        rbam3 = bam.hist.isolated.distances(
+                        rbam = rbam2,
+                        isocpgset = isocpgset,
+                        distance = param$maxfragmentsize);
+        rbam4 = bam.coverage.by.density(
+                        rbam = rbam3,
+                        cpgset = cpgset,
+                        noncpgset = noncpgset,
+                        minfragmentsize = param$minfragmentsize,
+                        maxfragmentsize = param$maxfragmentsize)
+        rbam5 = bam.count.nonCpG.reads(
+                        rbam = rbam4,
+                        cpgset = cpgset,
+                        distance = param$maxfragmentsize);
 
         ### QC plots
         pipelineSaveQCplots(param, rbam5, basename(bamname));
@@ -293,8 +304,8 @@ pipelineProcessBam = function(bamname, param){
     if(savebam)
         saveRDS( object = rbam5, file = rdsbmfile, compress = "xz");
     rbam6 = rbam5;
-    rbam6$startsfwd=NULL;
-    rbam6$startsrev=NULL;
+    rbam6$startsfwd = NULL;
+    rbam6$startsrev = NULL;
     saveRDS( object = rbam6, file = rdsqcfile, compress = "xz");
 
     return(NULL);
@@ -305,12 +316,12 @@ pipelineProcessBam = function(bamname, param){
     ld = param$dirfilter;
     
     .log(ld, "%s, Process %06d, Starting BAM: %s",
-            date(), Sys.getpid(), bamname);
+        date(), Sys.getpid(), bamname);
 
     rez = pipelineProcessBam(bamname = bamname, param = param);
     
     .log(ld, "%s, Process %06d, Finished BAM: %s",
-            date(), Sys.getpid(), bamname);
+        date(), Sys.getpid(), bamname);
     return(rez);
 }
 
@@ -322,12 +333,12 @@ ramwas1scanBams = function( param ){
     # Parameter checks
     if( is.null(param$bamnames) )
         stop("BAM names must be specified. ",
-             "See \"filebamlist\" or \"bamnames\" parameter.");
+            "See \"filebamlist\" or \"bamnames\" parameter.");
 
     if( !dir.exists(param$dirbam) )
         stop("Directory with BAM files not found: ",
-             param$dirbam, "\n",
-             "See \"dirbam\" parameter");
+            param$dirbam, "\n",
+            "See \"dirbam\" parameter");
     
     for( nm in param$bamname ){ # nm = param$bamname[1]
         fn = makefullpath(param$dirbam, paste0(nm, ".bam"));
@@ -360,7 +371,9 @@ ramwas1scanBams = function( param ){
         z = vector('list', length(param$bamnames));
         names(z) = param$bamnames;
         for(i in seq_along(param$bamnames)){ # i=1
-            z[[i]] = logfun(bamname = param$bamnames[i], param = param);
+            z[[i]] = logfun(
+                        bamname = param$bamnames[i],
+                        param = param);
         }
     }
     .showErrors(z)
