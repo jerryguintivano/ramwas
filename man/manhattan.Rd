@@ -1,6 +1,6 @@
 \name{manhattan}
 \alias{manPlotPrepare}
-\alias{qqPlotPrepare}
+\alias{manPlotFast}
 \title{
     Fast Manhattan plot for Large Number of P-values
 }
@@ -99,7 +99,7 @@ pos = rep(1:1e6, 9);
 pv = runif(9e6)^1.1;
 
 # Extract the Manhattan plot info
-man = manPlotPrepare(chr, pos, pv, chrmargins = 1000);
+man = manPlotPrepare(pv, chr, pos, chrmargins = 1000);
 
 # Create Manhattan plot
 manPlotFast(man)
