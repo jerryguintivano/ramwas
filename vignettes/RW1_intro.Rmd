@@ -85,10 +85,11 @@ suppressPackageStartupMessages(library(ramwas))
 ```{r generateData, warning=FALSE}
 library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
-ramwas0createArtificialData(dir = dr,
-                            verbose = FALSE,
-                            nreads = 100e3,
-                            ncpgs = 25e3)
+ramwas0createArtificialData(
+            dir = dr,
+            verbose = FALSE,
+            nreads = 100e3,
+            ncpgs = 25e3)
 cat("Project directory:", dr)
 ```
 **Note.** The project directory `dr` can be set to
@@ -129,7 +130,7 @@ param = ramwasParameters(
     bimart = "ENSEMBL_MART_ENSEMBL",
     bidataset = "hsapiens_gene_ensembl",
     biattributes = c("hgnc_symbol","entrezgene","strand"),
-    bifilters = list(with_hgnc_trans_name=TRUE),
+    bifilters = list(with_hgnc_trans_name = TRUE),
     biflank = 0,
     cvnfolds = 5,
     mmalpha = 0,
