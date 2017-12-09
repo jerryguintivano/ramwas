@@ -46,7 +46,8 @@ VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, pander, BiocStyle, 
         BSgenome.Hsapiens.UCSC.hg19,
         SNPlocs.Hsapiens.dbSNP144.GRCh37,
-        BSgenome.Ecoli.NCBI.20080805
+        BSgenome.Ecoli.NCBI.20080805,
+        RevoUtilsMath
 Imports: graphics, stats, utils, digest, 
         glmnet, KernSmooth, grDevices,
         GenomicAlignments, Rsamtools, parallel,

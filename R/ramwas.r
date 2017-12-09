@@ -225,7 +225,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 .set1MLKthread = function(){
     if("package:RevoUtilsMath" %in% search())
         if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
-            setMKLthreads(1);
+            RevoUtilsMath::setMKLthreads(1);
 }
 
 # The logging function
