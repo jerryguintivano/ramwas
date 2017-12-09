@@ -85,13 +85,14 @@ qqPlotFast(
     The function \code{qqPlotPrepare} extracts the necessary information
     from a vector of p-values sufficient for creating QQ-plot. \cr
     The resulting object is many times smaller than the vector of p-values.
-    
 }
 \note{
     The plot has no title. To add a title use \code{\link[graphics]{title}}.
 }
 \value{
-    This function plots a QQ-plot and returns nothing.
+    The function \code{qqPlotPrepare} returns an object with
+    the necessary information from a vector of p-values
+    sufficient for creating QQ-plot.
 }
 \author{
     Andrey A Shabalin \email{ashabalin@vcu.edu}
@@ -111,6 +112,7 @@ pv = runif(n)
 
 # QQ-plot should be nearly diagonal
 qqPlotFast(pv)
+title("QQ-plot")
 
 # Size of p-values before extraction of QQ-plot info
 object.size(pv)
@@ -121,10 +123,9 @@ qq = qqPlotPrepare(pv)
 # Size of the QQ-plot info object
 object.size(qq)
 
-# QQ-plot is the same
+# Create QQ-plot, it is the same
 qqPlotFast(qq)
 
-# QQ-plot with plotting parameters
+# Create QQ-plot with plotting parameters
 qqPlotFast(qq, ylim = c(0,10), yaxmax = 9, axistep = 3, lwd = 3, cex = 1)
-
 }
