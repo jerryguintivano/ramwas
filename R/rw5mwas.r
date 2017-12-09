@@ -318,7 +318,8 @@ ramwas5MWAS = function( param ){
                 .file.remove(param$lockfile2);
             });
             clusterExport(cl, "testPhenotype");
-            logfun = .logErrors(ld, .ramwas3coverageJob);
+            # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
+            logfun = .logErrors(ld, .ramwas5MWASjob);
             z = clusterApplyLB(
                         cl = cl,
                         x = rangeset,

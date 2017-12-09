@@ -214,7 +214,7 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
-                logfun = .logErrors(ld, .ramwas3coverageJob);
+                logfun = .logErrors(ld, .ramwas4PCAjob);
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,

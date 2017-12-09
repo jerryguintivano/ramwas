@@ -65,7 +65,7 @@ ramwas7ArunMWASes = function(param){
     # Get data access
     data = new("rwDataClass");
     data$open(param, getPCs = FALSE);
-
+    data$close();
     # data$samplenames
     
     exclude0 = is.na(outcome);
