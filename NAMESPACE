@@ -26,6 +26,9 @@ export(
     processCommandLine,
     qcmean,
     qqPlotFast,
+    qqPlotPrepare,
+    manPlotPrepare,
+    manPlotFast,
     plotROC,
     rowSumsSq,
     colSumsSq,
@@ -56,6 +59,8 @@ importFrom(stats,
 importFrom(utils,
     flush.console, head, tail,
     tail.matrix, read.table, write.table)
+importFrom(grDevices, 
+    palette)
 importFrom(GenomicAlignments,
     cigarWidthAlongQuerySpace, cigarWidthAlongReferenceSpace)
 importFrom(Rsamtools,
