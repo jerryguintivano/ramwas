@@ -566,5 +566,5 @@ ramwas3normalizedCoverage = function( param ){
         .log(ld, "%s, Done Normalizing coverage matrix.", date());
     }
         
-    .log(ld, "%s,  Done ramwas3normalizedCoverage()", date());
+    .log(ld, "%s, Done ramwas3normalizedCoverage()", date());
 }

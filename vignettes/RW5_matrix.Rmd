@@ -7,6 +7,8 @@ output:
 vignette: >
   %\VignetteIndexEntry{5. Analyzing data from other sources}
   %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -197,9 +199,10 @@ the table shows R^2^ instead of correlations.
 ```{r topCorNULL}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-tblcr = read.table(paste0(pfull$dirpca, "/PC_vs_covs_corr.txt"),
-                 header = TRUE,
-                 sep = "\t")
+tblcr = read.table(
+            file = paste0(pfull$dirpca, "/PC_vs_covs_corr.txt"),
+            header = TRUE,
+            sep = "\t")
 pander(head(tblcr, 5))
 ```
 
@@ -208,9 +211,10 @@ show that the top two PCs are correlated with
 sex and age while a number of other PCs are affected by sample batch effects.
 ```{r topPvNULL}
 pfull = parameterPreprocess(param)
-tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
-                 header = TRUE,
-                 sep = "\t")
+tblpv = read.table(
+            file = paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
+            header = TRUE,
+            sep = "\t")
 pander(head(tblpv, 5))
 ```
 
@@ -232,9 +236,10 @@ The p-values for association between PCs and covariates changed slightly:
 ```{r topPvBatch}
 # Get the directory with PCA results
 pfull = parameterPreprocess(param)
-tblpv = read.table(paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
-                 header = TRUE,
-                 sep = "\t")
+tblpv = read.table(
+            file = paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
+            header = TRUE,
+            sep = "\t")
 pander(head(tblpv, 5))
 ```
 Note that the PCs are now orthogonal to the batch effects and thus
@@ -273,9 +278,9 @@ The top finding saved in the text file are:
 # Get the directory with testing results
 pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirmwas,"/Top_tests.txt"),
-                header = TRUE,
-                sep = "\t")
+            file = paste0(pfull$dirmwas,"/Top_tests.txt"),
+            header = TRUE,
+            sep = "\t")
 pander(head(toptbl, 5))
 ```
 
