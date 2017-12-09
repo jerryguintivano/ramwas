@@ -50,6 +50,7 @@ qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
     return(qq);
 }
 
+# Create QQ-plot from p-values or prepared summary
 qqPlotFast = function(
             x, 
             ntests = NULL, 
@@ -144,6 +145,7 @@ qqPlotFast = function(
     return(invisible(qq));
 }
 
+# Prepare the compact summary of p-values for Manhattan plot
 manPlotPrepare = function(
             pvalues,
             chr,
@@ -214,6 +216,7 @@ manPlotPrepare = function(
     return(man);
 }
 
+# Create Manhattan plot from prepared summary
 manPlotFast = function(
             man,
             ylim = NULL,
@@ -261,5 +264,3 @@ manPlotFast = function(
     points(man$x, man$y, pch = 20, col = ((man$colindex-1L) %% length(colorSet)) + 1L, cex = cex)
     palette(oldPal);
 }
-
-
