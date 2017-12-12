@@ -354,12 +354,43 @@ ramwas5MWAS = function( param ){
 
     ### QQ-plot
     {
-        message("Creating QQ-plot");
+        .log(ld, "%s, Creating QQ-plot", date());
         pdf(paste0(param$dirmwas, "/QQ_plot.pdf"), 7, 7);
-        qqPlotFast(pvalues);
+        qq = qqPlotPrepare(pvalues);
+        qqPlotFast(qq, lwd = 1);
         title(param$qqplottitle);
         dev.off();
+        saveRDS(file = paste0(param$dirmwas,"/z_QQinfo.rds"), object = qq);
     }
-    ramwas5saveTopFindings(param);
+    
+    ### Creating QQ-plot and Manhattan plot pair
+    locs = getLocations(param);
+    if(!is.null(locs)){
+        .log(ld, "%s, Creating QQ-plot and Manhattan plot pair", date());
+        
+        png(
+            filename = paste0(param$dirmwas, '/ManPlot.png'), 
+            width = 420*9*1.5, 
+            height = 420*3.8*1.5, 
+            pointsize = 16*4);
+        
+        layout(matrix(c(1,2), 1, 2, byrow = TRUE), widths=c(1,2.2));
+
+        qqPlotFast(qq, lwd = 7);
+        
+        man = manPlotPrepare(
+                pvalues = pvalues,
+                chr = locs$chr, 
+                pos = (locs$start + locs$end) %/% 2L);
+        
+        manPlotFast(man, lwd = 7);
+        
+        dev.off();
+        saveRDS(file = paste0(param$dirmwas,"/z_MANinfo.rds"), object = man);
+    }
+    
+    if(!is.null(locs))
+        ramwas5saveTopFindings(param);
+
     return(invisible(NULL));
 }
