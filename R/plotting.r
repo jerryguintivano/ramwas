@@ -34,7 +34,6 @@ qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
         keep = which(keep);
         ypvs = ypvs[keep];
         xpvs = xpvs[keep];
-        # 		rm(keep)
     } else {
         keep = seq_along(ypvs)
     }
@@ -63,7 +62,13 @@ qqPlotFast = function(
             yaxmax = NULL, 
             lwd = 3, 
             axistep = 2, 
-            col.band = "#ECA538"){
+            col.band = "#ECA538",
+            makelegend = TRUE,
+            xlab = expression(
+                paste("\u2013", " log"[10]*"(", italic("P"), "), null")),
+            ylab = expression(
+                paste("\u2013", " log"[10]*"(", italic("P"), "), observed"))
+        ){
     
     # Get compact summary of p-values for QQ-plot
     if( class(x) == "qqPlotInfo" ){
@@ -76,7 +81,7 @@ qqPlotFast = function(
     mx = head(qq$xpvs,1) * 1.05;
     if( is.null(ylim) ) {
         my = max(mx*1.15,head(qq$ypvs,1)) * 1.05;
-        ylim = c(0,my);
+        ylim = c(0, my);
     } else {
         my = ylim[2];
     }
@@ -91,10 +96,8 @@ qqPlotFast = function(
             xlim = c(0, mx), 
             xaxs = "i", 
             yaxs = "i", 
-            xlab = expression(
-                paste("\u2013", " log"[10]*"(", italic("P"), "), null")),
-            ylab = expression(
-                paste("\u2013", " log"[10]*"(", italic("P"), "), observed")),
+            xlab = xlab,
+            ylab = ylab,
             axes = FALSE);
         axis(1, seq(0, mx + 2, axistep), lwd = lwd);
         axis(2, seq(0, yaxmax, axistep), lwd = lwd);
@@ -114,29 +117,30 @@ qqPlotFast = function(
             lines( qq$xpvs, -log10(quantiles[,2]), col = col.band, lwd = lwd);
         }
     }
-    
-    if( !is.null(ci.level) ){
-        legend(
-            "topleft", 
-            legend = c(
-                    expression(paste(italic("P"), " value")),
-                    sprintf("%.0f%% CI",100-ci.level*100)),
-            lwd = c(0, lwd), 
-            pch = c(19, NA_integer_), 
-            lty = c(0, 1), 
-            col = c(col, col.band),
-            box.col = "transparent",
-            bg = "transparent");
-    } else {
-        legend(
-            "topleft", 
-            legend = expression(paste(italic("P"), " value")),
-            lwd = 0, 
-            pch = 19, 
-            lty = 0, 
-            col = col,
-            box.col = "transparent",
-            bg = "transparent");
+    if(makelegend){
+        if( !is.null(ci.level) ){
+            legend(
+                "topleft", 
+                legend = c(
+                        expression(paste(italic("P"), " value")),
+                        sprintf("%.0f%% CI",100-ci.level*100)),
+                lwd = c(0, lwd), 
+                pch = c(19, NA_integer_), 
+                lty = c(0, 1), 
+                col = c(col, col.band),
+                box.col = "transparent",
+                bg = "transparent");
+        } else {
+            legend(
+                "topleft", 
+                legend = expression(paste(italic("P"), " value")),
+                lwd = 0, 
+                pch = 19, 
+                lty = 0, 
+                col = col,
+                box.col = "transparent",
+                bg = "transparent");
+        }
     }
     if( !is.null(qq$lambda) ){
         lastr = sprintf("%.3f", qq$lambda);

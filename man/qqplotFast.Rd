@@ -27,7 +27,12 @@ qqPlotFast(
         yaxmax = NULL, 
         lwd = 3, 
         axistep = 2, 
-        col.band = "#ECA538")
+        col.band = "#ECA538",
+        makelegend = TRUE,
+        xlab = expression(
+            paste("\u2013", " log"[10]*"(", italic("P"), "), null")),
+        ylab = expression(
+            paste("\u2013", " log"[10]*"(", italic("P"), "), observed")))
 }
 \arguments{
     \item{pvalues}{
@@ -78,6 +83,12 @@ qqPlotFast(
     }
     \item{yaxmax}{
         Maximum reach of the y axis.
+    }
+    \item{makelegend}{
+        If true, add legend to the plot.
+    }
+    \item{xlab, ylab}{
+        Axis labels. As in \link[graphics:plot]{plot function}.
     }
 }
 \details{
