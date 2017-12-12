@@ -97,17 +97,18 @@ plotPCvectors = function(e, i){
 postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     param = parameterPreprocess(param);
     ld = param$dirpca;
-     .log(ld, "%s, Start postPCAprocessing() call", date());
+    .log(ld, "%s, Start postPCAprocessing() call", date());
 
     # Get data access
     data = new("rwDataClass");
     data$open(param, getPCs = FALSE)
 
     if(is.null(e))
-        e = readRDS(file = paste0(param$dirpca,"/eigen.rds"))
+        e = readRDS(file = paste0(param$dirpca, "/eigen.rds"))
 
-    nonzeroPCs = sum(   abs(e$values/e$values[1]) >
-                        length(e$values)*.Machine$double.eps );
+    nonzeroPCs = sum(   
+                    abs(e$values/e$values[1]) >
+                    length(e$values)*.Machine$double.eps );
 
     # PCA plots
     {
@@ -149,21 +150,21 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                         cvrtqr = t(data$cvrtqr));
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
-                        name=paste0("PC",seq_len(nonzeroPCs)),
+                        name = paste0("PC", seq_len(nonzeroPCs)),
                         testcov$crF,
                         check.names = FALSE),
                     sep="\t", 
                     row.names = FALSE);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"),
                     x = data.frame(
-                        name=paste0("PC",seq_len(nonzeroPCs)),
+                        name = paste0("PC", seq_len(nonzeroPCs)),
                         testcov$pv,
                         check.names = FALSE),
                     sep="\t", 
                     row.names = FALSE);
     }
     data$close();
-     .log(ld, "%s, Done postPCAprocessing() call", date());
+    .log(ld, "%s, Done postPCAprocessing() call", date());
     return(invisible(NULL));
 }
 
@@ -173,7 +174,7 @@ ramwas4PCA = function( param ){
     param = parameterPreprocess(param);
     ld = param$dirpca;
     dir.create(param$dirpca, showWarnings = FALSE, recursive = TRUE);
-     .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
+    .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
     
 
     parameterDump(dir = param$dirpca, param = param,
@@ -238,9 +239,10 @@ ramwas4PCA = function( param ){
             .log(ld, "%s, Done calculating covariance matrix", date());
 
             .log(ld, "%s, Saving covariance matrix", date());
-            saveRDS(file = paste0(param$dirpca,"/covmat.rds"),
-                    object = covmat,
-                    compress = FALSE);
+            saveRDS(
+                file = paste0(param$dirpca,"/covmat.rds"),
+                object = covmat,
+                compress = FALSE);
         } # covmat
 
         ### Eigenvalue decomposition
@@ -293,7 +295,7 @@ ramwasPCsCovariateSelection = function(param){
 
         ### Eigenvalue decomposition
         message("Performing eigenvalue decomposition");
-        e = eigen(covmat1, symmetric=TRUE);
+        e = eigen(covmat1, symmetric = TRUE);
 
         ### First PC
         testslist = vector("list", param$covselpcs);
@@ -316,7 +318,7 @@ ramwasPCsCovariateSelection = function(param){
 
         ord = sort.list(tstatsabs, decreasing = FALSE);
 
-        pvalues = lapply(testslist, function(x)abs(x[ord,3]))
+        pvalues = lapply(testslist, function(x)abs(x[ord,3]));
         names(pvalues) = paste0("PC",seq_len(param$covselpcs), "_pvalues");
 
         tests = data.frame( covariates = rownames(testslist[[1]])[ord],
@@ -325,8 +327,9 @@ ramwasPCsCovariateSelection = function(param){
         # tests = data.frame(covariates = rownames(tests), tests);
         rownames(tests) = NULL;
         cat("\n",
-            paste0("Covariates Included: \n ",
-                   paste(covset, collapse = ",")),
+            paste0(
+                "Covariates Included: \n ",
+                paste(covset, collapse = ",")),
             "\n");
         print(head(tests,15));
 
@@ -340,7 +343,7 @@ ramwasPCsCovariateSelection = function(param){
                 newcov = as.integer(newcov);
             }
         } else {
-            newcov = scan("stdin", integer(), n=1);
+            newcov = scan("stdin", integer(), n = 1);
         }
         if( newcov == 0 )
             break;

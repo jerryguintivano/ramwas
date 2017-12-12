@@ -129,12 +129,13 @@ testPhenotype = function(phenotype, data, cvrtqr){
         # c(ff[1], pv[1])
         # anova(lm( data[1,] ~ 0 + t(cvrtqr) +
         #     as.factor(as.vector(as.character(round(covariate))))))
-        return( list(Rsquared = rsq,
-                     Fstat = ff,
-                     pvalue = pv,
-                     nVarTested = nVarTested,
-                     dfFull = dfFull,
-                     statname = paste0("-F_",nVarTested)) );
+        return( list(
+            Rsquared = rsq,
+            Fstat = ff,
+            pvalue = pv,
+            nVarTested = nVarTested,
+            dfFull = dfFull,
+            statname = paste0("-F_",nVarTested)) );
     }
 }
 
@@ -160,22 +161,21 @@ ramwas5saveTopFindings = function(param){
     message("Finding top MWAS hits");
     keep = findBestNpvs(mwas[,3], param$toppvthreshold);
     # keep = which(mwas[,3] < param$toppvthreshold);
-    ord = keep[sort.list(abs(mwas[keep,2]),decreasing = TRUE)];
+    ord = keep[sort.list(abs(mwas[keep,2]), decreasing = TRUE)];
 
     toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
-                                  position =     cpgloc[ord,2],
+                                  position = cpgloc[ord,2],
                                   tstat  = mwas[ord,2],
                                   pvalue = mwas[ord,3],
                                   qvalue = mwas[ord,4]);
 
     # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 
-
     message("Saving top MWAS hits");
     write.table(
-        file = paste0(param$dirmwas,"/Top_tests.txt"),
-        sep = "\t", quote = FALSE, row.names = FALSE,
-        x = toptable
+        file = paste0(param$dirmwas, "/Top_tests.txt"),
+        x = toptable,
+        sep = "\t", quote = FALSE, row.names = FALSE
     );
     return(invisible(NULL));
 }
@@ -345,7 +345,6 @@ ramwas5MWAS = function( param ){
     ### Fill in FDR column
     {
         .log(ld, "%s, Calculating FDR (q-values)", date());
-        message("Calculating FDR (q-values)");
         fm = fm.open(paste0(param$dirmwas, "/Stats_and_pvalues"));
         pvalues = fm[,3];
         pvalues[pvalues==0] = .Machine$double.xmin;
