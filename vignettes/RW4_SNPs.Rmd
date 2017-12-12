@@ -2,8 +2,8 @@
 title: "4. Joint Analysis of Methylation and Genotype Data"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    toc: true # table of content true
+    BiocStyle::html_document:
+        toc: true # table of content true
 vignette: >
   %\VignetteIndexEntry{4. Joint Analysis of Methylation and Genotype Data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,7 +19,7 @@ panderOptions("digits", 3)
 dr = "D:/temp/"
 ```
 
-# Joint analysis of methylation and genotype data
+# Statistical model for Joint Analysis of Methylation and Genotype Data
 
 Single nucleotide polymorphisms (SNPs) can create and destroy CpGs.
 As methylation occurs mostly at CpGs,
@@ -50,7 +50,7 @@ at the $i$-th CpG.
 * $cvrt$ -- covariates and the principal components.
 * $\epsilon$ -- noise.
 
-## Input data
+# Input data
 
 For CpG-SNPs analysis RaMWAS requires the usual input
 (see 
@@ -63,7 +63,7 @@ same set of samples and the same set of locations.
 Data preparation may include finding the closest SNP for every CpG and
 exclusion of CpGs without any SNPs in vicinity.
 
-### Create data matrices for CpG-SNP analysis
+## Create data matrices for CpG-SNP analysis
 
 To illustrate this type of analysis we
 produce the following artificial files.
@@ -124,7 +124,7 @@ chr      = as.integer(temp %/% 1e7) + 1L
 position = as.integer(temp %% 1e7)
 
 locmat = cbind(chr = chr, position = position)
-chrnames = paste0("chr", 1:22)
+chrnames = paste0("chr", 1:10)
 pander(head(locmat))
 ```
 
@@ -167,16 +167,16 @@ for( i in seq_len(nvariables/byrows) ){ # i=1
     slice[,  1:225] = slice[,  1:225] + covariates$sex / 50 / sd(covariates$sex)
     slice[,101:116] = slice[,101:116] + covariates$age / 16 / sd(covariates$age)
     slice = slice +
-            ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
-            snps/1.5 +
-            runif(nsamples*byrows)/2
+                ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
+                snps / 1.5 +
+                runif(nsamples*byrows) / 2
     fmm[,ind] = slice;
 }
 close(fms)
 close(fmm)
 ```
 
-## SNP-CpG analysis
+# SNP-CpG analysis
 
 Let us test for association between
 CpG scores and and the sex covariate

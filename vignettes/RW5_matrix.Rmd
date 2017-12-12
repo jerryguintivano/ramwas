@@ -109,7 +109,7 @@ chr      = as.integer(temp %/% 1e7) + 1L
 position = as.integer(temp %% 1e7)
 
 locmat = cbind(chr = chr, position = position)
-chrnames = paste0("chr", 1:22)
+chrnames = paste0("chr", 1:10)
 pander(head(locmat))
 ```
 
