@@ -176,11 +176,12 @@ manPlotPrepare = function(
 
     # max of each chromosome
     poslist = split(pos, chr, drop = FALSE);
-    chrmax = sapply(poslist, max) + 0 + chrmargins;
+    poslist[sapply(poslist,length)==0L] = list(0);
+    chrmax = sapply(poslist, max) + 0;# + chrmargins;
     
     # chromosome starts on the plot
     names(chrmax) = NULL;
-    offsets = c(0, cumsum(chrmax + chrmargins)) + chrmargins;
+    offsets = c(0, cumsum(chrmax)) + chrmargins;
     names(offsets)[seq_along(poslist)] = levels(chr);
     
     # within plot coordinates
