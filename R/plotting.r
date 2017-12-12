@@ -181,7 +181,8 @@ manPlotPrepare = function(
     # chromosome starts on the plot
     names(chrmax) = NULL;
     offsets = c(0, cumsum(chrmax + chrmargins)) + chrmargins;
-
+    names(offsets)[seq_along(poslist)] = levels(chr);
+    
     # within plot coordinates
     x0 = offsets[unclass(chr)] + pos;
     if(ismlog10) {
@@ -208,13 +209,17 @@ manPlotPrepare = function(
     # Color code
     colindex = unclass(chr);
     
+    # Chromosome names
+    chrnames = gsub("chr", "", levels(chr));
+    
     # Return minimum object;
     man = list(
         x = x0[keep],
         y = y0[keep],
         colindex = colindex[keep],
         offsets = offsets,
-        chrnames = levels(chr)
+        chrnames = chrnames,
+        chrmargins = chrmargins
     );
     class(man) = "manPlotInfo";
     return(man);
