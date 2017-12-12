@@ -48,10 +48,10 @@ exportClasses("rwDataClass")
 importFrom(methods,
     setRefClass, new)
 importFrom(grDevices,
-    dev.off, pdf)
+    dev.off, pdf, png)
 importFrom(graphics,
     abline, legend, lines, par, plot,
-    points, title, axis, barplot, hist)
+    points, title, axis, barplot, hist, layout)
 importFrom(stats,
     complete.cases, pf, pt, qf, qt, optim,
     model.matrix, quantile, median, qlogis,
