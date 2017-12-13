@@ -36,9 +36,8 @@
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
     # Get data access
-    data = new("rwDataClass");
-    data$open(param, getPCs = FALSE);
-    
+    data = new("rwDataClass", param = param, getPCs = FALSE);
+
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
@@ -101,8 +100,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     .log(ld, "%s, Start postPCAprocessing() call", date());
 
     # Get data access
-    data = new("rwDataClass");
-    data$open(param, getPCs = FALSE)
+    data = new("rwDataClass", param = param, getPCs = FALSE);
 
     if(is.null(e))
         e = readRDS(file = paste0(param$dirpca, "/eigen.rds"))
@@ -185,8 +183,7 @@ ramwas4PCA = function( param ){
                         "cputhreads", "diskthreads"));
 
     # Get data access
-    data = new("rwDataClass");
-    data$open(param, getPCs = FALSE);
+    data = new("rwDataClass", param = param, getPCs = FALSE);
 
     ### PCA part
     {

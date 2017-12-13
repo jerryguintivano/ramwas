@@ -191,8 +191,7 @@ ramwas5saveTopFindings = function(param){
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
   
     # Get data access
-    data = new("rwDataClass");
-    data$open(param, lockfile = param$lockfile2);
+    data = new("rwDataClass", param = param, lockfile = param$lockfile2);
 
     outmat = double(3*(rng[2]-rng[1]+1));
     dim(outmat) = c((rng[2]-rng[1]+1),3);
@@ -273,8 +272,7 @@ ramwas5MWAS = function( param ){
     outcome = param$covariates[[ param$modeloutcome ]];
     
     # Get data access
-    data = new("rwDataClass");
-    data$open(param);
+    data = new("rwDataClass", param = param);
 
     ### Outpout matrix. Cor / t-test / p-value / q-value
     ### Outpout matrix. R2  / F-test / p-value / q-value

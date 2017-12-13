@@ -48,7 +48,11 @@ setRefClass("rwDataClass",
 		cvrtqr = "ANY"
 	),
 	methods = list(
-		initialize = function() {
+		initialize = function(param = NULL, getPCs = TRUE, lockfile = NULL){
+		    if( !is.null(param) ){
+		        .self$open(param = param, getPCs = getPCs, lockfile = lockfile);
+		        return();
+		    }
 			fmdata <<- new("filematrix");
 		    samplenames <<- character(0);
 		    nsamples <<- 0;
