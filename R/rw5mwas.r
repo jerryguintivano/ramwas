@@ -184,7 +184,6 @@ ramwas5saveTopFindings = function(param){
 .ramwas5MWASjob = function(rng, param){
     # rng = rangeset[[1]];
     # library(filematrix);
-    .set1MLKthread();
     ld = param$dirmwas;
   
     .log(ld, "%s, Process %06d, Job %02d, Start MWAS, CpG range %d-%d",
@@ -316,6 +315,7 @@ ramwas5MWAS = function( param ){
                 .file.remove(param$lockfile2);
             });
             clusterExport(cl, "testPhenotype");
+            clusterCall(cl, .set1MLKthread);
             # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
             logfun = .logErrors(ld, .ramwas5MWASjob);
             z = clusterApplyLB(

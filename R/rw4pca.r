@@ -29,7 +29,6 @@
 # (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param){
     # library(filematrix);
-    .set1MLKthread();
     ld = param$dirpca;
     
     .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
@@ -220,6 +219,7 @@ ramwas4PCA = function( param ){
                     .file.remove(param$lockfile2);
                 });
                 logfun = .logErrors(ld, .ramwas4PCAjob);
+                clusterCall(cl, .set1MLKthread);
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
