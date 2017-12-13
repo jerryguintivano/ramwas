@@ -232,7 +232,7 @@ ramwas4PCA = function( param ){
                 rm(tmp);
                 on.exit();
                 rm(cl, rng, rangeset, covlist);
-                
+                gc();
             } else {
                 covmat = .ramwas4PCAjob( 
                                 rng = c(1, data$ncpgs, 0),
