@@ -22,7 +22,7 @@
 
     pv = data.frame(pv);
     names(pv) = paste0(names(covariates1),nms);
-    return(list(crF=crF, pv=pv));
+    return(list(crF = crF, pv = pv));
 }
 
 # Job function for PCA analysis
@@ -63,6 +63,7 @@
     .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
 
+    gc();
     return(covmat);
 }
 
@@ -197,7 +198,13 @@ ramwas4PCA = function( param ){
             mm = data$ncpgs;
             nsteps = ceiling(mm/step1);
 
-            nthreads = min(param$cputhreads, nsteps);
+            # Memory concerns
+            totmem = memory.limit() * 1048576;
+            thrmem = (data$nsamples^2 * 8) * 3;
+            maxthr = max(totmem / thrmem, 1)
+            thrmem = max(thrmem, 1);
+            
+            nthreads = min(param$cputhreads, nsteps, thrmem);
             rm(step1, mm, nsteps);
             if( nthreads > 1 ){
                 rng = round(seq(1, data$ncpgs+1, length.out = nthreads+1));

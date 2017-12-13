@@ -57,7 +57,7 @@ importFrom(stats,
     model.matrix, quantile, median, qlogis,
     plogis, qbeta, cor, lm, qchisq, runif, sd)
 importFrom(utils,
-    flush.console, head, tail,
+    flush.console, head, tail, memory.limit,
     tail.matrix, read.table, write.table)
 importFrom(grDevices, 
     palette)
