@@ -13,7 +13,7 @@ ramwasAnnotateLocations(param, chr, pos)
 }
 \arguments{
     \item{param}{
-        Vector of parameters as described in the "RW6_param.Rmd" vignette. \cr
+        List of parameters as described in the "RW6_param.Rmd" vignette. \cr
         Try: \code{vignette("RW6_param","ramwas")}.
     }
     \item{chr}{
@@ -40,7 +40,7 @@ bihost = "grch37.ensembl.org"
 bimart = "ENSEMBL_MART_ENSEMBL"
 bidataset = "hsapiens_gene_ensembl"
 biattributes = c("hgnc_symbol", "entrezgene", "strand")
-bifilters = list(with_hgnc_trans_name=TRUE)
+bifilters = list(with_hgnc_trans_name = TRUE)
 biflank = 0
 
 param = ramwasParameters(
@@ -55,5 +55,7 @@ param = ramwasParameters(
 chr = "chr1"
 pos =  15975530
 
+\dontrun{
 ramwasAnnotateLocations(param, chr, pos)
+}
 }
