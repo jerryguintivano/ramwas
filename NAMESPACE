@@ -42,6 +42,7 @@ export(
     getMWASandLocations,
     insilicoFASTQ,
     injectSNPsMAF,
+    mat2cols,
     ramwasSNPs
 )
 
