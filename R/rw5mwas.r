@@ -3,69 +3,95 @@
 # cvrtqr - must be orthonormalized
 # Supports categorical outcomes (text of factor)
 testPhenotype = function(phenotype, data, cvrtqr){
-    mycov = matrix(phenotype, nrow = 1);
+    # Preserve original variables for debugging
+    pheno = matrix(phenotype, ncol = 1);
     slice = data;
     cvqr0 = cvrtqr;
 
-    if( any(is.na(mycov)) ){
-        keep = which(colSums(is.na(mycov))==0);
+    # In rare case of missing phenotype values
+    # Subset and re-orthonormalize covariates
+    if( any(is.na(pheno)) ){
+        keep = which(rowSums(is.na(pheno))==0);
 
-        mycov = mycov[, keep, drop=FALSE];
-        slice = slice[keep, , drop=FALSE];
-        cvqr0 = cvqr0[, keep, drop=FALSE];
-        cvqr0 = t( qr.Q(qr(t(cvqr0))) );
+        pheno = pheno[keep, , drop = FALSE];
+        slice = slice[keep, , drop = FALSE];
+        cvqr0 = cvqr0[keep, , drop = FALSE];
+        cvqr0 = qr.Q(qr(cvqr0));
     }
 
-    # mycov = as.character(round(mycov));
-    if( is.character(mycov) || is.factor(mycov) ){
-        fctr = as.factor(mycov);
-        if(length(levels(fctr)) <= 1){
-            return( list(Rsquared = 0,
-                Fstat = 0,
-                pvalue = 1,
-                nVarTested = 0,
-                dfFull = ncol(cvqr0) - nrow(cvqr0),
-                statname = paste0("-F_",0)) );
+    # Process factor phenotypes
+    # Othonormalize them
+    # Exclude redundant
+    if( is.character(pheno) || is.factor(pheno) ){
+        fctr = as.factor(pheno);
+        # Single factor phenotype
+        # Occur by mistake and
+        # after heavy subsetting
+        if( length(levels(fctr)) <= 1 ){
+            return(list(
+                    Rsquared = 0,
+                    Fstat = 0,
+                    pvalue = 1,
+                    nVarTested = 0,
+                    dfFull = ncol(cvqr0) - nrow(cvqr0),
+                    statname = paste0("-F_",0)));
         }
-        dummy = t(model.matrix(~fctr)[,-1]);
-        dummy = dummy - tcrossprod(dummy,cvqr0) %*% cvqr0;
+        dummy = model.matrix(~fctr)[,-1];
+        dummy = dummy - cvqr0 %*% crossprod(cvqr0, dummy);
 
-        q = qr(t(dummy));
-        keep = abs(diag(qr.R(q))) > .Machine$double.eps*ncol(mycov);
+        q = qr(dummy);
+        keep = abs(diag(qr.R(q))) > (.Machine$double.eps * length(pheno) * 10);
 
-        mycov = t( qr.Q(qr(t(dummy))) );
-        mycov = mycov[keep, , drop = FALSE];
+        pheno = qr.Q(qr(dummy));
+        if( !all(keep) )
+            pheno = pheno[, keep, drop = FALSE];
     } else {
-        cvsumsq1 = sum( mycov^2 );
-        mycov = mycov - tcrossprod(mycov,cvqr0) %*% cvqr0;
-        cvsumsq2 = sum( mycov^2 );
-        if( cvsumsq2 <= cvsumsq1 * .Machine$double.eps*ncol(mycov) ){
-            mycov[] = 0;
+        cvsumsq1 = sum( pheno^2 );
+        pheno = pheno - cvqr0 %*% crossprod(cvqr0, pheno);
+        cvsumsq2 = sum( pheno^2 );
+        if( cvsumsq2 <= (cvsumsq1 * .Machine$double.eps * ncol(pheno)) ){
+            return(list(
+                    correlation = 0,
+                    tstat = 0,
+                    pvalue = 1,
+                    nVarTested = nVarTested,
+                    dfFull = dfFull,
+                    statname = ""));
         } else {
-            mycov = mycov / sqrt(rowSums(mycov^2));
+            pheno = pheno / sqrt(sum(pheno^2));
         }
     }
 
     ###
-    nVarTested = nrow(mycov);
-    dfFull = ncol(cvqr0) - nrow(cvqr0) - nVarTested;
-    if(nVarTested == 1){
-        if(dfFull <= 0)
-            return(list(correlation = 0,
-                        tstat = 0,
-                        pvalue = 1,
-                        nVarTested = nVarTested,
-                        dfFull = dfFull,
-                        statname = ""));
+    nVarTested = ncol(pheno);
+    dfFull = nrow(pheno) - ncol(cvqr0) - nVarTested;
+    if( nVarTested == 1 ){
+        if( dfFull <= 0 )
+            return(list(
+                    correlation = 0,
+                    tstat = 0,
+                    pvalue = 1,
+                    nVarTested = nVarTested,
+                    dfFull = dfFull,
+                    statname = ""));
 
+        
+        # SST - Total variation
+        # cvD^2 - Variation explained by covariates
+        # cvC^2 - Variation explained by phenotype
+        # cr = cvD / sqrt(SST - cvC^2) with precautions
+        
+        # If data is residualized
+        # cr = cvD / sqrt(SST)
+        
         # SST = rowSums(slice^2);
         SST = colSumsSq(slice);
 
-        cvD = (mycov %*% slice);
+        cvD = crossprod(pheno, slice);
         # cvD2 = colSums(cvD^2);
         # cvD2 = cvD2^2;
 
-        cvC = (cvqr0 %*% slice);
+        cvC = crossprod(cvqr0, slice);
         cvC2 = colSumsSq( cvC );
         # cvC2 = colSums( cvC^2 );
 
@@ -73,10 +99,10 @@ testPhenotype = function(phenotype, data, cvrtqr){
         cr = cvD / sqrt(pmax(SST - cvC2, 1e-50, SST/1e15));
 
         cor2tt = function(x){
-            return( x * sqrt( dfFull / (1 - pmin(x^2,1))));
+            return( x * sqrt(dfFull / (1 - pmin(x^2,1))));
         }
         tt2pv = function(x){
-            return( (pt(-abs(x),dfFull)*2));
+            return( (pt(-abs(x), dfFull)*2) );
         }
         tt = cor2tt(cr);
         pv = tt2pv(tt);
@@ -85,35 +111,41 @@ testPhenotype = function(phenotype, data, cvrtqr){
         # c(tt[1], pv[1])
         # summary(lm( as.vector(covariate) ~ 0 + data[1,] +
         #         t(cvrtqr)))$coefficients[1,]
-        return( list(correlation = cr,
-                     tstat = tt,
-                     pvalue = pv,
-                     nVarTested = nVarTested,
-                     dfFull = dfFull,
-                     statname = "") );
-
+        return(list(
+                correlation = cr,
+                tstat = tt,
+                pvalue = pv,
+                nVarTested = nVarTested,
+                dfFull = dfFull,
+                statname = ""));
     } else {
         if(dfFull <= 0)
-            return( list(Rsquared = 0,
-                         Fstat = 0,
-                         pvalue = 1,
-                         nVarTested = nVarTested,
-                         dfFull = dfFull,
-                         statname = paste0("-F_",nVarTested)) );
+            return(list(
+                    Rsquared = 0,
+                    Fstat = 0,
+                    pvalue = 1,
+                    nVarTested = nVarTested,
+                    dfFull = dfFull,
+                    statname = paste0("-F_",nVarTested)) );
 
+        # SST - Total variation
+        # cvD2 - Variation explained by covariates
+        # cvC2 - Variation explained by phenotype
+        # cr  = cvD / sqrt(SST - cvC^2) with precautions
+        # rsq = cvD2 / (SST - cvC2)
         # SST = rowSums(slice^2);
         SST = colSumsSq(slice);
 
-        cvD = (mycov %*% slice);
+        cvD = crossprod(pheno, slice);
         # cvD2 = colSums(cvD^2);
         cvD2 = colSumsSq(cvD);
 
-        cvC = (cvqr0 %*% slice);
+        cvC = crossprod(cvqr0, slice);
         # cvC2 = colSums( cvC^2 );
         cvC2 = colSumsSq( cvC );
 
         # SSR = colSums( cvD^2 );
-        rsq = cvD2 / pmax(SST - cvC2, (SST+1e-16)/1e16);
+        rsq = cvD2 / pmax(SST - cvC2, 1e-50, SST/1e15);
 
         # rsq = colSums(cr^2);
         rsq2F = function(x){
@@ -129,13 +161,13 @@ testPhenotype = function(phenotype, data, cvrtqr){
         # c(ff[1], pv[1])
         # anova(lm( data[1,] ~ 0 + t(cvrtqr) +
         #     as.factor(as.vector(as.character(round(covariate))))))
-        return( list(
-            Rsquared = rsq,
-            Fstat = ff,
-            pvalue = pv,
-            nVarTested = nVarTested,
-            dfFull = dfFull,
-            statname = paste0("-F_",nVarTested)) );
+        return(list(
+                Rsquared = rsq,
+                Fstat = ff,
+                pvalue = pv,
+                nVarTested = nVarTested,
+                dfFull = dfFull,
+                statname = paste0("-F_",nVarTested)));
     }
 }
 
@@ -209,7 +241,7 @@ ramwas5saveTopFindings = function(param){
         rez = testPhenotype(
                     phenotype = param$covariates[[param$modeloutcome]],
                     data = slice,
-                    cvrtqr = t(data$cvrtqr))
+                    cvrtqr = data$cvrtqr)
 
         outmat[(fr:to) - (rng[1] - 1), ] = cbind(rez[[1]], rez[[2]], rez[[3]]);
 

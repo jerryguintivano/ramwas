@@ -307,14 +307,15 @@ ramwasPCsCovariateSelection = function(param){
             pc = e$vectors[,i, drop=FALSE];
 
             message("Testing PC",i," vs. covariates");
-            # testPhenotype(phenotype = ann[[2]], data = pc, cvrtqr = t(cvtrqr))
+            # testPhenotype(phenotype = ann[[2]], data = pc, cvrtqr = cvtrqr)
 
-            testslist[[i]] = t(sapply( lapply( lapply( ann[-1],
-                                                       testPhenotype,
-                                                       data=pc,
-                                                       cvrtqr=t(cvtrqr)),
-                                               `[`,
-                                               1:3),
+            testslist[[i]] = t(sapply( lapply( X = lapply( 
+                                                    X = ann[-1],
+                                                    FUN = testPhenotype,
+                                                    data = pc,
+                                                    cvrtqr = cvtrqr),
+                                            FUN = `[`,
+                                            1:3),
                                        unlist));
         }
         tstatsabs = lapply(testslist, function(x)abs(x[,3]))
