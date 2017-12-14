@@ -78,8 +78,9 @@
         s(qc$reads.total), # Total reads
         afracb(qc$reads.aligned, qc$reads.total), # Reads aligned, % of total
         afracb(qc$reads.recorded, qc$reads.aligned), # Reads after filter, % ali
-        afracb(qc$reads.recorded - qc$reads.recorded.no.repeats,
-               qc$reads.aligned), # Reads removed as repeats\tRRAR % of aligned
+        afracb(
+            qc$reads.recorded - qc$reads.recorded.no.repeats,
+            qc$reads.aligned), # Reads removed as repeats\tRRAR % of aligned
         afracb(qc$reads.recorded.no.repeats, qc$reads.aligned), # Reads for scor
         perc(qcmean( qc$frwrev.no.repeats )), # Forward strand (%)
         twodig(qcmean( qc$hist.score1 )), # Avg alignment score
@@ -127,8 +128,9 @@
         s(qc$reads.total), # Total reads
         afracb(qc$reads.aligned, qc$reads.total), # Reads aligned, % of total
         afracb(qc$reads.recorded, qc$reads.aligned), # Reads after filter, % ali
-        afracb(qc$reads.recorded - qc$reads.recorded.no.repeats,
-               qc$reads.aligned), # Reads removed as repeats\tRRAR % of aligned
+        afracb(
+            qc$reads.recorded - qc$reads.recorded.no.repeats,
+            qc$reads.aligned), # Reads removed as repeats\tRRAR % of aligned
         afracb(qc$reads.recorded.no.repeats, qc$reads.aligned), # Reads for scor
         perc(qcmean( qc$frwrev.no.repeats )), # Forward strand (%)
         twodig(qcmean( qc$hist.score1 )), # Avg alignment score
@@ -221,10 +223,11 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
 
     logitrange = diff(qlogis(c(0.25,0.75)));
 
-    initparam = c(xmidpoint = xmidpoint,
-                      xdivider = (xqrange/logitrange)/2,
-                      ymultiplier = yrange,
-                      ymean = ybottom);
+    initparam = c(
+                    xmidpoint = xmidpoint,
+                    xdivider = (xqrange/logitrange)/2,
+                    ymultiplier = yrange,
+                    ymean = ybottom);
 
     fsPredict = function( x, param){
         (plogis((param[1]-x)/param[2]))*param[3]+param[4]
@@ -268,13 +271,13 @@ ramwas2collectqc = function( param ){
     dir.create(param$dirqc, showWarnings = FALSE, recursive = TRUE);
 
     parameterDump(dir = param$dirqc, param = param,
-                      toplines = c("dirrqc",
-                                       "filebamlist", "filebam2sample",
-                                       "bam2sample", "bamnames",
-                                       "scoretag", "minscore",
-                                       "minfragmentsize", "maxfragmentsize",
-                                       "maxrepeats",
-                                       "filecpgset", "filenoncpgset"));
+        toplines = c(   "dirrqc",
+                        "filebamlist", "filebam2sample",
+                        "bam2sample", "bamnames",
+                        "scoretag", "minscore",
+                        "minfragmentsize", "maxfragmentsize",
+                        "maxrepeats",
+                        "filecpgset", "filenoncpgset"));
     {
         bams = NULL;
         if( !is.null(param$bamnames) )
@@ -406,27 +409,32 @@ ramwas2collectqc = function( param ){
         message("Saving QC info by BAMs in bam2sample");
         bb = unlist(param$bam2sample, use.names = FALSE);
         names(bb) = bb;
-        collect.qc.summary(bamset = bb,
-                           dirname = "summary_bams_in_bam2sample");
+        collect.qc.summary(
+                    bamset = bb,
+                    dirname = "summary_bams_in_bam2sample");
         message("Saving QC info by SAMPLE");
-        collect.qc.summary(bamset = param$bam2sample,
-                           dirname = "summary_by_sample");
+        collect.qc.summary(
+                    bamset = param$bam2sample,
+                    dirname = "summary_by_sample");
         message("Saving QC info TOTAL (all BAMs in bam2sample)");
         uniqbams = unique(unlist(param$bam2sample, use.names = FALSE));
-        bigqc = collect.qc.summary(bamset = list(total = uniqbams),
-                                   dirname = "summary_total");
+        bigqc = collect.qc.summary(
+                    bamset = list(total = uniqbams),
+                    dirname = "summary_total");
         rm(uniqbams);
     } else {
         message("Saving QC info TOTAL (all BAMs in bamnames/filebamlist)");
-        bigqc = collect.qc.summary(bamset = list(total=bams),
-                                   dirname = "summary_total");
+        bigqc = collect.qc.summary(
+                    bamset = list(total=bams),
+                    dirname = "summary_total");
     }
 
     ### Fragment size
     frdata = bigqc$total$hist.isolated.dist1;
     estimate = estimateFragmentSizeDistribution(frdata, param$minfragmentsize);
-    writeLines(con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"),
-               text = as.character(estimate));
+    writeLines(
+            con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"),
+            text = as.character(estimate));
 
     pdf(paste0(param$dirqc,"/Fragment_size_distribution_estimate.pdf"),8,8);
     plotFragmentSizeDistributionEstimate(frdata, estimate);
@@ -436,14 +444,16 @@ ramwas2collectqc = function( param ){
 
 plotFragmentSizeDistributionEstimate = function(frdata, estimate){
     lz = lm(frdata[seq_along(estimate)] ~ estimate)
-    plot(as.vector(frdata)/1000,
-         pch = 19,
-         col="blue",
-         main="Isolated CpG coverage vs.\nfragment size distribution estimate",
-         ylab="count, thousands",
-         xlab="Distance to isolated CpGs",
-         xaxs="i");
-    lines((estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
-          lwd = 4,
-          col="red");
+    plot(
+        x = as.vector(frdata)/1000,
+        pch = 19,
+        col = "blue",
+        main = "Isolated CpG coverage vs.\nfragment size distribution estimate",
+        ylab = "count, thousands",
+        xlab = "Distance to isolated CpGs",
+        xaxs = "i");
+    lines(
+        x = (estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
+        lwd = 4,
+        col = "red");
 }

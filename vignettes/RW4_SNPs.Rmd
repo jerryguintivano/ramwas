@@ -5,8 +5,10 @@ output:
     BiocStyle::html_document:
         toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{4. Joint Analysis of Methylation and Genotype Data}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{4. Joint Analysis of Methylation and Genotype Data}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    chunk_output_type: console
 ---
 
 
@@ -43,12 +45,12 @@ $$\mu_i = \beta_0 + outcome * \beta_1 + {outcome} * {SNP}_i * \beta_2 +
 
 where
 
-* $\mu_i$ -- methylation measurement for $i$-th CpG.
-* $outcome$ -- phenotype of interest.
-* $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype)
-at the $i$-th CpG.
-* $cvrt$ -- covariates and the principal components.
-* $\epsilon$ -- noise.
+*   $\mu_i$ -- methylation measurement for $i$-th CpG.
+*   $outcome$ -- phenotype of interest.
+*   $SNP_i$ -- the SNP values (0/1/2 or dosages for imputed genotype)
+    at the $i$-th CpG.
+*   $cvrt$ -- covariates and the principal components.
+*   $\epsilon$ -- noise.
 
 # Input data
 
@@ -68,18 +70,18 @@ exclusion of CpGs without any SNPs in vicinity.
 To illustrate this type of analysis we
 produce the following artificial files.
 
-* `CpG_locations.*` -- filematrix with the location of the SNP-CpGs.\
-It has two columns with integer values --
-chromosome number and location
-(`chr` and `position`).
-* `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
-for the integer column `chr` in the location filematrix.
-* `Coverage.*` -- filematrix with the data for all samples and all locations.\
-  Each row has data for a single sample.
-  Row names are sample names.\
-  Each column has data for a single location.
-  Columns match rows of the location filematrix.
-* `SNPs.*` -- filematrix with genotype data, matching the coverage matrix.
+*   `CpG_locations.*` -- filematrix with the location of the SNP-CpGs.\
+    It has two columns with integer values --
+    chromosome number and location
+    (`chr` and `position`).
+*   `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
+    for the integer column `chr` in the location filematrix.
+*   `Coverage.*` -- filematrix with the data for all samples and all locations.\
+    Each row has data for a single sample.
+    Row names are sample names.\
+    Each column has data for a single location.
+    Columns match rows of the location filematrix.
+*   `SNPs.*` -- filematrix with genotype data, matching the coverage matrix.
 
 First, we load the package and set up a working directory.
 The project directory `dr` can be set to

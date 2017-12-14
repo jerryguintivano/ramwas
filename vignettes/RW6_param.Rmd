@@ -2,11 +2,13 @@
 title: "6. RaMWAS Parameters"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    toc: true # table of content true
+    BiocStyle::html_document:
+        toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{6. RaMWAS parameters}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{6. RaMWAS parameters}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    chunk_output_type: console
 ---
 
 ```{r loadKnitr, echo=FALSE}
@@ -198,9 +200,10 @@ with the set of locations stored as a `list` with
 one sorted vector of CpG locations per chromosome.
 
 ```{r CpGsetExample}
-cpgset = list( chr1 = c(12L, 57L, 123L),
-               chr2 = c(45L, 95L, 99L, 111L),
-               chr3 = c(22L, 40L, 199L, 211L) )
+cpgset = list( 
+            chr1 = c(12L, 57L, 123L),
+            chr2 = c(45L, 95L, 99L, 111L),
+            chr3 = c(22L, 40L, 199L, 211L) )
 ```
 
 In practice, the set should depend
@@ -263,12 +266,12 @@ and count is reset to `maxrepeaets`
 The CpGs in CpG set defined by `filecpgset` are filtered based on
 their coverage.
 
-* A CpG must have average equal or greater than `minavgcpgcoverage`
-(default is 0.3).
-* A CpG must have at least `minnonzerosamples` proportion of samples
-with nonzero coverage\
-  (default is 0.3, i.e. a CpG is preserved if at least 30\% of samples
-  have non-zero coverage).
+*   A CpG must have average equal or greater than `minavgcpgcoverage`
+    (default is 0.3).
+*   A CpG must have at least `minnonzerosamples` proportion of samples
+    with nonzero coverage\
+    (default is 0.3, i.e. a CpG is preserved if at least 30\% of samples
+    have non-zero coverage).
 
 The file operations in this step 
 can be performed faster if done in large blocks.
@@ -312,16 +315,16 @@ package.
 
 The parameters include:
 
-* `bihost` -- BioMart host site.  
-Default is `grch37.ensembl.org`.
-* `bimart` -- BioMart database name, see listMarts().  
-Default is `ENSEMBL_MART_ENSEMBL`.
-* `bidataset` -- BioMart data set, see listDatasets().
-* `biattributes` -- are attributes of interest, see listAttributes().
-Default is `c("hgnc_symbol","entrezgene","strand")`.
-* `bifilters` -- lists filters (if any), see listFilters().
-* `biflank` -- indicates the maximum allowed distance from the
-CpG to the annotation element.
+*   `bihost` -- BioMart host site.  
+    Default is `grch37.ensembl.org`.
+*   `bimart` -- BioMart database name, see listMarts().  
+    Default is `ENSEMBL_MART_ENSEMBL`.
+*   `bidataset` -- BioMart data set, see listDatasets().
+*   `biattributes` -- are attributes of interest, see listAttributes().
+    Default is `c("hgnc_symbol","entrezgene","strand")`.
+*   `bifilters` -- lists filters (if any), see listFilters().
+*   `biflank` -- indicates the maximum allowed distance from the
+    CpG to the annotation element.
 
 Here is an example on how to select a custom biomart annotation track:
 

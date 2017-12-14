@@ -4,15 +4,22 @@
     thresholds = c(-Inf, 1e3, 1e6, 1e9)*1.5;
     bin = findInterval(maxval, thresholds)
     switch(bin,
-             {ylab = "count"},
-             {ylab = "count, thousands"; values=values/1e3;},
-             {ylab = "count, millions"; values=values/1e6;},
-             {ylab = "count, billions"; values=values/1e9;}
+        {ylab = "count"},
+        {ylab = "count, thousands"; values=values/1e3;},
+        {ylab = "count, millions"; values=values/1e6;},
+        {ylab = "count, billions"; values=values/1e9;}
     )
     param = list(...);
-    plotparam = list(height = as.vector(values), width = 1, space = 0,
-                          col = "royalblue", border = "blue",
-                          main = main2, xaxs="i", yaxs="i", ylab = ylab);
+    plotparam = list(
+            height = as.vector(values), 
+            width = 1, 
+            space = 0,
+            col = "royalblue", 
+            border = "blue",
+            main = main2, 
+            xaxs="i", 
+            yaxs="i", 
+            ylab = ylab);
     plotparam[names(param)] = param;
     do.call(barplot, plotparam);
     # barplot(, ...);
@@ -21,54 +28,66 @@
     axis(1,at = at+0.5-firstvalue, labels = at)
 }
 plot.qcHistScore = function(x, samplename="", xstep = 25, ...){
-    .my.hist.plot(as.vector(x),
-                  main2 = paste0("Distribution of read scores\n",samplename),
-                  firstvalue=0,
-                  xstep = xstep,
-                  ...);
+    .my.hist.plot(
+        values = as.vector(x),
+        main2 = paste0("Distribution of read scores\n",samplename),
+        firstvalue = 0,
+        xstep = xstep,
+        ...);
 }
 plot.qcHistScoreBF = function(x, samplename="", xstep = 25, ...){
     .my.hist.plot(as.vector(x),
-        main2 = paste0("Distribution of read scores\n",
-                       "(including excluded reads)\n",samplename),
+        main2 = paste0(
+                    "Distribution of read scores\n",
+                    "(including excluded reads)\n",
+                    samplename),
         firstvalue=0,
         xstep = xstep,
         ...);
 }
 plot.qcEditDist = function(x, samplename="", xstep = 5, ...){
-    .my.hist.plot(as.vector(x),
-       main2 = paste0("Distribution of edit distance\n",samplename),
-       firstvalue=0,
-       xstep = xstep,
-       ...);
+    .my.hist.plot(
+        values = as.vector(x),
+        main2 = paste0("Distribution of edit distance\n",samplename),
+        firstvalue=0,
+        xstep = xstep,
+        ...);
 }
 plot.qcEditDistBF = function(x, samplename="", xstep = 5, ...){
-    .my.hist.plot(as.vector(x),
-        main2 = paste0("Distribution of edit distance\n",
-                       "(including excluded reads)\n", samplename),
+    .my.hist.plot(
+        values = as.vector(x),
+        main2 = paste0(
+                    "Distribution of edit distance\n",
+                    "(including excluded reads)\n",
+                    samplename),
         firstvalue=0,
         xstep = xstep,
         ...);
 }
 plot.qcLengthMatched = function(x, samplename="", xstep = 25, ...){
-    .my.hist.plot(as.vector(x),
+    .my.hist.plot(
+        values = as.vector(x),
         main2 = paste0("Distribution of aligned length\n", samplename),
         firstvalue=1,
         xstep = xstep,
         ...);
 }
 plot.qcLengthMatchedBF = function(x, samplename="", xstep = 25, ...){
-    .my.hist.plot(as.vector(x),
-        main2 = paste0("Distribution of aligned length\n",
-                       "(including excluded reads)\n", samplename),
+    .my.hist.plot(
+        values = as.vector(x),
+        main2 = paste0(
+                    "Distribution of aligned length\n",
+                    "(including excluded reads)\n", samplename),
         firstvalue=1,
         xstep = xstep,
         ...);
 }
 plot.qcIsoDist = function(x, samplename="", xstep = 25, ...){
-    .my.hist.plot(as.vector(x),
-        main2 = paste0("Distances from read starts to isolated CpGs\n",
-                       samplename),
+    .my.hist.plot(
+        values = as.vector(x),
+        main2 = paste0(
+                    "Distances from read starts to isolated CpGs\n",
+                    samplename),
         firstvalue=0,
         xstep = xstep,
         ...);
@@ -86,8 +105,11 @@ plot.qcCoverageByDensity = function(x, samplename="", ...){
         main = paste0("Average coverage by CpG density\n", samplename));
     plotparam[names(param)] = param;
     do.call(plot, plotparam);
-    axis(1, at = seq(0,tail(x,1)+2,by = 1), labels = seq(0,tail(x,1)+2,by=1)^2);
-    axis(2);
+    axis(
+        side = 1,
+        at = seq(0, tail(x,1)+2, by = 1), 
+        labels = seq(0, tail(x,1)+2, by=1)^2);
+    axis(side = 2);
 }
 .histmean = function(x){
     return( sum(x * seq_along(x)) / pmax(sum(x), .Machine$double.xmin) );

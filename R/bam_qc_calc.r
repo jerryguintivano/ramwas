@@ -149,8 +149,12 @@ bam.hist.isolated.distances = function(rbam, isocpgset, distance){
 }
 
 # QC: Calculate average coverage vs. CpG density
-bam.coverage.by.density = function(rbam, cpgset, noncpgset,
-                                   minfragmentsize, maxfragmentsize){
+bam.coverage.by.density = function(
+        rbam,
+        cpgset,
+        noncpgset,
+        minfragmentsize,
+        maxfragmentsize){
 
     fragdistr = c(
         rep(1, minfragmentsize-1),
@@ -168,14 +172,17 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset,
     # }
     # rm(noncpgset);
 
-    cpgdensity1 = calc.coverage(rbam = list(startsfwd = cpgset),
-                                cpgset = cpgset,
-                                fragdistr = fragdistr);
-    cpgdensity2 = calc.coverage(rbam = list(startsrev = lapply(cpgset,`-`,1L)),
-                                cpgset = cpgset,
-                                fragdistr = fragdistr[-1]);
-    cpgdensity = unlist(cpgdensity1, recursive = FALSE, use.names = FALSE) +
-                 unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
+    cpgdensity1 = calc.coverage(
+                        rbam = list(startsfwd = cpgset),
+                        cpgset = cpgset,
+                        fragdistr = fragdistr);
+    cpgdensity2 = calc.coverage(
+                        rbam = list(startsrev = lapply(cpgset,`-`,1L)),
+                        cpgset = cpgset,
+                        fragdistr = fragdistr[-1]);
+    cpgdensity = 
+            unlist(cpgdensity1, recursive = FALSE, use.names = FALSE) +
+            unlist(cpgdensity2, recursive = FALSE, use.names = FALSE);
     rm(cpgdensity1,cpgdensity2);
 
     cpgcoverage = calc.coverage(rbam, cpgset,    fragdistr);
@@ -191,11 +198,12 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset,
     axmax = ceiling(quantile(sqrtcpgdensity,0.99)*100)/100;
 
     # library(KernSmooth);
-    z = locpoly(x = c(sqrtcpgdensity, double(length(noncoverage))),
-                y = c(cpgcoverage, noncoverage),
-                bandwidth = 0.5,
-                gridsize = axmax*100+1,
-                range.x = c(0,axmax));
+    z = locpoly(
+            x = c(sqrtcpgdensity, double(length(noncoverage))),
+            y = c(cpgcoverage, noncoverage),
+            bandwidth = 0.5,
+            gridsize = axmax*100+1,
+            range.x = c(0,axmax));
     z$y[is.na(z$y)] = 0;
 
     rbam$qc$avg.coverage.by.density = z$y;
@@ -209,13 +217,15 @@ bam.coverage.by.density = function(rbam, cpgset, noncpgset,
 # QC: Fraction of reads on ChrX/Y
 bam.chrXY.qc = function(rbam){
     strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
-    rbam$qc$chrX.count = strandfunX(rbam$startsfwd) +
-                         strandfunX(rbam$startsfwd);
+    rbam$qc$chrX.count =
+                    strandfunX(rbam$startsfwd) +
+                    strandfunX(rbam$startsfwd);
     class(rbam$qc$chrX.count) = "qcChrX"
 
     strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
-    rbam$qc$chrY.count =  strandfunY(rbam$startsfwd) +
-                          strandfunY(rbam$startsfwd);
+    rbam$qc$chrY.count =
+                    strandfunY(rbam$startsfwd) +
+                    strandfunY(rbam$startsfwd);
     class(rbam$qc$chrY.count) = "qcChrY"
 
     return(rbam);

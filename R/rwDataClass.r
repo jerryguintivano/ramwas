@@ -29,8 +29,9 @@ setRefClass("rwDataClass",
             
             # Covariates defined
             if(is.null(param$covariates))
-                stop("Covariates are not defined.\n",
-                     "See \"filecovariates\" or \"covariates\" parameter.");
+                stop(
+                    "Covariates are not defined.\n",
+                    "See \"filecovariates\" or \"covariates\" parameter.");
             
             # All covariates present
             cvrtset = match(
@@ -38,9 +39,10 @@ setRefClass("rwDataClass",
                         table = names(param$covariates), 
                         nomatch = 0L);
             if( any(cvrtset == 0L) )
-                stop( "The \"modelcovariates\" lists unknown covariates: \n",
-                      paste0(param$modelcovariates[head(which(cvrtset==0))], 
-                           collapse = ', '));
+                stop( 
+                    "The \"modelcovariates\" lists unknown covariates: \n",
+                    paste0(param$modelcovariates[head(which(cvrtset==0))], 
+                        collapse = ', '));
             
             # Extract covariates
             cvrt = param$covariates[ cvrtset ];

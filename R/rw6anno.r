@@ -20,9 +20,10 @@ ramwasAnnotateLocations = function(param, chr, pos){
     # Call biomaRt
     {
         # library(biomaRt)
-        gene_ensembl = useMart(biomart = param$bimart,
-                               host = param$bihost,
-                               dataset = param$bidataset)
+        gene_ensembl = useMart(
+                            biomart = param$bimart,
+                            host = param$bihost,
+                            dataset = param$bidataset)
 
         if(length(nochr) > maxrequest){
 
@@ -106,8 +107,9 @@ ramwasAnnotateLocations = function(param, chr, pos){
         ## Enumerate all CpG-gene pairs
         ## xx - CpG index (among sorted), factored for "split" call
         ## yy - Gene index (within biomart response)
-        xx = unlist(lapply(which(fi1<fi2),
-                           FUN=function(x){((fi1[x]+1):(fi2[x]))}));
+        xx = unlist(lapply(
+                        X = which(fi1<fi2),
+                        FUN=function(x){((fi1[x]+1):(fi2[x]))}));
         levels(xx) = paste0(seq_along(tablepos));
         class(xx) = "factor";
         yy = rep(seq_along(fi1), times = fi2-fi1)
@@ -156,19 +158,21 @@ ramwas6annotateTopFindings = function(param){
     # keep = which(mwas[,3] < param$toppvthreshold);
     ord = keep[sort.list(abs(mwas[keep,2]),decreasing = TRUE)];
 
-    toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
-                           position =     cpgloc[ord,2],
-                           tstat  = mwas[ord,2],
-                           pvalue = mwas[ord,3],
-                           qvalue = mwas[ord,4]);
+    toptable = data.frame(
+                    chr = chrnames[cpgloc[ord,1]],
+                    position =     cpgloc[ord,2],
+                    tstat  = mwas[ord,2],
+                    pvalue = mwas[ord,3],
+                    qvalue = mwas[ord,4]);
 
     # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 
     if( !is.null(param$biattributes) && (nrow(toptable)>0L) ){
         message("Annotating top MWAS hits");
-        bio = ramwasAnnotateLocations(param,
-                                      chr = toptable$chr,
-                                      pos = toptable$position);
+        bio = ramwasAnnotateLocations(
+                    param = param,
+                    chr = toptable$chr,
+                    pos = toptable$position);
         toptable = data.frame(toptable, bio);
     }
 

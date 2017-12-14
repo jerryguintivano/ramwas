@@ -195,11 +195,12 @@ ramwas5saveTopFindings = function(param){
     # keep = which(mwas[,3] < param$toppvthreshold);
     ord = keep[sort.list(abs(mwas[keep,2]), decreasing = TRUE)];
 
-    toptable = data.frame( chr = chrnames[cpgloc[ord,1]],
-                                  position = cpgloc[ord,2],
-                                  tstat  = mwas[ord,2],
-                                  pvalue = mwas[ord,3],
-                                  qvalue = mwas[ord,4]);
+    toptable = data.frame( 
+                        chr = chrnames[cpgloc[ord,1]],
+                        position = cpgloc[ord,2],
+                        tstat  = mwas[ord,2],
+                        pvalue = mwas[ord,3],
+                        qvalue = mwas[ord,4]);
 
     # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
 
@@ -217,10 +218,10 @@ ramwas5saveTopFindings = function(param){
     # rng = rangeset[[1]];
     # library(filematrix);
     ld = param$dirmwas;
-  
+
     .log(ld, "%s, Process %06d, Job %02d, Start MWAS, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
-  
+
     # Get data access
     data = new("rwDataClass", param = param, lockfile = param$lockfile2);
 
@@ -272,14 +273,16 @@ ramwas5MWAS = function( param ){
     param = parameterPreprocess(param);
     ld = param$dirmwas;
     dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
-     .log(ld, "%s, Start ramwas5MWAS() call", date(), append = FALSE);
+    .log(ld, "%s, Start ramwas5MWAS() call", date(), append = FALSE);
 
     if(is.null(param$modeloutcome))
-        stop("Model outcome variable not defined\n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome variable not defined\n",
+            "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
-        stop("Model outcome is not found among covariates.\'n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome is not found among covariates.\'n",
+            "See \"modeloutcome\" parameter");
     
     parameterDump(dir = param$dirmwas, param = param,
         toplines = c(   "dirmwas", "dirpca", "dircoveragenorm",

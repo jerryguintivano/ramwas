@@ -2,11 +2,13 @@
 title: "3. BAM Quality Control Measures"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    toc: true # table of content true
+    BiocStyle::html_document:
+        toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{3. BAM Quality Control Measures}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{3. BAM Quality Control Measures}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    chunk_output_type: console
 ---
 
 # Loading and saving RaMWAS objects
@@ -22,8 +24,8 @@ and illustrated in mulpiple plots.
 
 The text summary is saved in two versions:
 
-* `Summary_QC.txt` -- formatted for viewing in Excel.
-* `Summary_QC_R.txt` -- formatted for easy import in R.
+*   `Summary_QC.txt` -- formatted for viewing in Excel.
+*   `Summary_QC_R.txt` -- formatted for easy import in R.
 
 Excel\ friendly\ column\ name | R\ friendly column name | brief\ description\ and\ link\ to\ section
 :---|:---|:---
@@ -107,9 +109,9 @@ The number of aligned reads is only 2\% smaller, 2.42 billion.
 
 ```{r reads.aligned}
 {
- cat("Reads aligned:", qc$reads.aligned, "\n")
- cat("This is ", qc$reads.aligned / qc$reads.total * 100,
-     "% of all reads", sep="")
+cat("Reads aligned:", qc$reads.aligned, "\n")
+cat("This is ", qc$reads.aligned / qc$reads.total * 100,
+    "% of all reads", sep="")
 }
 ```
 
@@ -125,9 +127,9 @@ Almost of 2.2 billion reads passed the score threshold.
 
 ```{r reads.recorded}
 {
- cat("Reads recorded:",qc$reads.recorded,"\n")
- cat("This is ", qc$reads.recorded / qc$reads.aligned * 100,
-     "% of aligned reads", sep="")
+cat("Reads recorded:",qc$reads.recorded,"\n")
+cat("This is ", qc$reads.recorded / qc$reads.aligned * 100,
+    "% of aligned reads", sep="")
 }
 ```
 
@@ -158,9 +160,9 @@ In our example, 10\% of reads are removed as duplicates.
 
 ```{r reads.recorded.no.repeats}
 {
- cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
- cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
-     "% of aligned reads", "\n", sep="")
+cat("Reads without duplicates:", qc$reads.recorded.no.repeats, "\n")
+cat("This is ", qc$reads.recorded.no.repeats / qc$reads.recorded * 100,
+    "% of aligned reads", "\n", sep="")
 }
 ```
 
@@ -181,10 +183,10 @@ so `qcmean` should give a number close to `0.5`.
 
 ```{r frwrevNR}
 {
- cat("Excluding duplicate reads", "\n")
- cat("Reads on forward strand:", qc$frwrev.no.repeats[1], "\n")
- cat("Reads on reverse strand:", qc$frwrev.no.repeats[2], "\n")
- cat("Fraction of reads on forward strand:", qcmean(qc$frwrev.no.repeats),"\n")
+    cat("Excluding duplicate reads", "\n")
+    cat("Reads on forward strand:", qc$frwrev.no.repeats[1], "\n")
+    cat("Reads on reverse strand:", qc$frwrev.no.repeats[2], "\n")
+    cat("Fraction of reads on forward strand:", qcmean(qc$frwrev.no.repeats),"\n")
 }
 ```
 
@@ -193,10 +195,10 @@ fraction of reads on the forward strand was further away from 0.5.
 
 ```{r frwrev}
 {
- cat("Not excluding duplicate reads", "\n")
- cat("Reads on forward strand:", qc$frwrev[1], "\n")
- cat("Reads on reverse strand:", qc$frwrev[2], "\n")
- cat("Fraction of reads on forward strand (before QC):", qcmean(qc$frwrev),"\n")
+    cat("Not excluding duplicate reads", "\n")
+    cat("Reads on forward strand:", qc$frwrev[1], "\n")
+    cat("Reads on reverse strand:", qc$frwrev[2], "\n")
+    cat("Fraction of reads on forward strand (before QC):", qcmean(qc$frwrev),"\n")
 }
 ```
 
@@ -215,11 +217,11 @@ Negative scores (if any) are ignored.
 
 ```{r hist.score1, fig.width=8}
 {
- cat("Average alignment score, after filter:", qcmean(qc$hist.score1),    "\n")
- cat("Average alignment score, no filter:   ", qcmean(qc$bf.hist.score1), "\n")
- par(mfrow=c(1,2))
- plot(qc$hist.score1)
- plot(qc$bf.hist.score1)
+cat("Average alignment score, after filter:", qcmean(qc$hist.score1),    "\n")
+cat("Average alignment score, no filter:   ", qcmean(qc$bf.hist.score1), "\n")
+par(mfrow=c(1,2))
+plot(qc$hist.score1)
+plot(qc$bf.hist.score1)
 }
 ```
 
@@ -239,13 +241,13 @@ reads with 1 aligned basepair, the second with 2, and so on.
 
 ```{r hist.length.matched, fig.width=8}
 {
- cat("Average aligned length, after filter:", 
-     qcmean(qc$hist.length.matched),    "\n")
- cat("Average aligned length, no filter:   ",
-     qcmean(qc$bf.hist.length.matched), "\n")
- par(mfrow = c(1,2))
- plot(qc$hist.length.matched)
- plot(qc$bf.hist.length.matched)
+cat("Average aligned length, after filter:", 
+    qcmean(qc$hist.length.matched),    "\n")
+cat("Average aligned length, no filter:   ",
+    qcmean(qc$bf.hist.length.matched), "\n")
+par(mfrow = c(1,2))
+plot(qc$hist.length.matched)
+plot(qc$bf.hist.length.matched)
 }
 ```
 
@@ -268,13 +270,13 @@ The `qcmean` function for this QC metric returns the average edit distance.
 
 ```{r hist.edit.dist1}
 {
- cat("Average edit distance, after filter:", 
-     qcmean(qc$hist.edit.dist1),    "\n")
- cat("Average edit distance, no filter:   ", 
-     qcmean(qc$bf.hist.edit.dist1), "\n")
- par(mfrow = c(1,2))
- plot(qc$hist.edit.dist1)
- plot(qc$bf.hist.edit.dist1)
+cat("Average edit distance, after filter:", 
+    qcmean(qc$hist.edit.dist1),    "\n")
+cat("Average edit distance, no filter:   ", 
+    qcmean(qc$bf.hist.edit.dist1), "\n")
+par(mfrow = c(1,2))
+plot(qc$hist.edit.dist1)
+plot(qc$bf.hist.edit.dist1)
 }
 ```
 
@@ -298,8 +300,8 @@ which is consistent with low level of noise.
 
 ```{r cnt.nonCpG.reads}
 {
- cat("Non-CpG reads:", qc$cnt.nonCpG.reads[1], "\n")
- cat("This is ", qcmean(qc$cnt.nonCpG.reads)*100, "% of recorded reads", sep="")
+cat("Non-CpG reads:", qc$cnt.nonCpG.reads[1], "\n")
+cat("This is ", qcmean(qc$cnt.nonCpG.reads)*100, "% of recorded reads", sep="")
 }
 ```
 
@@ -317,11 +319,11 @@ The opposite ratio measures the noise level (lower is better).
 
 ```{r avg.cpg.coverage}
 {
- cat("Summed across", qc$nbams, "bams", "\n")
- cat("Average     CpG coverage:", qc$avg.cpg.coverage, "\n")
- cat("Average non-CpG coverage:", qc$avg.noncpg.coverage, "\n")
- cat("Enrichment ratio:", qc$avg.cpg.coverage / qc$avg.noncpg.coverage, "\n")
- cat("Noise level:", qc$avg.noncpg.coverage / qc$avg.cpg.coverage)
+cat("Summed across", qc$nbams, "bams", "\n")
+cat("Average     CpG coverage:", qc$avg.cpg.coverage, "\n")
+cat("Average non-CpG coverage:", qc$avg.noncpg.coverage, "\n")
+cat("Enrichment ratio:", qc$avg.cpg.coverage / qc$avg.noncpg.coverage, "\n")
+cat("Noise level:", qc$avg.noncpg.coverage / qc$avg.cpg.coverage)
 }
 ```
 
@@ -345,9 +347,9 @@ caused by lab-technical factors.
 
 ```{r avg.coverage.by.density}
 {
-    cat("Highest coverage is observed at CpG density of",
-        qcmean(qc$avg.coverage.by.density)^2)
-    plot(qc$avg.coverage.by.density)
+cat("Highest coverage is observed at CpG density of",
+    qcmean(qc$avg.coverage.by.density)^2)
+plot(qc$avg.coverage.by.density)
 }
 ```
 
@@ -398,10 +400,10 @@ The `chrY.count` QC metric is defined analogously for chromosome Y.
 
 ```{r chrXY}
 {
- cat("ChrX reads: ", qc$chrX.count[1], ", which is ",
-     qcmean(qc$chrX.count)*100, "% of total", sep="", "\n")
- cat("ChrY reads: ", qc$chrY.count[1], ", which is ",
-     qcmean(qc$chrY.count)*100, "% of total", sep="", "\n")
+cat("ChrX reads: ", qc$chrX.count[1], ", which is ",
+    qcmean(qc$chrX.count)*100, "% of total", sep="", "\n")
+cat("ChrY reads: ", qc$chrY.count[1], ", which is ",
+    qcmean(qc$chrY.count)*100, "% of total", sep="", "\n")
 }
 ```
 

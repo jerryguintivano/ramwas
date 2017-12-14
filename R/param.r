@@ -38,8 +38,9 @@ parameterDump = function(dir, param, toplines = NULL){
 
     fid = file( paste0(dir, "/UsedSettings.txt"), "wt");
     on.exit(close(fid));
-    writeLines(con = fid,
-       text = c("## Parameters used to create the files in this directory",""));
+    writeLines(
+        con = fid,
+        text = c("## Parameters used to create the files in this directory",""))
     if( !is.null(toplines)){
         set = (names(param) %in% toplines);
         .dump(fid, param[ set]);
@@ -160,7 +161,6 @@ processCommandLine = function(.arg = NULL){
 }
 
 trimBamFilename = function(bamnames){
-    # bamnames = c('/gpfs_fs/pharm/MDDBrain/RaMWAS_SOLiD/bams/Wildfire_2014_06_16_1_STAN1_BA10_d15.bam','/gpfs_fs/pharm/blood_brain_celltype/bam_files/brain/GFM57_PE+.bam')
     BNnopath = basename(bamnames);
     BNnodotbam = gsub('\\.bam$', '', BNnopath, ignore.case = TRUE);
     return(BNnodotbam);
@@ -253,8 +253,12 @@ parameterPreprocess = function( param ){
             sep = "\t";
         }
         filename = makefullpath(param$dirproject, param$filecovariates);
-        param$covariates = read.table(filename, header = TRUE, sep = sep,
-                              stringsAsFactors = FALSE, check.names = FALSE);
+        param$covariates = read.table(
+                                file = filename, 
+                                header = TRUE, 
+                                sep = sep,
+                                stringsAsFactors = FALSE, 
+                                check.names = FALSE);
         rm(filename, sep);
     }
 
@@ -295,8 +299,8 @@ parameterPreprocess = function( param ){
 
         if( !all(param$modelcovariates %in% names(param$covariates) ) )
             stop( paste("Covariates (modelcovariates) missing in covariates:",
-             param$modelcovariates[
-                 !(param$modelcovariates %in% names(param$covariates)) ]));
+                param$modelcovariates[
+                    !(param$modelcovariates %in% names(param$covariates)) ]));
 
         if( !is.null(param$modeloutcome) )
             if( !( param$modeloutcome %in% names(param$covariates)) )
@@ -315,8 +319,9 @@ parameterPreprocess = function( param ){
                 object = paste(sort(param$modelcovariates), collapse = "\t"),
                 algo = "crc32",
                 serialize = FALSE);
-            param$dirpca = sprintf("PCA_%02d_cvrts_%s",
-                                   length(param$modelcovariates), hash);
+            param$dirpca = sprintf(
+                                "PCA_%02d_cvrts_%s",
+                                length(param$modelcovariates), hash);
         } else {
             param$dirpca = "PCA_00_cvrts";
         }
@@ -325,16 +330,18 @@ parameterPreprocess = function( param ){
 
     # Set param$dirmwas
     if( is.null(param$dirmwas) )
-        param$dirmwas = paste0("Testing_",
-                               param$modeloutcome,"_",
-                               param$modelPCs,"_PCs");
+        param$dirmwas = paste0(
+                            "Testing_",
+                            param$modeloutcome,"_",
+                            param$modelPCs,"_PCs");
     param$dirmwas = makefullpath(param$dirpca, param$dirmwas);
 
     # Set QQ-plot title
     if( is.null(param$qqplottitle)){
-        qqplottitle = paste0("Testing ", param$modeloutcome, "\n",
-                             param$modelPCs, " PC",
-                             if(param$modelPCs!=1)"s"else"");
+        qqplottitle = paste0(
+                            "Testing ", param$modeloutcome, "\n",
+                            param$modelPCs, " PC",
+                            if(param$modelPCs!=1)"s"else"");
         if(length(param$modelcovariates) > 0)
             qqplottitle = paste0(
                 qqplottitle, " and ",
@@ -345,8 +352,9 @@ parameterPreprocess = function( param ){
         rm(qqplottitle);
     }
     if( is.null(param$dircv))
-        param$dircv = sprintf("%s/CV_%02d_folds",
-                              param$dirmwas, param$cvnfolds);
+        param$dircv = sprintf(
+                            "%s/CV_%02d_folds",
+                            param$dirmwas, param$cvnfolds);
 
     ### CpG set should exist
     if( !is.null(param$filecpgset)){
@@ -395,10 +403,11 @@ parameterPreprocess = function( param ){
 
     # SNPs analysis
     if(is.null(param$dirSNPs))
-        param$dirSNPs = paste0("Testing_wSNPs_",
-                               param$modeloutcome, "_",
-                               length(param$modelcovariates), "cvrts_",
-                               param$modelPCs, "PCs");
+        param$dirSNPs = paste0(
+                            "Testing_wSNPs_",
+                            param$modeloutcome, "_",
+                            length(param$modelcovariates), "cvrts_",
+                            param$modelPCs, "PCs");
     param$dirSNPs = makefullpath( param$dircoveragenorm, param$dirSNPs);
     if(!is.null(param$fileSNPs))
         param$fileSNPs = makefullpath( param$dircoveragenorm, param$fileSNPs);

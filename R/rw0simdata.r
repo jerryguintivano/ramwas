@@ -65,9 +65,10 @@ ramwas0createArtificialData = function(
     # Age covariate and effects
     {
         age = sample(x = 20:80, size = nsamples, replace = TRUE)
-        cpgageset = groupSample( len = length(locsgood),
-                                 size = length(locsgood)/100,
-                                 gr = 6);
+        cpgageset = groupSample( 
+                        len = length(locsgood),
+                        size = length(locsgood)/100,
+                        gr = 6);
         cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
         cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
         rm(cpgageset)

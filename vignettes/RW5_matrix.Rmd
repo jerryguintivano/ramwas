@@ -2,13 +2,13 @@
 title: "5. Analyzing Data from Other Methylation Platforms or Data Types"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    toc: true # table of content true
+    BiocStyle::html_document:
+        toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{5. Analyzing data from other sources}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{5. Analyzing data from other sources}
+    %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  chunk_output_type: console
+    chunk_output_type: console
 ---
 
 
@@ -51,19 +51,19 @@ We create data files in the same format as produced by
 
 These files include
 
-* `CpG_locations.*` -- filematrix with the location of 
-the CpGs / SNPs / gene trascription start sites.\
-It must have two columns with integer values -- 
-chromosome number and location
-(`chr` and `position`).
-* `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
-for the integer column `chr` in the location filematrix.
-* `Coverage.*` -- filematrix with the data for all samples and all locations.\
-  Each row has data for a single sample.
-  Row names must be sample names.\
-  Each column has data for a single location
-  (CpG / SNP / gene trascription start site).
-  Columns must match rows of the location filematrix.\
+*   `CpG_locations.*` -- filematrix with the location of 
+    the CpGs / SNPs / gene trascription start sites.\
+    It must have two columns with integer values -- 
+    chromosome number and location
+    (`chr` and `position`).
+*   `CpG_chromosome_names.txt` -- file with chromosome names (factor levels)
+    for the integer column `chr` in the location filematrix.
+*   `Coverage.*` -- filematrix with the data for all samples and all locations.\
+    Each row has data for a single sample.
+    Row names must be sample names.\
+    Each column has data for a single location
+    (CpG / SNP / gene trascription start site).
+    Columns must match rows of the location filematrix.\
 
 First, we load the package and set up a working directory.
 The project directory `dr` can be set to
@@ -121,8 +121,9 @@ fmloc = fm.create.from.matrix(
             filenamebase = paste0(dr,"/CpG_locations"),
             mat = locmat)
 close(fmloc)
-writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"),
-           text = chrnames)
+writeLines(
+        con = paste0(dr,"/CpG_chromosome_names.txt"),
+        text = chrnames)
 ```
 
 Finally, we create data matrix.
@@ -156,9 +157,9 @@ close(fm)
 
 To run PCA with RaMWAS we specify three parameters:
 
-* `dircoveragenorm` -- directory with the data matrix
-* `covariates` -- data frame with covariates
-* `modelcovariates` -- names of covariates to regress out
+*   `dircoveragenorm` -- directory with the data matrix
+*   `covariates` -- data frame with covariates
+*   `modelcovariates` -- names of covariates to regress out
 
 ```{r param1}
 param = ramwasParameters(

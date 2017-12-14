@@ -13,8 +13,9 @@
         # which(ind2>ind1)
         # are covered by fragments
         # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
-        .Call("cover_frw_c",
-              startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+        .Call(
+            .NAME = "cover_frw_c",
+            startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
     }
     if(length(startrev) > 0){
         # CpGs left of start
@@ -25,8 +26,9 @@
         # which(ind2>ind1)
         # are covered by fragments
         # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
-        .Call("cover_rev_c",
-              startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
+        .Call(
+            .NAME = "cover_rev_c",
+            startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
     }
     return(cover);
 }
@@ -37,10 +39,11 @@ calc.coverage = function(rbam, cpgset, fragdistr){
     names(coveragelist) = names(cpgset);
     for( chr in names(coveragelist) ){ # chr = names(coveragelist)[1]
         coveragelist[[chr]] =
-            .calc.coverage.chr(rbam$startsfwd[[chr]],
-                               rbam$startsrev[[chr]],
-                               cpgset[[chr]],
-                               fragdistr);
+            .calc.coverage.chr(
+                    startfrw = rbam$startsfwd[[chr]],
+                    startrev = rbam$startsrev[[chr]],
+                    cpgs = cpgset[[chr]],
+                    fragdistr = fragdistr);
     }
     return(coveragelist);
 }
@@ -99,9 +102,10 @@ pipelineCoverage1Sample = function(colnum, param){
             rbam = bam.removeRepeats( rbams[[1]], param$maxrepeats );
         }
         rm(rbams);
-        coverage = calc.coverage(rbam = rbam,
-                                 cpgset = cpgset,
-                                 fragdistr = param$fragdistr)
+        coverage = calc.coverage(
+                        rbam = rbam,
+                        cpgset = cpgset,
+                        fragdistr = param$fragdistr)
     }
     return(coverage);
 }
@@ -181,13 +185,14 @@ pipelineCoverage1Sample = function(colnum, param){
         fr = (part-1)*step1 + 1;
         to = min(part*step1, mm);
 
-        subslice = mat[fr:to,,drop=FALSE];
+        subslice = mat[fr:to, , drop=FALSE];
 
         ### Filtering criteria
         cpgmean = rowMeans( subslice );
         cpgnonz = rowMeans( subslice>0 );
-        keep = (cpgmean >= param$minavgcpgcoverage) &
-               (cpgnonz >= param$minnonzerosamples);
+        keep = 
+            (cpgmean >= param$minavgcpgcoverage) &
+            (cpgnonz >= param$minnonzerosamples);
         if( !any(keep) )
             next;
 
@@ -238,7 +243,7 @@ pipelineCoverage1Sample = function(colnum, param){
     fm = fm.open(filename, lockfile = param$lockfile2);
     
     .log(ld, "%s, Process %06d, Start normalizing slice: %03d",
-            date(), Sys.getpid(), fmpart_offset[1]);
+        date(), Sys.getpid(), fmpart_offset[1]);
 
     # Read filtered+transposed 
     filename = paste0(param$dirtemp2, "/TrCoverage_part", fmpart_offset[1]);
@@ -276,8 +281,9 @@ ramwas3normalizedCoverage = function( param ){
     if( param$minfragmentsize < param$maxfragmentsize ){
         filename = paste0(param$dirfilter,"/Fragment_size_distribution.txt");
         if( !file.exists(filename) )
-            stop("Fragment size distribution estimate not found: ", filename,
-                 "\nRun ramwas2collectqc() function first")
+            stop(
+                "Fragment size distribution estimate not found: ", filename,
+                "\nRun ramwas2collectqc() function first")
         param$fragdistr = as.double(readLines(con = filename));
         rm(filename);
     } else {
@@ -355,7 +361,7 @@ ramwas3normalizedCoverage = function( param ){
         mm = ncpgs;
         nslices = ceiling(mm/step1);
         .log(ld, "%s, Creating %d file matrices for raw scores at: %s",
-             date(), nslices, param$dirtemp1);
+            date(), nslices, param$dirtemp1);
         
         for( part in seq_len(nslices) ){ # part = 1
             # cat("Creating raw  matrix slices", part, "of", nslices, "\n");
@@ -452,7 +458,7 @@ ramwas3normalizedCoverage = function( param ){
     ### Prepare CpG set for filtered CpGs
     {
         .log(ld, "%s, Saving locations for CpGs which passed the filter", 
-             date());
+            date());
 
         chr = rep(seq_along(cpgset), sapply(cpgset, length));
         pos = unlist(cpgset, recursive = FALSE, use.names = FALSE);
@@ -522,10 +528,11 @@ ramwas3normalizedCoverage = function( param ){
                 sliceoffsets[-length(sliceoffsets)]));
 
         ### Create big matrix for normalized coverage
-        fm = fm.create(paste0(param$dircoveragenorm, "/Coverage"),
-                       nrow = nsamples,
-                       ncol = tail(sliceoffsets,1),
-                       size = param$doublesize);
+        fm = fm.create(
+                    filenamebase = paste0(param$dircoveragenorm, "/Coverage"),
+                    nrow = nsamples,
+                    ncol = tail(sliceoffsets,1),
+                    size = param$doublesize);
         rownames(fm) = names(param$bam2sample);
         close(fm);
 

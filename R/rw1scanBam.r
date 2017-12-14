@@ -33,8 +33,9 @@ pipelineSaveQCplots = function(param, rbam, bamname){
         rm(filename);
     }
     if( !is.null(rbam$qc$avg.coverage.by.density) ){
-        filename = paste0(param$dirqc,
-                          "/coverage_by_density/cbd_",bamname,".pdf");
+        filename = paste0(
+                        param$dirqc,
+                        "/coverage_by_density/cbd_",bamname,".pdf");
         dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
         pdf(filename);
         plot(rbam$qc$avg.coverage.by.density, samplename = bamname);
@@ -163,8 +164,9 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
         {
             offset = length(startlistfwd);
             split.levels = as.integer(bb$rname) + offset*bb$isReverse;
-            levels(split.levels) = c(names(startlistfwd),
-                                     paste0(names(startlistfwd),"-"));
+            levels(split.levels) = c(
+                                    names(startlistfwd),
+                                    paste0(names(startlistfwd),"-"));
             class(split.levels) = "factor";
             splt = split( bb$startpos, split.levels, drop = FALSE);
             # print(sapply(splt,length))

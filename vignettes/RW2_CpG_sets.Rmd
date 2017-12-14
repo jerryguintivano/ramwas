@@ -2,11 +2,13 @@
 title: "2. CpG sets"
 date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    toc: true # table of content true
+    BiocStyle::html_document:
+        toc: true # table of content true
 vignette: >
-  %\VignetteIndexEntry{2. CpG sets}
-  %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{2. CpG sets}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    chunk_output_type: console
 ---
 
 # CpG sets
@@ -20,9 +22,10 @@ with the set of locations stored as a `list` with
 one sorted vector of CpG locations per chromosome.
 
 ```{r CpGsetExample}
-cpgset = list( chr1 = c(12L, 57L, 123L),
-               chr2 = c(45L, 95L, 99L, 111L),
-               chr3 = c(22L, 40L, 199L, 211L) )
+cpgset = list( 
+            chr1 = c(12L, 57L, 123L),
+            chr2 = c(45L, 95L, 99L, 111L),
+            chr3 = c(22L, 40L, 199L, 211L) )
 ```
 
 In practice, the set should depend
@@ -256,8 +259,9 @@ cover = split(cover, fac)
 # filter CpGs on each chromosome by the coverage
 cpgsetQC = cpgset
 for( i in seq_along(cpgset) ){
-    keep = (cover[[i]] >= (targetcov - covtolerance)) &
-           (cover[[i]] <= (targetcov + covtolerance))
+    keep = 
+        (cover[[i]] >= (targetcov - covtolerance)) &
+        (cover[[i]] <= (targetcov + covtolerance))
     cpgsetQC[[i]] = cpgset[[i]][ keep ]
 }
 ```

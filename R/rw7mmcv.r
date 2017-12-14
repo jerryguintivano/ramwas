@@ -14,17 +14,18 @@ plotROC = function(outcome, forecast){
     fpr = zeroesHereOrRight / zeroesHereOrRight[1]
     tpr = onesHereOrRight / onesHereOrRight[1]
 
-    plot(x = fpr,
-         y = tpr,
-         xlim = c(0,1),
-         ylim = c(0,1),
-         xaxs = "i",
-         yaxs = "i",
-         type = "l",
-         col = "blue",
-         lwd = 2,
-         xlab = "False positive rate",
-         ylab = "True positive rate");
+    plot(
+        x = fpr,
+        y = tpr,
+        xlim = c(0,1),
+        ylim = c(0,1),
+        xaxs = "i",
+        yaxs = "i",
+        type = "l",
+        col = "blue",
+        lwd = 2,
+        xlab = "False positive rate",
+        ylab = "True positive rate");
     abline(a = 0, b = 1);
 }
 
@@ -36,14 +37,16 @@ ramwas7ArunMWASes = function(param){
         param$toppvthreshold = 50;
     ld = param$dircv;
     dir.create(param$dircv, showWarnings = FALSE, recursive = TRUE);
-     .log(ld, "%s, Start ramwas7ArunMWASes() call", date(), append = FALSE);
+    .log(ld, "%s, Start ramwas7ArunMWASes() call", date(), append = FALSE);
 
     if(is.null(param$modeloutcome))
-        stop("Model outcome variable not defined\n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome variable not defined\n",
+            "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
-        stop("Model outcome is not found among covariates.\'n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome is not found among covariates.\'n",
+            "See \"modeloutcome\" parameter");
 
     outcome = param$covariates[[ param$modeloutcome ]];
     
@@ -80,7 +83,7 @@ ramwas7ArunMWASes = function(param){
     for( fold in seq_len(param$cvnfolds) ){ # fold = 1
 
         .log(ld, "%s, Start MWAS for fold %02d of %d",
-             date(), fold, param$cvnfolds);
+            date(), fold, param$cvnfolds);
 
         exclude = exclude0;
         exclude[ shuffle[starts[fold]:(starts[fold+1]-1)] ] = TRUE;
@@ -130,32 +133,38 @@ predictionStats = function(outcome, forecast, dfFull = NULL){
 
 # Plot true outcome vs. prediction
 # with correlations and p-value in the title
-plotPrediction = function(param, outcome, forecast,
-                          cpgs2use, main, dfFull = NULL){
+plotPrediction = function(
+        param,
+        outcome,
+        forecast,
+        cpgs2use,
+        main,
+        dfFull = NULL){
     rng = range(c(outcome, forecast), na.rm = TRUE);
     stats = predictionStats(outcome, forecast, dfFull);
 
-    plot( outcome,
-          forecast,
-          pch = 19,
-          col = "blue",
-          xlab = param$modeloutcome,
-          ylab = "CV prediction",
-          xlim = rng,
-          ylim = rng,
-          main = sprintf(paste0(
-              "%s\n",
-              "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
-              "R2 = %.3f / %.3f, p-value = %.3e / %.3e"),
-            main, stats$MSE, stats$MAD,
-            stats$corp, stats$cors,
-            stats$R2p, stats$R2s,
-            stats$pvp, stats$pvs)
-    );
-    legend(x = "bottomright",
-           legend = c(paste0("# CpGs = ",   cpgs2use),
-                      paste0("EN alpha = ", param$mmalpha))
-    );
+    plot( 
+        x = outcome,
+        y = forecast,
+        pch = 19,
+        col = "blue",
+        xlab = param$modeloutcome,
+        ylab = "CV prediction",
+        xlim = rng,
+        ylim = rng,
+        main = sprintf(paste0(
+                    "%s\n",
+                    "RMSE = %.3f, MAD = %.3f, cor = %.3f / %.3f (P/S)\n",
+                    "R2 = %.3f / %.3f, p-value = %.3e / %.3e"),
+                main, stats$MSE, stats$MAD,
+                stats$corp, stats$cors,
+                stats$R2p, stats$R2s,
+                stats$pvp, stats$pvs));
+    legend(
+        x = "bottomright",
+        legend = c(
+                paste0("# CpGs = ",   cpgs2use),
+                paste0("EN alpha = ", param$mmalpha)));
     abline(a = 0, b = 1, col = "gray")
 }
 
@@ -168,11 +177,13 @@ ramwas7BrunElasticNet = function(param){
     .log(ld, "%s, Start ramwas7BrunElasticNet() call", date());
     
     if(is.null(param$modeloutcome))
-        stop("Model outcome variable not defined\n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome variable not defined\n",
+            "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
-        stop("Model outcome is not found among covariates.\'n",
-             "See \"modeloutcome\" parameter");
+        stop(
+            "Model outcome is not found among covariates.\'n",
+            "See \"modeloutcome\" parameter");
 
     
     # Get data access
@@ -188,7 +199,7 @@ ramwas7BrunElasticNet = function(param){
         forecast0 = NULL;
         for( fold in seq_len(param$cvnfolds) ){ # fold = 1
             .log(ld, "%s, Processing fold %02d of %d", 
-                 date(), fold, param$cvnfolds);
+                date(), fold, param$cvnfolds);
             {
                 dircvmwas = sprintf("%s/fold_%02d", param$dircv, fold);
                 rdsfile = paste0(dircvmwas, "/exclude.rds");
@@ -330,8 +341,9 @@ plotCVcors = function(cl, param){
         legend = c("Correlations:","Pearson", "Spearman"),
         pch = c(NA_integer_,19,17),
         col = c("red","red","cyan4"));
-    title(paste0("Prediction of \"", param$modeloutcome,"\"\n",
-                 param$cvnfolds,"-fold cross validation"));
+    title(paste0(
+            "Prediction of \"", param$modeloutcome,"\"\n",
+            param$cvnfolds,"-fold cross validation"));
 }
 
 ramwas7CplotByNCpGs = function(param){

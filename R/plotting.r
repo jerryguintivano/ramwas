@@ -3,7 +3,6 @@ qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
     if(is.null(ntests))
         ntests = length(pvalues);
     
-    
     if(ismlog10) {
         ypvs = pvalues;
     } else {
@@ -16,11 +15,8 @@ qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
     
     if(length(ypvs)*2 > ntests) {
         lambda =
-                qchisq(p = 0.1^ypvs[ntests/2], df = 1, lower.tail = FALSE) / 
-                qchisq(p = 0.5, df = 1, lower.tail = FALSE);
-        # lambda = sprintf("%.3f",log10(pvalues[ntests/2]) / log10(0.5));
-        # legend("bottom", legend = bquote(lambda == .(lambda)), bty = "n")
-        # 		text(mx, mx/2, bquote(lambda == .(lambda)), pos=2)
+            qchisq(p = 0.1^ypvs[ntests/2], df = 1, lower.tail = FALSE) / 
+            qchisq(p = 0.5, df = 1, lower.tail = FALSE);
     } else {
         lambda = NULL;
     }
@@ -250,27 +246,40 @@ manPlotFast = function(
         yaxmax = floor(my);
     
     # Plot frame
-    plot(NA, NA, 
-         xlim = c(0, tail(man$offsets,1)), 
-         ylim = ylim, 
-         xaxs = 'i', 
-         yaxs = 'i',
-         xlab = 'Chromosome', 
-         ylab = expression(paste("\u2013", " log"[10]*"(", italic("P"), "), observed")),
-         # ylab = expression("- log"[10]*"(p-value), observed"),
-         #ylab = "",#expression("- log"[10]*"(p-value)"),
-         axes = FALSE);
-    # abline(v = man$offsets[-c(1,length(man$offsets))], col = 'grey', lwd = 2)
-    axis(side = 1, at = man$offsets, labels = rep("", length(man$offsets)), lwd = lwd);
-    axis(side = 1, 
-         at = (man$offsets[-1] + man$offsets[-length(man$offsets)])/2, 
-         labels = man$chrnames,
-         tick = FALSE,
-         lwd = lwd);
-    axis(2, at = seq(0, yaxmax, axistep), lwd = lwd);
+    plot(
+        x = NA,
+        y = NA, 
+        xlim = c(0, tail(man$offsets,1)), 
+        ylim = ylim, 
+        xaxs = 'i', 
+        yaxs = 'i',
+        xlab = 'Chromosome', 
+        ylab = expression(
+            paste("\u2013", " log"[10]*"(", italic("P"), "), observed")),
+        axes = FALSE);
+    axis(
+        side = 1,
+        at = man$offsets,
+        labels = rep("", length(man$offsets)),
+        lwd = lwd);
+    axis(
+        side = 1,
+        at = (man$offsets[-1] + man$offsets[-length(man$offsets)])/2,
+        labels = man$chrnames,
+        tick = FALSE,
+        lwd = lwd);
+    axis(
+        side = 2,
+        at = seq(0, yaxmax, axistep),
+        lwd = lwd);
     
     # plot points in palette color
     oldPal = palette(colorSet);
-    points(man$x, man$y, pch = 20, col = ((man$colindex-1L) %% length(colorSet)) + 1L, cex = cex)
+    points(
+        x = man$x,
+        y = man$y,
+        pch = 20,
+        col = ((man$colindex-1L) %% length(colorSet)) + 1L,
+        cex = cex);
     palette(oldPal);
 }

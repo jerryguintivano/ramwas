@@ -191,10 +191,11 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 
 # Get covariates + PCs matrix for analysis
 # orthonormalized unless normalize == FALSE
-.getCovariates = function(param,
-                          rowsubset = NULL,
-                          normalize = TRUE,
-                          modelhasconstant){
+.getCovariates = function(
+        param,
+        rowsubset = NULL,
+        normalize = TRUE,
+        modelhasconstant){
     # Named covariates
     cvrt = param$covariates[ param$modelcovariates ];
 
@@ -232,7 +233,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 .log = function(ld, fmt, ..., append = TRUE){
     msg = sprintf(fmt, ...);
     cat(file = paste0(ld, "/Log.txt"),
-         msg, "\n", sep = "", append = append);
+        msg, "\n", sep = "", append = append);
     message(msg);
     return(invisible(msg));
 }

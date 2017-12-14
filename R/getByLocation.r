@@ -78,9 +78,10 @@ getLocations = function(x){
     chr = as.integer(locmat[,1]);
     levels(chr) = chrnames;
     class(chr) = "factor";
-    locations = data.frame(chr = chr, 
-                           start = locmat[,2], 
-                           end = locmat[,2] + 1L);
+    locations = data.frame(
+                    chr = chr, 
+                    start = locmat[,2], 
+                    end = locmat[,2] + 1L);
     if( ncol(locmat) >= 3 )
         locations$end = locmat[,3];
     return(locations);
@@ -130,17 +131,19 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     dir.create(targetdir, showWarnings = FALSE)
     setwd(targetdir)
 
-    file.copy(from = paste0(dircov,'/CpG_chromosome_names.txt'),
-              to = 'CpG_chromosome_names.txt');
+    file.copy(
+            from = paste0(dircov,'/CpG_chromosome_names.txt'),
+            to = 'CpG_chromosome_names.txt');
     fm = fm.create.from.matrix('CpG_locations', locmat[mch,]);
     close(fm);
 
     fi = fm.open(paste0(dircov,'/Coverage'), readonly = TRUE)
-    fo = fm.create('Coverage',
-                   nrow = nrow(fi),
-                   ncol = length(mch),
-                   type = fi$type,
-                   size = fi$size);
+    fo = fm.create(
+                filenamebase = 'Coverage',
+                nrow = nrow(fi),
+                ncol = length(mch),
+                type = fi$type,
+                size = fi$size);
 
     step1 = 1024;
     runto = length(mch);
