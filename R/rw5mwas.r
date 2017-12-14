@@ -34,7 +34,7 @@ testPhenotype = function(phenotype, data, cvrtqr){
         keep = abs(diag(qr.R(q))) > .Machine$double.eps*ncol(mycov);
 
         mycov = t( qr.Q(qr(t(dummy))) );
-        mycov = mycov[keep, ];
+        mycov = mycov[keep, , drop = FALSE];
     } else {
         cvsumsq1 = sum( mycov^2 );
         mycov = mycov - tcrossprod(mycov,cvqr0) %*% cvqr0;
