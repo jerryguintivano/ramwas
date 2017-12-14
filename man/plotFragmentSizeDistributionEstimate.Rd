@@ -1,5 +1,6 @@
 \name{plotFragmentSizeDistributionEstimate}
 \alias{plotFragmentSizeDistributionEstimate}
+\alias{estimateFragmentSizeDistribution}
 \title{
     Estimate and plot Fragment Size Distribution.
 }
@@ -23,9 +24,6 @@ plotFragmentSizeDistributionEstimate(frdata, estimate)
     \item{estimate}{
         Fragment size distribution estimate.
     }
-}
-\details{
-    The plot has no title. To add a title use \code{\link[graphics]{title}}.
 }
 \value{
     The function \code{estimateFragmentSizeDistribution}
