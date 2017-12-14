@@ -399,7 +399,7 @@ plotPCvectors(e, 2)
 The file with correlations shows
 strong correlation of the top PCs with age and sex.
 
-```{r tablePCAcr, echo=FALSE, warning=FALSE, message=FALSE}
+```{r tablePCAcr, warning=FALSE, message=FALSE}
 tblcr = read.table(
             file = paste0(pfull$dirpca, "/PC_vs_covs_corr.txt"),
             header = TRUE,
@@ -411,7 +411,7 @@ The file with p-values indicate statistical significance of these correlations.
 
 Table: Correlations\ in\ `PC_vs_covariates_corr.txt`\ file.
 
-```{r tablePCApv, echo=FALSE, warning=FALSE, message=FALSE}
+```{r tablePCApv, warning=FALSE, message=FALSE}
 tblpv = read.table(
             file = paste0(pfull$dirpca, "/PC_vs_covs_pvalue.txt"),
             header = TRUE,
@@ -459,7 +459,7 @@ diagonal for many CpGs, suggesting many markers with small effects.
 This is consistent with how the data was generated --
 there is weak signal in 1\% of CpGs.
 
-```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE}
+```{r tableMWAS, warning=FALSE, message=FALSE}
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
 close(fm)
