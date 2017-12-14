@@ -48,10 +48,10 @@ data = matrix(rnorm(n*m), nrow = m)
 covmat = crossprod(data)
 e = eigen(covmat)
 
-$ Plot PC values
+# Plot PC values
 plotPCvalues(e$values)
 
-$ Plot PC vectors
+# Plot PC vectors
 plotPCvectors(e, 1)
 plotPCvectors(e, 2)
 }
