@@ -13,7 +13,7 @@ setRefClass("rwDataClass",
         initialize = function(param = NULL, getPCs = TRUE, lockfile = NULL){
             if( !is.null(param) ){
                 .self$open(param = param, getPCs = getPCs, lockfile = lockfile);
-                return();
+                return(invisible(.self));
             }
             fmdata <<- new("filematrix");
             samplenames <<- character(0);
@@ -22,7 +22,7 @@ setRefClass("rwDataClass",
             ndatarows <<- 0;
             rowsubset <<- NULL;
             cvrtqr <<- NULL;
-            return(.self);
+            return(invisible(.self));
         },
         open = function(param, getPCs = TRUE, lockfile = NULL){
             # Checks of parameters and files
@@ -93,56 +93,28 @@ setRefClass("rwDataClass",
                 rm(e);
             }
         
-            # Add a constant?
-            if( param$modelhasconstant ){
-                cvrt = c(const = list(rep(1, nrow(cvrt))), cvrt);
-            } else {
-                cvrt = cvrt;
-            }
+            cvrtqr <<- orthonormalizeCovariates(
+                            cvrt = cvrt,
+                            modelhasconstant = param$modelhasconstant);
             
-            # orthonormalize the covariates
-            if( is.list(cvrt) ){
-                isfactorset = sapply(cvrt, class) %in% c("character","factor");
-                for( ind in seq_along(isfactorset) ){ # ind = 1
-                    if( isfactorset[ind] ){
-                        fctr = factor(cvrt[[ind]]);
-                        if(nlevels(fctr) >= 2) {
-                            cvrt[[ind]] = model.matrix(~fctr)[,-1];
-                        } else {
-                            cvrt[[ind]] = NULL;
-                        }
-                        rm(fctr);
-                    } else {
-                        # Kill pure zero covariates
-                        if( all(cvrt[[ind]] == 0) )
-                            cvrt[ind] = list(NULL);
-                    }
-                }
-                cvrtmat = matrix(unlist(cvrt), nrow = nsamples);
-            } else {
-                cvrtmat = cvrt;
-            }
-            
-            cvrtqr <<- qr.Q(qr(cvrtmat));
-            
-            
+            return(invisible(.self));
         },
         close = function(){
             fmdata$close();
         },
         getDataRez = function(colset, resid = TRUE){
             # Get data
-            x = fmdata[,colset];
+            x = fmdata[, colset];
             
             # Subset to active rows
             if( !is.null(rowsubset) )
-                x = x[rowsubset,];
+                x = x[rowsubset, ];
             
             # Impute missing values
             naset = is.na(x);
             if( any(naset) ){
                 set = which(colSums(naset) > 0L);
-                for( j in set ) { # j = set[1]
+                for( j in set ){ # j = set[1]
                     cl = x[,j];
                     mn = mean(cl, na.rm = TRUE);
                     if( is.na(mn) )
