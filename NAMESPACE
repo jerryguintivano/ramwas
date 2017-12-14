@@ -29,6 +29,8 @@ export(
     qqPlotPrepare,
     manPlotPrepare,
     manPlotFast,
+    plotPCvalues,
+    plotPCvectors,
     plotROC,
     rowSumsSq,
     colSumsSq,

@@ -88,7 +88,7 @@ plotPCvectors = function(e, i){
         ylab = "PC components",
         pch = 19,
         col = "blue1",
-        xlim = c(0, length(e$values)+0.5),
+        xlim = c(0.001, length(e$values)+0.999),
         xaxs = "i");
     abline(h = 0, col = "grey");
 }
