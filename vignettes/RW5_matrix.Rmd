@@ -18,6 +18,7 @@ library(knitr)
 library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
+opts_chunk$set(fig.width = 6, fig.height = 6)
 # opts_chunk$set(eval=FALSE)
 # dr = "D:/temp/"
 ```
@@ -181,7 +182,7 @@ ramwas4PCA(param)
 ```
 
 The top several PCs are marginally distinct from the rest.
-```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 ramwas:::plotPCvalues(e$values)
@@ -265,7 +266,7 @@ ramwas5MWAS(param)
 The QQ-plot shows mild enrichment among a large number of variables,
 which is consistent with how the data was generated --
 22\% of variables are affected by sex.
-```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]

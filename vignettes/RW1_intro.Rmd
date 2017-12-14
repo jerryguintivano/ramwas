@@ -137,7 +137,7 @@ param = ramwasParameters(
     biflank = 0,
     cvnfolds = 5,
     mmalpha = 0,
-    mmncpgs = c(5,10,50,100,500,1000,2000,3000)
+    mmncpgs = c(5,10,50,100,500,1000,2000)
 )
 ```
 We describe the role of each parameter as they are used below.
@@ -180,25 +180,26 @@ This creates the following subdirectories in the project directory:
 *   `qc` -- directory with a number of quality control (QC) plots, 
     one plot per QC metrix per BAM.\
     For more information see [BAM QC vignette](RW3_BAM_QCs.html).
-    * `edit_distance` -- plots showing distribution of edit distance, i.e.
-    number of mismatches between the aligned read and the reference genome.
-    * `isolated_distance` -- plots showing distribution of distances
-    from read starts to isolated CpGs. \
-    The CpGs are called isolated if they are located at least `maxfragmentsize`
-    basepairs away from any other CpG.\
-    The distribution of reads around these CpGs is used later
-    for estimation of fragment size distribution.
-    * `matched_length` -- plots showing distribution of the length of the
-    reads aligned to the reference genome.
-    * `score` -- plots showing distribution of the score (`scoretag` parameter).
-    * `coverage_by_density` -- plots showing average CpG score (coverage) as
-    a function of CpG density.\
-    These plots illustrate the performance of the enrichment protocol.
-    It is a sign of a stable protocol if the shape of these
-    plots is the same across BAMs.
-* `rds_rbam` and `rds_qc` -- directories with RaMWAS BAM info files
-(BAM read start locations) and BAM quality control metrics,
-one RDS file per BAM.
+    *   `edit_distance` -- plots showing distribution of edit distance, i.e.
+        number of mismatches between the aligned read and the reference genome.
+    *   `isolated_distance` -- plots showing distribution of distances
+        from read starts to isolated CpGs. \
+        The CpGs are called isolated if they are located at least 
+        `maxfragmentsize` basepairs away from any other CpG.\
+        The distribution of reads around these CpGs is used later
+        for estimation of fragment size distribution.
+    *   `matched_length` -- plots showing distribution of the length of the
+        reads aligned to the reference genome.
+    *   `score` -- plots showing distribution of the score 
+        (`scoretag` parameter).
+    *   `coverage_by_density` -- plots showing average CpG score (coverage) as
+        a function of CpG density.\
+        These plots illustrate the performance of the enrichment protocol.
+        It is a sign of a stable protocol if the shape of these
+        plots is the same across BAMs.
+*   `rds_rbam` and `rds_qc` -- directories with RaMWAS BAM info files
+    (BAM read start locations) and BAM quality control metrics,
+    one RDS file per BAM.
 
 Here is a `coverage_by_density` plot for the simulated data.
 It shows higher average CpG score (fragment coverage) for regions
@@ -237,36 +238,36 @@ ramwas2collectqc(param)
 
 The following files and directories are created in the project directory:
 
-* `Fragment_size_distribution.txt` -- text file with estimated
+*   `Fragment_size_distribution.txt` -- text file with estimated
 fragment size distribution.
-* `qc/Fragment_size_distribution_estimate.pdf` -- plot showing both
+*   `qc/Fragment_size_distribution_estimate.pdf` -- plot showing both
 estimated fragment size distribution and the distribution of distances
 from read starts to isolated CpGs.
-* Four sub-directories in the "qc" directory
-    + `summary_bams` -- by BAMs.\
-    This information can be used 
-    to exclude BAMs that fail selected QC criteria.
-    + `summary_bams_in_bam2sample` -- by BAMs,
-    but only those listed in `filebam2sample` parameter.\
-    This information can be used to confirm that all BAMs that did not pass
-    QC are no longer used in further analyses.
-    + `summary_by_sample` -- by sample.\
-    Slightly different QC criteria can be applied on sample level.
-    For example, samples with low number of total reads 
-    can be excluded.
-    + `summary_total` -- total across all BAMs.\
-    This information presents the project summary 
-    of all BAMs in `filebam2sample`.
+*   Four sub-directories in the "qc" directory
+    +   `summary_bams` -- by BAMs.\
+        This information can be used 
+        to exclude BAMs that fail selected QC criteria.
+    +   `summary_bams_in_bam2sample` -- by BAMs,
+        but only those listed in `filebam2sample` parameter.\
+        This information can be used to confirm that all BAMs that did not pass
+        QC are no longer used in further analyses.
+    +   `summary_by_sample` -- by sample.\
+        Slightly different QC criteria can be applied on sample level.
+        For example, samples with low number of total reads 
+        can be excluded.
+    +   `summary_total` -- total across all BAMs.\
+        This information presents the project summary 
+        of all BAMs in `filebam2sample`.
 * The directories listed above contain
-    - `Summary_QC.txt` -- table with a number of numerical QC measures,
-    in an Excel friendly format.
-    - `Summary_QC_R.txt` -- table with a number of numerical QC measures,
-    in an R friendly format.
-    - `qclist.rds` -- an R file with list of QC objects.
-    - `Fig_hist_*.pdf` -- histograms of several QC measures across samples.
-    - `Fig_*.pdf` -- PDF files with various QC plots,
-    one page per BAM or sample,
-    depending on the directory.
+    -   `Summary_QC.txt` -- table with a number of numerical QC measures,
+        in an Excel friendly format.
+    -   `Summary_QC_R.txt` -- table with a number of numerical QC measures,
+        in an R friendly format.
+    -   `qclist.rds` -- an R file with list of QC objects.
+    -   `Fig_hist_*.pdf` -- histograms of several QC measures across samples.
+    -   `Fig_*.pdf` -- PDF files with various QC plots,
+        one page per BAM or sample,
+        depending on the directory.
 
 After exclusion of BAMs and samples not passing QC,
 step 2 should be rerun. This ensures that
@@ -300,10 +301,10 @@ RaMWAS can filter out CpGs with low scores.
 These CpGs are unmethylated and are unlikely to produce any findings.
 A CpG is preserved if
 
-* CpG has average equal or greater than the 
-threshold `minavgcpgcoverage` (default is 0.3).
-* CpG has at least `minnonzerosamples` proportion of samples
-with nonzero coverage\
+*   CpG has average equal or greater than the 
+    threshold `minavgcpgcoverage` (default is 0.3).
+*   CpG has at least `minnonzerosamples` proportion of samples
+    with nonzero coverage\
     (default is 0.3, i.e. a CpG is preserved if at least 30\% of samples
     have non-zero coverage).
 
@@ -388,7 +389,7 @@ The sub-directory includes:
 The PC plot for artificial data shows one strong component and
 no outliers in the sample loadings, with first PC clearly capturing sample sex.
 
-```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE}
+```{r plotPCA, warning=FALSE, message=FALSE}
 e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
 plotPCvalues(e$values)
 plotPCvectors(e, 1)
