@@ -1,3 +1,41 @@
+# find how samples in CpG score matrix
+# match those in "covariates" parameter
+# get the total number of CpGs along the way
+.matchCovmatCovar = function( param ){
+
+    # Sample names in covariates
+    cvsamples = param$covariates[[1]];
+
+    # Grab info form coverage matrix
+    fm = fm.open( paste0(param$dircoveragenorm, "/Coverage"), readonly = TRUE);
+    fmsamples = rownames(fm);
+    ncpgs = ncol(fm);
+    nsamplesall = nrow(fm);
+    close(fm);
+
+    # Match samples in covariates with those in coverage matrix
+    if(is.null(cvsamples)){
+        # if covariates are not set, assume they match.
+        rowsubset = NULL;
+    } else {
+        rowsubset = match(cvsamples, fmsamples, nomatch = 0L);
+        if( any(rowsubset==0) )
+            stop( paste("Unknown samples in covariate file:",
+                        cvsamples[head(which(rowsubset==0))]) );
+
+        # if no reordering is required, set rowsubset=NULL
+        if( length(cvsamples) == length(fmsamples) ){
+            if( all(rowsubset == seq_along(rowsubset)) ){
+                rowsubset = NULL;
+            }
+        }
+    }
+    return(list(
+        rowsubset = rowsubset,
+        ncpgs = ncpgs,
+        cvsamples = cvsamples, nsamplesall = nsamplesall));
+}
+
 # Save top findings in a text file
 # with annotation
 ramwas5saveTopFindingsSNPs = function(param){
