@@ -24,7 +24,7 @@ plotPCvectors(e, i)
         Eigenvalue decomposition (spectral decomposition) as returned by 
         \code{\link[base]{eigen}}.
     }
-    \iten{i}{
+    \item{i}{
         Indicates loadings of which PC to plot.
     }
 }
