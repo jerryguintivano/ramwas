@@ -182,14 +182,14 @@ ramwas4PCA(param)
 ```
 
 The top several PCs are marginally distinct from the rest.
-```{r plotPCA, echo=FALSE, warning=FALSE, message=FALSE}
+```{r plotPCA, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
-ramwas:::plotPCvalues(e$values)
-ramwas:::plotPCvectors(e,1)
-ramwas:::plotPCvectors(e,2)
-ramwas:::plotPCvectors(e,3)
-ramwas:::plotPCvectors(e,4)
+plotPCvalues(e$values)
+plotPCvectors(e, 1)
+plotPCvectors(e, 2)
+plotPCvectors(e, 3)
+plotPCvectors(e, 4)
 rm(e)
 ```
 
@@ -266,7 +266,7 @@ ramwas5MWAS(param)
 The QQ-plot shows mild enrichment among a large number of variables,
 which is consistent with how the data was generated --
 22\% of variables are affected by sex.
-```{r tableMWAS, echo=FALSE, warning=FALSE, message=FALSE}
+```{r tableMWAS, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]

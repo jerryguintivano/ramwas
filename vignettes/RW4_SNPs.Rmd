@@ -17,6 +17,7 @@ library(knitr)
 library(pander)
 suppressPackageStartupMessages(library(ramwas))
 panderOptions("digits", 3)
+opts_chunk$set(fig.width = 6, fig.height = 6)
 # opts_chunk$set(eval=FALSE)
 dr = "D:/temp/"
 ```
@@ -135,10 +136,10 @@ Now we save locations in a filematrix
 and create a text file with chromosome names.\
 ```{r locSave}
 fmloc = fm.create.from.matrix(
-            filenamebase = paste0(dr,"/CpG_locations"),
+            filenamebase = paste0(dr, "/CpG_locations"),
             mat = locmat)
 close(fmloc)
-writeLines(con = paste0(dr,"/CpG_chromosome_names.txt"), text = chrnames)
+writeLines(con = paste0(dr, "/CpG_chromosome_names.txt"), text = chrnames)
 ```
 
 Finally, we create methylation and SNP matrices
@@ -209,7 +210,7 @@ ramwasSNPs(param)
 ```
 
 The QQ-plot shows better enrichment with significant p-values.
-```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
 pv = fm[,3]
@@ -226,7 +227,7 @@ ramwas5MWAS(param)
 ```
 
 The QQ-plot shows much weaker signal for the standard MWAS.
-```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
 fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
 pv = fm[,3]
@@ -240,7 +241,7 @@ for both analyses:
 ```{r topPvSNPs}
 # Get the directory with testing results
 toptbl = read.table(
-                paste0(pfull$dirSNPs,"/Top_tests.txt"),
+                paste0(pfull$dirSNPs, "/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))
@@ -252,7 +253,7 @@ and thus uses F-test, while regular MWAS uses t-test.
 ```{r topPvMWAS}
 pfull = parameterPreprocess(param)
 toptbl = read.table(
-                paste0(pfull$dirmwas,"/Top_tests.txt"),
+                paste0(pfull$dirmwas, "/Top_tests.txt"),
                 header = TRUE,
                 sep = "\t")
 pander(head(toptbl,10))
