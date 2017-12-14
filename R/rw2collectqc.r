@@ -200,26 +200,26 @@ combineBamQcIntoSamples = function(rbamlist, bamset){
 }
 
 # Estimate fragmet size distribution
-estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
+estimateFragmentSizeDistribution = function(frdata, seqLength){
 
-    if( length(hist.isolated.distances) == seqLength )
+    if( length(frdata) == seqLength )
         return( rep(1, seqLength) );
 
     ### Point of crossing the middle
-    ytop = median(hist.isolated.distances[1:seqLength]);
-    ybottom = median(tail(hist.isolated.distances,seqLength));
+    ytop = median(frdata[1:seqLength]);
+    ybottom = median(tail(frdata,seqLength));
     ymidpoint = ( ytop + ybottom )/2;
     yrange = ( ytop - ybottom );
-    overymid = (hist.isolated.distances > ymidpoint)
+    overymid = (frdata > ymidpoint)
     xmidpoint = which.max( cumsum( overymid - mean(overymid) ) );
 
     ### interquartile range estimate
     xqrange =
-        which.max(cumsum( ((hist.isolated.distances >
-                                quantile(hist.isolated.distances,0.25))-0.75) ))
+        which.max(cumsum( ((frdata >
+                                quantile(frdata,0.25))-0.75) ))
         -
-        which.max(cumsum( ((hist.isolated.distances >
-                                quantile(hist.isolated.distances,0.75))-0.25) ))
+        which.max(cumsum( ((frdata >
+                                quantile(frdata,0.75))-0.25) ))
 
     logitrange = diff(qlogis(c(0.25,0.75)));
 
@@ -233,15 +233,15 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
         (plogis((param[1]-x)/param[2]))*param[3]+param[4]
     }
 
-    x = seq_along(hist.isolated.distances);
+    x = seq_along(frdata);
 
-    # plot( x, hist.isolated.distances)
+    # plot( x, frdata)
     # lines( x, fsPredict(x, initparam), col="blue", lwd = 3)
 
     fmin = function(param){
         fit2 = fsPredict(x, param);
         # (plogis((param[1]-x)/param[2]))*param[3]+param[4];
-        error = hist.isolated.distances - fit2;
+        error = frdata - fit2;
         e2 = error^2;
         e2s = sort.int(e2,decreasing = TRUE);
         return(sum(e2s[-(1:10)]));
@@ -259,7 +259,7 @@ estimateFragmentSizeDistribution = function(hist.isolated.distances, seqLength){
     rezfit = rezfit[keep];
     rezfit = rezfit / rezfit[1];
 
-    # lz = lm(hist.isolated.distances[seq_along(rezfit)] ~ rezfit)
+    # lz = lm(frdata[seq_along(rezfit)] ~ rezfit)
     # lines(rezfit*lz$coefficients[2]+lz$coefficients[1], lwd = 4, col="red");
 
     return(rezfit);

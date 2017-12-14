@@ -280,12 +280,12 @@ The red line is the parametic fit for these points.
 For more information on estimation of fragment size distribution see
 [@van2013estimation].
 
-```{r plotFSD, echo=FALSE, warning=FALSE, message=FALSE}
+```{r plotFSD, warning=FALSE, message=FALSE}
 qc = readRDS(paste0(pfull$dirqc, "/summary_total/qclist.rds"))
 frdata = qc$total$hist.isolated.dist1
 estimate = as.double(readLines(
     con = paste0(pfull$dirproject,"/Fragment_size_distribution.txt")))
-ramwas:::plotFragmentSizeDistributionEstimate(frdata, estimate)
+plotFragmentSizeDistributionEstimate(frdata, estimate)
 ```
 
 

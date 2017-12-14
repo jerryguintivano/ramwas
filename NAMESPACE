@@ -43,6 +43,8 @@ export(
     insilicoFASTQ,
     injectSNPsMAF,
     mat2cols,
+    estimateFragmentSizeDistribution,
+    plotFragmentSizeDistributionEstimate,
     ramwasSNPs
 )
 
@@ -56,7 +58,7 @@ importFrom(graphics,
     abline, legend, lines, par, plot,
     points, title, axis, barplot, hist, layout)
 importFrom(stats,
-    complete.cases, pf, pt, qf, qt, optim, rnorm,
+    complete.cases, pf, pt, qf, qt, optim, rnorm, pnorm,
     model.matrix, quantile, median, qlogis,
     plogis, qbeta, cor, lm, qchisq, runif, sd)
 importFrom(utils,
