@@ -14,7 +14,7 @@
         # are covered by fragments
         # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
         .Call(
-            .NAME = "cover_frw_c",
+            "cover_frw_c",
             startfrw, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
     }
     if(length(startrev) > 0){
@@ -27,7 +27,7 @@
         # are covered by fragments
         # ind1[which(ind2>ind1)]+1 .. ind2[which(ind2>ind1)]
         .Call(
-            .NAME = "cover_rev_c",
+            "cover_rev_c",
             startrev, cpgs, fragdistr, ind1, ind2, cover, PACKAGE = "ramwas");
     }
     return(cover);
