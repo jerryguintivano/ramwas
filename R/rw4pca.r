@@ -145,7 +145,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         testcov = .testCovariates(
                         covariates1 = param$covariates[-1],
                         data = e$vectors[,seq_len(nonzeroPCs)],
-                        cvrtqr = t(data$cvrtqr));
+                        cvrtqr = data$cvrtqr);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
                         name = paste0("PC", seq_len(nonzeroPCs)),
