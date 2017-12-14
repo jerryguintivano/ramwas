@@ -551,24 +551,25 @@ It contains:
 For the simulated data
 we get moderately good prediction
 using just 50 top CpGs.
-```{r plotCV1, echo=FALSE, warning=FALSE, message=FALSE}
+```{r plotCV1, warning=FALSE, message=FALSE}
 cv = readRDS( paste0(pfull$dircv, "/rds/CpGs=000050_alpha=0.000000.rds") )
-ramwas:::plotPrediction(param = pfull,
-                        outcome = cv$outcome,
-                        forecast = cv$forecast,
-                        cpgs2use = 50,
-                        main = "Prediction success (EN on coverage)")
+plotPrediction(
+        param = pfull,
+        outcome = cv$outcome,
+        forecast = cv$forecast,
+        cpgs2use = 50,
+        main = "Prediction success (EN on coverage)")
 ```
 
 The correlation of prediction with
 actual age is maximal when we use 100
 top CpGs in elastic net.
-```{r plotCV2, echo=FALSE, warning=FALSE, message=FALSE}
+```{r plotCV2, warning=FALSE, message=FALSE}
 ramwas7CplotByNCpGs(param)
 cl = readRDS(sprintf("%s/rds/cor_data_alpha=%f.rds",
                     pfull$dircv,
                     pfull$mmalpha))
-ramwas:::plotCVcors(cl, pfull)
+plotCVcors(cl, pfull)
 ```
 
 ## CpG-SNP analysis

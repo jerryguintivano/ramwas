@@ -32,6 +32,8 @@ export(
     plotPCvalues,
     plotPCvectors,
     plotROC,
+    plotPrediction,
+    plotCVcors,
     rowSumsSq,
     colSumsSq,
     testPhenotype,

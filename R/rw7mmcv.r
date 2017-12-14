@@ -23,10 +23,25 @@ plotROC = function(outcome, forecast){
         yaxs = "i",
         type = "l",
         col = "blue",
-        lwd = 2,
+        lwd = 4,
         xlab = "False positive rate",
         ylab = "True positive rate");
-    abline(a = 0, b = 1);
+    abline(a = 0, b = 1, col = "grey");
+    legend(
+        "bottomright", 
+        legend = c("ROC curve","diagonal"),
+        lwd = c(4,1), 
+        lty = 1, 
+        col = c("blue","grey"),
+        bg = "transparent");
+    
+    auc = -sum(tpr[-1] * diff(fpr));
+    
+    legend(
+        "bottom",
+        legend = sprintf('AUC = %.3f',auc),
+        bty = "n");
+    return(auc);
 }
 
 # Run 10 (cvnfolds) MWASes
@@ -333,17 +348,18 @@ plotCVcors = function(cl, param){
         log = "x",
         xlab = "Number of markers",
         ylab = "Correlation")
-    points( cl$x, cl$cors, col = "cyan4", pch = 17)
+    points(cl$x, cl$cors, col = "cyan4", pch = 17)
     abline(h=0, col = "grey")
     legend(x = "bottomleft", legend = paste0("EN alpha = ", param$mmalpha))
     legend(
         "bottomright",
-        legend = c("Correlations:","Pearson", "Spearman"),
+        legend = c("Correlations:", "Pearson", "Spearman"),
         pch = c(NA_integer_,19,17),
         col = c("red","red","cyan4"));
     title(paste0(
             "Prediction of \"", param$modeloutcome,"\"\n",
             param$cvnfolds,"-fold cross validation"));
+    return(invisible(NULL));
 }
 
 ramwas7CplotByNCpGs = function(param){
