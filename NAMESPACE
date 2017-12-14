@@ -67,7 +67,7 @@ importFrom(Rsamtools,
     scanBamFlag, ScanBamParam, BamFile,
     open.BamFile, scanBam, asBam)
 importFrom(parallel,
-    makeCluster, clusterEvalQ, clusterApplyLB,
+    makeCluster, clusterEvalQ, clusterApplyLB, clusterCall,
     stopCluster, detectCores, clusterExport)
 importFrom(KernSmooth, locpoly)
 importFrom(digest, digest)
