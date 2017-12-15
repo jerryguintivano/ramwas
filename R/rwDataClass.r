@@ -15,13 +15,13 @@ setRefClass("rwDataClass",
                 .self$open(param = param, getPCs = getPCs, lockfile = lockfile);
                 return(invisible(.self));
             }
-            fmdata <<- new("filematrix");
-            samplenames <<- character(0);
-            nsamples <<- 0;
-            ncpgs <<- 0;
-            ndatarows <<- 0;
-            rowsubset <<- NULL;
-            cvrtqr <<- NULL;
+            .self$fmdata = new("filematrix");
+            .self$samplenames = character(0);
+            .self$nsamples = 0;
+            .self$ncpgs = 0;
+            .self$ndatarows = 0;
+            .self$rowsubset = NULL;
+            .self$cvrtqr = NULL;
             return(invisible(.self));
         },
         open = function(param, getPCs = TRUE, lockfile = NULL){
@@ -53,21 +53,21 @@ setRefClass("rwDataClass",
 
             
             # Sample names in covariates
-            samplenames <<- as.character(param$covariates[[1]]);
-            nsamples <<- length(samplenames);
+            .self$samplenames = as.character(param$covariates[[1]]);
+            .self$nsamples = length(samplenames);
         
             # Open data matrix
-            fmdata <<- fm.open( 
+            .self$fmdata = fm.open( 
                     filenamebase = paste0(param$dircoveragenorm, "/Coverage"), 
                     readonly = TRUE,
                     lockfile = lockfile);
             fmsamples = rownames(fmdata);
-            ncpgs <<- ncol(fmdata);
-            ndatarows <<- nrow(fmdata);
+            .self$ncpgs = ncol(fmdata);
+            .self$ndatarows = nrow(fmdata);
             # nsamplesall = nrow(fmdata);
         
             # Match samples in covariates with those in coverage matrix
-            rowsubset <<- match(samplenames, fmsamples, nomatch = 0L);
+            .self$rowsubset = match(samplenames, fmsamples, nomatch = 0L);
             if( any(rowsubset == 0L) )
                 stop( "Unknown samples in covariate file: ",
                     paste(samplenames[head(which(rowsubset==0))],
@@ -76,7 +76,7 @@ setRefClass("rwDataClass",
             # if no reordering is required, set rowsubset=NULL
             if( length(samplenames) == length(fmsamples) ){
                 if( all(rowsubset == seq_along(rowsubset)) ){
-                    rowsubset <<- NULL;
+                    .self$rowsubset = NULL;
                 }
             }
             
@@ -95,9 +95,9 @@ setRefClass("rwDataClass",
                 rm(e);
             }
         
-            cvrtqr <<- orthonormalizeCovariates(
-                            cvrt = cvrt,
-                            modelhasconstant = param$modelhasconstant);
+            .self$cvrtqr = orthonormalizeCovariates(
+                                cvrt = cvrt,
+                                modelhasconstant = param$modelhasconstant);
             
             return(invisible(.self));
         },
