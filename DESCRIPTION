@@ -41,7 +41,7 @@ BugReports: https://github.com/andreyshabalin/ramwas/issues
 License: LGPL-3
 LazyLoad: yes
 NeedsCompilation: yes
-Depends: R (>= 3.3.0), methods, filematrix
+Depends: R (>= 3.4.0), methods, filematrix
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, pander, BiocStyle, 
         BSgenome.Hsapiens.UCSC.hg19,
