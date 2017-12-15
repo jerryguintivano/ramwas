@@ -34,7 +34,7 @@ ramwasSNPs(param)
 }
 \arguments{
     \item{param}{
-        List with RaMWAS parameters. \cr
+        List with RaMWAS parameters.\cr
         For detailed description of all available parameters run:\cr
         \code{browseVignettes("ramwas")}.
         }

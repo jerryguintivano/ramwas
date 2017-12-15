@@ -16,7 +16,9 @@ parameterDump(dir, param, toplines = NULL)
         The file is named \code{"UsedSettings.txt"}.
     }
     \item{param}{
-        A list with RaMWAS parameters. Or any list in general.
+        A list with RaMWAS parameters. Or any list in general.\cr
+        For detailed description of all available parameters run:\cr
+        \code{browseVignettes("ramwas")}.
     }
     \item{toplines}{
         Names of the elements in \code{param} to save first (top of the file).
