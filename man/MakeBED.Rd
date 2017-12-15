@@ -50,7 +50,7 @@ madeBEDgraphGange(x, filename, chr, start, end)
     \item{chromStart}{Start position}
     \item{chromEnd}{End position}
     \item{name}{Empty name column. BED format only}
-    \item{score}{MWAS p-value.}
+    \item{score}{p-value}
     
 }
 \author{

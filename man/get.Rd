@@ -69,7 +69,7 @@ getDataByLocation(x, chr, start, end)
 
     If the outcome variable was categorical,
     columns \code{cor} and \code{t.test} are replaced with
-    \code{R.squared} and \code{F-test}
+    \code{R.squared} and \code{F-test}.
 
     Functions \code{getMWASandLocations} and \code{getMWASrange}
     return a data frame with elements of output
