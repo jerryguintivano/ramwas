@@ -43,7 +43,7 @@ getDataByLocation(x, chr, start, end)
         }
     }
     \item{chr}{
-        Chromosome names or numbers.
+        Chromosome name or number.
     }
     \item{start}{
         Start position of the genomic region of interest.

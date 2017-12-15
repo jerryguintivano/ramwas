@@ -61,7 +61,6 @@ getMWASandLocations = function(x){
 
 # Get MWAS results by locations
 getMWASrange = function(x, chr, start, end){
-
     mwas = getMWASandLocations(x);
     chrnames = levels(mwas$chr);
     if( is.factor(chr) )
@@ -175,4 +174,106 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
 
     close(fo);
     close(fi);
+}
+
+madeBED = function(x, filename){
+    mwas = getMWASandLocations(x)
+    bed = data.frame(
+        chrom = mwas$chr,
+        chromStart  = mwas$start - 1,
+        chromEnd =  mwas$end,
+        name = '.',
+        score = mwas$`p-value`
+    )
+    write.table(
+        file = filename,
+        x = bed,
+        quote = FALSE,
+        sep = "\t",
+        col.names = FALSE,
+        row.names = FALSE);
+    return(invisible(bed));
+}
+
+madeBEDrange = function(x, filename, chr, start, end){
+    mwas = getMWASandLocations(x);
+    chrnames = levels(mwas$chr);
+    if( is.factor(chr) )
+        chr = as.character(chr);
+    if( is.character(chr) ){
+        chrn = match(chr, chrnames, nomatch = 0L);
+    } else {
+        chrn = chr;
+    }
+    
+    keep =  which(
+                as.integer(mwas$chr) == chrn &
+                (mwas$end >= start) & 
+                (mwas$start <= end));
+    
+    bed = data.frame(
+        chrom = mwas$chr[keep],
+        chromStart  = mwas$start[keep] - 1,
+        chromEnd =  mwas$end[keep],
+        name = '.',
+        score = mwas$`p-value`[keep]
+    )
+    write.table(
+        file = filename,
+        x = bed,
+        quote = FALSE,
+        sep = "\t",
+        col.names = FALSE,
+        row.names = FALSE);
+    return(invisible(bed));
+}
+
+madeBEDgraph = function(x, filename){
+    mwas = getMWASandLocations(x)
+    bed = data.frame(
+        chrom = mwas$chr,
+        chromStart  = mwas$start - 1,
+        chromEnd =  mwas$end,
+        score = mwas$`p-value`
+    )
+    write.table(
+        file = filename,
+        x = bed,
+        quote = FALSE,
+        sep = "\t",
+        col.names = FALSE,
+        row.names = FALSE);
+    return(invisible(bed));
+}
+
+madeBEDgraphGange = function(x, filename, chr, start, end){
+    mwas = getMWASandLocations(x);
+    chrnames = levels(mwas$chr);
+    if( is.factor(chr) )
+        chr = as.character(chr);
+    if( is.character(chr) ){
+        chrn = match(chr, chrnames, nomatch = 0L);
+    } else {
+        chrn = chr;
+    }
+    
+    keep =  which(
+                as.integer(mwas$chr) == chrn &
+                (mwas$end >= start) & 
+                (mwas$start <= end));
+    
+    bed = data.frame(
+        chrom = mwas$chr[keep],
+        chromStart  = mwas$start[keep] - 1,
+        chromEnd =  mwas$end[keep],
+        score = mwas$`p-value`[keep]
+    )
+    write.table(
+        file = filename,
+        x = bed,
+        quote = FALSE,
+        sep = "\t",
+        col.names = FALSE,
+        row.names = FALSE);
+    return(invisible(bed));
 }
