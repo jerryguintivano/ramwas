@@ -28,7 +28,7 @@ ramwas0createArtificialData = function(
         chrlen = ncpgs*50;
         probs = seq(1,0,length.out = chrlen) * (2 * ncpgs / chrlen);
         locs = which(probs > runif(chrlen)) + 10e3L;
-        locs[1] = 100L; # for non-CpG count
+        # locs[1] = 100L; # for non-CpG count
         rm(probs);
 
         cpgset = list( chr1 = locs );
