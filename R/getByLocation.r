@@ -14,7 +14,7 @@ getLocations = function(x){
         return(NULL);
     
     chrnames = readLines(chrfile);
-    locmat = fm.load(paste0(dircov,"/CpG_locations"));
+    locmat = fm.load(paste0(dircov, "/CpG_locations"));
     chr = as.integer(locmat[,1]);
     levels(chr) = chrnames;
     class(chr) = "factor";
@@ -60,10 +60,10 @@ getMWASandLocations = function(x){
 }
 
 # Get MWAS results by locations
-getTestsByLocation = function(x, chr, position){
+getMWASrange = function(x, chr, start, end){
 
-    data = getMWASandLocations(x);
-    chrnames = levels(data$chr);
+    mwas = getMWASandLocations(x);
+    chrnames = levels(mwas$chr);
     if( is.factor(chr) )
         chr = as.character(chr);
     if( is.character(chr) ){
@@ -71,19 +71,16 @@ getTestsByLocation = function(x, chr, position){
     } else {
         chrn = chr;
     }
-
-    maxmult = (max(data$start)+2)*2;
     
-    mch = match(
-            x = chrn * maxmult + position,
-            table = as.integer(data$chr) * maxmult + data$start,
-            nomatch = 0L);
-
-    return(data[mch,]);
+    keep =  as.integer(mwas$chr) == chrn &
+            (mwas$end >= start) & 
+            (mwas$start <= end);
+    
+    return(mwas[keep,]);
 }
 
 # Get MWAS results by locations
-getDataByLocation = function(x, chr, position){
+getDataByLocation = function(x, chr, start, end){
     if( is.list(x) ){
         param = parameterPreprocess(x);
         dircov = param$dircoveragenorm;
@@ -101,20 +98,17 @@ getDataByLocation = function(x, chr, position){
         chrn = chr;
     }
 
-    maxmult = (max(locs$start)+2)*2;
-
-    mch = match(
-            x = chrn * maxmult + position, 
-            table = as.integer(locs$chr) * maxmult + locs$start,
-            nomatch = 0L);
+    keep =  as.integer(locs$chr) == chrn &
+            (locs$end >= start) & 
+            (locs$start <= end);
     
     fm = fm.open(paste0(dircov, "/Coverage"));
-    mat = fm[, mch[mch>0L] ];
+    mat = fm[, keep];
     rownames(mat) = rownames(fm);
     close(fm);
 
     rez = list(
-        locations = locs[mch[mch>0L],],
+        locations = locs[keep,],
         matrix = mat);
 
     return(rez);

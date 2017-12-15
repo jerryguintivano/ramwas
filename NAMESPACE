@@ -42,7 +42,7 @@ export(
     getLocations,
     getMWAS,
     getMWASandLocations,
-    getTestsByLocation,
+    getMWASrange,
     getDataByLocation,
     insilicoFASTQ,
     injectSNPsMAF,

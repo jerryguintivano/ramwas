@@ -2,7 +2,7 @@
 \alias{getLocations}
 \alias{getMWAS}
 \alias{getMWASandLocations}
-\alias{getTestsByLocation}
+\alias{getMWASrange}
 \alias{getDataByLocation}
 \title{
     Functions for Access to Data, MWAS Results, and Location Information
@@ -16,7 +16,7 @@
     Function \code{getMWASandLocations} obtains both MWAS results and
     location information in a single data frame.
     
-    Functions \code{getDataByLocation} and \code{getTestsByLocation} 
+    Functions \code{getDataByLocation} and \code{getMWASrange} 
     return the data (coverage) and MWAS results for the selected set
     of variables (CpGs).
 }
@@ -24,8 +24,8 @@
 getLocations(x)
 getMWAS(x)
 getMWASandLocations(x)
-getTestsByLocation(x, chr, position)
-getDataByLocation(x, chr, position)
+getMWASrange(x, chr, start, end)
+getDataByLocation(x, chr, start, end)
 }
 \arguments{
     \item{x}{
@@ -39,14 +39,17 @@ getDataByLocation(x, chr, position)
                 for \code{getDataByLocation} and \code{getLocations}
             \item MWAS directory (parameter \code{dirmwas}) 
                 for \code{getMWAS}, \code{getMWASandLocations},
-                and \code{getTestsByLocation}
+                and \code{getMWASrange}
         }
     }
     \item{chr}{
-        vector of chromosome names or numbers.
+        Chromosome names or numbers.
     }
-    \item{position}{
-        Start positions on the respective chromosome(s).
+    \item{start}{
+        Start position of the genomic region of interest.
+    }
+    \item{end}{
+        End position of the genomic region of interest.
     }
 }
 \details{
@@ -68,7 +71,7 @@ getDataByLocation(x, chr, position)
     columns \code{cor} and \code{t.test} are replaced with
     \code{R.squared} and \code{F-test}
 
-    Functions \code{getMWASandLocations} and \code{getTestsByLocation}
+    Functions \code{getMWASandLocations} and \code{getMWASrange}
     return a data frame with elements of output
     of both \code{getLocations} and \code{getMWAS}
 
@@ -106,31 +109,17 @@ getMWASandLocations(param)
 getMWASandLocations("/data/myMWAS")
 
 
-# Extract one location
-getTestsByLocation(param, 1, 123321)
+# Extract MWAS for a region
+getMWASrange(param, 1, 123321, 223321)
 
 # Chromosome can be character
-getTestsByLocation(param, "chr1", 123321)
-
-# Extract multiple locations
-# on the same chromosome
-getTestsByLocation(param, 1, c(123123,123321))
-
-# on different chromosomes
-getTestsByLocation(param, c("chr1","chr2"), c(123123,123321))
+getMWASrange(param, "chr1", 123321, 223321)
 
 
-# Extract one location
-getDataByLocation(param, 1, 123321)
+# Extract data for a region
+getDataByLocation(param, 1, 123321, 223321)
 
 # Chromosome can be character
-getDataByLocation(param, "chr1", 123321)
-
-# Extract multiple locations
-# on the same chromosome
-getDataByLocation(param, 1, c(123123,123321))
-
-# on different chromosomes
-getDataByLocation(param, c("chr1","chr2"), c(123123,123321))
+getDataByLocation(param, "chr1", 123321, 223321)
 }
 }
