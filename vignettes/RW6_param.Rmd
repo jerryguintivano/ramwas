@@ -377,9 +377,9 @@ param = ramwasParameters(
     bidataset = bidataset,
     biattributes = biattributes,
     bifilters = bifilters,
-    biflank = 0);
+    biflank = 0)
 
-anno = ramwasAnnotateLocations(param, chr, pos);
+anno = ramwasAnnotateLocations(param, chr, pos)
 pander(anno)
 ```
 

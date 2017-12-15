@@ -90,9 +90,10 @@ library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
 ramwas0createArtificialData(
             dir = dr,
-            verbose = FALSE,
+            nsamples = 10,
             nreads = 100e3,
-            ncpgs = 25e3)
+            ncpgs = 25e3,
+            verbose = FALSE)
 cat("Project directory:", dr)
 ```
 **Note.** The project directory `dr` can be set to
@@ -459,13 +460,22 @@ diagonal for many CpGs, suggesting many markers with small effects.
 This is consistent with how the data was generated --
 there is weak signal in 1\% of CpGs.
 
-```{r tableMWAS, warning=FALSE, message=FALSE}
-fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
-title(pfull$qqplottitle)
+RaMWAS also creates a Manhattan plot with matching Y axis.
+
+```{r tableMWAS, warning=FALSE, message=FALSE, fig.width = 12}
+mwas = getMWASandLocations(param)
+layout(matrix(c(1,2), 1, 2, byrow = TRUE), widths=c(1,2.2))
+qqPlotFast(mwas$`p-value`)
+man = manPlotPrepare(
+        pvalues = mwas$`p-value`,
+        chr = mwas$chr,
+        pos = mwas$start,
+        chrmargins = 0)
+manPlotFast(man)
 ```
+
+
+
 
 ## Annotation of top results {#step6}
 
@@ -552,7 +562,7 @@ For the simulated data
 we get moderately good prediction
 using just 50 top CpGs.
 ```{r plotCV1, warning=FALSE, message=FALSE}
-cv = readRDS( paste0(pfull$dircv, "/rds/CpGs=000050_alpha=0.000000.rds") )
+cv = readRDS(paste0(pfull$dircv, "/rds/CpGs=000050_alpha=0.000000.rds"))
 plotPrediction(
         param = pfull,
         outcome = cv$outcome,
@@ -565,7 +575,6 @@ The correlation of prediction with
 actual age is maximal when we use 100
 top CpGs in elastic net.
 ```{r plotCV2, warning=FALSE, message=FALSE}
-ramwas7CplotByNCpGs(param)
 cl = readRDS(sprintf("%s/rds/cor_data_alpha=%f.rds",
                     pfull$dircv,
                     pfull$mmalpha))

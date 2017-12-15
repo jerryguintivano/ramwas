@@ -186,7 +186,8 @@ so `qcmean` should give a number close to `0.5`.
     cat("Excluding duplicate reads", "\n")
     cat("Reads on forward strand:", qc$frwrev.no.repeats[1], "\n")
     cat("Reads on reverse strand:", qc$frwrev.no.repeats[2], "\n")
-    cat("Fraction of reads on forward strand:", qcmean(qc$frwrev.no.repeats),"\n")
+    cat("Fraction of reads on forward strand:",
+        qcmean(qc$frwrev.no.repeats), "\n")
 }
 ```
 
@@ -198,7 +199,8 @@ fraction of reads on the forward strand was further away from 0.5.
     cat("Not excluding duplicate reads", "\n")
     cat("Reads on forward strand:", qc$frwrev[1], "\n")
     cat("Reads on reverse strand:", qc$frwrev[2], "\n")
-    cat("Fraction of reads on forward strand (before QC):", qcmean(qc$frwrev),"\n")
+    cat("Fraction of reads on forward strand (before QC):",
+        qcmean(qc$frwrev), "\n")
 }
 ```
 

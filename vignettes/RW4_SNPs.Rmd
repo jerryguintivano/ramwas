@@ -173,7 +173,7 @@ for( i in seq_len(nvariables/byrows) ){ # i=1
                 ((as.integer(factor(covariates$batch))+i) %% 3) / 200 +
                 snps / 1.5 +
                 runif(nsamples*byrows) / 2
-    fmm[,ind] = slice;
+    fmm[,ind] = slice
 }
 close(fms)
 close(fmm)
@@ -212,10 +212,8 @@ ramwasSNPs(param)
 The QQ-plot shows better enrichment with significant p-values.
 ```{r plotQQ2, echo=FALSE, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
-fm = fm.open( paste0(pfull$dirSNPs, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
+mwas = getMWAS(pfull$dirSNPs)
+qqPlotFast(mwas$`p-value`)
 title("QQ-plot for CpG-SNP analysis")
 ```
 
@@ -228,11 +226,8 @@ ramwas5MWAS(param)
 
 The QQ-plot shows much weaker signal for the standard MWAS.
 ```{r plotQQ1, echo=FALSE, warning=FALSE, message=FALSE}
-pfull = parameterPreprocess(param)
-fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
+mwas = getMWAS(param)
+qqPlotFast(mwas$`p-value`)
 title(pfull$qqplottitle)
 ```
 

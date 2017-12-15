@@ -267,11 +267,8 @@ The QQ-plot shows mild enrichment among a large number of variables,
 which is consistent with how the data was generated --
 22\% of variables are affected by sex.
 ```{r tableMWAS, warning=FALSE, message=FALSE}
-pfull = parameterPreprocess(param)
-fm = fm.open( paste0(pfull$dirmwas, "/Stats_and_pvalues") )
-pv = fm[,3]
-close(fm)
-qqPlotFast(pv)
+mwas = getMWAS(param)
+qqPlotFast(mwas$`p-value`)
 title(pfull$qqplottitle)
 ```
 
