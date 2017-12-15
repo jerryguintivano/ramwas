@@ -234,11 +234,9 @@ ramwas7BrunElasticNet = function(param){
             } # forecast0
             {
                 # get p-values
-                fm = fm.open(paste0(dircvmwas, "/Stats_and_pvalues"))
-                # colnames(fm)
-                pv = fm[,3];
-                close(fm);
-                rm(fm);
+                mwas = getMWAS(param);
+                pv = mwas$`p-value`;
+                rm(mwas);
             } # pv
             {
                 cpgset = findBestNpvs(pv, n = cpgs2use);

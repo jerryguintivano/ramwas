@@ -182,27 +182,14 @@ ramwas5saveTopFindings = function(param){
     message("Working in: ", param$dirmwas);
 
     message("Loading MWAS results");
-    mwas = fm.load( paste0(param$dirmwas, "/Stats_and_pvalues") );
-
-    message("Loading CpG locations");
-    cpgloc = fm.load(
-        filenamebase = paste0(param$dircoveragenorm, "/CpG_locations") );
-    chrnames = readLines(
-        con = paste0(param$dircoveragenorm, "/CpG_chromosome_names.txt") );
-
+    mwas = getMWASandLocations(param);
+    
     message("Finding top MWAS hits");
-    keep = findBestNpvs(mwas[,3], param$toppvthreshold);
+    keep = findBestNpvs(mwas$`p-value`, param$toppvthreshold);
     # keep = which(mwas[,3] < param$toppvthreshold);
-    ord = keep[sort.list(abs(mwas[keep,2]), decreasing = TRUE)];
+    ord = keep[sort.list(abs(mwas[[5]][keep]), decreasing = TRUE)];
 
-    toptable = data.frame( 
-                        chr = chrnames[cpgloc[ord,1]],
-                        position = cpgloc[ord,2],
-                        tstat  = mwas[ord,2],
-                        pvalue = mwas[ord,3],
-                        qvalue = mwas[ord,4]);
-
-    # saveRDS(file = paste0(param$dirmwas,"/Top_tests.rds"), object = toptable);
+    toptable = mwas[ord,];
 
     message("Saving top MWAS hits");
     write.table(
