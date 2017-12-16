@@ -31,31 +31,16 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("ramwas")
 ```
 
-## Install from GitHub
+## Update via GitHub
 
-### Prerequisites
-
-To install RaMWAS several R packages must be installed first
-
-```
-install.packages(c("knitr","rmarkdown","KernSmooth","filematrix","digest","glmnet","devtools","pander"))
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("BiocInstaller","BiocStyle","GenomicAlignments","Rsamtools","biomaRt"))
-```
-
-### Installation
-
-To install RaMWAS directly from GitHub run
+To update RaMWAS to the development version from GitHub run
 
 ```
 devtools::install_github("andreyshabalin/ramwas")
 ```
 
-### Prerequisites for building vignettes
-
-The following packages are used in vignettes only
+If the `devtools` package is not installed, run this line prior:
 
 ```
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("BSgenome.Hsapiens.UCSC.hg19","SNPlocs.Hsapiens.dbSNP144.GRCh37","BSgenome.Ecoli.NCBI.20080805"))
+install.packages("devtools")
 ```
