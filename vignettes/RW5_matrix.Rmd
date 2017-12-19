@@ -7,7 +7,7 @@ output:
 vignette: >
     %\VignetteIndexEntry{5. Analyzing data from other sources}
     %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
     chunk_output_type: console
 ---
 

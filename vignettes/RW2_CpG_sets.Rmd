@@ -7,7 +7,7 @@ output:
 vignette: >
     %\VignetteIndexEntry{2. CpG sets}
     %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
     chunk_output_type: console
 ---
 

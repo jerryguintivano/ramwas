@@ -8,7 +8,7 @@ vignette: >
     %\VignetteIndexEntry{1. Overview}
     %\VignetteEngine{knitr::rmarkdown}
 bibliography: bib.bib
-editor_options: 
+editor_options:
     chunk_output_type: console
 ---
 
@@ -138,7 +138,7 @@ param = ramwasParameters(
     biflank = 0,
     cvnfolds = 5,
     mmalpha = 0,
-    mmncpgs = c(5,10,50,100,500,1000,2000)
+    mmncpgs = c(5, 10, 50, 100, 500, 1000, 2000)
 )
 ```
 We describe the role of each parameter as they are used below.

@@ -7,7 +7,7 @@ output:
 vignette: >
     %\VignetteIndexEntry{4. Joint Analysis of Methylation and Genotype Data}
     %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
     chunk_output_type: console
 ---
 

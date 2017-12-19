@@ -7,7 +7,7 @@ output:
 vignette: >
     %\VignetteIndexEntry{6. RaMWAS parameters}
     %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
+editor_options:
     chunk_output_type: console
 ---
 
@@ -43,7 +43,7 @@ param = ramwasParameters(
     toppvthreshold = 1e-5,
     cvnfolds = 10,
     mmalpha = 0,
-    mmncpgs = c(5,10,50,100,500,1000,5000,10000)
+    mmncpgs = c(5, 10, 50, 100, 500, 1000, 5000, 10000)
 )
 ```
 
