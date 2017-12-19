@@ -44,3 +44,13 @@ If the `devtools` package is not installed, run this line prior:
 ```
 install.packages("devtools")
 ```
+
+## Run Rcmd check
+
+To rerun package tests install suggested packages:
+
+```
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("BSgenome.Ecoli.NCBI.20080805","knitr", 
+            "rmarkdown", "pander", "BiocStyle", "devtools"))
+```
