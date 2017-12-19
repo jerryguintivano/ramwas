@@ -29,7 +29,7 @@ colSumsSq(x)
     Andrey A Shabalin \email{ashabalin@vcu.edu}
 }
 \seealso{
-    See \code{\link[base]{rowSums}} and \code{\link[base]{colSums}}
+    See \code{\link[base:colSums]{rowSums}} and \code{\link[base]{colSums}}
     for simple (not squared) row/column sums.
 }
 \examples{

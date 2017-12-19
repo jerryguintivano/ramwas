@@ -11,7 +11,7 @@ insilicoFASTQ(con, gensequence, fraglength)
 }
 \arguments{
     \item{con}{
-        A \code{\link[base]{connection}} object or a
+        A \code{\link[base:connections]{connection}} object or a
         character string naming the output file. \cr
         If the name ends with ".gz", a compressed file is created. \cr
         An empty string can be used to output to the console.
