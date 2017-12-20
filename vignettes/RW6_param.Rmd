@@ -1,5 +1,5 @@
 ---
-title: "6. RaMWAS Parameters"
+title: "RaMWAS Parameters"
 date: "`r Sys.Date()`"
 output:
     BiocStyle::html_document:

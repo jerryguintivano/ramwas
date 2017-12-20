@@ -1,5 +1,5 @@
 ---
-title: "2. CpG sets"
+title: "CpG sets"
 date: "`r Sys.Date()`"
 output:
     BiocStyle::html_document:

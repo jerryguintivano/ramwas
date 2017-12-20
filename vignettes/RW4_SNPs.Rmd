@@ -1,5 +1,5 @@
 ---
-title: "4. Joint Analysis of Methylation and Genotype Data"
+title: "Joint Analysis of Methylation and Genotype Data"
 date: "`r Sys.Date()`"
 output:
     BiocStyle::html_document:
