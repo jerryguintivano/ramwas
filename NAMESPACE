@@ -85,7 +85,7 @@ importFrom(graphics,
     points, title, axis, barplot, hist, layout)
 importFrom(stats,
     complete.cases, pf, pt, qf, qt, optim, rnorm, pnorm,
-    model.matrix, quantile, median, qlogis,
+    model.matrix, quantile, median, qlogis, rnbinom,
     plogis, qbeta, cor, lm, qchisq, runif, sd)
 importFrom(utils,
     flush.console, head, tail, memory.limit,

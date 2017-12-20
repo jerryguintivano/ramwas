@@ -15,7 +15,7 @@ ramwas0createArtificialData(dir,
                             nreads = 1e6,
                             ncpgs = 500e3,
                             randseed = 18090212,
-                            verbose = TRUE)
+                            threads = 1)
 }
 \arguments{
     \item{dir}{
@@ -33,8 +33,8 @@ ramwas0createArtificialData(dir,
     \item{randseed}{
         Random number generator seed for consistency of the output.
     }
-    \item{verbose}{
-        If TRUE, produce a message for each BAM file.
+    \item{threads}{
+        Number of CPU cores to use for data generation.
     }
 }
 \details{

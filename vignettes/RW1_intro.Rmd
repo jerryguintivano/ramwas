@@ -93,7 +93,7 @@ ramwas0createArtificialData(
             nsamples = 10,
             nreads = 100e3,
             ncpgs = 25e3,
-            verbose = FALSE)
+            threads = 2)
 cat("Project directory:", dr)
 ```
 **Note.** The project directory `dr` can be set to
