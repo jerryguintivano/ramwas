@@ -391,6 +391,8 @@ ramwas3normalizedCoverage = function( param ){
                 .file.remove(param$lockfile);
             });
             logfun = .logErrors(ld, .ramwas3coverageJob);
+            # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
+            # logfun = ramwas:::.ramwas3coverageJob
             z = clusterApplyLB(
                         cl = cl,
                         x = seq_len(nsamples),
@@ -448,7 +450,7 @@ ramwas3normalizedCoverage = function( param ){
         } else {
             z = vector('list', nslices);
             for( fmpart in seq_len(nslices) ){ # fmpart = 1
-                z[[fmpart]] = logfun(fmpart, param);
+                z[[fmpart]] = .ramwas3transposeFilterJob(fmpart, param);
             }
         }
         .showErrors(z);
@@ -478,7 +480,7 @@ ramwas3normalizedCoverage = function( param ){
             indx = fm.load( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
             indx = as.vector(indx)
             keep[fr:to][indx] = TRUE;
-            sliceoffsets[part+1] = sliceoffsets[part] + sum(keep);
+            sliceoffsets[part+1] = sliceoffsets[part] + length(indx);
             
             # Cleanup
             fmlc = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
