@@ -338,8 +338,12 @@ ramwas5MWAS = function( param ){
             });
             clusterExport(cl, "testPhenotype");
             # clusterCall(cl, .set1MLKthread);
-            clusterEvalQ(cl, .set1MLKthreadEvalQ)
-            # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
+            clusterEvalQ(cl, parse(
+                text = "if(\"package:RevoUtilsMath\" %in% search())
+                    if(exists(\"setMKLthreads\", 
+                        where = \"package:RevoUtilsMath\"))
+                    RevoUtilsMath::setMKLthreads(1);"));
+            # clusterExport(cl, c(".log",'ld','.ramwas5MWASjob'));
             logfun = .logErrors(ld, .ramwas5MWASjob);
             z = clusterApplyLB(
                         cl = cl,

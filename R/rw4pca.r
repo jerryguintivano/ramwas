@@ -220,7 +220,11 @@ ramwas4PCA = function( param ){
                 });
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 # clusterCall(cl, .set1MLKthread);
-                clusterEvalQ(cl, .set1MLKthreadEvalQ)
+                clusterEvalQ(cl, parse(
+                    text = "if(\"package:RevoUtilsMath\" %in% search())
+                        if(exists(\"setMKLthreads\", 
+                            where = \"package:RevoUtilsMath\"))
+                        RevoUtilsMath::setMKLthreads(1);"));
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
