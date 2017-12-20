@@ -88,10 +88,10 @@ groupSample = function(len, size, gr){
         runto = nreads;
         nsteps = ceiling(runto/step1);
         for( part in seq_len(nsteps) ) { # part = 1
-         	fr = (part-1)*step1 + 1;
-         	to = min(part*step1, runto);
-	        set = fr:to;
-	        
+            fr = (part-1)*step1 + 1;
+            to = min(part*step1, runto);
+            set = fr:to;
+            
             writeLines(con = fid,
                 sprintf("%06d\t%d\tchr1\t%d\t%d\t%dM\t*\t0\t0\t*\t*\tNM:i:%d",
                 set, # 1 QNAME String [!-?A-~]{1,254} Query template NAME
@@ -205,10 +205,10 @@ ramwas0createArtificialData = function(
             sex = sex,
             stringsAsFactors = FALSE);
         write.table(
-                file = paste0(dir, "/covariates.txt"),
-                x = cvrt,
-                sep = "\t",
-                row.names = FALSE);
+            file = paste0(dir, "/covariates.txt"),
+            x = cvrt,
+            sep = "\t",
+            row.names = FALSE);
 
         .log(ld, "%s, Savings BAM list in: %s", date(),
             paste0(dir, "/bam_list.txt"));

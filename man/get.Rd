@@ -30,7 +30,8 @@ getDataByLocation(x, chr, start, end)
 \arguments{
     \item{x}{
         Name of directory or   
-        list of RaMWAS parameters as described in the "RW6_param.Rmd" vignette. \cr
+        list of RaMWAS parameters as described in the "RW6_param.Rmd" vignette.
+        \cr
         Try: \code{vignette("RW6_param","ramwas")}.\cr
 
         If a directory name is provided, it must point to

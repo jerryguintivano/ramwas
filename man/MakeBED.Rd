@@ -25,7 +25,8 @@ madeBEDgraphGange(x, filename, chr, start, end)
 \arguments{
     \item{x}{
         Name of MWAS directory (parameter \code{dirmwas}) or   
-        list of RaMWAS parameters as described in the "RW6_param.Rmd" vignette. \cr
+        list of RaMWAS parameters as described in the "RW6_param.Rmd" vignette.
+        \cr
         Try: \code{vignette("RW6_param","ramwas")}.\cr
     }
     \item{filename}{
