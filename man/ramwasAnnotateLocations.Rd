@@ -54,6 +54,7 @@ param = ramwasParameters(
 # Test a location
 chr = "chr1"
 pos =  15975530
-
+\dontrun{
 ramwasAnnotateLocations(param, chr, pos)
+}
 }
