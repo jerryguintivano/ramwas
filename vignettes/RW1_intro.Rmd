@@ -90,7 +90,7 @@ library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
 ramwas0createArtificialData(
             dir = dr,
-            nsamples = 10,
+            nsamples = 20,
             nreads = 100e3,
             ncpgs = 25e3,
             threads = 2)
