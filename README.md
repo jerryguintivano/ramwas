@@ -51,6 +51,6 @@ To rerun package tests install suggested packages:
 
 ```
 source("https://bioconductor.org/biocLite.R")
-biocLite(c("BSgenome.Ecoli.NCBI.20080805","knitr", 
+biocLite(c("BSgenome.Ecoli.NCBI.20080805","knitr","BiocCheck", 
             "rmarkdown", "pander", "BiocStyle", "devtools"))
 ```
