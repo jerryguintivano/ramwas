@@ -337,7 +337,8 @@ ramwas5MWAS = function( param ){
                 .file.remove(param$lockfile2);
             });
             clusterExport(cl, "testPhenotype");
-            clusterCall(cl, .set1MLKthread);
+            # clusterCall(cl, .set1MLKthread);
+            clusterEvalQ(cl, .set1MLKthreadEvalQ)
             # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
             logfun = .logErrors(ld, .ramwas5MWASjob);
             z = clusterApplyLB(

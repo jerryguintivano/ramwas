@@ -219,7 +219,8 @@ ramwas4PCA = function( param ){
                     .file.remove(param$lockfile2);
                 });
                 logfun = .logErrors(ld, .ramwas4PCAjob);
-                clusterCall(cl, .set1MLKthread);
+                # clusterCall(cl, .set1MLKthread);
+                clusterEvalQ(cl, .set1MLKthreadEvalQ)
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,

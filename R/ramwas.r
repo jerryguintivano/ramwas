@@ -188,11 +188,15 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     return(rez);
 }
 
-.set1MLKthread = function(){
-    if("package:RevoUtilsMath" %in% search())
-        if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
-            RevoUtilsMath::setMKLthreads(1);
-}
+.set1MLKthreadEvalQ = "if(\"package:RevoUtilsMath\" %in% search())
+         if(exists(\"setMKLthreads\", where = \"package:RevoUtilsMath\"))
+             RevoUtilsMath::setMKLthreads(1);";
+
+# .set1MLKthread = function(){
+#     if("package:RevoUtilsMath" %in% search())
+#         if(exists("setMKLthreads", where = "package:RevoUtilsMath"))
+#             RevoUtilsMath::setMKLthreads(1);
+# }
 
 # The logging function
 .log = function(ld, fmt, ..., append = TRUE){
