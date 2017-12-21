@@ -4,8 +4,25 @@ CHANGES IN VERSION 1.3.0
 NEW FEATURES
 
     o Improved error reporting from parallel jobs
+    o Improved logging behavior
+    o Added multiple input checks in the pipeline functions
     o Improved MLK behavior in Microsoft R
     o Added BED and BedGraph export
+    o Added Manhattan plot function
+    o Added ROC curve with AUC calculation
+    o Made fragment size estimation functions public
+    o Made PCA plotting functions public
+    o Added rwDataClass for convenient data access.
+    o Added getLocations, getMWAS*, getData* functions
+    o Improved QQ-plot function (more parameters)
+    o Speed up pvalue2qvalue function for sorted vectors
+    o Added multithreading in ramwas0createArtificialData()
+    o Improved testPhenotype() to have consistent input (variables by columns)
+    o BAM scanning [ramwas1scanBams] rescans BAMs newer than the rbam files
+    
+BUG FIXES
+
+    o Use importMethodsFrom(filematrix, as.matrix) in NAMESPACE
 
 CHANGES IN VERSION 1.0.0
 -----------------------
