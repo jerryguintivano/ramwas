@@ -133,7 +133,7 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
 
     mch = match(chrn*maxmult + position, locmat %*% c(maxmult,1), nomatch = 0L);
     if( any(mch == 0L) )
-        stop('Some locations not found')
+        stop("Some locations not found");
 
     mch = sort(mch);
 
@@ -141,14 +141,14 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     setwd(targetdir)
 
     file.copy(
-            from = paste0(dircov,'/CpG_chromosome_names.txt'),
-            to = 'CpG_chromosome_names.txt');
-    fm = fm.create.from.matrix('CpG_locations', locmat[mch,]);
+            from = paste0(dircov, "/CpG_chromosome_names.txt"),
+            to = "CpG_chromosome_names.txt");
+    fm = fm.create.from.matrix("CpG_locations", locmat[mch,]);
     close(fm);
 
-    fi = fm.open(paste0(dircov,'/Coverage'), readonly = TRUE)
+    fi = fm.open(paste0(dircov, "/Coverage"), readonly = TRUE)
     fo = fm.create(
-                filenamebase = 'Coverage',
+                filenamebase = "Coverage",
                 nrow = nrow(fi),
                 ncol = length(mch),
                 type = fi$type,
@@ -158,7 +158,7 @@ subsetCoverageDirByLocation = function(x, chr, position, targetdir){
     runto = length(mch);
     nsteps = ceiling(runto/step1);
     for( part in seq_len(nsteps) ){ # part = 1
-        message('Loop filling coverage matrix, step ', part, ' of ', nsteps);
+        message("Loop filling coverage matrix, step ", part, " of ", nsteps);
         fr = (part-1)*step1 + 1;
         to = min(part*step1, runto);
         fo[,fr:to] = fi[,mch[fr:to]];
@@ -182,7 +182,7 @@ madeBED = function(x, filename){
         chrom = mwas$chr,
         chromStart  = mwas$start - 1,
         chromEnd =  mwas$end,
-        name = '.',
+        name = ".",
         score = mwas$`p-value`
     )
     write.table(
@@ -215,7 +215,7 @@ madeBEDrange = function(x, filename, chr, start, end){
         chrom = mwas$chr[keep],
         chromStart  = mwas$start[keep] - 1,
         chromEnd =  mwas$end[keep],
-        name = '.',
+        name = ".",
         score = mwas$`p-value`[keep]
     )
     write.table(

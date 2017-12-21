@@ -167,7 +167,7 @@ manPlotPrepare = function(
         chr = factor(chr);
     if(is.integer(chr)) {
         levels(chr) = as.character(seq_len(tail(chr,1)));
-        class(chr) = 'factor';
+        class(chr) = "factor";
     }
 
     # max of each chromosome
@@ -192,7 +192,7 @@ manPlotPrepare = function(
     yfac = as.integer(y0*100)+1L;
     yorder = sort.list(yfac);
     levels(yfac) = as.character(seq_len(max(yfac)));
-    class(yfac) = 'factor';
+    class(yfac) = "factor";
     
     ygroup = split(seq_along(yfac), yfac);
     for( i in seq_along(ygroup)){ # i=1
@@ -226,7 +226,7 @@ manPlotPrepare = function(
 manPlotFast = function(
             man,
             ylim = NULL,
-            colorSet = c('steelblue4',"#2C82D1","#4CB2D1"),
+            colorSet = c("steelblue4", "#2C82D1", "#4CB2D1"),
             yaxmax = NULL,
             lwd = 3,
             axistep = 2,
@@ -251,9 +251,9 @@ manPlotFast = function(
         y = NA, 
         xlim = c(0, tail(man$offsets,1)), 
         ylim = ylim, 
-        xaxs = 'i', 
-        yaxs = 'i',
-        xlab = 'Chromosome', 
+        xaxs = "i", 
+        yaxs = "i",
+        xlab = "Chromosome", 
         ylab = expression(
             paste("\u2013", " log"[10]*"(", italic("P"), "), observed")),
         axes = FALSE);

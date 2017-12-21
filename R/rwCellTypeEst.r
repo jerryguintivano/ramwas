@@ -13,7 +13,7 @@ estimateCellTypes = function(param, ncpgs = NULL){
     mycelltypes = names(ctindices);
     
     # Select CpGs to use
-    fm = fm.open(paste0(pf$dirmwas, '/Stats_and_pvalues'));
+    fm = fm.open(paste0(pf$dirmwas, "/Stats_and_pvalues"));
     pv = fm[,3];
     close(fm)
     idset = findBestNpvs(pv, ncpgs);
@@ -22,7 +22,7 @@ estimateCellTypes = function(param, ncpgs = NULL){
     cvrtqr = t(.getCovariates(pf, modelhasconstant = TRUE));
     
     # Initialize loop
-    fm = fm.open(paste0(pf$dircoveragenorm,'/Coverage'), readonly = TRUE)
+    fm = fm.open(paste0(pf$dircoveragenorm, "/Coverage"), readonly = TRUE)
     XTX = 0;
     XY = 0;
     # YY = 0;
@@ -34,7 +34,7 @@ estimateCellTypes = function(param, ncpgs = NULL){
     for( part in seq_len(nsteps) ) { # part = 1
         fr = (part-1)*step1 + 1;
         to = min(part*step1, runto);
-        message("Processing CpGs ", fr, ' to ', to, " of ", runto);
+        message("Processing CpGs ", fr, " to ", to, " of ", runto);
         
         slice = fm[,idset[fr:to]];
         slice = slice - tcrossprod(cvrtqr, crossprod(slice, cvrtqr));
@@ -68,13 +68,13 @@ estimateCellTypes = function(param, ncpgs = NULL){
     rownames(fullbeta) = rownames(fm);
     
     saveRDS(
-        file = sprintf('%s/CellTypeEstimatesR_%07d_CpGs.rds',pf$dirmwas,ncpgs), 
+        file = sprintf("%s/CellTypeEstimatesR_%07d_CpGs.rds", pf$dirmwas,ncpgs), 
         object = fullbeta);
     write.table(
-        file = sprintf('%s/CellTypeEstimatesT_%07d_CpGs.txt',pf$dirmwas,ncpgs), 
+        file = sprintf("%s/CellTypeEstimatesT_%07d_CpGs.txt", pf$dirmwas,ncpgs), 
         x = data.frame(samples = rownames(fullbeta), fullbeta),
         row.names = FALSE,
-        sep = '\t');
+        sep = "\t");
     
     close(fm);
     

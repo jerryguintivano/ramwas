@@ -39,7 +39,7 @@ manPlotFast(
     }
     \item{ismlog10}{
         Specifies whether the provides p-values (\code{pvalues} parameter)
-        are minus log10 transformed (\code{- log10(pv)});
+        are minus log10 transformed (\code{- log10(pv)})
     }
     \item{chrmargins}{
         The plot margins at the ends of chromosomes (in basepairs).
@@ -94,12 +94,12 @@ manPlotFast(
 }
 \examples{
 # Simulate data (9 chromosomes, million tests each)
-chr = rep(paste0('chr',1:9), each = 1e6);
-pos = rep(1:1e6, 9);
-pv = runif(9e6)^1.1;
+chr = rep(paste0('chr',1:9), each = 1e6)
+pos = rep(1:1e6, 9)
+pv = runif(9e6)^1.1
 
 # Extract the Manhattan plot info
-man = manPlotPrepare(pv, chr, pos, chrmargins = 1000);
+man = manPlotPrepare(pv, chr, pos, chrmargins = 1000)
 
 # Create Manhattan plot
 manPlotFast(man)

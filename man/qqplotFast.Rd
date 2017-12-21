@@ -47,7 +47,7 @@ qqPlotFast(
     }
     \item{ismlog10}{
         Specifies whether the provides p-values (\code{pvalues} parameter)
-        are minus log10 transformed (\code{- log10(pv)});
+        are minus log10 transformed (\code{- log10(pv)})
     }
     \item{x}{
         Either a vector of p-values, as in \code{qqPlotPrepare},

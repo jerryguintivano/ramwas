@@ -42,7 +42,7 @@ setRefClass("rwDataClass",
                 stop( 
                     "The \"modelcovariates\" lists unknown covariates: \n",
                     paste0(param$modelcovariates[head(which(cvrtset==0))], 
-                        collapse = ', '));
+                        collapse = ", "));
             
             # Extract covariates
             cvrt = param$covariates[ cvrtset ];
@@ -71,7 +71,7 @@ setRefClass("rwDataClass",
             if( any(rowsubset == 0L) )
                 stop( "Unknown samples in covariate file: ",
                     paste(samplenames[head(which(rowsubset==0))],
-                        collapse = ', '));
+                        collapse = ", "));
         
             # if no reordering is required, set rowsubset=NULL
             if( length(samplenames) == length(fmsamples) ){

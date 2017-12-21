@@ -86,7 +86,7 @@ plotROC(outcome, forecast)
 }
 \examples{
 # Sample data
-n = 300;
+n = 300
 param = list(modeloutcome = "Age", mmalpha = 0, cvnfolds = 5)
 outcome = rnorm(n, mean = 50, sd = 20)
 forecast = outcome + rnorm(n, mean = 0, sd = 20)
@@ -99,7 +99,7 @@ plotPrediction(
         outcome,
         forecast,
         cpgs2use,
-        main);
+        main)
 
 # Artificial data for plotCVcors()
 cl = list(

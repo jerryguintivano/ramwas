@@ -162,7 +162,7 @@ processCommandLine = function(.arg = NULL){
 
 trimBamFilename = function(bamnames){
     BNnopath = basename(bamnames);
-    BNnodotbam = gsub('\\.bam$', '', BNnopath, ignore.case = TRUE);
+    BNnodotbam = gsub("\\.bam$", "", BNnopath, ignore.case = TRUE);
     return(BNnodotbam);
 }
 

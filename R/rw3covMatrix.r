@@ -303,8 +303,8 @@ ramwas3normalizedCoverage = function( param ){
                 "parameter:\n ",
                 paste0(head(param$covariates[[1]][badset]), collapse = "\n "));
         
-        message('Using the ',length(param$covariates[[1]]),
-                ' samples in the covariate file.')
+        message("Using the ", length(param$covariates[[1]]),
+                " samples in the covariate file.")
         param$bam2sample = param$bam2sample[param$covariates[[1]]];
     }
     # Check is all rbams are in place
@@ -318,7 +318,7 @@ ramwas3normalizedCoverage = function( param ){
             }
         }
         rm(bams, bname, filename);
-        message('All required Rbam files present are present.');
+        message("All required Rbam files present are present.");
     }
     
     dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
@@ -391,7 +391,7 @@ ramwas3normalizedCoverage = function( param ){
                 .file.remove(param$lockfile);
             });
             logfun = .logErrors(ld, .ramwas3coverageJob);
-            # clusterExport(cl, c(".log",'ld','.ramwas3coverageJob'));
+            # clusterExport(cl, c(".log","ld",".ramwas3coverageJob"));
             # logfun = ramwas:::.ramwas3coverageJob
             z = clusterApplyLB(
                         cl = cl,
@@ -404,7 +404,7 @@ ramwas3normalizedCoverage = function( param ){
             rm(tmp);
             on.exit();
         } else {
-            z = vector('list', nsamples);
+            z = vector("list", nsamples);
             names(z) = names(param$bam2sample);
             for(i in seq_along(param$bam2sample)){ # i=1
                 z[[i]] = .ramwas3coverageJob(  
@@ -448,7 +448,7 @@ ramwas3normalizedCoverage = function( param ){
             rm(tmp);
             on.exit();
         } else {
-            z = vector('list', nslices);
+            z = vector("list", nslices);
             for( fmpart in seq_len(nslices) ){ # fmpart = 1
                 z[[fmpart]] = .ramwas3transposeFilterJob(fmpart, param);
             }
@@ -540,7 +540,6 @@ ramwas3normalizedCoverage = function( param ){
 
         
         ### normalize and fill in
-        logfun = .logErrors(ld, .ramwas3normalizeJob);
         nthreads = min(param$diskthreads, nslices);
         if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile1 = tempfile();
@@ -552,6 +551,7 @@ ramwas3normalizedCoverage = function( param ){
                 .file.remove(param$lockfile1);
                 .file.remove(param$lockfile2);
             });
+            logfun = .logErrors(ld, .ramwas3normalizeJob);
             z = clusterApplyLB(
                         cl = cl,
                         x = fmpart_offset_list,
@@ -564,8 +564,8 @@ ramwas3normalizedCoverage = function( param ){
             on.exit();
         } else {
             for( i in seq_len(nslices) ){ # i = 1
-                z = vector('list', nslices);
-                z[[i]] = logfun( 
+                z = vector("list", nslices);
+                z[[i]] = .ramwas3normalizeJob( 
                         fmpart_offset = fmpart_offset_list[[i]],
                         param = param,
                         samplesums = samplesums);

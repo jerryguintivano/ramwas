@@ -1,23 +1,23 @@
 # Make QC plots for an Rbam
 pipelineSaveQCplots = function(param, rbam, bamname){
-    filename = paste0(param$dirqc,"/score/hs_",bamname,".pdf");
-    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    filename = sprintf("%s/score/hs_%s.pdf", param$dirqc, bamname);
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE);
     pdf(filename);
     plot(rbam$qc$hist.score1, samplename = bamname);
     plot(rbam$qc$bf.hist.score1, samplename = bamname);
     dev.off();
     rm(filename);
 
-    filename = paste0(param$dirqc,"/edit_distance/ed_",bamname,".pdf");
-    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    filename = sprintf("%s/edit_distance/ed_%s.pdf", param$dirqc, bamname);
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE);
     pdf(filename);
     plot(rbam$qc$hist.edit.dist1, samplename = bamname);
     plot(rbam$qc$bf.hist.edit.dist1, samplename = bamname);
     dev.off();
     rm(filename);
 
-    filename = paste0(param$dirqc,"/matched_length/ml_",bamname,".pdf");
-    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+    filename = sprintf("%s/matched_length/ml_%s.pdf", param$dirqc, bamname);
+    dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE);
     pdf(filename);
     plot(rbam$qc$hist.length.matched, samplename = bamname);
     plot(rbam$qc$bf.hist.length.matched, samplename = bamname);
@@ -25,18 +25,18 @@ pipelineSaveQCplots = function(param, rbam, bamname){
     rm(filename);
 
     if( !is.null(rbam$qc$hist.isolated.dist1) ){
-        filename = paste0(param$dirqc,"/isolated_distance/id_",bamname,".pdf");
-        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+        filename = sprintf("%s/isolated_distance/id_%s.pdf",
+                        param$dirqc, bamname);
+        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE);
         pdf(filename);
         plot(rbam$qc$hist.isolated.dist1, samplename = bamname);
         dev.off();
         rm(filename);
     }
     if( !is.null(rbam$qc$avg.coverage.by.density) ){
-        filename = paste0(
-                        param$dirqc,
-                        "/coverage_by_density/cbd_",bamname,".pdf");
-        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+        filename = sprintf("%s/isolated_distance/cbd_%s.pdf",
+                        param$dirqc, bamname);
+        dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE);
         pdf(filename);
         plot(rbam$qc$avg.coverage.by.density, samplename = bamname);
         dev.off();
@@ -46,7 +46,7 @@ pipelineSaveQCplots = function(param, rbam, bamname){
 
 # Scan a BAM file into Rbam object
 bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
-    fields = c("qname","rname","pos","cigar","flag")
+    fields = c("qname", "rname", "pos", "cigar", "flag");
     # "qname" is read name, "rname" is chromosome
     tags = "NM";# character();
 
@@ -239,12 +239,12 @@ pipelineProcessBam = function(bamname, param){
     dir.create(param$dirrbam, showWarnings = FALSE, recursive = TRUE)
     dir.create(param$dirrqc,  showWarnings = FALSE, recursive = TRUE)
 
-    rdsbmfile = paste0( param$dirrbam, "/", basename(bamname), ".rbam.rds" );
-    rdsqcfile = paste0( param$dirrqc,  "/", basename(bamname), ".qc.rds" );
+    rdsbmfile = paste0(param$dirrbam, "/", basename(bamname), ".rbam.rds");
+    rdsqcfile = paste0(param$dirrqc,  "/", basename(bamname), ".qc.rds");
 
     savebam = TRUE;
     rbam = NULL;
-    if( file.exists( rdsbmfile ) ){
+    if( file.exists(rdsbmfile) ){
         if( param$recalculate.QCs ){
             ### Precache the input rds file
             {invisible(readBin( rdsbmfile, "raw", file.size(rdsbmfile)));}
@@ -355,11 +355,11 @@ ramwas1scanBams = function( param ){
 
     .log(ld, "%s, Scanning bams.", date(), append = FALSE);
     
-    logfun = .logErrors(ld, .ramwas1scanBamJob);
     nthreads = min(param$cputhreads, length(param$bamname));
-    if( nthreads > 1){
+    if( nthreads > 1 ){
         cl = makeCluster(nthreads);
         on.exit({stopCluster(cl);});
+        logfun = .logErrors(ld, .ramwas1scanBamJob);
         z = clusterApplyLB(
                 cl = cl,
                 x = param$bamnames, 
@@ -370,15 +370,15 @@ ramwas1scanBams = function( param ){
         rm(tmp);
         on.exit();
     } else {
-        z = vector('list', length(param$bamnames));
+        z = vector("list", length(param$bamnames));
         names(z) = param$bamnames;
-        for(i in seq_along(param$bamnames)){ # i=1
-            z[[i]] = logfun(
+        for( i in seq_along(param$bamnames) ){ # i=1
+            z[[i]] = .ramwas1scanBamJob(
                         bamname = param$bamnames[i],
                         param = param);
         }
     }
-    .showErrors(z)
+    .showErrors(z);
     .log(ld, "%s, Done scanning bams.", date());
     return(invisible(z));
 }

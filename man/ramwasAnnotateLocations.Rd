@@ -49,7 +49,7 @@ param = ramwasParameters(
     bidataset = bidataset,
     biattributes = biattributes,
     bifilters = bifilters,
-    biflank = biflank);
+    biflank = biflank)
 
 # Test a location
 chr = "chr1"

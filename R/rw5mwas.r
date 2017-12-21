@@ -268,7 +268,7 @@ ramwas5MWAS = function( param ){
             "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
         stop(
-            "Model outcome is not found among covariates.\'n",
+            "Model outcome is not found among covariates.\n",
             "See \"modeloutcome\" parameter");
     
     parameterDump(dir = param$dirmwas, param = param,
@@ -343,7 +343,7 @@ ramwas5MWAS = function( param ){
                     if(exists(\"setMKLthreads\", 
                         where = \"package:RevoUtilsMath\"))
                     RevoUtilsMath::setMKLthreads(1);"));
-            # clusterExport(cl, c(".log",'ld','.ramwas5MWASjob'));
+            # clusterExport(cl, c(".log","ld",".ramwas5MWASjob"));
             logfun = .logErrors(ld, .ramwas5MWASjob);
             z = clusterApplyLB(
                         cl = cl,
@@ -394,7 +394,7 @@ ramwas5MWAS = function( param ){
         .log(ld, "%s, Creating QQ-plot and Manhattan plot pair", date());
         
         png(
-            filename = paste0(param$dirmwas, '/ManPlot.png'), 
+            filename = paste0(param$dirmwas, "/ManPlot.png"), 
             width = 420*9*1.5, 
             height = 420*3.8*1.5, 
             pointsize = 16*4);

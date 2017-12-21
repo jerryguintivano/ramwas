@@ -39,7 +39,7 @@ plotROC = function(outcome, forecast){
     
     legend(
         "bottom",
-        legend = sprintf('AUC = %.3f',auc),
+        legend = sprintf("AUC = %.3f", auc),
         bty = "n");
     return(auc);
 }
@@ -60,7 +60,7 @@ ramwas7ArunMWASes = function(param){
             "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
         stop(
-            "Model outcome is not found among covariates.\'n",
+            "Model outcome is not found among covariates.\n",
             "See \"modeloutcome\" parameter");
 
     outcome = param$covariates[[ param$modeloutcome ]];
@@ -197,7 +197,7 @@ ramwas7BrunElasticNet = function(param){
             "See \"modeloutcome\" parameter");
     if( !any(names(param$covariates) == param$modeloutcome) )
         stop(
-            "Model outcome is not found among covariates.\'n",
+            "Model outcome is not found among covariates.\n",
             "See \"modeloutcome\" parameter");
 
     
