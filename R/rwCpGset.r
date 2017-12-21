@@ -27,10 +27,10 @@ getCpGsetALL = function( genome ){
             Gint[as.integer(chrom[-1])] );
     }
 
-    cpgset = vector("list", length(genome))
+    cpgset = vector("list", length(genome));
     names(cpgset) = names(genome);
     for( i in seq_along(genome) ){ # i = length(genome)
-        message("Processing ",names(genome)[i]);
+        message("Processing ", names(genome)[i]);
         cpgset[[i]] = starts_fun(charToRaw(as.character(genome[[i]])));
     }
     return(cpgset);
@@ -45,9 +45,9 @@ insilicoFASTQ = function(con, gensequence, fraglength){
     if (is.character(con)){
         if(nchar(con) > 0){
             if(grepl("\\.gz$",con)){
-                con = gzfile(con, open = "wb")
+                con = gzfile(con, open = "wb");
             } else {
-                con = file(con, open = "wb")
+                con = file(con, open = "wb");
             }
             on.exit(close(con))
         } else {
@@ -57,7 +57,7 @@ insilicoFASTQ = function(con, gensequence, fraglength){
 
     qual = charToRaw(paste0(
                         "\n+\n",
-                        paste(rep("A",fraglength),collapse = ""),
+                        paste(rep("A",fraglength), collapse = ""),
                         "\n"));
 
     sequence = as.character(gensequence);
@@ -82,7 +82,7 @@ insilicoFASTQ = function(con, gensequence, fraglength){
             mat[3,] = list(qual);
         }
         mat[1,] = lapply(
-                    X = paste0("@",formatC(fr:to, width = 9, flag = "0"),"\n"),
+                    X = paste0("@",formatC(fr:to, width = 9, flag = "0"), "\n"),
                     FUN = charToRaw);
         mat[2,] = lapply(
                     X = fr:to,
@@ -164,7 +164,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
         countACGT[is.na(countACGT)] = 0;
         if(sum(countACGT) > 0 ){
             countACGT = countACGT / sum(countACGT);
-            index = (countACGT >= MAF)+1L;
+            index = (countACGT >= MAF) + 1L;
             dim(index) = c(1,4);
             gensequence[pos[i]] = rawACGT[index];
         }

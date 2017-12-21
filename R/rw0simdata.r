@@ -148,7 +148,7 @@ ramwas0createArtificialData = function(
                     n = ncpgs,
                     size = 1,
                     prob = seq(1/5, 1/1000, length.out = ncpgs));
-        locs = cumsum(2L + gaps) + 1e4L;
+        locs = cumsum(2L + gaps) + 1e6L;
         chrlen = tail(locs, 1);
         rm(gaps);
         

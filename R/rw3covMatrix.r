@@ -162,13 +162,15 @@ pipelineCoverage1Sample = function(colnum, param){
 
     # Create transposed+filtered output and the corresponding location files
     fmout = fm.create( 
-                filenamebase = paste0(param$dirtemp2,"/TrCoverage_part",fmpart),
+                filenamebase = 
+                    paste0(param$dirtemp2, "/TrCoverage_part", fmpart),
                 nrow = ncol(mat),
                 ncol = 0,
                 size = param$doublesize,
                 lockfile = param$lockfile2);
     fmpos = fm.create( 
-                filenamebase = paste0(param$dirtemp2,"/TrCoverage_loc",fmpart),
+                filenamebase = 
+                    paste0(param$dirtemp2, "/TrCoverage_loc",  fmpart),
                 nrow = 1,
                 ncol = 0,
                 type = "integer",
@@ -200,7 +202,7 @@ pipelineCoverage1Sample = function(colnum, param){
 
         if( !all(keep) ){
             keep = which(keep);
-            subslice = subslice[keep,,drop=FALSE];
+            subslice = subslice[keep, , drop=FALSE];
             slloc = slloc[keep];
         }
 
@@ -219,7 +221,7 @@ pipelineCoverage1Sample = function(colnum, param){
     close(fmpos);
 
     fmss = fm.open( 
-                filenamebase = paste0(param$dirtemp2,"/0_sample_sums"),
+                filenamebase = paste0(param$dirtemp2, "/0_sample_sums"),
                 lockfile = param$lockfile2);
     fmss[,fmpart] = samplesums;
     close(fmss);
@@ -279,7 +281,7 @@ ramwas3normalizedCoverage = function( param ){
     
     # Fragment size estimate
     if( param$minfragmentsize < param$maxfragmentsize ){
-        filename = paste0(param$dirfilter,"/Fragment_size_distribution.txt");
+        filename = paste0(param$dirfilter, "/Fragment_size_distribution.txt");
         if( !file.exists(filename) )
             stop(
                 "Fragment size distribution estimate not found: ", filename,
@@ -467,7 +469,7 @@ ramwas3normalizedCoverage = function( param ){
         keep = logical(ncpgs);
         
         kbblock = (128*1024)/8;
-        step1 = max(floor(param$buffersize / (8 * nsamples)/kbblock),1)*kbblock;
+        step1 = max(floor(param$buffersize / (8*nsamples)/kbblock),1)*kbblock;
         mm = ncpgs;
         nsteps = ceiling(mm/step1);
         keeplist = vector("list",nsteps);
@@ -477,13 +479,13 @@ ramwas3normalizedCoverage = function( param ){
             fr = (part-1)*step1 + 1;
             to = min(part*step1, mm);
 
-            indx = fm.load( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
+            indx = fm.load(paste0(param$dirtemp2, "/TrCoverage_loc", part));
             indx = as.vector(indx)
             keep[fr:to][indx] = TRUE;
             sliceoffsets[part+1] = sliceoffsets[part] + length(indx);
             
             # Cleanup
-            fmlc = fm.open( paste0(param$dirtemp2,"/TrCoverage_loc",part) );
+            fmlc = fm.open(paste0(param$dirtemp2, "/TrCoverage_loc", part));
             closeAndDeleteFiles(fmlc);
         }
         rm(part, step1, mm, nsteps, fr, to, kbblock, indx);
@@ -507,7 +509,7 @@ ramwas3normalizedCoverage = function( param ){
     {
         .log(ld, "%s, Gathering sample sums from %d slices", date(), nslices);
 
-        mat = fm.load( paste0(param$dirtemp2, "/0_sample_sums") );
+        mat = fm.load(paste0(param$dirtemp2, "/0_sample_sums"));
         samplesums = rowSums(mat);
         rm(mat);
         fm = fm.create.from.matrix(
@@ -516,7 +518,7 @@ ramwas3normalizedCoverage = function( param ){
         close(fm);
         
         # Cleanup
-        fm = fm.open( paste0(param$dirtemp2,"/0_sample_sums") );
+        fm = fm.open(paste0(param$dirtemp2, "/0_sample_sums"));
         closeAndDeleteFiles(fm);
     }
 

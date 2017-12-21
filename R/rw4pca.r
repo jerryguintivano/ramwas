@@ -124,13 +124,13 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         .log(ld, "%s, Saving PC values and vectors", date());
         PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
         rownames(PC_loads) = data$samplenames;
-        colnames(PC_loads) = paste0("PC",seq_len(ncol(PC_loads)));
+        colnames(PC_loads) = paste0("PC", seq_len(ncol(PC_loads)));
         write.table(file = paste0(param$dirpca, "/PC_loadings.txt"),
-                    x = data.frame(name=rownames(PC_loads),PC_loads),
+                    x = data.frame(name=rownames(PC_loads), PC_loads),
                     sep="\t",
                     row.names = FALSE);
         PC_values = data.frame(
-                    PC_num = paste0("PC",seq_len(length(e$values))),
+                    PC_num = paste0("PC", seq_len(length(e$values))),
                     VarianceExplained = e$values/sum(e$values));
         write.table(file = paste0(param$dirpca, "/PC_values.txt"),
                     x = PC_values,
@@ -144,7 +144,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         .log(ld, "%s, Saving PC vs. covariates associations", date());
         testcov = .testCovariates(
                         covariates1 = param$covariates[-1],
-                        data = e$vectors[,seq_len(nonzeroPCs)],
+                        data = e$vectors[, seq_len(nonzeroPCs)],
                         cvrtqr = data$cvrtqr);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
@@ -249,7 +249,7 @@ ramwas4PCA = function( param ){
 
             .log(ld, "%s, Saving covariance matrix", date());
             saveRDS(
-                file = paste0(param$dirpca,"/covmat.rds"),
+                file = paste0(param$dirpca, "/covmat.rds"),
                 object = covmat,
                 compress = FALSE);
         } # covmat
@@ -263,7 +263,7 @@ ramwas4PCA = function( param ){
                 file = paste0(param$dirpca, "/eigen.rds"),
                 object = e,
                 compress = FALSE);
-            # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
+            # e = readRDS(paste0(param$dirpca, "/eigen.rds"));
         } # e
     }
     data$close();
