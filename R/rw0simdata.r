@@ -46,7 +46,7 @@ groupSample = function(len, size, gr){
 
         # Add non-CpG reads
         cpglocs[seq_len(length(cpglocs)/100)] = 
-                seq_len(length(cpglocs)/100) + length(fragdistr);
+                seq_len(length(cpglocs)/100) + max(locs);
 
         # read strand (0 - forward, 1 - reverse)
         readdir = sample(
@@ -148,7 +148,7 @@ ramwas0createArtificialData = function(
                     n = ncpgs,
                     size = 1,
                     prob = seq(1/5, 1/1000, length.out = ncpgs));
-        locs = cumsum(2L + gaps) + 1e6L;
+        locs = cumsum(2L + gaps) + 1e3L;
         chrlen = tail(locs, 1);
         rm(gaps);
         
