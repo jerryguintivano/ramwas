@@ -85,7 +85,7 @@ suppressPackageStartupMessages(library(ramwas))
 # dr = "D:/temp"
 ```
 
-```{r generateData, warning=FALSE}
+```{r generateData, warning=FALSE, message=FALSE}
 library(ramwas)
 dr = paste0(tempdir(), "/simulated_project")
 ramwas0createArtificialData(

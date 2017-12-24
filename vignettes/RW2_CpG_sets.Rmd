@@ -138,7 +138,9 @@ command `--counts`.
 Note that `vcftools` is an independent software,
 not part of RaMWAS.
 
-> `vcftools --gzvcf ALL.chr22.phase3.vcf.gz --counts --out count_ALL_chr22.txt`
+> `vcftools --gzvcf ALL.chr22.phase3.vcf.gz \`  
+> `         --counts \`  
+> `         --out count_ALL_chr22.txt`
 
 RaMWAS provides the function `injectSNPsMAF` to
 read in the generated allele count files,
@@ -208,8 +210,11 @@ insilicoFASTQ(
 The generated FASTQ files are then aligned to the reference genome.
 Taking Bowtie2 as an example:
 
-> `bowtie2 --local --threads 14 --reorder -x bowtie2ind -U
-chr1.fastq.gz | samtools view -bS -o chr1.bam`
+> `bowtie2 --local \`  
+> `        --threads 14 \`  
+> `        --reorder \`  
+> `        -x bowtie2ind \`  
+> `        -U chr1.fastq.gz | samtools view -bS -o chr1.bam`
 
 The generated BAMs are then scanned with RaMWAS and
 the coverage for one sample combining all the BAMs is calculated:

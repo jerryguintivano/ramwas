@@ -205,7 +205,7 @@ param$cputhreads = 2
 
 The CpG-SNP analysis:
 
-```{r SNPs, message=FALSE}
+```{r SNPs, message=FALSE, warning=FALSE}
 ramwasSNPs(param)
 ```
 
@@ -220,7 +220,7 @@ title("QQ-plot for CpG-SNP analysis")
 For comparison, we also perform the usual MWAS for these CpGs
 without regard for SNPs.
 
-```{r MWAS, message=FALSE}
+```{r MWAS, message=FALSE, warning=FALSE}
 ramwas5MWAS(param)
 ```
 
