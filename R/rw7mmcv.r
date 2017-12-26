@@ -40,6 +40,7 @@ plotROC = function(outcome, forecast){
     legend(
         "bottom",
         legend = sprintf("AUC = %.3f", auc),
+        bg = "transparent",
         bty = "n");
     return(auc);
 }
@@ -322,7 +323,9 @@ ramwas7BrunElasticNet = function(param){
                     "right",
                     legend = c(
                         paste0("# CpGs = ",   cpgs2use),
-                        paste0("EN alpha = ", param$mmalpha)));
+                        paste0("EN alpha = ", param$mmalpha)),
+                    bg = "transparent",
+                    bty = "n");
                 title(paste0(
                     "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
                     param$cvnfolds, "-fold cross validation"));
