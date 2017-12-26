@@ -302,7 +302,7 @@ ramwas3normalizedCoverage = function( param ){
     
     # Are samples in covariates are in bam2sample?
     if( !is.null(param$covariates) ){
-        badset = !(names(param$bam2sample) %in% param$covariates[[1]]);
+        badset = !(param$covariates[[1]] %in% names(param$bam2sample));
         if( any(badset) )
             stop("Covariate file has samples not present in \"bam2sample\" ",
                 "parameter:\n ",
