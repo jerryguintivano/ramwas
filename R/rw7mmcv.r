@@ -235,7 +235,7 @@ ramwas7BrunElasticNet = function(param){
             } # forecast0
             {
                 # get p-values
-                mwas = getMWAS(param);
+                mwas = getMWAS(dircvmwas);
                 pv = mwas$`p-value`;
                 rm(mwas);
             } # pv
