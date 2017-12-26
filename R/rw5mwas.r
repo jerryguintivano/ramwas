@@ -337,14 +337,10 @@ ramwas5MWAS = function( param ){
                 .file.remove(param$lockfile2);
             });
             clusterExport(cl, "testPhenotype");
-            # clusterCall(cl, .set1MLKthread);
-            clusterEvalQ(cl, parse(
-                text = "if(\"package:RevoUtilsMath\" %in% search())
-                    if(exists(\"setMKLthreads\", 
-                        where = \"package:RevoUtilsMath\"))
-                    RevoUtilsMath::setMKLthreads(1);"));
-            # clusterExport(cl, c(".log","ld",".ramwas5MWASjob"));
             logfun = .logErrors(ld, .ramwas5MWASjob);
+            clusterExport(cl, ".set1MLKthread", 
+                            envir = asNamespace("ramwas"));
+            clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
             z = clusterApplyLB(
                         cl = cl,
                         x = rangeset,
