@@ -398,17 +398,19 @@ ramwas5MWAS = function( param ){
             width = 420*9*1.5, 
             height = 420*3.8*1.5, 
             pointsize = 16*4);
-        
+
+        ylim = c(0, max(qq$xpvs[1], qq$ypvs[1])*1.05);
+                
         layout(matrix(c(1,2), 1, 2, byrow = TRUE), widths=c(1,2.2));
 
-        qqPlotFast(qq, lwd = 7);
+        qqPlotFast(qq, lwd = 7, ylim = ylim);
         
         man = manPlotPrepare(
                 pvalues = pvalues,
                 chr = locs$chr, 
                 pos = (locs$start + locs$end) %/% 2L);
         
-        manPlotFast(man, lwd = 7);
+        manPlotFast(man, lwd = 7, ylim = ylim);
         
         dev.off();
         saveRDS(file = paste0(param$dirmwas,"/z_MANinfo.rds"), object = man);

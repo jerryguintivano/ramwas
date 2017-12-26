@@ -76,7 +76,7 @@ qqPlotFast = function(
     # Axis ranges
     mx = head(qq$xpvs,1) * 1.05;
     if( is.null(ylim) ) {
-        my = max(mx*1.15,head(qq$ypvs,1)) * 1.05;
+        my = max(mx, head(qq$ypvs,1) * 1.05) ;
         ylim = c(0, my);
     } else {
         my = ylim[2];
@@ -237,7 +237,7 @@ manPlotFast = function(
     
     # Axis ranges
     if(is.null(ylim)) {
-        my = max(man$y)*1.05;
+        my = max(man$y) * 1.05;
         ylim = c(0,my);
     } else {
         my = ylim[2];
