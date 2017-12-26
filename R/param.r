@@ -203,6 +203,9 @@ parameterPreprocess = function( param ){
     # Set up basic directories
     if( is.null(param$dirproject) )
         param$dirproject = getwd();
+    
+    if( !isAbsolutePath(param$dirproject) )
+        param$dirproject = makefullpath(getwd(), param$dirproject);
 
     if( is.null(param$dirbam))
         param$dirbam = "bams";
