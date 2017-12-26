@@ -319,7 +319,7 @@ ramwas7BrunElasticNet = function(param){
                 plotROC(outcome = outcome,
                         forecast = forecast)
                 legend(
-                    "bottomright",
+                    "right",
                     legend = c(
                         paste0("# CpGs = ",   cpgs2use),
                         paste0("EN alpha = ", param$mmalpha)));
