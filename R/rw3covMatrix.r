@@ -48,11 +48,6 @@ calc.coverage = function(rbam, cpgset, fragdistr){
     return(coveragelist);
 }
 
-# .readRDS = function(object){
-#     # readBin(object, what = "raw", n = file.size(object));
-#     return(readRDS(object));
-# }
-
 # calculate CpG score matrix for 1 sample
 pipelineCoverage1Sample = function(colnum, param){
 
