@@ -254,12 +254,17 @@ ramwas5saveTopFindings = function(param){
     return(invisible(NULL));
 }
 
+# Add error logging feature
+lf.ramwas5MWASjob = .logErrors(.ramwas5MWASjob);
+
 # Setp 5 of RaMWAS
 ramwas5MWAS = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
     ld = param$dirmwas;
     dir.create(param$dirmwas, showWarnings = FALSE, recursive = TRUE);
+    dirprev = setwd(ld);
+
     .log(ld, "%s, Start ramwas5MWAS() call", date(), append = FALSE);
 
     if(is.null(param$modeloutcome))
@@ -337,14 +342,13 @@ ramwas5MWAS = function( param ){
                 .file.remove(param$lockfile2);
             });
             clusterExport(cl, "testPhenotype");
-            logfun = .logErrors(ld, .ramwas5MWASjob);
             clusterExport(cl, ".set1MLKthread", 
                             envir = asNamespace("ramwas"));
             clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
             z = clusterApplyLB(
                         cl = cl,
                         x = rangeset,
-                        fun = logfun,
+                        fun = lf.ramwas5MWASjob,
                         param = param);
             .showErrors(z);
             tmp = sys.on.exit();
@@ -413,5 +417,6 @@ ramwas5MWAS = function( param ){
     if(!is.null(locs))
         ramwas5saveTopFindings(param);
 
+    setwd(dirprev);
     return(invisible(NULL));
 }

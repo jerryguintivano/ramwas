@@ -183,18 +183,18 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     return(invisible(msg));
 }
 
-.logErrors = function(ld, fun){
+.logErrors = function(fun){
     function(...){
         withCallingHandlers(
             tryCatch(fun(...),
                 error = function(e){
-                    .log(ld, "%s, Process %06d\nError: %s\nIn: %s",
+                    .log('.', "%s, Process %06d\nError: %s\nIn: %s",
                         date(), Sys.getpid(),
                         conditionMessage(e), deparse(conditionCall(e)));
                 }
             ),
             warning = function(w){
-                .log(ld, "%s, Process %06d\nWarning: %s\nIn: %s",
+                .log('.', "%s, Process %06d\nWarning: %s\nIn: %s",
                     date(), Sys.getpid(),
                     conditionMessage(w), deparse(conditionCall(w)));
                 invokeRestart("muffleWarning");
