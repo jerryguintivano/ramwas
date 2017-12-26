@@ -356,7 +356,7 @@ ramwas1scanBams = function( param ){
         stop("Parameter not set: maxfragmentsize");
     
 
-    .log(ld, "%s, Scanning bams.", date(), append = FALSE);
+    .log(ld, "%s, Start ramwas1scanBams() call", date(), append = FALSE);
     
     nthreads = min(param$cputhreads, length(param$bamname));
     if( nthreads > 1 ){
@@ -381,7 +381,7 @@ ramwas1scanBams = function( param ){
         }
     }
     .showErrors(z);
-    .log(ld, "%s, Done scanning bams.", date());
+    .log(ld, "%s, Done ramwas1scanBams() call", date());
     setwd(dirprev);
     return(invisible(z));
 }

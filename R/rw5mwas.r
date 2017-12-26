@@ -419,6 +419,8 @@ ramwas5MWAS = function( param ){
     if(!is.null(locs))
         ramwas5saveTopFindings(param);
 
+    .log(ld, "%s, Done ramwas5MWAS() call", date());
+    
     setwd(dirprev);
     return(invisible(NULL));
 }
