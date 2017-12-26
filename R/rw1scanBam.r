@@ -244,7 +244,7 @@ pipelineProcessBam = function(bamname, param){
 
     savebam = TRUE;
     rbam = NULL;
-    if( file.exists(rdsbmfile) ){
+    if( file.exists(rdsqcfile) & file.exists(rdsbmfile) ){
         if( param$recalculate.QCs ){
             ### Precache the input rds file
             {invisible(readBin( rdsbmfile, "raw", file.size(rdsbmfile)));}
