@@ -54,8 +54,8 @@ testPhenotype = function(phenotype, data, cvrtqr){
                     correlation = 0,
                     tstat = 0,
                     pvalue = 1,
-                    nVarTested = nVarTested,
-                    dfFull = dfFull,
+                    nVarTested = 0,
+                    dfFull = 0,
                     statname = ""));
         } else {
             pheno = pheno / sqrt(sum(pheno^2));
