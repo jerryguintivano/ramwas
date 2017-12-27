@@ -404,10 +404,12 @@ ramwas7CplotByNCpGs = function(param){
             plotROC(outcome = datalist[[i]]$outcome,
                     forecast = datalist[[i]]$forecast)
             legend(
-                    "bottomright",
-                    legend = c(
-                            paste0("# CpGs = ",   cpgs2use),
-                            paste0("EN alpha = ", param$mmalpha)));
+                "right",
+                legend = c(
+                    paste0("# CpGs = ",   cpgs2use),
+                    paste0("EN alpha = ", param$mmalpha)),
+                bg = "transparent",
+                bty = "n");
             title(paste0(
                 "ROC curve for prediction of \"", param$modeloutcome,"\"\n",
                 param$cvnfolds,"-fold cross validation"));
