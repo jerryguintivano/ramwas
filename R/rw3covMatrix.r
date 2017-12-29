@@ -573,5 +573,4 @@ ramwas3normalizedCoverage = function( param ){
     }
         
     .log(ld, "%s, Done ramwas3normalizedCoverage() call", date());
-    return(invisible(NULL));
 }
