@@ -184,7 +184,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 }
 
 .logErrors = function(ld, fun){
-    function(...){
+    rez = function(...){
         withCallingHandlers(
             tryCatch(fun(...),
                 error = function(e){
@@ -200,7 +200,13 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
                 invokeRestart("muffleWarning");
             }
         )
-    }
+    };
+    env = new.env(parent = baseenv());
+    assign("ld", ld, envir = env);
+    assign(".log", .log, envir = env);
+    assign("fun", fun, envir = env);
+    environment(rez) = env;
+    return(rez);
 }
 
 .showErrors = function(z){
