@@ -326,15 +326,10 @@ pipelineProcessBam = function(bamname, param){
     return(rez);
 }
 
-# Add error logging feature
-lf.ramwas1scanBamJob = .logErrors(.ramwas1scanBamJob);
-
 # Step 1 of the pipeline
 ramwas1scanBams = function( param ){
     param = parameterPreprocess(param);
     ld = param$dirfilter;
-    dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE);
-    dirprev = setwd(ld);
     
     # Parameter checks
     if( is.null(param$bamnames) )
@@ -355,6 +350,7 @@ ramwas1scanBams = function( param ){
     if( !is.null(param$filecpgset) && is.null(param$maxfragmentsize) )
         stop("Parameter not set: maxfragmentsize");
     
+    dir.create(param$dirfilter, showWarnings = FALSE, recursive = TRUE);
 
     .log(ld, "%s, Start ramwas1scanBams() call", date(), append = FALSE);
     
@@ -362,10 +358,11 @@ ramwas1scanBams = function( param ){
     if( nthreads > 1 ){
         cl = makeCluster(nthreads);
         on.exit({stopCluster(cl);});
+        logfun = .logErrors(ld, .ramwas1scanBamJob);
         z = clusterApplyLB(
                 cl = cl,
                 x = param$bamnames, 
-                fun = lf.ramwas1scanBamJob,
+                fun = logfun,
                 param = param);
         tmp = sys.on.exit();
         eval(tmp);
@@ -382,6 +379,5 @@ ramwas1scanBams = function( param ){
     }
     .showErrors(z);
     .log(ld, "%s, Done ramwas1scanBams() call", date());
-    setwd(dirprev);
     return(invisible(z));
 }

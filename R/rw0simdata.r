@@ -125,9 +125,6 @@ groupSample = function(len, size, gr){
     return(invisible(NULL));
 }
 
-# Add error logging feature
-lf.ramwas0cadJob = .logErrors(.ramwas0cadJob);
-
 # Create artificial data set for vignettes and examples
 ramwas0createArtificialData = function(
             dir,
@@ -139,8 +136,6 @@ ramwas0createArtificialData = function(
     
     ld = paste0(dir, "/bams");
     dir.create(ld, showWarnings = FALSE, recursive = TRUE);
-    dirprev = setwd(ld);
-    
     .log(ld, "%s, Start ramwas0createArtificialData() call", date(), 
         append = FALSE);
 
@@ -239,10 +234,11 @@ ramwas0createArtificialData = function(
             on.exit({
                 stopCluster(cl);
             });
+            logfun = .logErrors(ld, .ramwas0cadJob);
             rez = clusterApplyLB(
                             cl = cl,
                             x = rangeset,
-                            fun = lf.ramwas0cadJob,
+                            fun = logfun,
                             ld = ld,
                             locfile = paste0(dir, "/Simulated_chromosome.rds"),
                             nreads = nreads,
@@ -280,7 +276,5 @@ ramwas0createArtificialData = function(
         }
         .log(ld, "%s, Done generating BAM files in: %s", date(), ld);
     }
-    
-    setwd(dirprev);
     return(invisible(NULL));
 }

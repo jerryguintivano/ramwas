@@ -269,18 +269,10 @@ pipelineCoverage1Sample = function(colnum, param){
     return(NULL);
 }
 
-# Add error logging feature
-lf.ramwas3coverageJob = .logErrors(.ramwas3coverageJob);
-lf.ramwas3transposeFilterJob = .logErrors(.ramwas3transposeFilterJob);
-lf.ramwas3normalizeJob = .logErrors(.ramwas3normalizeJob);
-
-
 # Step 3 of RaMWAS
 ramwas3normalizedCoverage = function( param ){
     param = parameterPreprocess(param);
     ld = param$dircoveragenorm;
-    dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
-    dirprev = setwd(ld);
     
     # Fragment size estimate
     if( param$minfragmentsize < param$maxfragmentsize ){
@@ -325,6 +317,9 @@ ramwas3normalizedCoverage = function( param ){
         rm(bams, bname, filename);
         message("All required Rbam files present are present.");
     }
+    
+    dir.create(param$dircoveragenorm, showWarnings = FALSE, recursive = TRUE);
+    dir.create(param$dirtemp, showWarnings = FALSE, recursive = TRUE);
 
 
     parameterDump(dir = param$dircoveragenorm, param = param,
@@ -350,8 +345,6 @@ ramwas3normalizedCoverage = function( param ){
         param$dirtemp1 = param$dirtemp;
     if(is.null(param$dirtemp2))
         param$dirtemp2 = param$dirtemp;
-    dir.create(param$dirtemp1, showWarnings = FALSE, recursive = TRUE);
-    dir.create(param$dirtemp2, showWarnings = FALSE, recursive = TRUE);
     
     stopifnot(dir.exists(param$dirtemp1));
     stopifnot(dir.exists(param$dirtemp2));
@@ -394,11 +387,13 @@ ramwas3normalizedCoverage = function( param ){
                 stopCluster(cl);
                 .file.remove(param$lockfile);
             });
+            logfun = .logErrors(ld, .ramwas3coverageJob);
             # clusterExport(cl, c(".log","ld",".ramwas3coverageJob"));
+            # logfun = ramwas:::.ramwas3coverageJob
             z = clusterApplyLB(
                         cl = cl,
                         x = seq_len(nsamples),
-                        fun = lf.ramwas3coverageJob,
+                        fun = logfun,
                         param = param,
                         nslices = nslices);
             tmp = sys.on.exit();
@@ -429,7 +424,8 @@ ramwas3normalizedCoverage = function( param ){
                     nrow = nsamples,
                     ncol = nslices);
         close(fm);
-        
+
+        logfun = .logErrors(ld, .ramwas3transposeFilterJob);
         nthreads = min(param$diskthreads, nslices);
         if( nthreads > 1 ){
             if(param$usefilelock) param$lockfile2 = tempfile();
@@ -442,7 +438,7 @@ ramwas3normalizedCoverage = function( param ){
             z = clusterApplyLB(
                         cl = cl,
                         x = seq_len(nslices),
-                        fun = lf.ramwas3transposeFilterJob,
+                        fun = logfun,
                         param = param);
             tmp = sys.on.exit();
             eval(tmp);
@@ -552,10 +548,11 @@ ramwas3normalizedCoverage = function( param ){
                 .file.remove(param$lockfile1);
                 .file.remove(param$lockfile2);
             });
+            logfun = .logErrors(ld, .ramwas3normalizeJob);
             z = clusterApplyLB(
                         cl = cl,
                         x = fmpart_offset_list,
-                        fun = lf.ramwas3normalizeJob,
+                        fun = logfun,
                         param = param,
                         samplesums = samplesums);
             tmp = sys.on.exit();
@@ -576,6 +573,5 @@ ramwas3normalizedCoverage = function( param ){
     }
         
     .log(ld, "%s, Done ramwas3normalizedCoverage() call", date());
-    setwd(dirprev);
     return(invisible(NULL));
 }

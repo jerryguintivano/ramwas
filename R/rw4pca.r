@@ -166,17 +166,12 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     return(invisible(NULL));
 }
 
-# Add error logging feature
-lf.ramwas4PCAjob = .logErrors(.ramwas4PCAjob);
-
 # Step 4 of RaMWAS
 ramwas4PCA = function( param ){
     # library(filematrix)
     param = parameterPreprocess(param);
     ld = param$dirpca;
     dir.create(param$dirpca, showWarnings = FALSE, recursive = TRUE);
-    dirprev = setwd(ld);
-
     .log(ld, "%s, Start ramwas4PCA() call", date(), append = FALSE);
     
 
@@ -223,6 +218,7 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
+                logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(cl, ".set1MLKthread", 
                               envir = asNamespace("ramwas"));
                 clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
@@ -231,7 +227,7 @@ ramwas4PCA = function( param ){
                 covlist = clusterApplyLB(
                                 cl = cl,
                                 x = rangeset,
-                                fun = lf.ramwas4PCAjob,
+                                fun = logfun,
                                 param = param);
                 .showErrors(covlist);
                 covmat = Reduce(f = `+`, x = covlist);
@@ -272,7 +268,6 @@ ramwas4PCA = function( param ){
     data$close();
     postPCAprocessing(param, e);
     .log(ld, "%s, Done ramwas4PCA() call", date());
-    setwd(dirprev);
     return(invisible(NULL));
 }
 
