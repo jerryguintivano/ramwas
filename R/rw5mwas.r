@@ -338,8 +338,10 @@ ramwas5MWAS = function( param ){
             });
             clusterExport(cl, "testPhenotype");
             logfun = .logErrors(ld, .ramwas5MWASjob);
-            clusterExport(cl, ".set1MLKthread", 
-                            envir = asNamespace("ramwas"));
+            clusterExport(  
+                        cl = cl, 
+                        varlist = ".set1MLKthread", 
+                        envir = asNamespace("ramwas"));
             clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
             z = clusterApplyLB(
                         cl = cl,
