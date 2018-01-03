@@ -246,7 +246,7 @@ madeBEDgraph = function(x, filename){
     return(invisible(bed));
 }
 
-madeBEDgraphGange = function(x, filename, chr, start, end){
+madeBEDgraphRange = function(x, filename, chr, start, end){
     mwas = getMWASandLocations(x);
     chrnames = levels(mwas$chr);
     if( is.factor(chr) )

@@ -47,7 +47,7 @@ export(
     madeBED,
     madeBEDrange,
     madeBEDgraph,
-    madeBEDgraphGange,
+    madeBEDgraphRange,
     insilicoFASTQ,
     injectSNPsMAF,
     mat2cols,

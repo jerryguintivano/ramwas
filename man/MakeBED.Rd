@@ -2,7 +2,7 @@
 \alias{madeBED}
 \alias{madeBEDrange}
 \alias{madeBEDgraph}
-\alias{madeBEDgraphGange}
+\alias{madeBEDgraphRange}
 \title{
     Export MWAS results in BED format.
 }
@@ -13,14 +13,14 @@
     all variables (CpGs), while \code{madeBEDrange} selects only variables on 
     a given chromosome between given locations.
     
-    Functions \code{madeBEDgraph} and \code{madeBEDgraphGange} do the same,
+    Functions \code{madeBEDgraph} and \code{madeBEDgraphRange} do the same,
     but create a file in BedGraph format.
 }
 \usage{
 madeBED(x, filename)
 madeBEDrange(x, filename, chr, start, end)
 madeBEDgraph(x, filename)
-madeBEDgraphGange(x, filename, chr, start, end)
+madeBEDgraphRange(x, filename, chr, start, end)
 }
 \arguments{
     \item{x}{
