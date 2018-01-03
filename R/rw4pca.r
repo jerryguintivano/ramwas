@@ -75,7 +75,6 @@ plotPCvalues = function(values, n = 40, ylim = NULL){
         col = "blue",
         ylim = ylim,
         xlim = c(0, length(pc100)+0.5),
-        main = "Principal components",
         xlab = "PCs",
         ylab = "Variation Explained (%)",
         yaxs = "i",
@@ -116,6 +115,7 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         .log(ld, "%s, Saving PCA plots in: %s", date(), plotfilename);
         pdf(plotfilename, 7, 7);
         plotPCvalues(e$values, n = 40);
+        title("Principal components");
         for( i in seq_len(min(plotPCs,nonzeroPCs)))
             plotPCvectors(e,i);
         dev.off();
