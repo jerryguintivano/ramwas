@@ -68,10 +68,10 @@ estimateCellTypes = function(param, ncpgs = NULL){
     rownames(fullbeta) = rownames(fm);
     
     saveRDS(
-        file = sprintf("%s/CellTypeEstimatesR_%07d_CpGs.rds", pf$dirmwas,ncpgs), 
+        file = sprintf("%s/CellTypeEstimatesR_%07d_CpGs.rds", pf$dirmwas,ncpgs),
         object = fullbeta);
     write.table(
-        file = sprintf("%s/CellTypeEstimatesT_%07d_CpGs.txt", pf$dirmwas,ncpgs), 
+        file = sprintf("%s/CellTypeEstimatesT_%07d_CpGs.txt", pf$dirmwas,ncpgs),
         x = data.frame(samples = rownames(fullbeta), fullbeta),
         row.names = FALSE,
         sep = "\t");
