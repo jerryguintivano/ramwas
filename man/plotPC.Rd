@@ -10,7 +10,7 @@
     The function \code{plotPCvectors} plots PC vectors (loadings).
 }
 \usage{
-plotPCvalues(values, n = 40)
+plotPCvalues(values, n = 40, ylim = NULL)
 plotPCvectors(e, i)
 }
 \arguments{
@@ -19,6 +19,10 @@ plotPCvectors(e, i)
     }
     \item{n}{
         Number of top PCs to plot.
+    }
+    \item{ylim}{
+        Numeric vectors of length 2, giving the y coordinate range.
+        Exactly as in \link[graphics:plot.window]{Plotting Parameters}.
     }
     \item{e}{
         Eigenvalue decomposition (spectral decomposition) as returned by 
