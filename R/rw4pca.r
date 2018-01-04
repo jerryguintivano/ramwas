@@ -66,9 +66,9 @@
 }
 
 plotPCvalues = function(values, n = 40, ylim = NULL){
+    pc100 = head(values,n)/sum(values)*100;
     if(is.null(ylim))
         ylim = c(0, pc100[1]*1.05);
-    pc100 = head(values,n)/sum(values)*100;
     plot(
         x = pc100,
         pch = 19,
