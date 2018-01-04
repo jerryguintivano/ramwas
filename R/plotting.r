@@ -95,7 +95,7 @@ qqPlotFast = function(
             xlab = xlab,
             ylab = ylab,
             axes = FALSE);
-        axis(1, seq(0, mx + 2, axistep), lwd = lwd);
+        axis(1, seq(0, mx + axistep, axistep), lwd = lwd);
         axis(2, seq(0, yaxmax, axistep), lwd = lwd);
     }
     abline(a = 0, b = 1, col = "grey", lwd = lwd)
