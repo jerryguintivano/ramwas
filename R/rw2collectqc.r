@@ -436,24 +436,32 @@ ramwas2collectqc = function( param ){
             con = paste0(param$dirfilter,"/Fragment_size_distribution.txt"),
             text = as.character(estimate));
 
-    pdf(paste0(param$dirqc,"/Fragment_size_distribution_estimate.pdf"),8,8);
+    pdf(paste0(param$dirqc,"/Fragment_size_distribution_estimate.pdf"), 8, 8);
     plotFragmentSizeDistributionEstimate(frdata, estimate);
+    title("Isolated CpG coverage vs.\nfragment size distribution estimate");
     dev.off();
     return(invisible(NULL));
 }
 
-plotFragmentSizeDistributionEstimate = function(frdata, estimate){
+plotFragmentSizeDistributionEstimate = function(
+        frdata, 
+        estimate, 
+        col1 = "blue", 
+        col2 = "red"){
     lz = lm(frdata[seq_along(estimate)] ~ estimate)
     plot(
         x = as.vector(frdata)/1000,
         pch = 19,
-        col = "blue",
-        main = "Isolated CpG coverage vs.\nfragment size distribution estimate",
+        col = col1,
         ylab = "count, thousands",
         xlab = "Distance to isolated CpGs",
-        xaxs = "i");
+        xaxs = "i",
+        xlim = c(0, length(frdata)), 
+        axes = FALSE);
+	axis(1);
+	axis(2);
     lines(
         x = (estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
         lwd = 4,
-        col = "red");
+        col = col2);
 }

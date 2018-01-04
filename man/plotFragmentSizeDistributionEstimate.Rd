@@ -10,7 +10,11 @@
 }
 \usage{
 estimateFragmentSizeDistribution(frdata, seqLength)
-plotFragmentSizeDistributionEstimate(frdata, estimate)
+plotFragmentSizeDistributionEstimate(      
+        frdata,
+        estimate,
+        col1 = "blue",
+        col2 = "red")
 }
 \arguments{
     \item{frdata}{
@@ -23,6 +27,12 @@ plotFragmentSizeDistributionEstimate(frdata, estimate)
     }
     \item{estimate}{
         Fragment size distribution estimate.
+    }
+    \item{col1}{
+        Color of \code{frdata} points.
+    }
+    \item{col2}{
+        Color of \code{estimate} curve.
     }
 }
 \value{
