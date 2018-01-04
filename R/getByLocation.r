@@ -35,7 +35,6 @@ getMWAS = function(x){
         dirmwas = param$dirmwas;
     } else {
         dirmwas = x;
-        dircov = paste0(x, "/../..");
     }
     mwas = fm.load(filenamebase = paste0(dirmwas, "/Stats_and_pvalues"));
     return(data.frame(mwas, check.names = FALSE));
