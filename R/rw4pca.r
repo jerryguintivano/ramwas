@@ -79,9 +79,9 @@ plotPCvalues = function(values, n = 40, ylim = NULL, col = "blue"){
         ylab = "Variation Explained, %",
         yaxs = "i",
         xaxs = "i",
-		axes = FALSE);
-	axis(1);
-	axis(2);
+        axes = FALSE);
+    axis(1);
+    axis(2);
 }
 
 plotPCvectors = function(e, i, col = "blue1"){

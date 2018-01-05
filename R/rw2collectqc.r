@@ -458,8 +458,8 @@ plotFragmentSizeDistributionEstimate = function(
         xaxs = "i",
         xlim = c(0, length(frdata)), 
         axes = FALSE);
-	axis(1);
-	axis(2);
+    axis(1);
+    axis(2);
     lines(
         x = (estimate*lz$coefficients[2]+lz$coefficients[1])/1000,
         lwd = 4,
