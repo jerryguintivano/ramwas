@@ -445,15 +445,16 @@ This step creates a sub-directory in the PCA directory named
 is the number of top PCs included as covariates (see [Directory names][]).
 The sub-directory includes:
 
-* `QQ_plot.pdf` -- QQ-plot with a confidence band and inflation factor lambda
-(median of the chi-squared test statistics
-divided by the expected median of the chi-squared distribution under null).
-* `Top_tests.txt` -- text file with the top findings.
-* `Stats_and_pvalues.*` -- filematrix with MWAS results.
-The columns include test statistic, p-value, and q-value.
-The rows match the CpGs of the coverage matrix.
-* `DegreesOfFreedom.txt` -- file with the numbers of degrees of freedom for
-the t- or F test used for testing.
+*   `QQ_plot.pdf` -- QQ-plot with a confidence band and inflation factor lambda
+    (median of the chi-squared test statistics
+    divided by the expected median of the chi-squared distribution under null).
+*   `Top_tests.txt` -- text file with the top findings.
+*   `Stats_and_pvalues.*` -- filematrix with MWAS results.
+    The columns include test statistic, p-value, and q-value 
+    (calculated using Benjamini-Hochberg Procedure [@benjamini1995controlling]).
+    The rows match the CpGs of the coverage matrix.
+*   `DegreesOfFreedom.txt` -- file with the numbers of degrees of freedom for
+    the t- or F test used for testing.
 
 For the simulated data the QQ-plot for age shows moderate deviation from the
 diagonal for many CpGs, suggesting many markers with small effects. 
