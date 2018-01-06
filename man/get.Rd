@@ -54,7 +54,7 @@ getDataByLocation(x, chr, start, end)
     }
 }
 \details{
-    The function returns the MWAS results with locations.
+    The functions return the MWAS results and/or locations.
 }
 \value{
     Function \code{getLocations} returns a data frame with
