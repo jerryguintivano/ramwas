@@ -44,6 +44,7 @@ export(
     getMWASandLocations,
     getMWASrange,
     getDataByLocation,
+    subsetCoverageDirByLocation,
     madeBED,
     madeBEDrange,
     madeBEDgraph,
