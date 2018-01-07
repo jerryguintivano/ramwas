@@ -401,6 +401,17 @@ The split into folds is random.
 The random seed can be set with the `randseed` parameter,
 which is set to `18090212` by default for consistency across runs.
 
+### Choosing the number of folds `cvnfolds` in the cross validation
+
+When selecting the number of folds, K, in K-fold cross validation a researcher 
+faces a trade off. 
+On one hand, larger K allows the training set 
+[of size approximately $\frac{K-1}{K}N$ to better match the size of 
+the complete data set. 
+On the other hand, the computational complexity of cross validation 
+grows linearly with K. As a balance, $K = 5$ or $10$ is often chosen. 
+The most extreme case of $K = N$ is known as the 
+leave-one-out cross validation procedure.
 
 ## Joint analysis with genotype data
 
