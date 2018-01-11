@@ -22,10 +22,10 @@ with the set of locations stored as a `list` with
 one sorted vector of CpG locations per chromosome.
 
 ```{r CpGsetExample}
-cpgset = list( 
+cpgset = list(
             chr1 = c(12L, 57L, 123L),
             chr2 = c(45L, 95L, 99L, 111L),
-            chr3 = c(22L, 40L, 199L, 211L) )
+            chr3 = c(22L, 40L, 199L, 211L))
 ```
 
 In practice, the set should depend
