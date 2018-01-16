@@ -1,4 +1,4 @@
-# RaMWAS: Fast methylome-wide association study pipeline for enrichment platforms
+# RaMWAS: Fast Methylome-Wide Association Study Pipeline for Enrichment Platforms
 
 RaMWAS provides a complete toolset for 
 methylome-wide association studies (MWAS).
@@ -47,7 +47,7 @@ If `devtools` package is missing, it can be installed with
 install.packages("devtools")
 ```
 
-### Run Rcmd check
+### Run Rcmd Check (Install Suggested Packages)
 
 To rerun package tests, suggested packages can be installed with
 
