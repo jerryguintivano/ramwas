@@ -24,10 +24,12 @@ genotype data.
 
 ### Install Bioconductor Version
 
-To install RaMWAS via Bioconductor, run
+To install
+[Bioconductor version](https://bioconductor.org/packages/ramwas/)
+of RaMWAS, run
 
 ```
-source("http://bioconductor.org/biocLite.R")
+source("https://bioconductor.org/biocLite.R")
 biocLite("ramwas")
 ```
 
