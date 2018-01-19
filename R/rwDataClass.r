@@ -106,7 +106,7 @@ setRefClass("rwDataClass",
         },
         getDataRez = function(colset, resid = TRUE){
             # Get data
-            x = fmdata[, colset];
+            x = data$fmdata[, colset];
             
             # Subset to active rows
             if( !is.null(rowsubset) )
@@ -121,8 +121,7 @@ setRefClass("rwDataClass",
                     mn = mean(cl, na.rm = TRUE);
                     if( is.na(mn) )
                         mn = 0;
-                    where1 = is.na( x[j, ] );
-                    x[is.na(cl),j] = mn;
+                    x[is.na(cl), j] = mn;
                 }
             }
             rm(naset);
