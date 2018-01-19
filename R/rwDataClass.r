@@ -106,7 +106,7 @@ setRefClass("rwDataClass",
         },
         getDataRez = function(colset, resid = TRUE){
             # Get data
-            x = data$fmdata[, colset];
+            x = fmdata[, colset];
             
             # Subset to active rows
             if( !is.null(rowsubset) )
