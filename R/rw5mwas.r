@@ -11,14 +11,17 @@ testPhenotype = function(phenotype, data, cvrtqr){
     # In rare case of missing phenotype values
     # Subset and re-orthonormalize covariates
     if( any(is.na(pheno)) ){
-        keep = which(rowSums(is.na(pheno))==0);
-
+        keep = which( rowSums(is.na(pheno)) == 0 );
         pheno = pheno[keep, , drop = FALSE];
         slice = slice[keep, , drop = FALSE];
         cvqr0 = cvqr0[keep, , drop = FALSE];
         cvqr0 = qr.Q(qr(cvqr0));
+        rm(keep);
     }
 
+    phenostd = NULL;
+    beta = NULL;
+    
     # Process factor phenotypes
     # Othonormalize them
     # Exclude redundant
@@ -40,8 +43,9 @@ testPhenotype = function(phenotype, data, cvrtqr){
         dummy = dummy - cvqr0 %*% crossprod(cvqr0, dummy);
 
         q = qr(dummy);
+        
+        # Remove zero factors
         keep = abs(diag(qr.R(q))) > (.Machine$double.eps * length(pheno) * 10);
-
         pheno = qr.Q(qr(dummy));
         if( !all(keep) )
             pheno = pheno[, keep, drop = FALSE];
@@ -58,7 +62,8 @@ testPhenotype = function(phenotype, data, cvrtqr){
                     dfFull = 0,
                     statname = ""));
         } else {
-            pheno = pheno / sqrt(sum(pheno^2));
+            phenostd = sqrt(sum(pheno^2));
+            pheno = pheno / phenostd;
         }
     }
 
@@ -96,7 +101,10 @@ testPhenotype = function(phenotype, data, cvrtqr){
         # cvC2 = colSums( cvC^2 );
 
         # SSR = colSums( cvD^2 );
-        cr = cvD / sqrt(pmax(SST - cvC2, 1e-50, SST/1e15));
+        stdData = sqrt(pmax(SST - cvC2, 1e-50, SST/1e15));
+        cr = cvD / stdData;
+        if(!is.null(phenostd))
+            beta = (cr / stdData) * phenostd;
 
         cor2tt = function(x){
             return( x * sqrt(dfFull / (1 - pmin(x^2,1))));
@@ -117,7 +125,8 @@ testPhenotype = function(phenotype, data, cvrtqr){
                 pvalue = pv,
                 nVarTested = nVarTested,
                 dfFull = dfFull,
-                statname = ""));
+                statname = "",
+                beta = beta));
     } else {
         if(dfFull <= 0)
             return(list(
@@ -215,6 +224,8 @@ ramwas5saveTopFindings = function(param){
     outmat = double(3*(rng[2]-rng[1]+1));
     dim(outmat) = c((rng[2]-rng[1]+1),3);
 
+    betmat = double(rng[2]-rng[1]+1);
+    
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
@@ -232,7 +243,8 @@ ramwas5saveTopFindings = function(param){
                     cvrtqr = data$cvrtqr)
 
         outmat[(fr:to) - (rng[1] - 1), ] = cbind(rez[[1]], rez[[2]], rez[[3]]);
-
+        if( !is.null(rez$beta) )
+            betmat[(fr:to) - (rng[1] - 1)] = rez$beta;
         rm(slice);
     }
     data$close();
@@ -247,6 +259,8 @@ ramwas5saveTopFindings = function(param){
                 filenamebase = paste0(param$dirmwas, "/Stats_and_pvalues"),
                 lockfile = param$lockfile2);
     fmout[rng[1]:rng[2], 1:3] = outmat;
+    if( !is.null(rez$beta) )
+        fmout[rng[1]:rng[2], 5] = betmat;
     close(fmout);
     .log(ld, "%s, Process %06d, Job %02d, Done MWAS, CpG range %d-%d",
         date(), Sys.getpid(), rng[3], rng[1], rng[2]);
@@ -302,9 +316,9 @@ ramwas5MWAS = function( param ){
         fm = fm.create( 
                     filenamebase = paste0(param$dirmwas, "/Stats_and_pvalues"),
                     nrow = data$ncpgs,
-                    ncol = 4);
+                    ncol = 4 + is.numeric( outcome ));
         if( is.numeric( outcome ) ){
-            colnames(fm) = c("cor","t-test","p-value","q-value");
+            colnames(fm) = c("cor","t-test","p-value","q-value","beta");
         } else {
             colnames(fm) = c("R-squared","F-test","p-value","q-value");
         }
