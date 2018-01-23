@@ -2,10 +2,10 @@
 # accounting for covariates
 # cvrtqr - must be orthonormalized
 # Supports categorical outcomes (text of factor)
-testPhenotype = function(phenotype, data, cvrtqr){
+testPhenotype = function(phenotype, data1, cvrtqr){
     # Preserve original variables for debugging
     pheno = matrix(phenotype, ncol = 1);
-    slice = data;
+    slice = data1;
     cvqr0 = cvrtqr;
 
     # In rare case of missing phenotype values

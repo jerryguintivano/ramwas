@@ -1,11 +1,11 @@
 # test every covariate agains the data
-.testCovariates = function(covariates1, data, cvrtqr){
+.testCovariates = function(covariates1, data1, cvrtqr){
     # covariates1 = param$covariates[-1]
     crF = vector("list", length(covariates1));
     pv  = vector("list", length(covariates1));
     nms = character(length(covariates1));
     for( i in seq_along(covariates1) ){ # i=1
-        rez = testPhenotype(covariates1[[i]], data, cvrtqr);
+        rez = testPhenotype(phenotype = covariates1[[i]], data1, cvrtqr);
         pv[[i]] = as.vector(rez[[3]]);
         # nms[i] = rez$statname;
         if(nchar(rez$statname)==0){
@@ -17,10 +17,10 @@
         }
     }
     crF = data.frame(crF);
-    names(crF) = paste0(names(covariates1),nms);
+    names(crF) = paste0(names(covariates1), nms);
 
     pv = data.frame(pv);
-    names(pv) = paste0(names(covariates1),nms);
+    names(pv) = paste0(names(covariates1), nms);
     return(list(crF = crF, pv = pv));
 }
 
