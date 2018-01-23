@@ -82,7 +82,7 @@ setRefClass("rwDataClass",
             
             # Get PCs
             if( getPCs & (param$modelPCs > 0) ){
-                filename = paste0(param$dirpca, "/eigen.rds");
+                filename = paste0(param$dirpca, "/eigenvectors.bmat");
                 if( !file.exists(filename) )
                     stop(   "File not found: ", filename, "\n",
                             "Cannot include PCs in the analysis.\n",
