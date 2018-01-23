@@ -39,6 +39,7 @@
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
+    step1 = max(step1, data$ndatarows %/% 2);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in seq_len(nsteps) ){ # part = 1
@@ -201,12 +202,13 @@ ramwas4PCA = function( param ){
             .log(ld, "%s, Calculating covariance matrix", date());
 
             step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
+            step1 = max(step1, data$ndatarows %/% 2);
             mm = data$ncpgs;
             nsteps = ceiling(mm/step1);
 
             # Memory concerns
             totmem = memory.limit() * 1048576;
-            thrmem = (data$nsamples^2 * 8) * 3;
+            thrmem = (data$nsamples^2 * 8) * 4;
             maxthr = max(totmem / thrmem, 1)
             thrmem = max(thrmem, 1);
             
