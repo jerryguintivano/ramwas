@@ -239,7 +239,7 @@ ramwas5saveTopFindings = function(param){
         
         rez = testPhenotype(
                     phenotype = param$covariates[[param$modeloutcome]],
-                    data = slice,
+                    data1 = slice,
                     cvrtqr = data$cvrtqr)
 
         outmat[(fr:to) - (rng[1] - 1), ] = cbind(rez[[1]], rez[[2]], rez[[3]]);
