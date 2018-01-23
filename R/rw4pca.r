@@ -53,9 +53,11 @@
         slice = slice /
             rep( pmax(sqrt(colSumsSq(slice)), 1e-3), each = data$nsamples);
         
-        covmat = covmat + tcrossprod(slice);
-        
+        addit = tcrossprod(slice);
         rm(slice);
+        
+        covmat = covmat + addit;
+        rm(addit);
     }
     data$close();
     .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
