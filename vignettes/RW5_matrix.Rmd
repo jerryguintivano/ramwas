@@ -184,13 +184,16 @@ ramwas4PCA(param)
 The top several PCs are marginally distinct from the rest.
 ```{r plotPCA, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
-e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
-plotPCvalues(e$values)
-plotPCvectors(e, 1)
-plotPCvectors(e, 2)
-plotPCvectors(e, 3)
-plotPCvectors(e, 4)
-rm(e)
+eigenvalues = fm.load(paste0(pfull$dirpca, "/eigenvalues"));
+eigenvectors = fm.open(
+                filenamebase = paste0(pfull$dirpca, "/eigenvectors"),
+                readonly = TRUE);
+plotPCvalues(eigenvalues)
+plotPCvectors(eigenvectors[,1], 1)
+plotPCvectors(eigenvectors[,2], 2)
+plotPCvectors(eigenvectors[,3], 3)
+plotPCvectors(eigenvectors[,4], 4)
+close(eigenvectors)
 ```
 
 There are strong correlations between top PCs with

@@ -393,10 +393,14 @@ The PC plot for artificial data shows one strong component and
 no outliers in the sample loadings, with first PC clearly capturing sample sex.
 
 ```{r plotPCA, warning=FALSE, message=FALSE}
-e = readRDS(paste0(pfull$dirpca, "/eigen.rds"))
-plotPCvalues(e$values)
-plotPCvectors(e, 1)
-plotPCvectors(e, 2)
+eigenvalues = fm.load(paste0(pfull$dirpca, "/eigenvalues"));
+eigenvectors = fm.open(
+                filenamebase = paste0(pfull$dirpca, "/eigenvectors"),
+                readonly = TRUE);
+plotPCvalues(eigenvalues)
+plotPCvectors(eigenvectors[,1], 1)
+plotPCvectors(eigenvectors[,2], 2)
+close(eigenvectors)
 ```
 
 The file with correlations shows

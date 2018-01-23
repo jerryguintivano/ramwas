@@ -58,6 +58,6 @@ e = eigen(covmat)
 plotPCvalues(e$values)
 
 # Plot PC vectors
-plotPCvectors(e, 1)
-plotPCvectors(e, 2)
+plotPCvectors(e$vectors[,1], 1)
+plotPCvectors(e$vectors[,2], 2)
 }
