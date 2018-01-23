@@ -92,7 +92,7 @@ setRefClass("rwDataClass",
                         filenamebase = paste0(param$dirpca, "/eigenvectors"),
                         readonly = TRUE);
                 PCs = eigenvectors[, seq_len(param$modelPCs)]; # , drop=FALSE
-                close(eigenvectors);
+                eigenvectors$close();
                 
                 if(!is.null( rowsubset ))
                     PCs = PCs[rowsubset,];
