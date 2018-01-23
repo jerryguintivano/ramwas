@@ -276,14 +276,14 @@ ramwas4PCA = function( param ){
             e = eigen(covmat, symmetric = TRUE);
             rm(covmat);
             .log(ld, "%s, Saving Eigenvalue Decomposition", date());
-            fv1 = fm.create.from.matrix(
+            eigenvalues = fm.create.from.matrix(
                         filenamebase = paste0(param$dirpca, "/eigenvalues"),
                         mat = e$values);
-            close(fv1);
-            fv2 = fm.create.from.matrix(
+            close(eigenvalues);
+            eigenvectors = fm.create.from.matrix(
                         filenamebase = paste0(param$dirpca, "/eigenvectors"),
                         mat = e$vectors);
-            close(fv2);
+            close(eigenvectors);
             rm(e);
             
             # saveRDS(
