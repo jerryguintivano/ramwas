@@ -207,7 +207,9 @@ ramwas4PCA = function( param ){
             nsteps = ceiling(mm/step1);
 
             # Memory concerns
-            totmem = memory.limit() * 1048576;
+            suppressWarnings({
+                totmem = memory.limit() * 1048576;
+            });
             thrmem = (data$nsamples^2 * 8) * 4;
             maxthr = max(totmem / thrmem, 1)
             thrmem = max(thrmem, 1);
