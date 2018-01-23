@@ -39,7 +39,7 @@
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
-    step1 = max(step1, data$ndatarows %/% 2);
+    step1 = max(step1, data$ndatarows %/% 4);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in seq_len(nsteps) ){ # part = 1
@@ -51,7 +51,7 @@
         slice = data$getDataRez(fr:to);
 
         slice = slice /
-            rep( pmax(sqrt(colSums(slice^2)), 1e-3), each = data$nsamples);
+            rep( pmax(sqrt(colSumsSq(slice)), 1e-3), each = data$nsamples);
         
         covmat = covmat + tcrossprod(slice);
         
@@ -202,7 +202,7 @@ ramwas4PCA = function( param ){
             .log(ld, "%s, Calculating covariance matrix", date());
 
             step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
-            step1 = max(step1, data$ndatarows %/% 2);
+            step1 = max(step1, data$ndatarows %/% 4);
             mm = data$ncpgs;
             nsteps = ceiling(mm/step1);
 
