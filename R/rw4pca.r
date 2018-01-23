@@ -1,7 +1,6 @@
 # test every covariate agains the data
 .testCovariates = function(covariates1, data, cvrtqr){
     # covariates1 = param$covariates[-1]
-    # data = t(e$vectors[,seq_len(nonzeroPCs)])
     crF = vector("list", length(covariates1));
     pv  = vector("list", length(covariates1));
     nms = character(length(covariates1));
@@ -84,15 +83,15 @@ plotPCvalues = function(values, n = 40, ylim = NULL, col = "blue"){
     axis(2);
 }
 
-plotPCvectors = function(e, i, col = "blue1"){
+plotPCvectors = function(eigenvector, i, col = "blue1"){
     plot(
-        x = e$vectors[,i],
+        x = eigenvector,
         main = paste("PC",i),
         xlab = "Samples",
         ylab = "PC components",
         pch = 19,
         col = col,
-        xlim = c(0.001, length(e$values)+0.999),
+        xlim = c(0.001, length(eigenvector)+0.999),
         xaxs = "i");
     abline(h = 0, col = "grey");
 }
@@ -105,29 +104,34 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
     # Get data access
     data = new("rwDataClass", param = param, getPCs = FALSE);
 
-    if(is.null(e))
-        e = readRDS(file = paste0(param$dirpca, "/eigen.rds"))
+    # if(is.null(e))
+    #     e = readRDS(file = paste0(param$dirpca, "/eigen.rds"))
 
+    eigenvalues = fm.load(paste0(param$dirpca, "/eigenvalues"));
+    eigenvectors = fm.open(
+                    filenamebase = paste0(param$dirpca, "/eigenvectors"),
+                    readonly = TRUE);
+    
     nonzeroPCs = sum(   
-                    abs(e$values/e$values[1]) >
-                    length(e$values)*.Machine$double.eps );
+                    abs(eigenvalues/eigenvalues[1]) >
+                    length(eigenvalues)*.Machine$double.eps );
 
     # PCA plots
     {
         plotfilename = paste0(param$dirpca, "/PC_plot_covariates_removed.pdf")
         .log(ld, "%s, Saving PCA plots in: %s", date(), plotfilename);
         pdf(plotfilename, 7, 7);
-        plotPCvalues(e$values, n = 40);
+        plotPCvalues(eigenvalues, n = 40);
         title("Principal components");
-        for( i in seq_len(min(plotPCs,nonzeroPCs)))
-            plotPCvectors(e,i);
+        for( i in seq_len(min(plotPCs,nonzeroPCs)) )
+            plotPCvectors(eigenvectors[,i], i);
         dev.off();
     }
 
     # Save PCs and loadings
     {
         .log(ld, "%s, Saving PC values and vectors", date());
-        PC_loads = e$vectors[,seq_len(min(20,nonzeroPCs))];
+        PC_loads = eigenvectors[,seq_len(min(100,nonzeroPCs))];
         rownames(PC_loads) = data$samplenames;
         colnames(PC_loads) = paste0("PC", seq_len(ncol(PC_loads)));
         write.table(file = paste0(param$dirpca, "/PC_loadings.txt"),
@@ -135,8 +139,8 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
                     sep="\t",
                     row.names = FALSE);
         PC_values = data.frame(
-                    PC_num = paste0("PC", seq_len(length(e$values))),
-                    VarianceExplained = e$values/sum(e$values));
+                    PC_num = paste0("PC", seq_len(length(eigenvalues))),
+                    VarianceExplained = eigenvalues/sum(eigenvalues));
         write.table(file = paste0(param$dirpca, "/PC_values.txt"),
                     x = PC_values,
                     sep = "\t",
@@ -149,24 +153,25 @@ postPCAprocessing = function(param, e = NULL, plotPCs = 20){
         .log(ld, "%s, Saving PC vs. covariates associations", date());
         testcov = .testCovariates(
                         covariates1 = param$covariates[-1],
-                        data = e$vectors[, seq_len(nonzeroPCs)],
+                        data1 = PC_loads,
                         cvrtqr = data$cvrtqr);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_corr.txt"),
                     x = data.frame(
-                        name = paste0("PC", seq_len(nonzeroPCs)),
+                        name = paste0("PC", seq_len(ncol(PC_loads))),
                         testcov$crF,
                         check.names = FALSE),
                     sep="\t", 
                     row.names = FALSE);
         write.table(file = paste0(param$dirpca, "/PC_vs_covs_pvalue.txt"),
                     x = data.frame(
-                        name = paste0("PC", seq_len(nonzeroPCs)),
+                        name = paste0("PC", seq_len(ncol(PC_loads))),
                         testcov$pv,
                         check.names = FALSE),
                     sep="\t", 
                     row.names = FALSE);
     }
     data$close();
+    close(eigenvectors);
     .log(ld, "%s, Done postPCAprocessing() call", date());
     return(invisible(NULL));
 }
@@ -254,26 +259,42 @@ ramwas4PCA = function( param ){
             .log(ld, "%s, Done calculating covariance matrix", date());
 
             .log(ld, "%s, Saving covariance matrix", date());
-            saveRDS(
-                file = paste0(param$dirpca, "/covmat.rds"),
-                object = covmat,
-                compress = FALSE);
+            
+            fc = fm.create.from.matrix(
+                        filenamebase = paste0(param$dirpca, "/covmat"),
+                        mat = covmat);
+            close(fc);
+            # saveRDS(
+            #     file = paste0(param$dirpca, "/covmat.rds"),
+            #     object = covmat,
+            #     compress = FALSE);
         } # covmat
 
         ### Eigenvalue decomposition
         {
             .log(ld, "%s, Performing Eigenvalue Decomposition", date());
             e = eigen(covmat, symmetric = TRUE);
+            rm(covmat);
             .log(ld, "%s, Saving Eigenvalue Decomposition", date());
-            saveRDS(
-                file = paste0(param$dirpca, "/eigen.rds"),
-                object = e,
-                compress = FALSE);
+            fv1 = fm.create.from.matrix(
+                        filenamebase = paste0(param$dirpca, "/eigenvalues"),
+                        mat = e$values);
+            close(fv1);
+            fv2 = fm.create.from.matrix(
+                        filenamebase = paste0(param$dirpca, "/eigenvectors"),
+                        mat = e$vectors);
+            close(fv2);
+            rm(e);
+            
+            # saveRDS(
+            #     file = paste0(param$dirpca, "/eigen.rds"),
+            #     object = e,
+            #     compress = FALSE);
             # e = readRDS(paste0(param$dirpca, "/eigen.rds"));
         } # e
     }
     data$close();
-    postPCAprocessing(param, e);
+    postPCAprocessing(param);
     .log(ld, "%s, Done ramwas4PCA() call", date());
     return(invisible(NULL));
 }
@@ -310,12 +331,14 @@ ramwasPCsCovariateSelection = function(param){
 
         ### Eigenvalue decomposition
         message("Performing eigenvalue decomposition");
-        e = eigen(covmat1, symmetric = TRUE);
+        # e = eigen(covmat1, symmetric = TRUE);
+        eigenvalues = fm.load(paste0(param$dirpca, "/eigenvalues"));
+        eigenvectors = fm.load(paste0(param$dirpca, "/eigenvectors"));
 
         ### First PC
         testslist = vector("list", param$covselpcs);
         for( i in seq_len(param$covselpcs) ){ # i=1
-            pc = e$vectors[,i, drop=FALSE];
+            pc = eigenvectors[ ,i , drop=FALSE];
 
             message("Testing PC",i," vs. covariates");
             # testPhenotype(phenotype = ann[[2]], data = pc, cvrtqr = cvtrqr)

@@ -87,8 +87,13 @@ setRefClass("rwDataClass",
                     stop(   "File not found: ", filename, "\n",
                             "Cannot include PCs in the analysis.\n",
                             "Run PCA analysis first with ramwas4PCA().");
-                e = readRDS(filename);
-                PCs = e$vectors[, seq_len(param$modelPCs), drop=FALSE];
+                # e = readRDS(filename);
+                eigenvectors = fm.open(
+                        filenamebase = paste0(param$dirpca, "/eigenvectors"),
+                        readonly = TRUE);
+                PCs = eigenvectors[, seq_len(param$modelPCs)]; # , drop=FALSE
+                close(eigenvectors);
+                
                 if(!is.null( rowsubset ))
                     PCs = PCs[rowsubset,];
                 cvrt = cbind(cvrt, PCs);

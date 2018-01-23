@@ -141,12 +141,17 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
 
     ### Add PCs as covariates
     if( param$modelPCs > 0 ){
-        e = readRDS(paste0(param$dirpca,"/eigen.rds"));
-        PCs = e$vectors[, seq_len(param$modelPCs), drop=FALSE];
+        # e = readRDS(paste0(param$dirpca,"/eigen.rds"));
+        eigenvectors = fm.open(
+                filenamebase = paste0(param$dirpca, "/eigenvectors"),
+                readonly = TRUE);
+        PCs = eigenvectors[, seq_len(param$modelPCs)]; # , drop=FALSE
+        close(eigenvectors);
+        
         if(!is.null( rowsubset ))
             PCs = PCs[rowsubset,];
         mwascvrtqr = cbind(cvrt, PCs);
-        rm(e);
+        # rm(e);
     } else {
         mwascvrtqr = cvrt;
     }
