@@ -378,7 +378,8 @@ Y is a code distinguishing different sets with the same number of covariates
 (see [Directory names][]).
 The sub-directory includes:
 
-*   `covmat.rds` and `eigen.rds` - RDS files with the covariance matrix and
+*   `covmat.*`, `eigenvalues.*`, and `eigenvectors.*` -- 
+    filematrices with the sample covariance matrix and 
     its eigenvalue decomposition.
 *   `PC_values.txt` -- principal components scores.
 *   `PC_loadings.txt` -- sample loadings for the top 20 PCs.
