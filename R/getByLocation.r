@@ -26,6 +26,8 @@ getLocations = function(x){
     } else {
         locations$end = locations$start + 1L;
     }
+    if(!is.null(rownames(locmat)))
+        locations$nms = rownames(locmat);
     return(locations);
 }
 
