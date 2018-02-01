@@ -39,7 +39,7 @@
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
-    step1 = max(step1, data$ndatarows %/% 4);
+    step1 = max(step1, data$ndatarows %/% 16);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in seq_len(nsteps) ){ # part = 1
