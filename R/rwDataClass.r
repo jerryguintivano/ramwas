@@ -117,6 +117,13 @@ setRefClass("rwDataClass",
             if( !is.null(rowsubset) )
                 x = x[rowsubset, ];
             
+            # NA's are coded with 255 in raw filematrices
+            if( is.raw(x) ){
+                # x = matrix(as.raw(0:255), 16, 16);
+                storage.mode(x) = 'numeric';
+                x[x == 255] = NA_real_;
+            }
+            
             # Impute missing values
             naset = is.na(x);
             if( any(naset) ){
