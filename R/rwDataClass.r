@@ -128,6 +128,7 @@ setRefClass("rwDataClass",
             naset = is.na(x);
             if( any(naset) ){
                 set = which(colSums(naset) > 0L);
+                rm(naset);
                 for( j in set ){ # j = set[1]
                     cl = x[,j];
                     mn = mean(cl, na.rm = TRUE);
@@ -135,8 +136,9 @@ setRefClass("rwDataClass",
                         mn = 0;
                     x[is.na(cl), j] = mn;
                 }
+            } else {
+                rm(naset);
             }
-            rm(naset);
 
             # Orthogonalize w.r.t. covariates
             if( resid ){

@@ -39,7 +39,7 @@
     covmat = 0;
 
     step1 = ceiling( 128*1024*1024 / data$ndatarows / 8);
-    step1 = max(step1, data$ndatarows %/% 16);
+    step1 = max(step1, data$ndatarows %/% 2);
     mm = rng[2] - rng[1] + 1;
     nsteps = ceiling(mm/step1);
     for( part in seq_len(nsteps) ){ # part = 1
@@ -48,7 +48,7 @@
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
 
-        slice = data$getDataRez(fr:to);
+        slice = data$getDataRez(colset = fr:to);
 
         slice = slice /
             rep( pmax(sqrt(colSumsSq(slice)), 1e-3), each = data$nsamples);
@@ -58,6 +58,9 @@
         
         covmat = covmat + addit;
         rm(addit);
+        
+        if(data$ndatarows > 10000)
+            gc();
     }
     data$close();
     .log(ld, "%s, Process %06d, Job %02d, Done PCA, CpG range %d-%d",
@@ -66,6 +69,8 @@
     gc();
     return(covmat);
 }
+
+# as.numeric(15.9 / (object.size(covmat)/1024^3))
 
 plotPCvalues = function(values, n = 40, ylim = NULL, col = "blue"){
     pc100 = head(values,n)/sum(values)*100;
@@ -212,7 +217,7 @@ ramwas4PCA = function( param ){
             suppressWarnings({
                 totmem = memory.limit() * 1048576;
             });
-            thrmem = (data$nsamples^2 * 8) * 4;
+            thrmem = (data$nsamples^2 * 8) * 5;
             maxthr = max(totmem / thrmem, 1)
             thrmem = max(thrmem, 1);
             
