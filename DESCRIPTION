@@ -20,7 +20,7 @@ Authors@R: c(person("Andrey A", "Shabalin",
                     email = "ejvandenoord@vcu.edu",
                     role = "aut"))
 Maintainer: Andrey A Shabalin <ashabalin@vcu.edu>
-Description: RaMWAS provides a complete toolset for 
+Description: A complete toolset for 
         methylome-wide association studies (MWAS).
         It is specifically designed for data from 
         enrichment based methylation assays,
@@ -46,13 +46,13 @@ LazyLoad: yes
 NeedsCompilation: yes
 Depends: R (>= 3.3.0), methods, filematrix
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, pander, BiocStyle, 
+Suggests: knitr, rmarkdown, pander, BiocStyle,
         BSgenome.Ecoli.NCBI.20080805
-Imports: graphics, stats, utils, digest, 
+Imports: graphics, stats, utils, digest,
         glmnet, KernSmooth, grDevices,
         GenomicAlignments, Rsamtools, parallel,
         biomaRt, Biostrings, BiocGenerics
-biocViews: DNAMethylation, Sequencing, QualityControl, 
-        Coverage, Preprocessing, 
-        Normalization, BatchEffect, PrincipalComponent, 
+biocViews: DNAMethylation, Sequencing, QualityControl,
+        Coverage, Preprocessing,
+        Normalization, BatchEffect, PrincipalComponent,
         DifferentialMethylation, Visualization
