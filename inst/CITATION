@@ -1,0 +1,18 @@
+citHeader("To cite the 'ramwas' package in publications use:")
+
+citEntry(entry="article",
+         title = "{RaMWAS}: fast methylome-wide association study pipeline for enrichment platforms",
+         author = personList(
+                    person("Andrey A", "Shabalin"),
+                    person("Mohammad W", "Hattab"),
+                    person("Shaunna L", "Clark"),
+                    person("Robin F", "Chan"),
+                    person("Gaurav", "Kumar"),
+                    person("Karolina A", "Aberg"),
+                    person("Edwin JCG", "van den Oord")),
+         year     = "2018",
+         url      = "http://dx.doi.org/10.1093/bioinformatics/bty069",
+         publisher= "Oxford University Press",
+         journal  = "Bioinformatics",
+         textVersion = "Andrey A. Shabalin, Mohammad W. Hattab, Shaunna L. Clark, Robin F. Chan, Gaurav Kumar, Karolina A. Aberg, and Edwin J.C.G. van den Oord. RaMWAS: fast methylome-wide association study pipeline for enrichment platforms, Bioinformatics 2018, http://dx.doi.org/10.1093/bioinformatics/bty069"
+)
