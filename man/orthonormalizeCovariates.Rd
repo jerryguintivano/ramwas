@@ -31,7 +31,7 @@ orthonormalizeCovariates(cvrt, modelhasconstant)
     (if \code{modelhasconstant} is \code{TRUE}).
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     This function is used in several parts of the pipeline.

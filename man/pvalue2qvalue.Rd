@@ -29,7 +29,7 @@ pvalue2qvalue(pv, n = length(pv))
     Return a vector of q-values matching p-values in \code{pv}.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \examples{
 pv = runif(20)^2

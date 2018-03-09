@@ -55,7 +55,7 @@ madeBEDgraphRange(x, filename, chr, start, end)
     
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.

@@ -38,7 +38,7 @@ plotPCvectors(eigenvector, i, col = "blue1")
     This function creates a PC plot and returns nothing (\code{NULL}).
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.

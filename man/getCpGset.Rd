@@ -26,7 +26,7 @@ getCpGsetALL(genome)
     Returns a list with CpG coordinates for each genome sequence.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \examples{
 ### Using a BSGenome input

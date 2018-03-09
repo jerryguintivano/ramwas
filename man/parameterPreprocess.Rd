@@ -41,7 +41,7 @@ parameterPreprocess(param)
     Returns preprocessed list of parameters.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     This function is not intended to be run by the user.

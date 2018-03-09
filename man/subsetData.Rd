@@ -31,7 +31,7 @@ subsetCoverageDirByLocation(x, chr, start, targetdir)
     The function returns nothing.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.

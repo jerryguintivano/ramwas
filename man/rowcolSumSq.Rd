@@ -26,7 +26,7 @@ colSumsSq(x)
     \code{x} (\code{rowSumsSq}/\code{colSumsSq}).
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See \code{\link[base:colSums]{rowSums}} and \code{\link[base]{colSums}}

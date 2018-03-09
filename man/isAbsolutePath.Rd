@@ -21,7 +21,7 @@ isAbsolutePath(path)
     \code{TRUE} if the path is absolute, \code{FALSE} otherwise.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     This function improves upon the analog function

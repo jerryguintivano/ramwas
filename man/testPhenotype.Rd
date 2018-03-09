@@ -45,7 +45,7 @@ testPhenotype(phenotype, data1, cvrtqr)
     \item{dfFull}{Second number of degrees of freedom for the F-test.}
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     This function is used in several parts of the pipeline.

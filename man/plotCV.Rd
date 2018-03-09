@@ -79,7 +79,7 @@ plotROC(outcome, forecast)
     The \code{plotCVcors} returns nothing (\code{NULL}).
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.

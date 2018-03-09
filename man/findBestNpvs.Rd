@@ -26,7 +26,7 @@ findBestNpvs(pv, n)
     Return a vector of positions of the smallest \code{N} p-values in \code{pv}.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See \code{\link[base]{order}}.

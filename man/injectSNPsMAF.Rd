@@ -27,7 +27,7 @@ injectSNPsMAF(gensequence, frqcount, MAF = 0.01)
     Returns a string with the genome sequence with SNPs injected.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See \code{\link[BSgenome]{injectSNPs}} for the standard analog

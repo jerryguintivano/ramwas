@@ -61,7 +61,7 @@ ramwas0createArtificialData(dir,
     The function creates multiple files but returns no value.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \seealso{
     See vignettes: \code{browseVignettes("ramwas")}.

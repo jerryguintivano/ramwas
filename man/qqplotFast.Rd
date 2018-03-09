@@ -106,7 +106,7 @@ qqPlotFast(
     sufficient for creating QQ-plot.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     The function works faster if the p-values are sorted.

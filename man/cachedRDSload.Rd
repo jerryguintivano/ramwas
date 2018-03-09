@@ -23,7 +23,7 @@ cachedRDSload(rdsfilename)
     \code{rdsfilename} at this or a previous call of the function.
 }
 \author{
-    Andrey Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \examples{
 ### Change filename to hg19 CpGset

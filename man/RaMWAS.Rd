@@ -32,9 +32,9 @@ RaMWAS provides a complete toolset for
     }
 }
 \author{
-    Andrey Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 
-    Maintainer: Andrey Shabalin <ashabalin@vcu.edu>
+    Maintainer: Andrey A Shabalin <andrey.shabalin@gmail.com>
 }
 \keyword{ package }
 \keyword{ ramwas }

@@ -40,7 +40,7 @@ plotFragmentSizeDistributionEstimate(
     returns the estimate of the fragment size distribution.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \note{
     If the length of \code{frdata} is equal to \code{seqLength},

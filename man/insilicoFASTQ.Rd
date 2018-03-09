@@ -31,7 +31,7 @@ insilicoFASTQ(con, gensequence, fraglength)
     Returns a list with CpG coordinates for each genome sequence.
 }
 \author{
-    Andrey A Shabalin \email{ashabalin@vcu.edu}
+    Andrey A Shabalin \email{andrey.shabalin@gmail.com}
 }
 \examples{
 ## There are four 4 bp fragments in a 7 basepair sequence:
