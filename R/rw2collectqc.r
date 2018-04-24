@@ -51,10 +51,10 @@
     twodig = function(x){ sprintf("%.2f",x) };
     fourdig = function(x){ sprintf("%.4f",x) };
     s = function(x){
-        formatC(x=x,
-                digits=ceiling(log10(max(x)+1)),
-                big.mark=",",
-                big.interval=3);
+        formatC(x = x,
+                digits = ceiling(log10(max(x)+1)),
+                big.mark = ",",
+                big.interval = 3);
     }
 
     if( !is.null(qc$hist.score1))
