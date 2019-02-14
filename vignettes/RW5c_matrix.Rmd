@@ -5,7 +5,7 @@ output:
     BiocStyle::html_document:
         toc: true # table of content true
 vignette: >
-    %\VignetteIndexEntry{5. Analyzing data from other sources}
+    %\VignetteIndexEntry{5.c. Analyzing data from other sources}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options:
     chunk_output_type: console
@@ -23,7 +23,7 @@ opts_chunk$set(fig.width = 6, fig.height = 6)
 # dr = "D:/temp/"
 ```
 
-# Using RaMWAS for with other methylation platforms or data types
+# Using RaMWAS with other methylation platforms or data types
 
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
 is primarily designed for studies of methylation measurements
@@ -184,10 +184,10 @@ ramwas4PCA(param)
 The top several PCs are marginally distinct from the rest.
 ```{r plotPCA, warning=FALSE, message=FALSE}
 pfull = parameterPreprocess(param)
-eigenvalues = fm.load(paste0(pfull$dirpca, "/eigenvalues"));
+eigenvalues = fm.load(paste0(pfull$dirpca, "/eigenvalues"))
 eigenvectors = fm.open(
                 filenamebase = paste0(pfull$dirpca, "/eigenvectors"),
-                readonly = TRUE);
+                readonly = TRUE)
 plotPCvalues(eigenvalues)
 plotPCvectors(eigenvectors[,1], 1)
 plotPCvectors(eigenvectors[,2], 2)
