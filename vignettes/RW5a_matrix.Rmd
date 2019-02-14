@@ -301,7 +301,7 @@ png('PCvec.png', 800, 800, pointsize = 28)
 plotPCvectors(eig$vectors[,1], i = 1, col = 'blue')
 dev.off()
 ```
-![Scree plot](PCval.png)![Scree plot](PCvec.png)
+![Scree plot](PCval.png)![PC1 plot](PCvec.png)
 
 ```{r cov.pca}
 nPCs = 2
@@ -375,7 +375,7 @@ param$modelPCs = 0
 ramwas4PCA(param)
 ramwas5MWAS(param)
 ```
-![Scree plot](QQnull.png)
+![QQ-plot, no covariates, no PCs](QQnull.png)
 
 
 ```{r pcaFULL}
@@ -388,7 +388,7 @@ param$modelPCs = 5
 ramwas4PCA(param)
 ramwas5MWAS(param)
 ```
-![Scree plot](QQfull.png)
+![QQ-plot, 13 covariates and 5 PCs](QQfull.png)
 
 ```{r plotmwas, echo=FALSE}
 png('QQnull.png', 800, 800, pointsize = 28)
