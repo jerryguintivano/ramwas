@@ -15,31 +15,29 @@ editor_options:
 
 ```{r loadPackages, echo=FALSE, warning=FALSE, message=FALSE}
 library(knitr)
-library(pander)
+# library(pander)
 # suppressPackageStartupMessages(library(ramwas))
-panderOptions("digits", 3)
+# panderOptions("digits", 3)
 # opts_chunk$set(fig.width = 6, fig.height = 6)
 opts_chunk$set(eval=FALSE)
-# setwd("F:/meth/")
+# setwd('F:/meth')
 ```
 
-# Using RaMWAS for Illumina HumanMethylation450K or MethylationEPIC arrays
+# Using RaMWAS with Illumina HumanMethylation450K or MethylationEPIC arrays
 
 [RaMWAS](https://bioconductor.org/packages/ramwas/)
-is primarily designed for studies of methylation measurements
-from enrichment platforms.
-
-However, RaMWAS can also be useful for the analysis of 
+can be useful for the analysis of 
 array-based methylation measurements from the Illumina HumanMethylation450K or
 MethylationEPIC arrays.
-RaMWAS can perform several analysis steps on such data including:
+RaMWAS can perform several quality control steps that are key to 
+prevent test statistic inflation as well as downstream analyses such as 
 principal component analysis (PCA), association testing (MWAS),
 and multi-marker analysis with cross validation using the elastic net.
 
 ## Required packages
 
-The code in this vignette makes use of an number of CRAN and Bioconductor 
-packages. The packages can be installed with the following command.
+This vignette makes use of an number of CRAN and Bioconductor 
+packages. The packages can be installed with the following command:
 
 ```{r prereq, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -57,15 +55,12 @@ BiocManager::install(c(
 ```
 
 
-## Download data
+## Download example (public) data
 
 Data from 450k/EPIC arrays can be imported in two ways: 
 
 * from raw IDAT files or 
 * from a file of methylation measures (beta or M-values).
-
-Here we provide all the steps of analysis of a
-dataset from GEO, starting with downloading and reading in IDAT files.
 
 For our example dataset,
 we will use raw IDAT files from
@@ -92,34 +87,35 @@ library(minfi)
 download.file(  url = "http://shabal.in/RaMWAS/GSE42861_sampleSheet.csv", 
                 destfile = "GSE42861_sampleSheet.csv",
                 destfilemode = "wb")
-targets = read.csv("GSE42861_sampleSheet.csv")
+targets = read.csv( file = "GSE42861_sampleSheet.csv", 
+                    stringsAsFactors = FALSE)
 rgSet = read.metharray.exp(
-                targets = targets[1:20,],
-                extended = TRUE,
-                verbose = TRUE)
+                    targets = targets,
+                    extended = TRUE,
+                    verbose = TRUE)
 ```
 
 To go through the sample code quicker, one can choose to load
 only a few samples by changing `targets = targets` to, say,
-`targets = targets[1:20,]`. This would limit the example from 689 
+`targets = targets[1:20,]`. This would limit the example from 689 down to 20.
 
 ## Probe and sample level quality control
 
-We exclude CpGs based on a number of established criteria.
+We exclude CpGs and samples based on a number of established criteria.
 
 ### Probes with SNPs and in cross-reactive regions
 
-Next we remove probes in cross-reactive regions
+First,  we remove probes in cross-reactive regions
 and those containing an SNP with minor allele frequency above 0.01 
 within 10 bp of the single base extension position.
 
 The lists of excluded probes depends on the platform. 
-For Illumina HumanMethylation450k, we use findings of
+For Illumina HumanMethylation450k, we use the list provided by 
 [Chen et al. (2013)](http://www.sickkids.ca/Research/Weksberg-Lab/Publications/index.html).
-For Illumina MethylationEPIC, a.k.a. 850k,
+and for Illumina MethylationEPIC (a.k.a. 850k array) we use the list from
 [Pidsley et al. (2016)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1066-1).
 
-The set of probes is recorded in `exclude.snp` variable.
+The set of excluded probes is stored in `exclude.snp`.
 
 ```{r probes}
 if( "IlluminaHumanMethylation450k" %in% rgSet@annotation ){
@@ -144,7 +140,7 @@ if( "IlluminaHumanMethylation450k" %in% rgSet@annotation ){
                 ex1$TargetID,
                 ex2$PROBE,
                 ex3$PROBE[ (ex3$BASE_FROM_SBE < 10) & (ex3$AF > 0.01)]))
-    
+    rm(host, files, i, ex1, ex2, ex3)
 } else {
     host = "https://static-content.springer.com/esm/art%3A10.1186%2Fs13059-016-1066-1/MediaObjects/"
     files = c(
@@ -172,17 +168,17 @@ if( "IlluminaHumanMethylation450k" %in% rgSet@annotation ){
         snpcpgs6$PROBE[
             pmax(snpcpgs6$VARIANT_START - snpcpgs6$MAPINFO, 
                  snpcpgs6$MAPINFO - snpcpgs6$VARIANT_END) < 10]))
-    
+    rm(host, files, i, snpcpgs1, snpcpgs4, snpcpgs5, snpcpgs6)
 }
 ```
 
 ### Probes with low bead count
 
-We exclude CpGs with probes having less then 3 beads in 
+We also exclude CpGs with probes having less than 3 beads in 
 more than 1\% of the samples
-(in either red of green chanel for Type I probes).
+(in either red of green channel for Type I probes).
 
-The set of probes is recorded in `exclude.bds` variable.
+The set of probes is stored in `exclude.bds`.
 
 ```{r}
 lb = getNBeads(rgSet) < 3
@@ -191,18 +187,21 @@ pi2 = getProbeInfo(rgSet, type = "II")
 ex1 = pi1$Name[rowMeans(lb[pi1$AddressA,] | lb[pi1$AddressB,]) > 0.01]
 ex2 = pi2$Name[rowMeans(lb[pi2$AddressA,]) > 0.01]
 exclude.bds = unique(c(ex1, ex2))
+rm(lb, pi1, pi2, ex1, ex2)
 ```
 
 ### Probes and samples with low detection p-values
 
 We filter samples and probes using their detection p-values,
 as calculated by the `detectionP` function in the `minfi` package.
-Samples are dropped if more than 1\% of probes have a detection p-value over 1\%.
-Probes are dropped if more than 1\% of samples have a detection p-value over 1\%.
+In this example, 
+samples are dropped if more than 1\% of the probes 
+have a detection p-value over 1\%.
+Probes are dropped if more than 1\% of the samples
+have a detection p-value over 1\%.
 
-The set of probes is recorded in `exclude.bds` variable.
-The set of good samples is recorded in `keep.samples`.
-
+The set of probes is stored in `exclude.bds` and
+the set of good samples is stored in `keep.samples`.
 
 ```{r pv}
 hp = detectionP(rgSet) > 0.01
@@ -214,7 +213,6 @@ rm(hp)
 ### Exclusion of low quality samples and probes
 
 ```{r exclude}
-
 rgSet = subsetByLoci(
             rgSet = rgSet[,keep.samples],
             excludeLoci = c(exclude.snp, exclude.bds, exclude.hpv))
@@ -222,7 +220,7 @@ rgSet = subsetByLoci(
 
 ## Obtain methylation estimates and save in RaMWAS format
 
-First, we obtain mathylation estimates using one of many 
+First, we obtain methylation estimates using one of many 
 methods available in the `minfi` package.
 
 ```{r beta}
@@ -263,12 +261,16 @@ close(fm)
 
 ## Covariates for analysis
 
-For proper analysis, we need to include a number of covariates
-in the analysis.
+To avoid test statistic inflation, 
+we first generate covariates that may capture technical artefacts for 
+possible inclusion in the association tests. 
+This list of covariates is then pruned to only those that
+affect the methylation data 
+to avoid unnecessary loss of degrees of freedom (i.e., power). 
 
-### Principal components analysis on control probes
+### Principal components analysis (PCA) on control probes
 
-We extract red and green chanel for the control probes.
+We extract red and green channel for the control probes.
 
 ```{r pca1}
 controlType = unique(getManifest(rgSet)@data$TypeControl$Type)
@@ -307,6 +309,7 @@ dev.off()
 nPCs = 2
 covariates.pca = eig$vectors[,seq_len(nPCs)]
 colnames(covariates.pca) = paste0('PC',seq_len(nPCs))
+rm(probeData, data, covmat, eig, nPCs) 
 ```
 
 ### Cell type composition
@@ -318,9 +321,11 @@ In this example, we estimate cell proportions in blood.
 
 ```{r cell}
 covariates.cel = estimateCellCounts(
-                rgSet = rgSet, 
-                compositeCellType = "Blood",
-                cellTypes = c("CD8T", "CD4T", "NK", "Bcell", "Mono", "Gran"))
+                    rgSet = rgSet, 
+                    compositeCellType = "Blood",
+                    cellTypes = c("CD8T", "CD4T", "NK", 
+                                  "Bcell", "Mono", "Gran"),
+                    meanPlot = FALSE)
 ```
 
 ### Median methylated and unmethylated intensity
@@ -331,14 +336,15 @@ covariates.umm = getQC(rgSetRaw)
 
 ### Phenotypic covariates from the sample sheet
 
-We also add age, sex, case-control status and other covariates from
+We also add age, sex, case-control status, and other covariates from
 the samples sheet to the covariate data frame.
 
 ```{r pheno}
-rownames(targets) = targets$Basename
+rownames(targets) = targets$Basename;
+targets$xSlide = paste0('x',targets$Slide) # Force Slide to be categorical
 covariates.phe = targets[
-            rownames(covariates.umm), 
-            c("Slide", "caseStatus", "age", "sex", "smokingStatus", "Array")]
+            rownames(covariates.umm),
+            c("xSlide", "Array", "caseStatus", "age", "sex", "smokingStatus")]
 ```
 
 # Running RaMWAS on the data
@@ -359,6 +365,7 @@ covariates = data.frame(
                 covariates.cel,
                 covariates.phe)
 
+library(ramwas)
 param = ramwasParameters(
     dircoveragenorm = 'rw',
     covariates = covariates,
@@ -367,28 +374,49 @@ param = ramwasParameters(
     modelPCs = 0)
 ```
 
-## Run PCA and MWAS.
+## Covariate pruning 
+
+To avoid unnecessary loss of degrees of freedom (i.e., power) 
+one should iteratively prune covariates prior to association testing
+if they are not correlated with the top PCs of the methylation data.
+During these iterations, the methylation data is residualized using
+the included covariates prior to performing PCA so that the resulting PCs
+only capture possible remaining sources of variation.
+
+## MWAS without covariates (high inflation factor)
+
+Performing MWAS without correction for any covariates
+causes high inflation of the test statistics
+(19.256 here, 15.17 in the original study).
 
 ```{r pcaNULL}
 param$modelcovariates = NULL
 param$modelPCs = 0
 ramwas4PCA(param)
 ramwas5MWAS(param)
+qqPlotFast(getMWAS(param)$`p-value`)
+title('QQ-plot\nNo covariates, no PCs')
 ```
 ![QQ-plot, no covariates, no PCs](QQnull.png)
 
+## MWAS with all covariates (moderate inflation factor)
+
+Inclusion of all covariates reduces the inflation of the test statistics
+from 19.256 down to 1.182.
 
 ```{r pcaFULL}
 param$modelcovariates = c(
-    "age", "sex", "Array",
+    "age", "sex", "Array", "xSlide",
     "mMed", "uMed",
     "PC1", "PC2",
     "CD8T", "CD4T", "NK", "Bcell", "Mono", "Gran")
-param$modelPCs = 5
+param$modelPCs = 2
 ramwas4PCA(param)
 ramwas5MWAS(param)
+qqPlotFast(getMWAS(param)$`p-value`)
+title('QQ-plot\n13 covariates and 2 PC')
 ```
-![QQ-plot, 13 covariates and 5 PCs](QQfull.png)
+![QQ-plot, 13 covariates and 2 PCs](QQfull.png)
 
 ```{r plotmwas, echo=FALSE}
 png('QQnull.png', 800, 800, pointsize = 28)
@@ -401,14 +429,14 @@ dev.off()
 
 png('QQfull.png', 800, 800, pointsize = 28)
 param$modelcovariates = c(
-    "age", "sex", "Array",
+    "age", "sex", "Array", "xSlide",
     "mMed", "uMed",
     "PC1", "PC2",
     "CD8T", "CD4T", "NK", "Bcell", "Mono", "Gran")
-param$modelPCs = 5
+param$modelPCs = 2
 mwas = getMWAS(param)
 qqPlotFast(mwas$`p-value`)
-title('QQ-plot\n13 covariates and 5 PCs')
+title('QQ-plot\n13 covariates and 2 PCs')
 dev.off()
 ```
 
@@ -417,5 +445,4 @@ dev.off()
 Steps 6 and 7 of the RaMWAS pipeline can also be applied
 to the data matrix exactly as described in the
 [overview vignette](RW1_intro.html#annotation-of-top-results).
-
 
