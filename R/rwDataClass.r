@@ -97,7 +97,7 @@ setRefClass("rwDataClass",
                 if(!is.null( rowsubset ))
                     PCs = PCs[rowsubset,];
                 cvrt = cbind(cvrt, PCs);
-                rm(e);
+                # rm(e);
             }
         
             .self$cvrtqr = orthonormalizeCovariates(
