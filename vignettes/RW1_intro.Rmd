@@ -59,8 +59,9 @@ To install the Bioconductor version of RaMWAS (R 3.4 or newer requred)
 use the following commands:
 ```{r install, eval=FALSE}
 ## try http:// if https:// URLs are not supported
-source("http://bioconductor.org/biocLite.R")
-biocLite("ramwas")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ramwas")
 ```
 
 ## Loading package and viewing documentation

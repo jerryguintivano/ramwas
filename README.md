@@ -29,8 +29,9 @@ To install
 of RaMWAS, run
 
 ```
-source("https://bioconductor.org/biocLite.R")
-biocLite("ramwas")
+if(!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ramwas")
 ```
 
 ### Update to GitHub Version
@@ -38,13 +39,9 @@ biocLite("ramwas")
 To update RaMWAS to the development version from GitHub, run
 
 ```
+if (!requireNamespace("devtools", quietly = TRUE))
+   install.packages("devtools")
 devtools::install_github("andreyshabalin/ramwas")
-```
-
-If `devtools` package is missing, it can be installed with
-
-```
-install.packages("devtools")
 ```
 
 ### Run Rcmd Check (Install Suggested Packages)
@@ -52,7 +49,8 @@ install.packages("devtools")
 To rerun package tests, suggested packages can be installed with
 
 ```
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("BSgenome.Ecoli.NCBI.20080805","knitr","BiocCheck", 
-            "rmarkdown", "pander", "BiocStyle", "devtools"))
+if(!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(c( "BSgenome.Ecoli.NCBI.20080805", "knitr", "BiocCheck",
+                        "rmarkdown", "pander", "BiocStyle", "devtools"))
 ```
