@@ -51,6 +51,6 @@ To rerun package tests, suggested packages can be installed with
 ```
 if(!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install(c( "BSgenome.Ecoli.NCBI.20080805", "knitr", "BiocCheck",
-                        "rmarkdown", "pander", "BiocStyle", "devtools"))
+BiocManager::install(c("BSgenome.Ecoli.NCBI.20080805", "knitr", "BiocCheck",
+                       "rmarkdown", "pander", "BiocStyle", "devtools"))
 ```
