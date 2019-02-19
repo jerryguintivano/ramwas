@@ -39,8 +39,8 @@ BiocManager::install("ramwas")
 To update RaMWAS to the development version from GitHub, run
 
 ```
-if (!requireNamespace("devtools", quietly = TRUE))
-   install.packages("devtools")
+if(!requireNamespace("devtools", quietly = TRUE))
+    install.packages("devtools")
 devtools::install_github("andreyshabalin/ramwas")
 ```
 
