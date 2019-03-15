@@ -103,6 +103,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     
     # Transform factor covariates into dummies, kill zero covariates
     if(is.list(cvrtset)){
+        cvrtset = as.list(cvrtset);
         isfactorset = sapply(cvrtset, class) %in% c("character","factor");
         for( ind in seq_along(isfactorset) ){ # ind = 1
             if(isfactorset[ind]){
@@ -110,13 +111,13 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
                 if(nlevels(fctr) >= 2) {
                     cvrtset[[ind]] = model.matrix(~fctr)[,-1];
                 } else {
-                    cvrtset[[ind]] = NULL;
+                    cvrtset[[ind]] = numeric(0);
                 }
                 rm(fctr);
             } else {
                 # Kill pure zero covariates
                 if(all(cvrtset[[ind]] == 0))
-                    cvrtset[ind] = list(NULL);
+                    cvrtset[[ind]] = numeric(0);
             }
         }
         cvrtmat = matrix(unlist(cvrtset), nrow = nrow(cvrt));
