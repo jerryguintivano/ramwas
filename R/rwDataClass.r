@@ -48,7 +48,7 @@ setRefClass("rwDataClass",
             cvrt = param$covariates[ cvrtset ];
             rm(cvrtset);
             
-            if( any(sapply(lapply(cvrt, is.na), any)) )
+            if( any(vapply(lapply(cvrt, is.na), any, TRUE)) )
                 stop("Missing values are not allowed in the covariates.");
 
             

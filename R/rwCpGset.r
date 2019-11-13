@@ -15,8 +15,8 @@ getCpGsetALL = function( genome ){
     Cset = c("C","Y","S","M","B","H","V"); #,"N"
     Gset = c("G","R","S","K","B","D","V"); #,"N"
 
-    Craw = sapply(Cset,charToRaw);
-    Graw = sapply(Gset,charToRaw);
+    Craw = vapply(Cset, charToRaw, raw(1));
+    Graw = vapply(Gset, charToRaw, raw(1));
 
     Cint = logical(256); Cint[as.integer(Craw)] = TRUE;
     Gint = logical(256); Gint[as.integer(Graw)] = TRUE;
@@ -129,7 +129,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
 
         strACGT[2,2,2,2] = "N";
 
-        rawACGT = sapply(strACGT, charToRaw)
+        rawACGT = vapply(strACGT, charToRaw, raw(1))
         dim(rawACGT) = dim(strACGT)
 
         ACGT = 1:4
@@ -147,7 +147,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
     rm(frqcount);
     gc();
 
-    pos = as.integer( sapply( spt, `[`, 2) );
+    pos = as.integer( vapply( spt, `[`, "", 2) );
 
     gensequence = charToRaw(as.character(gensequence));
 
@@ -157,8 +157,8 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
             message("Step ", i, " of", length(spt));
         tl = spt[[i]][-(1:4)]
         tlspt = strsplit(tl,":",TRUE);
-        allele = sapply(tlspt,`[`,1);
-        count = as.integer(sapply(tlspt,tail,1));
+        allele = vapply(tlspt, `[`, "", 1);
+        count = as.integer(vapply(tlspt, tail, 1, 1));
         names(count) = allele;
         countACGT = count[ACGTnames];
         countACGT[is.na(countACGT)] = 0;

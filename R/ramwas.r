@@ -91,7 +91,7 @@ cachedRDSload = function(rdsfilename){
 # Orthonormalize a set of covariates
 orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     # Prevent missing values
-    if(any(sapply(lapply(cvrt, is.na), any)))
+    if(any(vapply(lapply(cvrt, is.na), any, TRUE)))
         stop("Missing values are not allowed in the covariates");
     
     # Add a constant?
@@ -104,7 +104,7 @@ orthonormalizeCovariates = function(cvrt, modelhasconstant = TRUE){
     # Transform factor covariates into dummies, kill zero covariates
     if(is.list(cvrtset)){
         cvrtset = as.list(cvrtset);
-        isfactorset = sapply(cvrtset, class) %in% c("character","factor");
+        isfactorset = vapply(cvrtset, class, "") %in% c("character","factor");
         for( ind in seq_along(isfactorset) ){ # ind = 1
             if(isfactorset[ind]){
                 fctr = factor(cvrtset[[ind]]);

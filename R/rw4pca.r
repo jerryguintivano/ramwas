@@ -364,7 +364,7 @@ ramwasPCsCovariateSelection = function(param){
             # Extract first three elements
             temp2 = lapply( X = temp1, FUN = `[`, 1:3);
             
-            testslist[[i]] = t(sapply(temp2, unlist));
+            testslist[[i]] = t(vapply(temp2, unlist, c(0,0,0)));
         }
         tstatsabs = lapply(testslist, function(x)abs(x[,3]))
         tstatsabs = do.call(pmin, tstatsabs);
@@ -405,7 +405,7 @@ ramwasPCsCovariateSelection = function(param){
     cat("New covariate line for parameter file:","\n","\n");
     cat(paste0(
         "modelcovariates = c(\n",
-        paste0("  ",sapply(covset, deparse), collapse = ",\n"),
+        paste0("  ", vapply(covset, deparse, ""), collapse = ",\n"),
         ")"), "\n","\n");
     return(invisible(newcov));
 }

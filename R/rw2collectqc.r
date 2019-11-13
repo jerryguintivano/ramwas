@@ -299,8 +299,8 @@ ramwas2collectqc = function( param ){
         bigqc = combineBamQcIntoSamples(rbamlist = rbamlist, bamset = bamset);
         saveRDS(file = paste0(dirloc,"/qclist.rds"), object = bigqc);
         {
-            textT = sapply(bigqc, .qcTextLineT)
-            textR = sapply(bigqc, .qcTextLineR)
+            textT = vapply(bigqc, .qcTextLineT, "")
+            textR = vapply(bigqc, .qcTextLineR, "")
             writeLines(
                     con = paste0(dirloc, "/Summary_QC.txt"),
                     text = c(.qcTextHeaderT, textT));

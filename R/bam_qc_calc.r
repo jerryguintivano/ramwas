@@ -31,8 +31,8 @@ bam.removeRepeats = function(rbam, maxrep){
         newbam = rbam;
     }
     newbam$qc$frwrev.no.repeats = c(
-        sum(sapply(newbam$startsfwd,length)),
-        sum(sapply(newbam$startsrev,length)));
+        sum(vapply(newbam$startsfwd,length,0)),
+        sum(vapply(newbam$startsrev,length,0)));
     class(newbam$qc$frwrev.no.repeats) = "qcFrwrev";
     newbam$qc$reads.recorded.no.repeats = sum(newbam$qc$frwrev.no.repeats);
     return(newbam);
@@ -165,7 +165,7 @@ bam.coverage.by.density = function(
         noncpgset =
             noncpgSitesFromCpGset(cpgset = cpgset, distance = maxfragmentsize);
     }
-    # sum(sapply(noncpgset,length))
+    # sum(vapply(noncpgset,length,0))
     # newcpgset = noncpgset;
     # for( chr in seq_along(noncpgset) ){
     #     newcpgset[[chr]] = sort.int( c(cpgset[[chr]], noncpgset[[chr]]) );
@@ -216,13 +216,13 @@ bam.coverage.by.density = function(
 
 # QC: Fraction of reads on ChrX/Y
 bam.chrXY.qc = function(rbam){
-    strandfunX = function(st){c(length(st$chrX), sum(sapply(st,length)))};
+    strandfunX = function(st){c(length(st$chrX), sum(vapply(st,length,0)))};
     rbam$qc$chrX.count =
                     strandfunX(rbam$startsfwd) +
                     strandfunX(rbam$startsfwd);
     class(rbam$qc$chrX.count) = "qcChrX"
 
-    strandfunY = function(st){c(length(st$chrY), sum(sapply(st,length)))};
+    strandfunY = function(st){c(length(st$chrY), sum(vapply(st,length,0)))};
     rbam$qc$chrY.count =
                     strandfunY(rbam$startsfwd) +
                     strandfunY(rbam$startsfwd);

@@ -122,7 +122,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
         for( attr in param$biattributes){ # attr = param$biattributes[1]
             z = bioresp[[attr]]
             result[[attr]] =
-                sapply(spl, function(x){ paste0(z[x], collapse = "/") })
+                vapply(spl, function(x){ paste0(z[x], collapse = "/") }, "")
         }
 
         ord1 = seq_along(ord);

@@ -20,7 +20,7 @@
             } else {
                 txt = paste0(
                     "c(\n",
-                    paste0("  ", sapply(value,deparse), collapse = ",\n"),
+                    paste0("  ", vapply(value,deparse,""), collapse = ",\n"),
                     ")");
             }
         } else {
@@ -113,7 +113,7 @@ ramwasParameters = function(
     # Grab all local variables and "..."
     rez = c(as.list(environment()), list(...));
     # exclude missing parameters
-    rez = rez[ !sapply(rez, is.symbol) ];
+    rez = rez[ !vapply(rez, is.symbol, TRUE) ];
     return(rez);
 }
 
@@ -131,8 +131,8 @@ parseBam2sample = function( lines ){
     lines = gsub("= ", "=",      lines, fixed = TRUE);
 
     split.eq = strsplit(lines, split = "=", fixed = TRUE);
-    samplenames = sapply(split.eq, `[`, 1);
-    bamlist = strsplit(sapply(split.eq,tail,1), split = ",", fixed = TRUE);
+    samplenames = vapply(split.eq, `[`, "", 1);
+    bamlist = strsplit(vapply(split.eq, tail, "", 1), split = ",", fixed = TRUE);
     names(bamlist) = samplenames;
 
     return(bamlist);

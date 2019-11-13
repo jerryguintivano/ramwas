@@ -172,8 +172,8 @@ manPlotPrepare = function(
 
     # max of each chromosome
     poslist = split(pos, chr, drop = FALSE);
-    poslist[sapply(poslist,length)==0L] = list(0);
-    chrmax = sapply(poslist, max) + 0;# + chrmargins;
+    poslist[vapply(poslist, length, 0)==0] = list(0);
+    chrmax = vapply(poslist, max, 0) + 0;# + chrmargins;
     
     # chromosome starts on the plot
     names(chrmax) = NULL;
@@ -200,7 +200,7 @@ manPlotPrepare = function(
             ygroup[[i]] = sample(ygroup[[i]], size = 300, replace = FALSE);
         }
     }
-    # sum(sapply(ygroup, length))
+    # sum(vapply(ygroup, length, 0))
     keep = unlist(ygroup, use.names = FALSE);
     
     # Color code

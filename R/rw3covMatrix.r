@@ -336,7 +336,7 @@ ramwas3normalizedCoverage = function( param ){
     
     ### data dimensions
     cpgset = cachedRDSload(param$filecpgset);
-    ncpgs = sum(sapply(cpgset, length));
+    ncpgs = sum(vapply(cpgset, length, 0));
     nsamples = length(param$bam2sample);
 
 
@@ -459,7 +459,7 @@ ramwas3normalizedCoverage = function( param ){
         .log(ld, "%s, Saving locations for CpGs which passed the filter", 
             date());
 
-        chr = rep(seq_along(cpgset), sapply(cpgset, length));
+        chr = rep(seq_along(cpgset), vapply(cpgset, length, 0));
         pos = unlist(cpgset, recursive = FALSE, use.names = FALSE);
         keep = logical(ncpgs);
         
