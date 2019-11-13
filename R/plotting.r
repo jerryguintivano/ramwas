@@ -67,7 +67,7 @@ qqPlotFast = function(
         ){
     
     # Get compact summary of p-values for QQ-plot
-    if( class(x) == "qqPlotInfo" ){
+    if( methods::is(x, "qqPlotInfo") ){
         qq = x;
     } else {
         qq = qqPlotPrepare(pvalues = x, ntests = ntests, ismlog10 = ismlog10);
@@ -232,7 +232,7 @@ manPlotFast = function(
             axistep = 2,
             cex = 1){
     
-    if( class(man) != "manPlotInfo" )
+    if( !methods::is(man, "manPlotInfo") )
         stop("The \"man\" parameter is not produced by manPlotPrepare().");
     
     # Axis ranges
