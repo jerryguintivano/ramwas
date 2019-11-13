@@ -103,7 +103,7 @@ importFrom(parallel,
     stopCluster, detectCores, clusterExport)
 importFrom(KernSmooth, locpoly)
 importFrom(digest, digest)
-importFrom(glmnet, cv.glmnet, predict.cv.glmnet)
+importFrom(glmnet, cv.glmnet, predict)
 importFrom(biomaRt, useMart, getBM)
 importFrom(Biostrings, matchPattern)
 
