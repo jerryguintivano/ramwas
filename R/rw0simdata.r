@@ -21,7 +21,7 @@ groupSample = function(len, size, gr){
 
     # First 10% CpGs are unmethylated
     cpgprob = rep(1, length(locs));
-    cpgprob[1:(length(locs)/10)] = 0;
+    cpgprob[seq_len(length(locs)/10)] = 0;
     
     for( bam in rng[1]:rng[2] ){ # bam = rng[1]
 
@@ -181,8 +181,8 @@ ramwas0createArtificialData = function(
                         len = length(locs),
                         size = length(locs)/100,
                         gr = 6);
-        cpgage1 = cpgageset[  1:(length(cpgageset)/2) ];
-        cpgage2 = cpgageset[-(1:(length(cpgageset)/2))];
+        cpgage1 = cpgageset[  seq_len(length(cpgageset)/2) ];
+        cpgage2 = cpgageset[-(seq_len(length(cpgageset)/2))];
         rm(cpgageset)
 
         sex = seq_len(nsamples) %% 2L;
@@ -190,8 +190,8 @@ ramwas0createArtificialData = function(
                         len = length(locs),
                         size = 600,
                         gr = 6);
-        cpgsex1 = cpgsexset[  1:(length(cpgsexset)/2) ];
-        cpgsex2 = cpgsexset[-(1:(length(cpgsexset)/2))];
+        cpgsex1 = cpgsexset[  seq_len(length(cpgsexset)/2) ];
+        cpgsex2 = cpgsexset[-(seq_len(length(cpgsexset)/2))];
         rm(cpgsexset)
     } # age, cpgage1, cpgage2, sex, cpgsex1, cpgsex2
 

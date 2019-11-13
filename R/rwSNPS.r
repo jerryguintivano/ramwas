@@ -202,7 +202,7 @@ ramwas5saveTopFindingsSNPs = function(param){
     step1 = ceiling( 512*1024*1024 / nrow(fmm) / 8);
     mm = rng[2]-rng[1]+1;
     nsteps = ceiling(mm/step1);
-    for( part in 1:nsteps ){ # part = 1
+    for( part in seq_len(nsteps) ){ # part = 1
         message("Slice ", part, " of ", nsteps);
         fr = (part-1)*step1 + rng[1];
         to = min(part*step1, mm) + rng[1] - 1;
@@ -242,7 +242,7 @@ ramwas5saveTopFindingsSNPs = function(param){
     fmout = fm.open(
                 filenamebase = paste0(param$dirSNPs, "/Stats_and_pvalues"),
                 lockfile = param$lockfile2);
-    fmout[rng[1]:rng[2],1:3] = outmat;
+    fmout[rng[1]:rng[2],seq_len(3)] = outmat;
     close(fmout);
 
     return("OK");

@@ -55,7 +55,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
             combine.data.frames = function(li){
                 rs = list();
                 nms = names(li[[1]]);
-                for( i in 1:length(nms) ){
+                for( i in seq_along(nms) ){
                     rs[[nms[i]]] = unlist(lapply(li, function(x){x[,nms[i]]}));
                 }
                 return(data.frame(rs));

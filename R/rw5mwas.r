@@ -258,7 +258,7 @@ ramwas5saveTopFindings = function(param){
     fmout = fm.open(
                 filenamebase = paste0(param$dirmwas, "/Stats_and_pvalues"),
                 lockfile = param$lockfile2);
-    fmout[rng[1]:rng[2], 1:3] = outmat;
+    fmout[rng[1]:rng[2], seq_len(3)] = outmat;
     if( !is.null(rez$beta) )
         fmout[rng[1]:rng[2], 5] = betmat;
     close(fmout);

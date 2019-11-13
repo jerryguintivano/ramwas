@@ -362,7 +362,7 @@ ramwasPCsCovariateSelection = function(param){
                             cvrtqr = cvtrqr);
             
             # Extract first three elements
-            temp2 = lapply( X = temp1, FUN = `[`, 1:3);
+            temp2 = lapply(X = temp1, FUN = `[`, seq_len(3));
             
             testslist[[i]] = t(vapply(temp2, unlist, c(0,0,0)));
         }

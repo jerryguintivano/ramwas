@@ -206,7 +206,7 @@ estimateFragmentSizeDistribution = function(frdata, seqLength){
         return( rep(1, seqLength) );
 
     ### Point of crossing the middle
-    ytop = median(frdata[1:seqLength]);
+    ytop = median(frdata[seq_len(seqLength)]);
     ybottom = median(tail(frdata,seqLength));
     ymidpoint = ( ytop + ybottom )/2;
     yrange = ( ytop - ybottom );
@@ -244,7 +244,7 @@ estimateFragmentSizeDistribution = function(frdata, seqLength){
         error = frdata - fit2;
         e2 = error^2;
         e2s = sort.int(e2,decreasing = TRUE);
-        return(sum(e2s[-(1:10)]));
+        return(sum(e2s[-(seq_len(10))]));
     }
 
     estimate = optim(par = initparam, fn = fmin, method = "BFGS");
@@ -255,7 +255,7 @@ estimateFragmentSizeDistribution = function(frdata, seqLength){
     keep = rezfit>0.05;
     keep[length(keep)] = FALSE;
     rezfit = rezfit - max(rezfit[!keep],0)
-    rezfit[1:seqLength] = rezfit[seqLength];
+    rezfit[seq_len(seqLength)] = rezfit[seqLength];
     rezfit = rezfit[keep];
     rezfit = rezfit / rezfit[1];
 

@@ -132,7 +132,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
         rawACGT = vapply(strACGT, charToRaw, raw(1))
         dim(rawACGT) = dim(strACGT)
 
-        ACGT = 1:4
+        ACGT = seq_len(4)
         ACGTnames = c("A","C","G","T")
         names(ACGT) = ACGTnames
     }
@@ -155,7 +155,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
     for( i in seq_along(spt)){ # i=17
         if( (i %% 10000) == 0 )
             message("Step ", i, " of", length(spt));
-        tl = spt[[i]][-(1:4)]
+        tl = spt[[i]][-seq_len(4)]
         tlspt = strsplit(tl,":",TRUE);
         allele = vapply(tlspt, `[`, "", 1);
         count = as.integer(vapply(tlspt, tail, 1, 1));
