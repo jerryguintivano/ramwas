@@ -115,10 +115,10 @@ ramwas5saveTopFindingsSNPs = function(param){
 
 
         # Rezidualize w.r.t. covariates
-        slice = slice - crossprod(cvrtq, cvrtq %*% slice); # slice[1:8,1:8]
-        varot = varot - crossprod(cvrtq, cvrtq %*% varot); # varot[1:8,1:8]
-        matos = matos - crossprod(cvrtq, cvrtq %*% matos); # matos[1:8,1:8]
-        snpss = snpss - crossprod(cvrtq, cvrtq %*% snpss); # snpss[1:8,1:8]
+        slice = slice - crossprod(cvrtq, cvrtq %*% slice);
+        varot = varot - crossprod(cvrtq, cvrtq %*% varot);
+        matos = matos - crossprod(cvrtq, cvrtq %*% matos);
+        snpss = snpss - crossprod(cvrtq, cvrtq %*% snpss);
 
         # Rezidualize w.r.t. SNPs
         snpss = snpss / rep(pmax(sqrt(colSums(snpss^2)), 1e-16),

@@ -78,7 +78,6 @@ bam.scanBamFile = function(bamfilename, scoretag = "MAPQ", minscore = 4){
 
         ### Put tags in the main list
         bb = c(bb[names(bb) != "tag"], bb$tag);
-        # data.frame(lapply(bb,`[`, 1:60), check.rows = FALSE)
 
         # stopifnot( length(bb[[scoretag]]) == length(bb[[1]]) )
 
