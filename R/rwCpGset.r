@@ -158,7 +158,7 @@ injectSNPsMAF = function(gensequence, frqcount, MAF = 0.01){ #
         tl = spt[[i]][-seq_len(4)]
         tlspt = strsplit(tl,":",TRUE);
         allele = vapply(tlspt, `[`, "", 1);
-        count = as.integer(vapply(tlspt, tail, 1, 1));
+        count = as.integer(vapply(tlspt, tail, "", 1));
         names(count) = allele;
         countACGT = count[ACGTnames];
         countACGT[is.na(countACGT)] = 0;
