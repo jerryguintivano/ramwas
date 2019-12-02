@@ -103,7 +103,12 @@ importFrom(parallel,
     stopCluster, detectCores, clusterExport)
 importFrom(KernSmooth, locpoly)
 importFrom(digest, digest)
-importFrom(glmnet, cv.glmnet, predict)
+#importFrom(glmnet, cv.glmnet)
+#importFrom(glmnet, predict)
+
+importFrom(stats, predict)
+import(glmnet)
+
 importFrom(biomaRt, useMart, getBM)
 importFrom(Biostrings, matchPattern)
 
@@ -114,6 +119,8 @@ importClassesFrom(filematrix, filematrix)
 importMethodsFrom(filematrix, close)
 importMethodsFrom(filematrix, as.matrix)
 importMethodsFrom(BiocGenerics, start)
+
+#import(methods)
 
 S3method(plot, qcHistScore)
 S3method(plot, qcEditDist)
