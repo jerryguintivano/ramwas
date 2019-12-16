@@ -1,27 +1,27 @@
 # Prepare the compact summary of p-values for QQ-plot
 qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
-    if(is.null(ntests))
+    if( is.null(ntests) )
         ntests = length(pvalues);
     
-    if(ismlog10) {
+    if( ismlog10 ){
         ypvs = pvalues;
     } else {
         ypvs = -log10(pvalues);
     }
     xpvs = -log10(seq_along(ypvs) / (ntests+1));
     
-    if(is.unsorted(-ypvs))
+    if( is.unsorted(-ypvs) )
         ypvs = sort.int(ypvs, decreasing = TRUE);
     
-    if(length(ypvs)*2 > ntests) {
+    if( length(ypvs)*2 > ntests ){
         lambda =
-            qchisq(p = 0.1^ypvs[ntests/2], df = 1, lower.tail = FALSE) / 
+            qchisq(p = 0.1^ypvs[ntests/2], df = 1, lower.tail = FALSE) /
             qchisq(p = 0.5, df = 1, lower.tail = FALSE);
     } else {
         lambda = NULL;
     }
     
-    if(length(ypvs) > 1000) {
+    if( length(ypvs) > 1000 ){
         # need to filter a bit, make the plotting faster
         levels = as.integer( (xpvs - xpvs[1])/(tail(xpvs,1) - xpvs[1]) * 2000);
         keep = c(TRUE, diff(levels)!=0);
@@ -47,17 +47,17 @@ qqPlotPrepare = function(pvalues, ntests = NULL, ismlog10 = FALSE){
 
 # Create QQ-plot from p-values or prepared summary
 qqPlotFast = function(
-            x, 
-            ntests = NULL, 
-            ismlog10 = FALSE, 
-            ci.level = 0.05, 
-            ylim = NULL, 
-            newplot = TRUE, 
-            col = "#D94D4C", 
-            cex = 0.5, 
-            yaxmax = NULL, 
-            lwd = 3, 
-            axistep = 2, 
+            x,
+            ntests = NULL,
+            ismlog10 = FALSE,
+            ci.level = 0.05,
+            ylim = NULL,
+            newplot = TRUE,
+            col = "#D94D4C",
+            cex = 0.5,
+            yaxmax = NULL,
+            lwd = 3,
+            axistep = 2,
             col.band = "#ECA538",
             makelegend = TRUE,
             xlab = expression(
@@ -75,30 +75,30 @@ qqPlotFast = function(
 
     # Axis ranges
     mx = head(qq$xpvs,1) * 1.05;
-    if( is.null(ylim) ) {
+    if( is.null(ylim) ){
         my = max(mx, head(qq$ypvs,1) * 1.05) ;
         ylim = c(0, my);
     } else {
         my = ylim[2];
     }
-    if(is.null(yaxmax))
+    if( is.null(yaxmax) )
         yaxmax = floor(my);
     
-    if(newplot){
+    if( newplot ){
         plot(
-            x = NA, 
-            y = NA, 
-            ylim = ylim, 
-            xlim = c(0, mx), 
-            xaxs = "i", 
-            yaxs = "i", 
+            x = NA,
+            y = NA,
+            ylim = ylim,
+            xlim = c(0, mx),
+            xaxs = "i",
+            yaxs = "i",
             xlab = xlab,
             ylab = ylab,
             axes = FALSE);
         axis(1, seq(0, mx + axistep, axistep), lwd = lwd);
         axis(2, seq(0, yaxmax, axistep), lwd = lwd);
     }
-    abline(a = 0, b = 1, col = "grey", lwd = lwd)
+    abline(a = 0, b = 1, col = "grey", lwd = lwd);
     points(qq$xpvs, qq$ypvs, col = col, cex = cex, pch = 19);
     
     if( !is.null(ci.level) ){
@@ -107,22 +107,22 @@ qqPlotFast = function(
                 p = rep(c(ci.level/2,1-ci.level/2), each=length(qq$xpvs)), 
                 shape1 = qq$keep, 
                 shape2 = qq$ntests - qq$keep + 1);
-            quantiles = matrix(quantiles, ncol=2);
+            quantiles = matrix(quantiles, ncol = 2);
             
             lines( qq$xpvs, -log10(quantiles[,1]), col = col.band, lwd = lwd);
             lines( qq$xpvs, -log10(quantiles[,2]), col = col.band, lwd = lwd);
         }
     }
-    if(makelegend){
+    if( makelegend ){
         if( !is.null(ci.level) ){
             legend(
-                "topleft", 
+                "topleft",
                 legend = c(
                         expression(paste(italic("P"), " value")),
                         sprintf("%.0f%% CI",100-ci.level*100)),
                 lwd = c(0, lwd), 
-                pch = c(19, NA_integer_), 
-                lty = c(0, 1), 
+                pch = c(19, NA_integer_),
+                lty = c(0, 1),
                 col = c(col, col.band),
                 box.col = "transparent",
                 bg = "transparent");
@@ -130,9 +130,9 @@ qqPlotFast = function(
             legend(
                 "topleft", 
                 legend = expression(paste(italic("P"), " value")),
-                lwd = 0, 
-                pch = 19, 
-                lty = 0, 
+                lwd = 0,
+                pch = 19,
+                lty = 0,
                 col = col,
                 box.col = "transparent",
                 bg = "transparent");
@@ -161,21 +161,21 @@ manPlotPrepare = function(
     stopifnot( length(pvalues) == length(pos) );
         
     # Factorize chromosome
-    if(is.double(chr))
+    if( is.double(chr) )
         chr = as.integer(chr);
     if( is.integer(chr) ){
         levels(chr) = as.character(seq_len(max(chr)));
         class(chr) = "factor";
     }
-    if(is.character(chr)){
-        levels = str_sort(unique(chr),numeric = TRUE);
+    if( is.character(chr) ){
+        levels = str_sort(unique(chr), numeric = TRUE);
         chr = factor(chr, levels = levels);
     }
 
     # max of each chromosome
     poslist = split(pos, chr, drop = FALSE);
     poslist[vapply(poslist, length, 0)==0] = list(0);
-    chrmax = vapply(poslist, max, 0) + 0;# + chrmargins;
+    chrmax = as.double(vapply(poslist, max, 0));# + chrmargins;
     
     # chromosome starts on the plot
     names(chrmax) = NULL;
@@ -184,7 +184,7 @@ manPlotPrepare = function(
     
     # within plot coordinates
     x0 = offsets[unclass(chr)] + pos;
-    if(ismlog10) {
+    if( ismlog10 ){
         y0 = pvalues;
     } else {
         y0 = -log10(pvalues);
@@ -197,7 +197,7 @@ manPlotPrepare = function(
     class(yfac) = "factor";
     
     ygroup = split(seq_along(yfac), yfac);
-    for( i in seq_along(ygroup)){ # i=1
+    for( i in seq_along(ygroup) ){ # i=1
         if( length(ygroup[[i]]) > 300 ){
             ygroup[[i]] = sample(ygroup[[i]], size = 300, replace = FALSE);
         }
@@ -238,24 +238,24 @@ manPlotFast = function(
         stop("The \"man\" parameter is not produced by manPlotPrepare().");
     
     # Axis ranges
-    if(is.null(ylim)) {
+    if( is.null(ylim) ){
         my = max(man$y) * 1.05;
         ylim = c(0,my);
     } else {
         my = ylim[2];
     }
-    if(is.null(yaxmax))
+    if( is.null(yaxmax) )
         yaxmax = floor(my);
     
     # Plot frame
     plot(
         x = NA,
-        y = NA, 
-        xlim = c(0, tail(man$offsets,1)), 
-        ylim = ylim, 
-        xaxs = "i", 
+        y = NA,
+        xlim = c(0, tail(man$offsets,1)),
+        ylim = ylim,
+        xaxs = "i",
         yaxs = "i",
-        xlab = "Chromosome", 
+        xlab = "Chromosome",
         ylab = expression(
             paste("\u2013", " log"[10]*"(", italic("P"), "), observed")),
         axes = FALSE);
