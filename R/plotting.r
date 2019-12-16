@@ -163,11 +163,13 @@ manPlotPrepare = function(
     # Factorize chromosome
     if(is.double(chr))
         chr = as.integer(chr);
-    if(is.character(chr))
-        chr = factor(chr);
-    if(is.integer(chr)) {
-        levels(chr) = as.character(seq_len(tail(chr,1)));
+    if( is.integer(chr) ){
+        levels(chr) = as.character(seq_len(max(chr)));
         class(chr) = "factor";
+    }
+    if(is.character(chr)){
+        levels = str_sort(unique(chr),numeric = TRUE);
+        chr = factor(chr, levels = levels);
     }
 
     # max of each chromosome

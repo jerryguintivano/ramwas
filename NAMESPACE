@@ -106,6 +106,8 @@ importFrom(digest, digest)
 #importFrom(glmnet, cv.glmnet)
 #importFrom(glmnet, predict)
 
+importFrom(stringr, str_sort)
+
 importFrom(stats, predict)
 import(glmnet)
 

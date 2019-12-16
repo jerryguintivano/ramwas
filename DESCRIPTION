@@ -48,7 +48,7 @@ Depends: R (>= 3.3.0), methods, filematrix
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, pander, BiocStyle,
         BSgenome.Ecoli.NCBI.20080805
-Imports: graphics, stats, utils, digest,
+Imports: graphics, stats, utils, digest, stringr,
         glmnet, KernSmooth, grDevices,
         GenomicAlignments, Rsamtools, parallel,
         biomaRt, Biostrings, BiocGenerics
