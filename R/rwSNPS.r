@@ -274,7 +274,7 @@ ramwasSNPs = function( param ){
         param$covariates = data.frame(lapply(
             X = param$covariates,
             FUN = `[`,
-            !is.na(param$covariates[[ param$modeloutcome ]])));
+            !is.na(param$covariates[[ param$modeloutcome ]])), check.names = FALSE);
     }
     ### Get and match sample names
     {

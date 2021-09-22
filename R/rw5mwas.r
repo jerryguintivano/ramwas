@@ -301,7 +301,7 @@ ramwas5MWAS = function( param ){
         param$covariates = data.frame(lapply(
             param$covariates,
             `[`,
-            !killset), stringsAsFactors = FALSE);
+            !killset), stringsAsFactors = FALSE, check.names = FALSE);
     }
     
     outcome = param$covariates[[ param$modeloutcome ]];

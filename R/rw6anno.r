@@ -58,7 +58,7 @@ ramwasAnnotateLocations = function(param, chr, pos){
                 for( i in seq_along(nms) ){
                     rs[[nms[i]]] = unlist(lapply(li, function(x){x[,nms[i]]}));
                 }
-                return(data.frame(rs));
+                return(data.frame(rs, check.names = FALSE));
             }
 
             bioresp = combine.data.frames(collect);
