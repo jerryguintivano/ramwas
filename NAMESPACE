@@ -59,23 +59,23 @@ export(
 
 exportClasses("rwDataClass")
 
-export(
-    .log,
-    .showErrors,
-    pipelineCoverage1Sample,
-    .ramwas3coverageJob,
-    .ramwas3transposeFilterJob,
-    .ramwas3normalizeJob,
-    .set1MLKthread,
-    .matchCovmatCovar,
-    .getCovariates,
-    .file.remove,
-    postPCAprocessing,
-    .ramwas4PCAjob,
-    .testCovariates,
-    .ramwas5MWASjob,
-    groupSample
-)
+#export(
+#    .log,
+#    .showErrors,
+#    pipelineCoverage1Sample,
+#    .ramwas3coverageJob,
+#    .ramwas3transposeFilterJob,
+#    .ramwas3normalizeJob,
+#    .set1MLKthread,
+#    .matchCovmatCovar,
+#    .getCovariates,
+#    .file.remove,
+#    postPCAprocessing,
+#    .ramwas4PCAjob,
+#    .testCovariates,
+#    .ramwas5MWASjob,
+#    groupSample
+#)
 
 importFrom(methods,
     setRefClass, new)

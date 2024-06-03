@@ -28,6 +28,7 @@
 # (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param){
     # library(filematrix);
+    library(ramwas)
     ld = param$dirpca;
     
     .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
