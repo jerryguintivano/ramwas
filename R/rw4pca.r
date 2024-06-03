@@ -239,11 +239,10 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
-                parallel::clusterEvalQ(cl, "ramwas")
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
                             cl = cl,
-                            varlist = ".set1MLKthread", 
+                            varlist = c(".set1MLKthread", ".log"), 
                             envir = asNamespace("ramwas"));
                 clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
                 # clusterCall(cl, function(){RevoUtilsMath::setMKLthreads()});
