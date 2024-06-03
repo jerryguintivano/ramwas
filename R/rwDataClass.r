@@ -1,5 +1,5 @@
 # Data matrix access class
-rwDataClass <- setRefClass("rwDataClass",
+setRefClass("rwDataClass",
     fields = list(
         fmdata = "filematrix",
         samplenames = "character",
