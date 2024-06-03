@@ -239,7 +239,7 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
-                parallel::clusterEvalQ(cl, loadedNamespace("ramwas"))
+                parallel::clusterEvalQ(cl, "ramwas")
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
                             cl = cl,
