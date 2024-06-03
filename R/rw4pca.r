@@ -28,7 +28,6 @@
 # (covariance matrix calculation)
 .ramwas4PCAjob = function(rng, param){
     # library(filematrix);
-    library(ramwas)
     ld = param$dirpca;
     
     .log(ld, "%s, Process %06d, Job %02d, Start PCA, CpG range %d-%d",
@@ -240,6 +239,7 @@ ramwas4PCA = function( param ){
                     stopCluster(cl);
                     .file.remove(param$lockfile2);
                 });
+                parallel::clusterEvalQ(cl, loadedNamespace("ramwas"))
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
                             cl = cl,
