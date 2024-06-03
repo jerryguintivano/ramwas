@@ -242,7 +242,8 @@ ramwas4PCA = function( param ){
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
                             cl = cl,
-                            varlist = c(".set1MLKthread", ".log"));
+                            varlist = c(".set1MLKthread", ".log"),
+                            envir = asNamespace("ramwas"));
                 clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
                 # clusterCall(cl, function(){RevoUtilsMath::setMKLthreads()});
                 
