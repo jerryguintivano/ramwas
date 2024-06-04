@@ -245,6 +245,7 @@ ramwas4PCA = function( param ){
                             varlist = c(".set1MLKthread", ".log"),
                             envir = asNamespace("ramwas"));
                 clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
+                clusterEvalQ(cl, { rwDataClass })
                 # clusterCall(cl, function(){RevoUtilsMath::setMKLthreads()});
                 
                 covlist = clusterApplyLB(
