@@ -242,8 +242,9 @@ ramwas4PCA = function( param ){
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
                             cl = cl,
-                            varlist = c(".set1MLKthread", ".log"),
-                            envir = environment());
+                            varlist = c(".set1MLKthread", ".log"));
+                clusterExport(cl, "filematrix")
+                clusterEvalQ(cl, "filematrix" %in% loadedNamespaces())
                 clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
                 clusterEvalQ(cl, { # Data matrix access class
 rwDataClass <- setRefClass("rwDataClass",
