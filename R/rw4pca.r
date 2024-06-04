@@ -244,8 +244,8 @@ ramwas4PCA = function( param ){
                     .file.remove(param$lockfile2);
                 });
 
-                clusterExport(cluster, "libs", envir=e)
-                clusterEvalQ(cluster, .libPaths(libs))
+                clusterExport(cl, "libs", envir=e)
+                clusterEvalQ(cl, .libPaths(libs))
 
                 logfun = .logErrors(ld, .ramwas4PCAjob);
                 clusterExport(  
