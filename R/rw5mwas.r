@@ -345,16 +345,24 @@ ramwas5MWAS = function( param ){
 
             if(param$usefilelock) param$lockfile2 = tempfile();
             # library(parallel);
+
+            e <- new.env()
+            e$libs <- .libPaths()
+
             cl = makeCluster(nthreads);
             on.exit({
                 stopCluster(cl);
                 .file.remove(param$lockfile2);
             });
+
+            clusterExport(cl, "libs", envir=e)
+            clusterEvalQ(cl, .libPaths(libs))
+            
             clusterExport(cl, "testPhenotype");
             logfun = .logErrors(ld, .ramwas5MWASjob);
             clusterExport(  
                         cl = cl, 
-                        varlist = ".set1MLKthread", 
+                        varlist = c(".set1MLKthread", ".log"), 
                         envir = asNamespace("ramwas"));
             clusterEvalQ(cl, eval(parse(text = .set1MLKthread)));
             z = clusterApplyLB(
